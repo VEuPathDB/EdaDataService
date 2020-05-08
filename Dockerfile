@@ -48,7 +48,7 @@ COPY --from=maven /tmp/build/fgputil-util-1.0.0.jar /workspace/vendor/
 ENV JAVA_HOME=/opt/jdk \
     PATH=/opt/jdk/bin:$PATH
 
-RUN apk add jq findutils make npm
+RUN apk add --no-cache jq findutils make npm
 WORKDIR /workspace
 
 COPY bin/prepare-env.sh bin/schema2raml.sh ./bin/
@@ -73,6 +73,7 @@ ENV JAVA_HOME=/opt/jdk \
     PATH=/opt/jdk/bin:$PATH
 COPY --from=jdk /jlinked /opt/jdk
 COPY --from=service /workspace/build/libs/service.jar /service.jar
+EXPOSE 8080
 
 CMD java -jar /service.jar
 
