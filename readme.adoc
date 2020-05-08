@@ -142,3 +142,44 @@ Running in Docker can be done by:
 
 . Run `make build-docker`
 . Run `docker run <your-image-name>`
+
+== Other Information
+
+=== Make Targets
+
+`compile`:: Compiles the Java code currently in the `src/` directory.  Does not
+perform any code/doc generation.
+
+`gen-compile`:: Runs code generation then compiles.
+
+`test`:: Runs unit tests against the code currently in the `src` directory.
+
+`build-jar`:: Compiles and packages a self-contained runnable jar from the
+project.  This _will_ perform code and doc generation.
+
+`build-docker`:: Builds a runnable docker image from the project.  This _will_
+perform code and doc generation (in the container).
+
+`local-dev`:: Sets up the local environment/workspace for local development.
++
+* Downloads and builds raml-to-jaxrs
+* Downloads and builds FgpUtil
+* Installs the required NPM packages
+
+`prep-env`:: Ensures the required binaries are available on the `$PATH` and
+installs the required NPM packages globally.
+
+`build-r2j`:: Builds the raml-to-jaxrs jar.
+
+`gen-jaxrs`:: Performs Java code generation from the Raml spec.
+
+`gen-docs`:: Performs API doc generation from the Raml spec.
+
+`docs/raml/library.raml`:: Converts the Json schema files to a Raml library.
+
+`install-fgputil`:: Downloads and builds FgpUtil, placing it in a "vendor"
+directory in the workspace from which Gradle can compile against it.
+
+`cleanup-example`:: Removes the code generated from the example Raml spec.
+
+`gradle-ping`:: Verifies that Gradle is downloaded and ready for use.

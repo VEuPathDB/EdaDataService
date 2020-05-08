@@ -5,7 +5,7 @@ set -eu
 echo "Cloning raml-for-jax-rs"
 git clone \
   --branch 3.0.5 \
-  --single-branch \
+  --depth 1 \
   https://github.com/mulesoft-labs/raml-for-jax-rs.git tmp/raml > /dev/null 2>&1
 
 curDir=$(pwd)

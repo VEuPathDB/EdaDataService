@@ -15,7 +15,7 @@ fi
 
 command -v mvn > /dev/null
 if [ $? -gt 0 ] && [ $skip -eq 0 ]; then
-  echo "${PREFIX_WARN} Maven is required.  Please install it and try again"
+  echo "${PREFIX_ERROR} Maven is required.  Please install it and try again"
   exit 1
 fi
 
@@ -25,4 +25,7 @@ if [ $? -gt 0 ]; then
   exit 1
 fi
 
-npm install -g json-dereference-cli raml2html ramldt2jsonschema
+npm install -g \
+  json-dereference-cli \
+  raml2html \
+  ramldt2jsonschema

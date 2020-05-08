@@ -7,7 +7,7 @@ docker=$1
 dir=$(pwd)
 
 echo "Cloning FgpUtil"
-git clone https://github.com/VEuPathDB/FgpUtil > /dev/null
+git clone --depth 1 https://github.com/VEuPathDB/FgpUtil > /dev/null
 cd FgpUtil/Util
 
 echo "Building FgpUtil"

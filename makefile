@@ -71,7 +71,7 @@ gen-jaxrs: docs/raml/library.raml
 		--generate-types-with jackson \
 		--model-package $(APP_PACKAGE).model \
 		--resource-package $(APP_PACKAGE).resources \
-		--support-package $(APP_PACKAGE).support 2>&1
+		--support-package $(APP_PACKAGE).support
 
 gen-docs: docs/raml/library.raml
 	@echo "Generating API Documentation"

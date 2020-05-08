@@ -10,7 +10,7 @@ RUN wget https://download.java.net/java/early_access/alpine/10/binaries/openjdk-
     && jdk-15/bin/jlink \
          --compress=2 \
          --module-path jdk-15/jmods \
-         --add-modules java.base \
+         --add-modules java.base,java.logging,java.xml \
          --output /jlinked
 
 #
@@ -48,7 +48,7 @@ COPY --from=maven /tmp/build/fgputil-util-1.0.0.jar /workspace/vendor/
 ENV JAVA_HOME=/opt/jdk \
     PATH=/opt/jdk/bin:$PATH
 
-RUN apk add jq findutils make npm grep
+RUN apk add jq findutils make npm
 WORKDIR /workspace
 
 COPY bin/prepare-env.sh bin/schema2raml.sh ./bin/
