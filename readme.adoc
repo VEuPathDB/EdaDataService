@@ -1,0 +1,144 @@
+= Example Containerized JaxRS Service
+:toc: left
+:source-highlighter: pygments
+:icons: font
+// Github specifics
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+Elizabeth Paige Harper <epharper@upenn.edu>
+v1.0.0
+
+== Running the Example
+
+=== Locally
+
+==== Prerequisites
+
+* Maven
+* NodeJS/NPM
+
+==== Setup & Run
+
+Environment/dependency setup for local development can be done via the command
+`make local-dev`.  This will install the dependencies required to build the
+project.
+
+After the environment has been set up, the project can be built, tested, and
+packaged using `make build-jar`.
+
+Starting the server can be done by running `java -jar build/lib/service.jar`.
+
+=== In Docker
+
+==== Prerequisites
+
+* Docker
+
+==== Setup & Run
+
+The project container can be built using `make build-docker`.  The first build
+of the container will take several minutes.
+
+Running the built container can be done with `docker run demo-service`.
+
+== Development
+
+To use this project as a template for the development of a new service, use the
+"Use this template" button above to create a new project based off of this repo.
+
+=== Environment
+
+Once your new project has been cloned, the development prerequisites can be
+installed using `make local-dev`.  This will install and build the following
+packages:
+
+* NPM
+** https://github.com/davidkelley/json-dereference-cli[json-dereference-cli]
+** https://github.com/raml2html/raml2html[raml2html]
+** https://github.com/raml-org/ramldt2jsonschema[ramldt2jsonschema]
+* Maven
+** https://github.com/mulesoft-labs/raml-for-jax-rs[raml-to-jaxrs]
+** https://github.com/VEuPathDB/FgpUtil[FgpUtil]
+
+After (or during) installing the prerequisites, you may run
+`make cleanup-example` to remove the Java classes generated for the demo.
+
+=== Configuration
+
+Configuration for the build is primarily done through the `service.properties`
+file.  Here you can configure the project's name, version, container name,
+Java package structure, etc...
+
+If additional dependencies are required, they will be added to the
+`build.gradle.kts` file.  For information about adding gradle dependencies see
+the https://docs.gradle.org/current/userguide/declaring_dependencies.html[Gradle
+docs].
+
+=== Raml & Json Schema
+
+The service api is defined in 2 places initially: the `api.raml` file and the
+JSON Schema files under the directory `docs/schema`.
+
+==== Json Schema
+
+Schema files will be converted to Raml types when generating the service or the
+docs.  The names of both the Java POJOs created from the schema files as well
+as the type name in Raml is controlled by the `$id` field.  Schema files without
+an `$id` field will not be generated as POJOs and will not be visible to the
+Raml doc.
+
+[CAUTION]
+If the `$id` field value is not valid as a Java class name, the build will fail
+with a cryptic/non-helpful error, most likely a NullPointerException.  This is a
+quirk of raml-to-jaxrs.
+
+Schema files can be defined in either Json or Yaml, the parser allows for both.
+These types can be mixed as well.
+
+==== Raml
+
+In the `api.raml` file, there is an include near the top of the file that
+declares the Raml file "uses" `docs/raml/library.raml`.  This file is generated
+from the Json schema files and should not be edited directly.
+
+.api.raml
+[source, yaml, linenums, start=5]
+----
+uses:
+  lib: docs/raml/library.raml
+----
+
+Referencing types defined in Json schema can be done by using the `lib` package
+name. For example, if you have a schema file with `$id: MyType`, this type would
+be usable in Raml as `lib.MyType`.
+
+=== Generating A Service
+
+Once your API is layed out, you can begin development of Java code by running
+`make gen-jaxrs`.  This will create a skeleton of the API in the source package
+defined in `service.properties`.
+
+The generated interfaces and types have the basic necessary annotations for use
+by both Jackson and Jersey.
+
+Once you have implemented the interfaces defined under
+`\{source-package}.resources` they must be registered in the constructor for the
+`Main` class.
+
+=== Run Your Service
+
+Running your service locally can be done by following the same steps as defined
+above in the <<Running the Example>> section:
+
+. Run `make build-jar`
+. Run `java -jar build/lib/service.jar`
+
+Running in Docker can be done by:
+
+. Run `make build-docker`
+. Run `docker run <your-image-name>`

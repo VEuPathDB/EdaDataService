@@ -1,0 +1,15 @@
+#%RAML 1.0
+title: User Dataset Import Service
+version: v1.0.0
+mediaType: application/json
+uses:
+  lib: docs/raml/library.raml
+
+/hello:
+  displayName: Hello World
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: lib.HelloResponse
