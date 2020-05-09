@@ -29,7 +29,8 @@ RUN wget https://download.java.net/java/early_access/alpine/10/binaries/openjdk-
     && git config --global advice.detachedHead false
 
 COPY . .
-RUN cp -n /jdbc/* vendor \
+RUN mkdir -p vendor \
+    && cp -n /jdbc/* vendor \
     && make jar
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
