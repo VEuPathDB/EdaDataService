@@ -6,11 +6,13 @@ echo "Cloning raml-for-jax-rs"
 git clone \
   --branch 3.0.5 \
   --depth 1 \
-  https://github.com/mulesoft-labs/raml-for-jax-rs.git tmp/raml > /dev/null 2>&1
+  --quiet \
+  https://github.com/mulesoft-labs/raml-for-jax-rs.git tmp/raml
 
 curDir=$(pwd)
 
 cd tmp/raml/raml-to-jaxrs/raml-to-jaxrs-cli
+echo "Correcting pom.xml"
 sed -i 's/3.0.5-SNAPSHOT/3.0.5/' pom.xml
 
 echo "Running maven build"

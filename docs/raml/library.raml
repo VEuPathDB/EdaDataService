@@ -8,6 +8,55 @@
 ################################################################################
 
 types:
+  ServerErrorResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      status:
+        enum:
+          - server-error
+        type: string
+        required: true
+      message:
+        type: string
+        required: true
+
+  UnauthorizedResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      status:
+        enum:
+          - unauthorized
+        type: string
+        required: true
+      message:
+        type: string
+        required: true
+
+  HelloPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      message:
+        description: Generated greeting
+        type: string
+        required: true
+
+  HelloPostBody:
+    type: object
+    additionalProperties: false
+    properties:
+      greet:
+        type: any
+        required: true
+      description:
+        type: any
+        required: false
+      type:
+        type: any
+        required: false
+
   HelloResponse:
     description: This JSON will become a POJO named HelloResponse (from the $id field)
     type: object
@@ -15,6 +64,8 @@ types:
     properties:
       greeting:
         description: Imports like this work fine
+        enum:
+          - Hello World
         type: string
-        pattern: (Hello|Goodbye) World
         required: true
+

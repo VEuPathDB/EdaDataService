@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-files=$(find docs/schema -type f -name '*.json')
+files=$(find docs/schema -name '*.json' -o -name '*.yml' -o -name '*.yaml')
 
 mkdir -p docs/raml
 
@@ -15,8 +15,15 @@ echo "#%RAML 1.0 Library
 
 types:" > docs/raml/library.raml
 
+getId() {
+  tr '\n\r' ' ' < "$1" \
+    | grep -Eo '"?\$id"?\s*:\s*"?([A-Za-z0-9_]+)"?' \
+    | sed 's/ \|"//g' \
+    | cut -d':' -f2
+}
+
 for file in ${files}; do
-  name=$(jq -r '.["$id"]' "${file}" | grep -v 'null')
+  name=$(getId "${file}")
 
   if [ -z "${name}" ]; then
     continue

@@ -25,7 +25,7 @@ if [ $? -gt 0 ]; then
   exit 1
 fi
 
-npm install -g \
+npm install -g -s \
   json-dereference-cli \
   raml2html \
   ramldt2jsonschema

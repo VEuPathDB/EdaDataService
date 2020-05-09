@@ -13,3 +13,24 @@ uses:
         body:
           application/json:
             type: lib.HelloResponse
+  post:
+    headers:
+      Auth_Key:
+        type: string
+        required: true
+    body:
+      application/json:
+        type: lib.HelloPostBody
+    responses:
+      200:
+        body:
+          application/json:
+            type: lib.HelloPostResponse
+      401:
+        body:
+          application/json:
+            type: lib.UnauthorizedResponse
+      500:
+        body:
+          application/json:
+            type: lib.ServerErrorResponse

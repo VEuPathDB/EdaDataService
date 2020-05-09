@@ -1,6 +1,8 @@
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #
 # Build a minimized JDK
 #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 FROM alpine:latest AS jdk
 
 WORKDIR /opt/jdk
@@ -13,42 +15,50 @@ RUN wget https://download.java.net/java/early_access/alpine/10/binaries/openjdk-
          --add-modules java.base,java.logging,java.xml \
          --output /jlinked
 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #
-# Build the RAML -> JaxRS generator
+# Build the Maven based dependencies
 #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 FROM alpine:latest AS maven
 
 COPY --from=jdk /opt/jdk/* /opt/jdk/
 
 ENV MAVEN_VERSION=3.6.3 \
-    JAVA_HOME=/opt/jdk
+    JAVA_HOME=/opt/jdk \
+    PATH=/mvn/bin:$PATH
 
-WORKDIR /tmp/mvn/
-RUN apk add --no-cache git sed
-RUN wget https://mirrors.gigenet.com/apache/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz \
+WORKDIR /tmp
+RUN apk add --no-cache git sed \
+    && wget https://mirrors.gigenet.com/apache/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz \
     && tar -xzf apache-maven-$MAVEN_VERSION-bin.tar.gz \
     && rm apache-maven-$MAVEN_VERSION-bin.tar.gz \
     && mv apache-maven-$MAVEN_VERSION /mvn
 
-ENV PATH=/mvn/bin:$PATH
-
-WORKDIR /tmp/build
 COPY bin/build-raml2jaxrs.sh bin/install-fgputil.sh ./
-RUN ./build-raml2jaxrs.sh && ./install-fgputil.sh docker
+RUN git config --global advice.detachedHead false./build-raml2jaxrs.sh \
+    && ./install-fgputil.sh docker \
+    && rm -rf /root/.m2 \
+    && rm -rf /opt/jdk
 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #
 # Build the service itself
 #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 FROM alpine:latest AS service
 
 COPY --from=jdk /opt/jdk/* /opt/jdk/
-COPY --from=maven /tmp/build/raml-to-jaxrs.jar /workspace/
-COPY --from=maven /tmp/build/fgputil-util-1.0.0.jar /workspace/vendor/
+COPY --from=maven /tmp/raml-to-jaxrs.jar /workspace/
+COPY --from=maven [ "/tmp/fgputil-util-1.0.0.jar", \
+                    "/tmp/fgputil-server-1.0.0", \
+                    "/tmp/fgputil-accountdb-1.0.0", \
+                    "/workspace/vendor/" ]
 
 ENV JAVA_HOME=/opt/jdk \
     PATH=/opt/jdk/bin:$PATH
 
-RUN apk add --no-cache jq findutils make npm
+RUN apk add --no-cache jq findutils coreutils make npm
 WORKDIR /workspace
 
 COPY bin/prepare-env.sh bin/schema2raml.sh ./bin/
@@ -64,9 +74,11 @@ COPY src/ ./src
 
 RUN make build-jar
 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #
 # Run the service
 #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 FROM alpine:latest
 
 ENV JAVA_HOME=/opt/jdk \

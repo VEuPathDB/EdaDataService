@@ -1,4 +1,5 @@
 # Schemas can be defined in JSON or YAML
 $schema: http://json-schema.org/draft-07/schema#
 type: string
-pattern: '^(Hello|Goodbye) World$'
+enum:
+  - Hello World

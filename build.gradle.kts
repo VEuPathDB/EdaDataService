@@ -19,30 +19,65 @@ repositories {
 }
 
 dependencies {
-  implementation(files("vendor/fgputil-util-1.0.0.jar"))
+
+  //
+  // FgpUtil & Compatibility Dependencies
+  //
+
+  // FgpUtil jars
+  implementation(files(
+    "vendor/fgputil-util-1.0.0.jar",
+    "vendor/fgputil-accountdb-1.0.0.jar"
+  ))
+
+  // Compatibility bridge to support the long dead log4j-1.X
+  implementation("org.apache.logging.log4j:log4j-1.2-api:${buildProps["version.log4j"]}")
+
+
+  //
+  // Project Dependencies
+  //
+
+  // JavaX
   implementation("javax.ws.rs:javax.ws.rs-api:2.1.1")
 
+  // Jersey
   implementation("org.glassfish.jersey.containers:jersey-container-grizzly2-http:${buildProps["version.jersey"]}")
+  implementation("org.glassfish.jersey.containers:jersey-container-grizzly2-servlet:${buildProps["version.jersey"]}")
   implementation("org.glassfish.jersey.media:jersey-media-json-jackson:${buildProps["version.jersey"]}")
   runtimeOnly("org.glassfish.jersey.inject:jersey-hk2:${buildProps["version.jersey"]}")
 
+  // Jackson
   implementation("com.fasterxml.jackson.core:jackson-databind:${buildProps["version.jackson"]}")
   implementation("com.fasterxml.jackson.core:jackson-annotations:${buildProps["version.jackson"]}")
+  implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${buildProps["version.jackson"]}")
 
-  implementation("org.slf4j:slf4j-api:1.7.30")
-  implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.13.2")
+  // CLI
+  implementation("info.picocli:picocli:4.2.0")
+  annotationProcessor("info.picocli:picocli-codegen:4.2.0")
 
+
+  // Log4J
+  implementation("org.apache.logging.log4j:log4j-api:${buildProps["version.log4j"]}")
+  implementation("org.apache.logging.log4j:log4j-core:${buildProps["version.log4j"]}")
+  implementation("org.apache.logging.log4j:log4j:${buildProps["version.log4j"]}")
+
+  // Utils
+  implementation("io.vulpine.lib:Jackfish:1.1.0")
+
+  // Unit Testing
   testImplementation("org.junit.jupiter:junit-jupiter-api:${buildProps["version.junit"]}")
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${buildProps["version.junit"]}")
 }
-
 
 tasks {
   jar {
     manifest {
       attributes["Main-Class"] = "${fullPack}.${buildProps["app.main-class"]}"
     }
-    from(configurations.runtimeClasspath.get().map {if (it.isDirectory) it else zipTree(it) })
+    from(configurations.runtimeClasspath.get().map {
+      if (it.isDirectory) it else zipTree(it)
+    })
     archiveFileName.set("service.jar")
   }
 }
