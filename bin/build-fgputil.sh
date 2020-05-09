@@ -15,7 +15,7 @@ cd FgpUtil
 
 echo "Building FgpUtil"
 
-mvn clean install 2>&1
+mvn clean install 2>&1 | grep '^\[[A-Z]'
 
 if [ "${docker}" = "docker" ]; then
   cp Util/target/fgputil-util-1.0.0.jar "${dir}/fgputil-util-1.0.0.jar"

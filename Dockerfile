@@ -18,7 +18,7 @@ RUN wget https://download.java.net/java/early_access/alpine/10/binaries/openjdk-
     && jdk-15/bin/jlink \
        --compress=2 \
        --module-path jdk-15/jmods \
-       --add-modules java.base,java.logging,java.xml,java.desktop,java.management \
+       --add-modules java.base,java.logging,java.xml,java.desktop,java.management,java.sql \
        --output /jlinked \
     && mv jdk-15 /opt/jdk \
     && apk add --no-cache git sed findutils coreutils make npm\
