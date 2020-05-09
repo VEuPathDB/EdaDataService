@@ -1,7 +1,5 @@
 #!/usr/bin/env sh
 
-set -e
-
 docker=$1
 dir=$(pwd)
 
@@ -10,12 +8,12 @@ echo "Cloning latest FgpUtil version"
 git clone \
   --depth 1 \
   --quiet \
-  https://github.com/VEuPathDB/FgpUtil
+  https://github.com/VEuPathDB/FgpUtil || exit 1
 cd FgpUtil
 
 echo "Building FgpUtil"
 
-mvn clean install 2>&1 | grep '^\[[A-Z]'
+(mvn clean install 2>&1 || exit 1) | grep '^\[[A-Z]'
 
 if [ "${docker}" = "docker" ]; then
   cp Util/target/fgputil-util-1.0.0.jar "${dir}/fgputil-util-1.0.0.jar"
