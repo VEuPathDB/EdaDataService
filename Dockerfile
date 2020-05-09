@@ -3,7 +3,9 @@
 #   Build Service & Dependencies
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-FROM foxcapades/alpine-oracle:latest AS prep
+FROM foxcapades/alpine-oracle:1.3 AS prep
+
+LABEL service="demo-service"
 
 ENV DOCKER=build\
     JAVA_HOME=/opt/jdk \
@@ -35,12 +37,16 @@ RUN cp -n /jdbc/* vendor \
 #   Run the service
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-FROM foxcapades/alpine-oracle:latest
+FROM foxcapades/alpine-oracle:1.3
+
+LABEL service="demo-service"
 
 ENV JAVA_HOME=/opt/jdk \
     PATH=/opt/jdk/bin:$PATH
+
 COPY --from=prep /jlinked /opt/jdk
 COPY --from=prep /workspace/build/libs/service.jar /service.jar
+
 EXPOSE 8080
 
 CMD java -jar /service.jar
