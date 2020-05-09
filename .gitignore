@@ -4,3 +4,5 @@
 /vendor/
 
 *.jar
+
+!gradle-wrapper.jar
