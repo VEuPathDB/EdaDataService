@@ -33,10 +33,16 @@ dependencies {
   // Compatibility bridge to support the long dead log4j-1.X
   implementation("org.apache.logging.log4j:log4j-1.2-api:${buildProps["version.log4j"]}")
 
-
   //
   // Project Dependencies
   //
+
+  // Oracle
+  runtimeOnly(files(
+    "vendor/ojdbc8.jar",
+    "vendor/ucp.jar",
+    "vendor/xstreams.jar"
+  ))
 
   // JavaX
   implementation("javax.ws.rs:javax.ws.rs-api:2.1.1")

@@ -1,90 +1,46 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #
-# Build a minimized JDK
+#   Build Service & Dependencies
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-FROM alpine:latest AS jdk
+FROM foxcapades/alpine-oracle:latest AS prep
 
-WORKDIR /opt/jdk
+ENV DOCKER=build\
+    JAVA_HOME=/opt/jdk \
+    PATH=/mvn/bin:/opt/jdk/bin:$PATH
+
+WORKDIR /workspace
 RUN wget https://download.java.net/java/early_access/alpine/10/binaries/openjdk-15-ea+10_linux-x64-musl_bin.tar.gz \
     && tar -xzf openjdk-15-ea+10_linux-x64-musl_bin.tar.gz \
     && rm openjdk-15-ea+10_linux-x64-musl_bin.tar.gz \
     && jdk-15/bin/jlink \
-         --compress=2 \
-         --module-path jdk-15/jmods \
-         --add-modules java.base,java.logging,java.xml \
-         --output /jlinked
+       --compress=2 \
+       --module-path jdk-15/jmods \
+       --add-modules java.base,java.logging,java.xml,java.desktop,java.management \
+       --output /jlinked \
+    && mv jdk-15 /opt/jdk \
+    && apk add --no-cache git sed findutils coreutils make npm\
+    && wget https://mirrors.gigenet.com/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz \
+    && tar -xzf apache-maven-3.6.3-bin.tar.gz \
+    && rm apache-maven-3.6.3-bin.tar.gz \
+    && mv apache-maven-3.6.3 /mvn \
+    && git config --global advice.detachedHead false
+
+COPY . .
+RUN cp -n /jdbc/* vendor \
+    && make jar
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #
-# Build the Maven based dependencies
+#   Run the service
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-FROM alpine:latest AS maven
-
-COPY --from=jdk /opt/jdk/* /opt/jdk/
-
-ENV MAVEN_VERSION=3.6.3 \
-    JAVA_HOME=/opt/jdk \
-    PATH=/mvn/bin:$PATH
-
-WORKDIR /tmp
-RUN apk add --no-cache git sed \
-    && wget https://mirrors.gigenet.com/apache/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz \
-    && tar -xzf apache-maven-$MAVEN_VERSION-bin.tar.gz \
-    && rm apache-maven-$MAVEN_VERSION-bin.tar.gz \
-    && mv apache-maven-$MAVEN_VERSION /mvn
-
-COPY bin/build-raml2jaxrs.sh bin/install-fgputil.sh ./
-RUN git config --global advice.detachedHead false./build-raml2jaxrs.sh \
-    && ./install-fgputil.sh docker \
-    && rm -rf /root/.m2 \
-    && rm -rf /opt/jdk
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-#
-# Build the service itself
-#
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-FROM alpine:latest AS service
-
-COPY --from=jdk /opt/jdk/* /opt/jdk/
-COPY --from=maven /tmp/raml-to-jaxrs.jar /workspace/
-COPY --from=maven [ "/tmp/fgputil-util-1.0.0.jar", \
-                    "/tmp/fgputil-server-1.0.0", \
-                    "/tmp/fgputil-accountdb-1.0.0", \
-                    "/workspace/vendor/" ]
+FROM foxcapades/alpine-oracle:latest
 
 ENV JAVA_HOME=/opt/jdk \
     PATH=/opt/jdk/bin:$PATH
-
-RUN apk add --no-cache jq findutils coreutils make npm
-WORKDIR /workspace
-
-COPY bin/prepare-env.sh bin/schema2raml.sh ./bin/
-RUN bin/prepare-env.sh docker
-
-COPY gradle/ ./gradle
-COPY gradlew ./
-COPY makefile .
-COPY service.properties build.gradle.kts ./
-COPY docs/schema ./docs/schema
-COPY api.raml .
-COPY src/ ./src
-
-RUN make build-jar
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-#
-# Run the service
-#
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-FROM alpine:latest
-
-ENV JAVA_HOME=/opt/jdk \
-    PATH=/opt/jdk/bin:$PATH
-COPY --from=jdk /jlinked /opt/jdk
-COPY --from=service /workspace/build/libs/service.jar /service.jar
+COPY --from=prep /jlinked /opt/jdk
+COPY --from=prep /workspace/build/libs/service.jar /service.jar
 EXPOSE 8080
 
 CMD java -jar /service.jar
