@@ -31,7 +31,8 @@ dependencies {
   ))
 
   // Compatibility bridge to support the long dead log4j-1.X
-  implementation("org.apache.logging.log4j:log4j-1.2-api:${buildProps["version.log4j"]}")
+  runtimeOnly("org.apache.logging.log4j:log4j-1.2-api:${buildProps["version.log4j"]}")
+  runtimeOnly("org.apache.commons:commons-dbcp2:2.7.0")
 
   //
   // Project Dependencies
