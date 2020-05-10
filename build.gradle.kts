@@ -1,5 +1,7 @@
 import java.util.Properties
 import java.io.FileInputStream
+import java.util.stream.Collectors
+import java.util.function.Predicate
 
 plugins {
   java
@@ -84,10 +86,9 @@ tasks.jar {
     attributes["Implementation-Version"] = buildProps["project.version"]
   }
   from(configurations.runtimeClasspath.get().map {
-    if (it.isDirectory) it else zipTree(it)
-  })
+    if (it.isDirectory) it else zipTree(it).matching {
+      exclude { f -> f.name.toLowerCase().contains("log4j") } } })
   archiveFileName.set("service.jar")
-  exclude("log4j.properties", "log4j.xml")
 }
 
 tasks.register("print-package") { print(fullPack) }
