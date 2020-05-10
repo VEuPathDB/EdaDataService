@@ -1,5 +1,5 @@
 APP_PACKAGE  := $(shell ./gradlew -q print-package)
-SCHEMA_FILES := $(shell find docs/schema -name '*.json' -o -name '*.yml' -o -name '*.yaml')
+SCHEMA_FILES := $(shell find docs/schema -name '*.raml')
 PWD          := $(shell pwd)
 MAIN_DIR     := src/main/java/$(shell echo $(APP_PACKAGE) | sed 's/\./\//g')
 GEN_DIR      := $(MAIN_DIR)/generated
@@ -52,8 +52,8 @@ docker:
 .PHONY: cleanup-example
 cleanup-example:
 	@echo "$(C_BLUE)Removing demo code$(C_NONE)"
-	@rm -rf "$(GEN_DIR)" \
-		"$(MAIN_DIR)/service/*"
+	@find "$(GEN_DIR)" -type d -delete
+	@rm -rf "$(MAIN_DIR)/service/*"
 
 .PHONY: install-dev-env
 install-dev-env:
@@ -73,14 +73,7 @@ build/libs/service.jar: $(ALL_PACKABLE) vendor/fgputil-accountdb-1.0.0.jar vendo
 
 
 $(GEN_FILES): api.raml docs/raml/library.raml
-	@echo "$(C_BLUE)Generating JaxRS Java Code$(C_NONE)"
-	@java -jar raml-to-jaxrs.jar ./api.raml \
-		--directory src/main/java \
-		--generate-types-with jackson \
-		--model-package $(APP_PACKAGE).generated.model \
-		--resource-package $(APP_PACKAGE).generated.resources \
-		--support-package $(APP_PACKAGE).generated.support \
-		| sed 's/^/  /'
+	@bin/generate-jaxrs.sh $(APP_PACKAGE)
 
 $(DOC_FILES): api.raml docs/raml/library.raml
 	@echo "$(C_BLUE)Generating API Documentation$(C_NONE)"
@@ -89,4 +82,4 @@ $(DOC_FILES): api.raml docs/raml/library.raml
 
 docs/raml/library.raml: $(SCHEMA_FILES)
 	@echo "$(C_BLUE)Converting JSON Schema to Raml$(C_NONE)"
-	@bin/schema2raml.sh
+	@bin/merge-raml.sh

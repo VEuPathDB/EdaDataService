@@ -5,22 +5,44 @@ mediaType: application/json
 uses:
   lib: docs/raml/library.raml
 
+securitySchemes:
+  cookie-auth:
+    description: Authentication based on a WDK auth cookie.
+    type:
+      x-custom
+    describedBy:
+      headers:
+        Cookie:
+          description: Auth_Key
+          type: string
+
+traits:
+  service-endpoint:
+    displayName: Services
+  health-endpoint:
+    displayName: Health & Metrics
+
+#
+# Example Endpoints
+#
+
 /hello:
   displayName: Hello World
   get:
+    is:
+      - service-endpoint
     responses:
       200:
         body:
           application/json:
             type: lib.HelloResponse
   post:
-    headers:
-      Auth_Key:
-        type: string
-        required: true
+    securedBy: cookie-auth
+    is:
+      - service-endpoint
     body:
       application/json:
-        type: lib.HelloPostBody
+        type: lib.HelloPostRequest
     responses:
       200:
         body:
@@ -34,3 +56,23 @@ uses:
         body:
           application/json:
             type: lib.ServerErrorResponse
+
+#
+# Generally Useful Endpoints
+#
+
+/health:
+  displayName: Health Check
+  get:
+    is:
+      - health-endpoint
+    responses:
+      200:
+        body:
+          application/json:
+            type: lib.HealthResponse
+      500:
+        body:
+          application/json:
+            type: lib.ServerErrorResponse
+

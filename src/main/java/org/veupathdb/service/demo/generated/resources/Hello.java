@@ -2,12 +2,11 @@ package org.veupathdb.service.demo.generated.resources;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
-import org.veupathdb.service.demo.generated.model.HelloPostBody;
+import org.veupathdb.service.demo.generated.model.HelloPostRequest;
 import org.veupathdb.service.demo.generated.model.HelloPostResponse;
 import org.veupathdb.service.demo.generated.model.HelloResponse;
 import org.veupathdb.service.demo.generated.model.ServerErrorResponse;
@@ -23,7 +22,7 @@ public interface Hello {
   @POST
   @Produces("application/json")
   @Consumes("application/json")
-  PostHelloResponse postHello(@HeaderParam("Auth_Key") String authKey, HelloPostBody entity);
+  PostHelloResponse postHello(HelloPostRequest entity);
 
   class PostHelloResponse extends ResponseDelegate {
     private PostHelloResponse(Response response, Object entity) {

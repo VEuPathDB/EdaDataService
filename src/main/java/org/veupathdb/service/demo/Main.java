@@ -6,12 +6,13 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.gusdb.fgputil.db.pool.DatabaseInstance;
 import org.veupathdb.service.demo.config.Options;
-import org.veupathdb.service.demo.middleware.AuthFilter;
-import org.veupathdb.service.demo.middleware.Log4JFilter;
-import org.veupathdb.service.demo.middleware.RequestIdFilter;
+import org.veupathdb.service.demo.container.middleware.AuthFilter;
+import org.veupathdb.service.demo.container.middleware.Log4JFilter;
+import org.veupathdb.service.demo.container.middleware.RequestIdFilter;
+import org.veupathdb.service.demo.container.utils.Cli;
+import org.veupathdb.service.demo.container.utils.DbManager;
+import org.veupathdb.service.demo.container.utils.Log;
 import org.veupathdb.service.demo.service.HelloWorld;
-import org.veupathdb.service.demo.utils.DbManager;
-import org.veupathdb.service.demo.utils.Log;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.UriBuilder;
@@ -20,7 +21,7 @@ import java.io.IOException;
 
 import static java.lang.String.format;
 import static org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory.createHttpServer;
-import static org.veupathdb.service.demo.utils.Errors.silence;
+import static org.veupathdb.service.demo.container.utils.Errors.silence;
 
 @ApplicationPath("/")
 public class Main extends ResourceConfig {
@@ -31,16 +32,15 @@ public class Main extends ResourceConfig {
   public Main(Options opts, DatabaseInstance acctDb) {
 
     super(
-      // Features
       JacksonFeature.class,
-
-      // Middleware
       RequestIdFilter.class,
       Log4JFilter.class,
 
       // Endpoint Implementations
       HelloWorld.class
     );
+
+    // Register middleware types that require dependencies.
     register(new AuthFilter(opts, acctDb));
   }
 
@@ -49,7 +49,7 @@ public class Main extends ResourceConfig {
     Log.initialize();
     log = LogManager.getLogger(Main.class);
 
-    final var opts = Options.initialize(args);
+    final var opts = Cli.ParseCLI(args, Options.getInstance());
     validateOptions(opts);
 
     final var acctDb = DbManager.initAccountDatabase(opts);

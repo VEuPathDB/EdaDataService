@@ -11,6 +11,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+/**
+ * CLI Options.
+ */
 public final class Options {
   private Options() {}
 
@@ -113,50 +116,7 @@ public final class Options {
 
   public static Options getInstance() {
     if (Objects.isNull(instance))
-      throw new IllegalStateException("Options.getInstance() was called before "
-        + "the Options object was initialized.");
+      instance = new Options();
     return instance;
-  }
-
-  public static Options initialize(String[] args) {
-    var tmp = new Options();
-    var cli = new CommandLine(tmp)
-      .setCaseInsensitiveEnumValuesAllowed(true)
-      .setUnmatchedArgumentsAllowed(false);
-    try {
-      cli.parseArgs(args);
-    } catch (UnmatchedArgumentException e) {
-      var match = e.getUnmatched()
-        .stream()
-        .anyMatch(((Predicate<String>)"-h"::equals).or("--help"::equals));
-
-      if (match) {
-        cli.usage(System.out);
-        Runtime.getRuntime().exit(0);
-      }
-
-      throw new RuntimeException("Unrecognized argument(s) " + e.getUnmatched());
-    }
-
-    emptyToNull(tmp);
-    return instance = tmp;
-  }
-
-  static void emptyToNull(Options opts) {
-    try {
-      for (var prop : opts.getClass().getDeclaredFields()) {
-        var tmp = prop.get(opts);
-        if (Objects.isNull(tmp))
-          continue;
-
-        if (tmp.equals("")) {
-          prop.set(opts, null);
-        } else if (tmp.equals(0)) {
-          prop.set(opts, null);
-        }
-      }
-    } catch (IllegalAccessException e) {
-      throw new RuntimeException(e);
-    }
   }
 }

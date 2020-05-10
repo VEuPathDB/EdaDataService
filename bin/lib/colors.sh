@@ -1,5 +1,6 @@
+#!/usr/bin/env sh
 
-if [ "${DOCKER}" != "build" ]; then
+if [ "${DOCKER:-local}" != "build" ]; then
   readonly C_BLUE="\033[94m"
   readonly C_CYAN="\033[36m"
   readonly C_RED="\033[31m"

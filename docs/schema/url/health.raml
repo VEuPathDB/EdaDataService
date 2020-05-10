@@ -1,0 +1,53 @@
+#%RAML 1.0 Library
+
+types:
+  HealthResponse:
+    description: Health details about the service
+    type: object
+    additionalProperties: false
+    properties:
+      status:
+        description: |
+          Status describes the overall service state.  A status of "healthy"
+          indicates that everything is running smoothly and all service dependencies
+          are reachable and online.  A status of "unhealthy" indicates that
+          something is wrong with either this service or one or more of it's
+          dependency services.
+        type: string
+        enum:
+          - healthy
+          - unhealthy
+        required: true
+      dependencies:
+        description: |
+          A list of external services that this service depends on and some details
+          about them.
+        type: array
+        items:
+          type: DependencyStatus
+        required: true
+
+  DependencyStatus:
+    type: object
+    properties:
+      name:
+        description: Name of the external depdendency.
+        type: string
+        required: true
+      reachable:
+        description: Whether or not the external service is reachable.
+        type: boolean
+        required: true
+      online:
+        description: |
+          Whether or not the external service is online and available for
+          requests.
+        type: string
+        enum:
+          - yes
+          - unknown
+          - no
+        required: true
+
+
+

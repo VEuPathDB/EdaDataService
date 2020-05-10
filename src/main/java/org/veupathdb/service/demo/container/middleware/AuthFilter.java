@@ -1,9 +1,9 @@
-package org.veupathdb.service.demo.middleware;
+package org.veupathdb.service.demo.container.middleware;
 
 import org.gusdb.fgputil.accountdb.AccountManager;
 import org.gusdb.fgputil.db.pool.DatabaseInstance;
 import org.gusdb.fgputil.web.LoginCookieFactory;
-import org.veupathdb.service.demo.config.Globals;
+import org.veupathdb.service.demo.container.Globals;
 import org.veupathdb.service.demo.config.Options;
 
 import javax.annotation.Priority;
@@ -25,8 +25,8 @@ import java.util.Set;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.synchronizedSet;
 import static java.util.Objects.isNull;
-import static org.veupathdb.service.demo.config.Globals.DB_ACCOUNT_SCHEMA;
-import static org.veupathdb.service.demo.utils.RequestKeys.AUTH_HEADER;
+import static org.veupathdb.service.demo.container.Globals.DB_ACCOUNT_SCHEMA;
+import static org.veupathdb.service.demo.container.utils.RequestKeys.AUTH_HEADER;
 
 /**
  * Provides client authentication checks for resource classes or methods

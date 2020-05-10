@@ -1,0 +1,32 @@
+#%RAML 1.0 Library
+
+types:
+
+  UnauthorizedResponse:
+    displayName: 401 Response
+    type: object
+    properties:
+      status:
+        type: string
+        enum:
+          - unauthorized
+        required: true
+      message:
+        type: string
+        required: true
+    additionalProperties: false
+
+  ServerErrorResponse:
+    displayName: 500 Response
+    type: object
+    properties:
+      status:
+        type: string
+        enum:
+          - server-error
+        required: true
+      message:
+        type: string
+        required: true
+    additionalProperties: false
+

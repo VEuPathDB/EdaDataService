@@ -1,4 +1,4 @@
-package org.veupathdb.service.demo.utils;
+package org.veupathdb.service.demo.container.utils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;

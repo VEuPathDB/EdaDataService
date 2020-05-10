@@ -1,4 +1,4 @@
-package org.veupathdb.service.demo.utils;
+package org.veupathdb.service.demo.container.utils;
 
 public final class RequestKeys {
   private RequestKeys() {}

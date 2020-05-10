@@ -1,4 +1,4 @@
-package org.veupathdb.service.demo.config;
+package org.veupathdb.service.demo.container;
 
 public final class Globals {
   private Globals() {}

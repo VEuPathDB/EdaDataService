@@ -1,6 +1,6 @@
-package org.veupathdb.service.demo.middleware;
+package org.veupathdb.service.demo.container.middleware;
 
-import org.veupathdb.service.demo.utils.RequestKeys;
+import org.veupathdb.service.demo.container.utils.RequestKeys;
 
 import javax.annotation.Priority;
 import javax.ws.rs.container.ContainerRequestContext;

@@ -1,4 +1,4 @@
-package org.veupathdb.service.demo.utils;
+package org.veupathdb.service.demo.container.utils;
 
 import org.gusdb.fgputil.db.platform.SupportedPlatform;
 import org.gusdb.fgputil.db.pool.DatabaseInstance;

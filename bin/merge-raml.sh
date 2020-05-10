@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-files=$(find docs/schema -name '*.json' -o -name '*.yml' -o -name '*.yaml')
+set -eu
 
 mkdir -p docs/raml
 
@@ -15,22 +15,5 @@ echo "#%RAML 1.0 Library
 
 types:" > docs/raml/library.raml
 
-getId() {
-  tr '\n\r' ' ' < "$1" \
-    | grep -Eo '"?\$id"?\s*:\s*"?([A-Za-z0-9_]+)"?' \
-    | sed 's/ \|"//g' \
-    | cut -d':' -f2
-}
+find docs/schema -name '*.raml' | xargs -I '{}' sed 's/#.\+\|^types.\+//' {} | grep -vE "^ *$" >> docs/raml/library.raml
 
-for file in ${files}; do
-  name=$(getId "${file}")
-
-  if [ -z "${name}" ]; then
-    continue
-  fi
-
-  json-dereference -s "${file}" -o "tmp_.json" > /dev/null
-  js2dt "tmp_.json" "${name}" \
-    | grep -v '#%\|types:' >> docs/raml/library.raml
-  rm "tmp_.json"
-done

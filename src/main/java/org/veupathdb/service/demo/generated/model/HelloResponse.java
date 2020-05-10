@@ -13,6 +13,12 @@ public interface HelloResponse {
   @JsonProperty("greeting")
   void setGreeting(GreetingType greeting);
 
+  @JsonProperty("anotherType")
+  AnotherType getAnotherType();
+
+  @JsonProperty("anotherType")
+  void setAnotherType(AnotherType anotherType);
+
   enum GreetingType {
     @JsonProperty("Hello World")
     HELLOWORLD("Hello World");
