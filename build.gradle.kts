@@ -77,18 +77,17 @@ dependencies {
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${buildProps["version.junit"]}")
 }
 
-tasks {
-  jar {
-    manifest {
-      attributes["Main-Class"] = "${fullPack}.${buildProps["app.main-class"]}"
-    }
-    from(configurations.runtimeClasspath.get().map {
-      if (it.isDirectory) it else zipTree(it).map { exclude {
-        file -> file.name == "log4j.properties" || file.name == "log4j.xml"
-      } }
-    })
-    archiveFileName.set("service.jar")
+tasks.jar {
+  manifest {
+    attributes["Main-Class"] = "${fullPack}.${buildProps["app.main-class"]}"
+    attributes["Implementation-Title"] = buildProps["project.name"]
+    attributes["Implementation-Version"] = buildProps["project.version"]
   }
+  from(configurations.runtimeClasspath.get().map {
+    if (it.isDirectory) it else zipTree(it)
+  })
+  archiveFileName.set("service.jar")
+  exclude("log4j.properties", "log4j.xml")
 }
 
 tasks.register("print-package") { print(fullPack) }
@@ -98,4 +97,3 @@ val test by tasks.getting(Test::class) {
   // Use junit platform for unit tests
   useJUnitPlatform()
 }
-
