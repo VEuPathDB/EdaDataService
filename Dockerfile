@@ -33,7 +33,7 @@ COPY . .
 RUN bin/install-fgputil.sh \
     && bin/install-raml2jaxrs.sh
 
-RUN cp -n /jdbc/* vendor
+RUN cp -n /jdbc/* vendor \
     && ./gradlew tasks > /dev/null \
     && make jar
 
