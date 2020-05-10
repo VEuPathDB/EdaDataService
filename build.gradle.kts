@@ -96,10 +96,6 @@ tasks.jar {
   archiveFileName.set("service.jar")
 }
 
-tasks.withType<JavaCompile>().forEach {
-  it.options.compilerArgs.add("--enable-preview")
-}
-
 tasks.register("print-package") { print(fullPack) }
 tasks.register("print-container-name") { print(buildProps["container.name"]) }
 

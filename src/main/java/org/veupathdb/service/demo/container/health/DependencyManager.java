@@ -2,6 +2,7 @@ package org.veupathdb.service.demo.container.health;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.veupathdb.service.demo.container.health.Dependency.TestResult;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,8 +13,6 @@ import static java.util.Objects.isNull;
 
 public final class DependencyManager {
   private DependencyManager() {}
-
-  private static record Pair(String name, Dependency.TestResult result) {}
 
   private static DependencyManager instance;
 
@@ -29,7 +28,7 @@ public final class DependencyManager {
   public Map<String, Dependency.TestResult> testDependencies() {
     return dependencies.entrySet()
       .parallelStream()
-      .map(e -> new Pair(e.getKey(), e.getValue().test()))
+      .map(e -> new DependencyPair(e.getKey(), e.getValue().test()))
       .collect(Collectors.toUnmodifiableMap(k -> k.name, v -> v.result));
   }
 
@@ -47,5 +46,15 @@ public final class DependencyManager {
     if (isNull(instance))
       instance = new DependencyManager();
     return instance;
+  }
+}
+
+class DependencyPair {
+  final String name;
+  final TestResult result;
+
+  DependencyPair(String name, TestResult result) {
+    this.name = name;
+    this.result = result;
   }
 }
