@@ -2,10 +2,7 @@
 
 . bin/lib/colors.sh
 
-readonly DEPS="json-dereference:json-dereference-cli
-  raml2html:raml2html
-  dt2js:ramldt2jsonschema
-  yaml2json:yaml2json"
+readonly DEPS="raml2html:raml2html"
 
 echo "${C_BLUE}Checking for required NPM packages${C_NONE}"
 

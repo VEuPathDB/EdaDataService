@@ -119,8 +119,8 @@ public final class DbManager {
     ));
 
     //noinspection OptionalGetWithoutIsPresent
-    DependencyManager.register(new DatabaseDependency("account-db",
-      opts.getDbHost().get(), opts.getDbPort().get(), acctDb));
+    DependencyManager.getInstance().register(new DatabaseDependency(
+      "account-db", opts.getDbHost().get(), opts.getDbPort().get(), acctDb));
 
     return acctDb;
   }

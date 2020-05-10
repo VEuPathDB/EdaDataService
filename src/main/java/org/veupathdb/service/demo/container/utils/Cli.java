@@ -51,6 +51,8 @@ public final class Cli {
   static void emptyToNull(Object opts) {
     try {
       for (var prop : opts.getClass().getDeclaredFields()) {
+        prop.setAccessible(true);
+
         var tmp = prop.get(opts);
         if (Objects.isNull(tmp))
           continue;

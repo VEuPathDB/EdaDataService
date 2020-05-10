@@ -1,10 +1,7 @@
 APP_PACKAGE  := $(shell ./gradlew -q print-package)
-SCHEMA_FILES := $(shell find docs/schema -name '*.raml')
 PWD          := $(shell pwd)
 MAIN_DIR     := src/main/java/$(shell echo $(APP_PACKAGE) | sed 's/\./\//g')
 GEN_DIR      := $(MAIN_DIR)/generated
-GEN_FILES    := $(shell find $(GEN_DIR) -name '*.java')
-DOC_FILES    := src/main/resources/api.html docs/api.html
 ALL_PACKABLE := $(shell find src/main -type f)
 
 C_BLUE := "\\033[94m"
@@ -35,11 +32,11 @@ default:
 	@echo ""
 
 .PHONY: compile
-compile: install-dev-env $(GEN_FILES) $(DOC_FILES)
+compile: install-dev-env gen-jaxrs gen-docs
 	@./gradlew clean compileJava
 
 .PHONY: test
-test: install-dev-env $(GEN_FILES) $(DOC_FILES)
+test: install-dev-env gen-jaxrs gen-docs
 	@./gradlew clean test
 
 .PHONY: jar
@@ -67,15 +64,15 @@ install-dev-env:
 # File based targets
 #
 
-build/libs/service.jar: $(ALL_PACKABLE) vendor/fgputil-accountdb-1.0.0.jar vendor/fgputil-util-1.0.0.jar build.gradle.kts service.properties
+build/libs/service.jar: gen-jaxrs gen-docs vendor/fgputil-accountdb-1.0.0.jar vendor/fgputil-util-1.0.0.jar build.gradle.kts service.properties
 	@echo "$(C_BLUE)Building application jar$(C_NONE)"
 	@./gradlew clean test jar
 
 
-$(GEN_FILES): api.raml docs/raml/library.raml
+gen-jaxrs:
 	@bin/generate-jaxrs.sh $(APP_PACKAGE)
 
-$(DOC_FILES): api.raml docs/raml/library.raml
+gen-docs: api.raml docs/raml/library.raml
 	@echo "$(C_BLUE)Generating API Documentation$(C_NONE)"
 	@raml2html api.raml > docs/api.html
 	@cp docs/api.html src/main/resources/api.html

@@ -12,7 +12,7 @@ compile() {
     --generate-types-with jackson \
     --model-package ${APP_PACKAGE}.generated.model \
     --resource-package ${APP_PACKAGE}.generated.resources \
-    --support-package ${APP_PACKAGE}.generated.support
+    --support-package ${APP_PACKAGE}.generated.support 2>&1
 }
 
 echo "${C_BLUE}Generating JaxRS Java Code${C_NONE}"
