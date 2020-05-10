@@ -15,6 +15,6 @@ sed -i 's/3.0.5-SNAPSHOT/3.0.5/' pom.xml
 
 echo "Running maven build"
 (mvn clean install || exit 1) | grep -v "Downloading\|already added, skipping\|Downloaded"
-mv target/raml-to-jaxrs-cli-3.0.5-jar-with-dependencies.jar "${curDir}"/raml-to-jaxrs.jar
+mv target/raml-to-jaxrs-cli-3.0.5-jar-with-dependencies.jar "${curDir}"/bin/raml-to-jaxrs.jar
 cd "${curDir}"
 rm -rf tmp
