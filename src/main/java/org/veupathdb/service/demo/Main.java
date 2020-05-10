@@ -46,7 +46,7 @@ public class Main extends ResourceConfig {
   public static void main(String[] args) throws IOException {
     // Configure Log4J and route all logging through it.
     Log.initialize();
-    log = LogManager.getLogger("service");
+    log = LogManager.getLogger(Main.class);
 
     final var opts = Options.initialize(args);
     validateOptions(opts);

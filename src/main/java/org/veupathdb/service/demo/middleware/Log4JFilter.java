@@ -22,7 +22,7 @@ public class Log4JFilter implements ContainerRequestFilter, ContainerResponseFil
     START_FORMAT = "%s Request start: %s %s",
     END_FORMAT   = "%s Request end: %s %s %d";
 
-  private static final Logger LOG = LogManager.getLogger();
+  private static final Logger LOG = LogManager.getLogger(Log4JFilter.class);
 
   @Override
   public void filter(ContainerRequestContext req) {
