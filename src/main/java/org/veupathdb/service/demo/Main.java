@@ -18,6 +18,7 @@ import javax.ws.rs.core.UriBuilder;
 
 import java.io.IOException;
 
+import static java.lang.String.format;
 import static org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory.createHttpServer;
 import static org.veupathdb.service.demo.utils.Errors.silence;
 
@@ -52,17 +53,19 @@ public class Main extends ResourceConfig {
     validateOptions(opts);
 
     final var acctDb = DbManager.initAccountDatabase(opts);
-
+    final var port = opts.getServerPort().orElse(DEFAULT_PORT);
     final var server = createHttpServer(
-      UriBuilder.fromUri("//0.0.0.0")
-        .port(opts.getServerPort().orElse(DEFAULT_PORT))
-        .build(),
+      UriBuilder.fromUri("//0.0.0.0").port(port).build(),
       new Main(opts, acctDb));
 
     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+      log.info("Server shutting down.");
       server.shutdownNow();
       silence(acctDb::close);
     }));
+
+    server.start();
+    log.info(format("Server started.  Listening on port %d.", port));
   }
 
   /**
