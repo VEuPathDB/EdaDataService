@@ -3,8 +3,9 @@ package org.veupathdb.service.demo.container.middleware;
 import org.gusdb.fgputil.accountdb.AccountManager;
 import org.gusdb.fgputil.db.pool.DatabaseInstance;
 import org.gusdb.fgputil.web.LoginCookieFactory;
-import org.veupathdb.service.demo.container.Globals;
+import org.veupathdb.service.demo.config.InvalidConfigException;
 import org.veupathdb.service.demo.config.Options;
+import org.veupathdb.service.demo.container.Globals;
 
 import javax.annotation.Priority;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -51,6 +52,11 @@ public class AuthFilter implements ContainerRequestFilter {
   public AuthFilter(Options opts, DatabaseInstance acctDb) {
     this.opts = opts;
     this.acctMan = new AccountManager(acctDb, DB_ACCOUNT_SCHEMA, emptyList());
+
+    // Only validate that the secret key is present if we actually need it.
+    if (opts.getAuthSecretKey().isEmpty())
+      throw new InvalidConfigException("Auth secret key is required for this "
+        + "service");
   }
 
   @Override

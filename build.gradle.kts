@@ -18,6 +18,11 @@ repositories {
   jcenter()
 }
 
+java {
+  sourceCompatibility = JavaVersion.VERSION_14
+  targetCompatibility = JavaVersion.VERSION_14
+}
+
 dependencies {
 
   //
@@ -94,6 +99,10 @@ tasks.jar {
     if (it.isDirectory) it else zipTree(it).matching {
       exclude { f -> f.name.toLowerCase().contains("log4j") } } })
   archiveFileName.set("service.jar")
+}
+
+tasks.withType<JavaCompile>().forEach {
+  it.options.compilerArgs.add("--enable-preview")
 }
 
 tasks.register("print-package") { print(fullPack) }
