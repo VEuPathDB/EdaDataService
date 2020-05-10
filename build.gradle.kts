@@ -1,7 +1,5 @@
 import java.util.Properties
 import java.io.FileInputStream
-import java.util.stream.Collectors
-import java.util.function.Predicate
 
 plugins {
   java
@@ -34,7 +32,14 @@ dependencies {
 
   // Compatibility bridge to support the long dead log4j-1.X
   runtimeOnly("org.apache.logging.log4j:log4j-1.2-api:${buildProps["version.log4j"]}")
+
+  // Extra FgpUtil dependencies
   runtimeOnly("org.apache.commons:commons-dbcp2:2.7.0")
+  runtimeOnly("org.json:json:20190722")
+  runtimeOnly("com.fasterxml.jackson.datatype:jackson-datatype-json-org:${buildProps["version.jackson"]}")
+  runtimeOnly("com.fasterxml.jackson.module:jackson-module-parameter-names:${buildProps["version.jackson"]}")
+  runtimeOnly("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${buildProps["version.jackson"]}")
+  runtimeOnly("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${buildProps["version.jackson"]}")
 
   //
   // Project Dependencies
