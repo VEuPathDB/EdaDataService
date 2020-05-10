@@ -83,7 +83,9 @@ tasks {
       attributes["Main-Class"] = "${fullPack}.${buildProps["app.main-class"]}"
     }
     from(configurations.runtimeClasspath.get().map {
-      if (it.isDirectory) it else zipTree(it)
+      if (it.isDirectory) it else zipTree(it).map { exclude {
+        file -> file.name == "log4j.properties" || file.name == "log4j.xml"
+      } }
     })
     archiveFileName.set("service.jar")
   }
