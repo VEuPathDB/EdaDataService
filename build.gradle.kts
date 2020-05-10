@@ -92,7 +92,8 @@ tasks.jar {
   }
   from(configurations.runtimeClasspath.get().map {
     if (it.isDirectory) it else zipTree(it).matching {
-      exclude { f -> f.name.toLowerCase().contains("log4j") } } })
+      exclude { f -> f.name.toLowerCase().contains("log4j") &&
+        f.name.toLowerCase().contains(".dat") } } })
   archiveFileName.set("service.jar")
 }
 
