@@ -31,6 +31,7 @@ RUN wget https://download.java.net/java/early_access/alpine/10/binaries/openjdk-
 COPY . .
 RUN mkdir -p vendor \
     && cp -n /jdbc/* vendor \
+    && ./gradlew tasks > /dev/null \
     && make jar
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
