@@ -1,16 +1,18 @@
 package org.veupathdb.service.demo.container.health;
 
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.db.pool.DatabaseInstance;
 import org.veupathdb.service.demo.generated.model.DependencyStatus.OnlineType;
-
-import javax.sql.DataSource;
 
 import java.sql.SQLException;
 
 import static org.apache.logging.log4j.LogManager.getLogger;
 
+/**
+ * Database Dependency
+ *
+ * Dependency wrapper for a database instance.
+ */
 public class DatabaseDependency implements Dependency {
   private static final Logger LOG = getLogger(DatabaseDependency.class);
 
