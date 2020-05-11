@@ -12,12 +12,13 @@ import org.veupathdb.service.demo.container.Globals;
 
 import java.io.IOException;
 
-//import org.slf4j.bridge.SLF4JBridgeHandler;
-
 public class Log {
   /**
    * Routes all logging through Log4J2 and applies the configuration from
    * resources.
+   *
+   * This is needed to hijack the default logging done by other libraries and
+   * force them through log4j.
    */
   public static void initialize() throws IOException {
     java.util.logging.LogManager.getLogManager().reset();
