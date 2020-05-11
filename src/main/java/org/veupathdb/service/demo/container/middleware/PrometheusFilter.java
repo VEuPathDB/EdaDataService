@@ -12,7 +12,7 @@ import javax.ws.rs.container.*;
 import javax.ws.rs.ext.Provider;
 
 @Provider
-@Priority(0)
+@Priority(1)
 @PreMatching
 public class PrometheusFilter
 implements ContainerRequestFilter, ContainerResponseFilter {

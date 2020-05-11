@@ -18,7 +18,7 @@ import java.util.UUID;
  * Assigns a unique ID to each request for logging, error tracing purposes.
  */
 @Provider
-@Priority(1)
+@Priority(0)
 @PreMatching
 public class RequestIdFilter
 implements ContainerRequestFilter, ContainerResponseFilter {
