@@ -7,10 +7,11 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class Pinger {
-  private static final Logger LOG = LogManager.getLogger(Pinger.class);
 
-  public static boolean isReachable(String addr, int port) {
-    LOG.debug("Pinging {}:{}", addr, port);
+  private final Logger log = LogManager.getLogger(Pinger.class);
+
+  public boolean isReachable(String addr, int port) {
+    log.debug("Pinging {}:{}", addr, port);
 
     try (var sock = new Socket(addr, port)) {
       sock.setSoTimeout(3000);
@@ -18,8 +19,8 @@ public class Pinger {
       sock.getOutputStream().flush();
       return true;
     } catch (IOException e) {
-      LOG.info("Ping failed for {}:{}", addr, port);
-      LOG.debug(e);
+      log.info("Ping failed for {}:{}", addr, port);
+      log.debug(e);
       return false;
     }
   }

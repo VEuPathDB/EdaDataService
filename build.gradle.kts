@@ -34,7 +34,7 @@ dependencies {
   runtimeOnly("org.apache.logging.log4j:log4j-1.2-api:${buildProps["version.log4j"]}")
 
   // Extra FgpUtil dependencies
-  runtimeOnly("org.apache.commons:commons-dbcp2:2.7.0")
+  runtimeOnly("org.apache.commons:commons-dbcp2:2.+")
   runtimeOnly("org.json:json:20190722")
   runtimeOnly("com.fasterxml.jackson.datatype:jackson-datatype-json-org:${buildProps["version.jackson"]}")
   runtimeOnly("com.fasterxml.jackson.module:jackson-module-parameter-names:${buildProps["version.jackson"]}")
@@ -53,7 +53,7 @@ dependencies {
   ))
 
   // JavaX
-  implementation("javax.ws.rs:javax.ws.rs-api:2.1.1")
+  implementation("javax.ws.rs:javax.ws.rs-api:2.+")
 
   // Jersey
   implementation("org.glassfish.jersey.containers:jersey-container-grizzly2-http:${buildProps["version.jersey"]}")
@@ -67,8 +67,8 @@ dependencies {
   implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${buildProps["version.jackson"]}")
 
   // CLI
-  implementation("info.picocli:picocli:4.2.0")
-  annotationProcessor("info.picocli:picocli-codegen:4.2.0")
+  implementation("info.picocli:picocli:4.+")
+  annotationProcessor("info.picocli:picocli-codegen:4.+")
 
 
   // Log4J
@@ -77,11 +77,12 @@ dependencies {
   implementation("org.apache.logging.log4j:log4j:${buildProps["version.log4j"]}")
 
   // Utils
-  implementation("io.vulpine.lib:Jackfish:1.1.0")
-  implementation("com.devskiller.friendly-id:friendly-id:1.1.0")
+  implementation("io.vulpine.lib:Jackfish:1.+")
+  implementation("com.devskiller.friendly-id:friendly-id:1.+")
 
   // Unit Testing
   testImplementation("org.junit.jupiter:junit-jupiter-api:${buildProps["version.junit"]}")
+  testImplementation("org.mockito:mockito-core:2.+")
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${buildProps["version.junit"]}")
 }
 

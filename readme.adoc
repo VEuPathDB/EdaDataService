@@ -264,3 +264,7 @@ profile information to the incoming request object.
 
 `gen-docs`::
 . Generates API docs from the Raml spec.
+
+`fix-path`::
+. Migrates the source code from the demo package to the correct package as
+  defined in `service.properties`

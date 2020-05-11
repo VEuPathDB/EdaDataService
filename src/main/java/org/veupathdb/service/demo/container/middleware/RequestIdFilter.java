@@ -30,7 +30,6 @@ public class RequestIdFilter implements ContainerRequestFilter,
 
   @Override
   public void filter(ContainerRequestContext req, ContainerResponseContext res) {
-    ThreadContext.remove((String) req.getProperty(
-      Globals.CONTEXT_ID));
+    ThreadContext.remove(Globals.CONTEXT_ID);
   }
 }

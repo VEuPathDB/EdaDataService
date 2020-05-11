@@ -13,10 +13,9 @@ import static org.apache.logging.log4j.LogManager.getLogger;
  *
  * Dependency wrapper for a database instance.
  */
-public class DatabaseDependency implements Dependency {
+public class DatabaseDependency extends ExternalDependency {
   private static final Logger LOG = getLogger(DatabaseDependency.class);
 
-  private final String name;
   private final String url;
   private final int port;
   private final DatabaseInstance ds;
@@ -24,22 +23,17 @@ public class DatabaseDependency implements Dependency {
   private String testQuery = "SELECT 1 FROM dual";
 
   public DatabaseDependency(String name, String url, int port, DatabaseInstance ds) {
-    this.name = name;
+    super(name);
     this.ds = ds;
     this.url = url;
     this.port = port;
   }
 
   @Override
-  public String getName() {
-    return this.name;
-  }
-
-  @Override
   public TestResult test() {
     LOG.info("Checking dependency health for database {}", name);
 
-    if (!Pinger.isReachable(url, port))
+    if (!pinger.isReachable(url, port))
       return new TestResult(false, OnlineType.UNKNOWN);
 
     try (
