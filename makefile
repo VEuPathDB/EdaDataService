@@ -86,7 +86,7 @@ gen-jaxrs:
 
 gen-docs: api.raml docs/raml/library.raml
 	@echo "$(C_BLUE)Generating API Documentation$(C_NONE)"
-	@raml2html api.raml > docs/api.html
+	@raml2html docs/raml/full-api.raml > docs/api.html
 	@cp docs/api.html src/main/resources/api.html
 
 docs/raml/library.raml: $(SCHEMA_FILES)

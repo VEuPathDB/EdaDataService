@@ -1,4 +1,45 @@
-#%RAML 1.0 Library
+#%RAML 1.0 Extension
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#
+# Extends the project specific API definition with additional meta services
+# useful for containerized applications.
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+extends: ../../api.raml
+
+uses:
+  lib: ./library.raml
+
+#
+# Predefined Services
+#
+
+/api:
+  displayName: API Documentation
+  get:
+    is:
+      - meta-endpoint
+    responses:
+      200:
+        body:
+          text/html:
+
+/health:
+  displayName: Health Check
+  get:
+    is:
+      - meta-endpoint
+    responses:
+      200:
+        body:
+          application/json:
+            type: lib.HealthResponse
+      500:
+        body:
+          application/json:
+            type: lib.ServerErrorResponse
 
 types:
   HealthResponse:
@@ -48,6 +89,3 @@ types:
           - unknown
           - no
         required: true
-
-
-

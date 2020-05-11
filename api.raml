@@ -57,33 +57,3 @@ traits:
         body:
           application/json:
             type: lib.ServerErrorResponse
-
-#
-# Generally Useful Endpoints
-#
-
-/api:
-  displayName: API Documentation
-  get:
-    is:
-      - meta-endpoint
-    responses:
-      200:
-        body:
-          text/html:
-
-/health:
-  displayName: Health Check
-  get:
-    is:
-      - meta-endpoint
-    responses:
-      200:
-        body:
-          application/json:
-            type: lib.HealthResponse
-      500:
-        body:
-          application/json:
-            type: lib.ServerErrorResponse
-
