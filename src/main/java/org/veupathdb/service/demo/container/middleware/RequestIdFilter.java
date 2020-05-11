@@ -4,10 +4,7 @@ import org.apache.logging.log4j.ThreadContext;
 import org.veupathdb.service.demo.container.utils.RequestKeys;
 
 import javax.annotation.Priority;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.container.ContainerResponseContext;
-import javax.ws.rs.container.ContainerResponseFilter;
+import javax.ws.rs.container.*;
 import javax.ws.rs.ext.Provider;
 
 import java.io.IOException;
@@ -18,6 +15,7 @@ import java.util.UUID;
  */
 @Provider
 @Priority(0)
+@PreMatching
 public class RequestIdFilter implements ContainerRequestFilter,
   ContainerResponseFilter {
 
