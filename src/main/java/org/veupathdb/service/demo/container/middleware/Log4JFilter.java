@@ -2,7 +2,7 @@ package org.veupathdb.service.demo.container.middleware;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
+import org.apache.logging.log4j.util.Supplier;
 import org.veupathdb.service.demo.container.utils.RequestKeys;
 
 import javax.annotation.Priority;
@@ -13,7 +13,6 @@ import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.core.Response.Status.Family;
 import javax.ws.rs.ext.Provider;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import static java.lang.String.format;
 
@@ -28,7 +27,7 @@ public class Log4JFilter implements ContainerRequestFilter, ContainerResponseFil
 
   @Override
   public void filter(ContainerRequestContext req) {
-    LOG.debug(() -> format(START_FORMAT, req.getProperty(RequestKeys.REQUEST_ID),
+    LOG.debug((Supplier<?>) () -> format(START_FORMAT, req.getProperty(RequestKeys.REQUEST_ID),
       req.getMethod(), req.getUriInfo().getPath()));
   }
 
