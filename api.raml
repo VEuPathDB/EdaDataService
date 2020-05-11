@@ -19,8 +19,9 @@ securitySchemes:
 traits:
   service-endpoint:
     displayName: Services
-  health-endpoint:
-    displayName: Health & Metrics
+  meta-endpoint:
+    displayName: Service Information
+
 
 #
 # Example Endpoints
@@ -61,11 +62,21 @@ traits:
 # Generally Useful Endpoints
 #
 
+/api:
+  displayName: API Documentation
+  get:
+    is:
+      - meta-endpoint
+    responses:
+      200:
+        body:
+          text/html:
+
 /health:
   displayName: Health Check
   get:
     is:
-      - health-endpoint
+      - meta-endpoint
     responses:
       200:
         body:

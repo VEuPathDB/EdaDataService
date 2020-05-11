@@ -133,7 +133,9 @@ types.
 
 .Type definition
 ====
-.Example Schema
+{nbsp}
+
+.Schema
 [source, yaml]
 ----
 #%RAML 1.0 Library

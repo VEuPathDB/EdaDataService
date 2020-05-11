@@ -1,7 +1,7 @@
 APP_PACKAGE  := $(shell ./gradlew -q print-package)
 PWD          := $(shell pwd)
 MAIN_DIR     := src/main/java/$(shell echo $(APP_PACKAGE) | sed 's/\./\//g')
-TEST_DIR     := $(shell echo $(MAIN_DIR) | sed 's/main/test')
+TEST_DIR     := $(shell echo $(MAIN_DIR) | sed 's/main/test/')
 GEN_DIR      := $(MAIN_DIR)/generated
 ALL_PACKABLE := $(shell find src/main -type f)
 
