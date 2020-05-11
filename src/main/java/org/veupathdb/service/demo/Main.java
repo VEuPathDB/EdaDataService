@@ -39,6 +39,6 @@ public class Main {
     }));
 
     server.start();
-    log.info(format("Server started.  Listening on port %d.", port));
+    log.info("Server started.  Listening on port {}.", port);
   }
 }
