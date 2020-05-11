@@ -77,6 +77,7 @@ public class AuthFilter implements ContainerRequestFilter {
     final var rawAuth = req.getCookies().get(AUTH_HEADER).getValue();
 
     if (isNull(rawAuth) || rawAuth.isEmpty()) {
+      LOG.debug("Authentication failed: no auth cookie.");
       req.abortWith(build401());
       return;
     }
