@@ -70,22 +70,12 @@ To use this project as a template for the development of a new service, use the
 
 === Detailed Overview
 
-==== Environment
+==== Environment Prerequisites
 
-Once your new project has been cloned, the development prerequisites can be
-installed using `make install-dev-env`.  This will install and build the following
-packages:
-
-* NPM
-** https://github.com/davidkelley/json-dereference-cli[json-dereference-cli]
-** https://github.com/raml2html/raml2html[raml2html]
-** https://github.com/raml-org/ramldt2jsonschema[ramldt2jsonschema]
-* Maven
-** https://github.com/mulesoft-labs/raml-for-jax-rs[raml-to-jaxrs]
-** https://github.com/VEuPathDB/FgpUtil[FgpUtil]
-
-After (or during) installing the prerequisites, you may run
-`make cleanup-example` to remove the Java classes generated for the demo.
+NPM:: Required to run https://github.com/raml2html/raml2html[raml2html]
+Maven:: Required to build
+https://github.com/mulesoft-labs/raml-for-jax-rs[raml-to-jaxrs] &
+https://github.com/VEuPathDB/FgpUtil[FgpUtil]
 
 ==== Configuration
 
@@ -100,32 +90,46 @@ docs].
 
 ==== API definition
 
-The service api is defined in 2 places initially: the `api.raml` file and the
-type definition files under the directory `docs/schema`.  These files must be
-valid Raml 1.0 Librariesfootnote:[https://medium.com/raml-api/raml-101-libraries-and-datatypes-fragments-1889b2e82c27[Modular Raml Guide 1]]footnote:[https://www.baeldung.com/modular-raml-includes-overlays-libraries-extensions[Modular Raml Guide 2]].
+The service api is defined in 2 places initially:
+
+. The `api.raml` file which contains the server endpoints.
+. The `docs/schema` folder which contains type schema definitions. +
+  These files must be valid Raml 1.0 Libraries.footnote:[https://medium.com/raml-api/raml-101-libraries-and-datatypes-fragments-1889b2e82c27[Modular Raml Guide 1]]footnote:[https://www.baeldung.com/modular-raml-includes-overlays-libraries-extensions[Modular Raml Guide 2]]
 
 ===== `api.raml`
 
-In the `api.raml` file, there is an include near the top of the file that
-declares the Raml file "uses" `docs/raml/library.raml`.  This file is generated
-from the schema files and should not be edited directly.
+====== Including Type Definitions
 
-.api.raml
+In the `api.raml` file, there is a statement near the top of the file that
+declares the Raml file "uses" `docs/raml/library.raml`.  This is a generated
+file based on the contents of the schema library under `docs/schema`.  The
+`library.raml` file should not be edited directly.
+
+.`api.raml`: `uses` declaration
 [source, yaml, linenums, start=5]
 ----
 uses:
   lib: docs/raml/library.raml
 ----
 
-Referencing types defined in the schema directory can be done by using the `lib`
-package name.
+The `uses` keyword maps an import alias to the imported library.  This import
+alias is used to access the types defined in that library.  In the case of the
+above example, library types would be available using `lib.MyType`
+
+.`api.raml`: Library type usage.
+[source, yaml, linenums, start=36]
+----
+        body:
+          application/json:
+            type: lib.HelloResponse
+----
 
 ===== Type Schema
 
 Each raml library file under `docs/schema` should define a root `types` object
-defining the types used by the API.  The name of a types defined under the
-`types` object will be the name of the generated Java class based on that type
-definition.
+defining the types used by the API.  The name of the types defined under the
+`types` object will be the name of the generated Java classes based on those
+types.
 
 .Type definition
 ====
@@ -152,7 +156,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 )
 public interface MyType {
   @JsonProperty("foo")
-  StatusType getFoo();
+  String getFoo();
 
   @JsonProperty("foo")
   void setFoo(String foo);
@@ -191,10 +195,10 @@ public class HealthResponseImpl implements HealthResponse {
 
 ==== Generating A Service
 
-Once your API is layed out, you can begin development of Java code by running
-`make gen-jaxrs`.  This will create a skeleton of the API in the `generated`
-source package located under the `app.package` packaged defined in
-`service.properties`.
+Once your API spec is complete, you can begin development of Java code by
+running `make gen-jaxrs`.  This will create a skeleton of the API in the
+`generated` source package located under the root package defined using the
+`app.package` values in `service.properties`.
 
 The generated interfaces and types have the basic necessary annotations for use
 by both Jackson and Jersey.
@@ -217,6 +221,13 @@ Running in Docker can be done by:
 . Run `docker run <your-image-name>`
 
 == Other Information
+
+=== Authentication
+
+The base service contains an authentication layer that will be enabled on any
+service class or method annotated with `@Authenticated`.  This authentication
+will validate a WDK user session against the account database and append user
+profile information to the incoming request object.
 
 === Make Targets
 
