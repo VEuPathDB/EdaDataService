@@ -102,7 +102,7 @@ docs].
 
 The service api is defined in 2 places initially: the `api.raml` file and the
 type definition files under the directory `docs/schema`.  These files must be
-valid Raml 1.0 Librariesfootnote:[Modular Raml Guide:https://medium.com/raml-api/raml-101-libraries-and-datatypes-fragments-1889b2e82c27]footnote:[Modular Raml Guide: https://www.baeldung.com/modular-raml-includes-overlays-libraries-extensions].
+valid Raml 1.0 Librariesfootnote:[https://medium.com/raml-api/raml-101-libraries-and-datatypes-fragments-1889b2e82c27[Modular Raml Guide 1]]footnote:[https://www.baeldung.com/modular-raml-includes-overlays-libraries-extensions[Modular Raml Guide 2]].
 
 ===== `api.raml`
 
@@ -220,39 +220,34 @@ Running in Docker can be done by:
 
 === Make Targets
 
-`compile`:: Compiles the Java code currently in the `src/` directory.  Does not
-perform any code/doc generation.
+`compile`::
+. Generates code & docs if the API def has changed.
+. Compiles Java code if anything has changed.
 
-`gen-compile`:: Runs code generation then compiles.
+`test`::
+. Generates code & docs if the API def has changed.
+. Compiles Java code if necessary.
+. Runs unit tests.
 
-`test`:: Runs unit tests against the code currently in the `src` directory.
+`jar`::
+. Generates code & docs if the API def has changed.
+. Compiles Java code if necessary.
+. Runs unit tests if necessary.
+. Packages a self-contained runnable jar.
 
-`build-jar`:: Compiles and packages a self-contained runnable jar from the
-project.  This _will_ perform code and doc generation.
+`docker`::
+. Runs `docker build` for the project.
 
-`build-docker`:: Builds a runnable docker image from the project.  This _will_
-perform code and doc generation (in the container).
+`install-dev-env`::
+. Checks for system prerequisites.
+. Downloads and builds raml-to-jaxrs.
+. Installs the Oracle JDBC components into the `vendor` directory.
+. Downloads, builds, and installs the FgpUtil project into the `vendor`
+  directory.
+. Installs the required NPM packages
 
-`local-dev`:: Sets up the local environment/workspace for local development.
-+
-* Downloads and builds raml-to-jaxrs
-* Downloads and builds FgpUtil
-* Installs the required NPM packages
+`gen-jaxrs`::
+. Generates Java code from the Raml spec.
 
-`prep-env`:: Ensures the required binaries are available on the `$PATH` and
-installs the required NPM packages globally.
-
-`build-r2j`:: Builds the raml-to-jaxrs jar.
-
-`gen-jaxrs`:: Performs Java code generation from the Raml spec.
-
-`gen-docs`:: Performs API doc generation from the Raml spec.
-
-`docs/raml/library.raml`:: Converts the Json schema files to a Raml library.
-
-`install-fgputil`:: Downloads and builds FgpUtil, placing it in a "vendor"
-directory in the workspace from which Gradle can compile against it.
-
-`cleanup-example`:: Removes the code generated from the example Raml spec.
-
-`gradle-ping`:: Verifies that Gradle is downloaded and ready for use.
+`gen-docs`::
+. Generates API docs from the Raml spec.
