@@ -8,6 +8,7 @@ import org.veupathdb.service.demo.container.middleware.AuthFilter.Authenticated;
 import java.util.Random;
 
 public class HelloWorld implements Hello {
+
   @Override
   public GetHelloResponse getHello() {
     var out = new HelloResponseImpl();
