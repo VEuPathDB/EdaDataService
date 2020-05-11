@@ -22,7 +22,7 @@ COPY . .
 
 RUN cp -n /jdbc/* vendor \
     && echo Installing Gradle \
-    && ./gradlew -q dependencies --configuration runtimeClasspath \
+    && ./gradlew dependencies --configuration runtimeClasspath \
     && make jar
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
