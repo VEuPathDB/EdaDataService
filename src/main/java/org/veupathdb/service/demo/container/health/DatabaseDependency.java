@@ -19,7 +19,7 @@ public class DatabaseDependency implements Dependency {
   private final int port;
   private final DatabaseInstance ds;
 
-  private String testQuery = "SELECT 1 FROM dual;";
+  private String testQuery = "SELECT 1 FROM dual";
 
   public DatabaseDependency(String name, String url, int port, DatabaseInstance ds) {
     this.name = name;
@@ -56,5 +56,9 @@ public class DatabaseDependency implements Dependency {
   @Override
   public void close() throws Exception {
     ds.close();
+  }
+
+  public void setTestQuery(String testQuery) {
+    this.testQuery = testQuery;
   }
 }
