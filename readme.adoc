@@ -25,11 +25,11 @@ v1.0.0
 ==== Setup & Run
 
 Environment/dependency setup for local development can be done via the command
-`make local-dev`.  This will install the dependencies required to build the
+`make install-dev-env`.  This will install the dependencies required to build the
 project.
 
 After the environment has been set up, the project can be built, tested, and
-packaged using `make build-jar`.
+packaged using `make jar`.
 
 Starting the server can be done by running `java -jar build/lib/service.jar`.
 
@@ -41,20 +41,35 @@ Starting the server can be done by running `java -jar build/lib/service.jar`.
 
 ==== Setup & Run
 
-The project container can be built using `make build-docker`.  The first build
+The project container can be built using `make docker`.  The first build
 of the container will take several minutes.
 
-Running the built container can be done with `docker run demo-service`.
+Running the built container can be done with `docker run --rm demo-service`.
+
+
+//------------------------------------------------------------------------------
+
 
 == Development
 
 To use this project as a template for the development of a new service, use the
 "Use this template" button above to create a new project based off of this repo.
 
+=== Quick Start
+
+. Clone your new project and cd into the cloned directory
+. Run `make cleanup-example install-dev-env`
+. Edit `service.properties` with your service's details.
+. Edit `api.raml` with your API design
+. Create any necessary types in `docs/schema`
+. Run `make gen-jaxrs`
+. Implement the generated service interfaces.
+. Register your
+
 === Environment
 
 Once your new project has been cloned, the development prerequisites can be
-installed using `make local-dev`.  This will install and build the following
+installed using `make install-dev-env`.  This will install and build the following
 packages:
 
 * NPM
@@ -79,32 +94,17 @@ If additional dependencies are required, they will be added to the
 the https://docs.gradle.org/current/userguide/declaring_dependencies.html[Gradle
 docs].
 
-=== Raml & Json Schema
+=== API definition
 
 The service api is defined in 2 places initially: the `api.raml` file and the
-JSON Schema files under the directory `docs/schema`.
+type definition files under the directory `docs/schema`.  These files must be
+valid Raml 1.0 Librariesfootnote:[Modular Raml Guide:https://medium.com/raml-api/raml-101-libraries-and-datatypes-fragments-1889b2e82c27]footnote:[Modular Raml Guide: https://www.baeldung.com/modular-raml-includes-overlays-libraries-extensions].
 
-==== Json Schema
-
-Schema files will be converted to Raml types when generating the service or the
-docs.  The names of both the Java POJOs created from the schema files as well
-as the type name in Raml is controlled by the `$id` field.  Schema files without
-an `$id` field will not be generated as POJOs and will not be visible to the
-Raml doc.
-
-[CAUTION]
-If the `$id` field value is not valid as a Java class name, the build will fail
-with a cryptic/non-helpful error, most likely a NullPointerException.  This is a
-quirk of raml-to-jaxrs.
-
-Schema files can be defined in either Json or Yaml, the parser allows for both.
-These types can be mixed as well.
-
-==== Raml
+==== `api.raml`
 
 In the `api.raml` file, there is an include near the top of the file that
 declares the Raml file "uses" `docs/raml/library.raml`.  This file is generated
-from the Json schema files and should not be edited directly.
+from the schema files and should not be edited directly.
 
 .api.raml
 [source, yaml, linenums, start=5]
@@ -113,22 +113,92 @@ uses:
   lib: docs/raml/library.raml
 ----
 
-Referencing types defined in Json schema can be done by using the `lib` package
-name. For example, if you have a schema file with `$id: MyType`, this type would
-be usable in Raml as `lib.MyType`.
+Referencing types defined in the schema directory can be done by using the `lib`
+package name.
+
+==== Type Schema
+
+Each raml library file under `docs/schema` should define a root `types` object
+defining the types used by the API.  The name of a types defined under the
+`types` object will be the name of the generated Java class based on that type
+definition.
+
+.Type definition
+====
+.Example Schema
+[source, yaml]
+----
+#%RAML 1.0 Library
+types:
+  MyType:
+    properties:
+      foo: string
+----
+
+.Resulting Java Interface
+[source, java]
+----
+package org.veupathdb.service.demo.generated.model;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+@JsonDeserialize(
+    as = HealthResponseImpl.class
+)
+public interface MyType {
+  @JsonProperty("foo")
+  StatusType getFoo();
+
+  @JsonProperty("foo")
+  void setFoo(String foo);
+}
+----
+
+.Resulting Java Class
+[source, java]
+----
+package org.veupathdb.service.demo.generated.model;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonPropertyOrder({
+    "foo",
+})
+public class HealthResponseImpl implements HealthResponse {
+  @JsonProperty("foo")
+  private String foo;
+
+  @JsonProperty("foo")
+  public String getFoo() {
+    return this.foo;
+  }
+
+  @JsonProperty("foo")
+  public void setFoo(String foo) {
+    this.foo = foo;
+  }
+}
+----
+
+====
 
 === Generating A Service
 
 Once your API is layed out, you can begin development of Java code by running
-`make gen-jaxrs`.  This will create a skeleton of the API in the source package
-defined in `service.properties`.
+`make gen-jaxrs`.  This will create a skeleton of the API in the `generated`
+source package located under the `app.package` packaged defined in
+`service.properties`.
 
 The generated interfaces and types have the basic necessary annotations for use
 by both Jackson and Jersey.
 
 Once you have implemented the interfaces defined under
-`\{source-package}.resources` they must be registered in the constructor for the
-`Main` class.
+`\{source-package}.generated.resources` they must be registered in the
+`\{source-package}.Resources` class.
 
 === Run Your Service
 

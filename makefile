@@ -1,5 +1,6 @@
 APP_PACKAGE  := $(shell ./gradlew -q print-package)
 PWD          := $(shell pwd)
+EXAMPLE_DIR  := src/main/java/org/veupathdb/service/demo
 MAIN_DIR     := src/main/java/$(shell echo $(APP_PACKAGE) | sed 's/\./\//g')
 GEN_DIR      := $(MAIN_DIR)/generated
 ALL_PACKABLE := $(shell find src/main -type f)
@@ -59,6 +60,12 @@ install-dev-env:
 	@bin/install-oracle.sh
 	@bin/install-raml2jaxrs.sh
 	@bin/install-npm.sh
+
+fix-path:
+	ifneq ($(MAIN_DIR), $(EXAMPLE_DIR))
+		@mv -t $(MAIN_DIR) $(EXAMPLE_DIR)/*
+		@rm -rf $(EXAMPLE_DIR)
+	endif
 
 #
 # File based targets
