@@ -10,7 +10,7 @@ public class Pinger {
   private static final Logger LOG = LogManager.getLogger(Pinger.class);
 
   public static boolean isReachable(String addr, int port) {
-    LOG.info("Pinging {}:{}", addr, port);
+    LOG.debug("Pinging {}:{}", addr, port);
 
     try (var sock = new Socket(addr, port)) {
       sock.setSoTimeout(3000);

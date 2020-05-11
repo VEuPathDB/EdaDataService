@@ -1,5 +1,7 @@
 package org.veupathdb.service.demo.container.middleware;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.accountdb.AccountManager;
 import org.gusdb.fgputil.db.pool.DatabaseInstance;
 import org.gusdb.fgputil.web.LoginCookieFactory;
@@ -45,6 +47,7 @@ public class AuthFilter implements ContainerRequestFilter {
 
   private final Options opts;
   private final AccountManager acctMan;
+  private final Logger log;
 
   @Context
   private ResourceInfo resource;
@@ -52,6 +55,7 @@ public class AuthFilter implements ContainerRequestFilter {
   public AuthFilter(Options opts, DatabaseInstance acctDb) {
     this.opts = opts;
     this.acctMan = new AccountManager(acctDb, DB_ACCOUNT_SCHEMA, emptyList());
+    this.log = LogManager.getLogger(getClass());
 
     // Only validate that the secret key is present if we actually need it.
     if (opts.getAuthSecretKey().isEmpty())
@@ -64,6 +68,8 @@ public class AuthFilter implements ContainerRequestFilter {
     if (!isAuthRequired(resource))
       return;
 
+    log.debug("Authenticating request");
+
     final var rawAuth = req.getHeaderString(AUTH_HEADER);
 
     if (isNull(rawAuth) || rawAuth.isEmpty()) {
@@ -74,17 +80,20 @@ public class AuthFilter implements ContainerRequestFilter {
     final var auth = LoginCookieFactory.parseCookieValue(rawAuth);
     if (!new LoginCookieFactory(
       opts.getAuthSecretKey().orElseThrow()).isValidCookie(auth)) {
+      log.debug("Authentication failed: bad cookie");
       req.abortWith(build401());
       return;
     }
 
     final var profile = acctMan.getUserProfile(auth.getUsername());
     if (isNull(profile)) {
+      log.debug("Authentication failed: no such user");
       req.abortWith(build401());
       return;
     }
 
     req.setProperty(Globals.REQUEST_USER, profile);
+    log.debug("Request authenticated");
   }
 
   static Response build401() {

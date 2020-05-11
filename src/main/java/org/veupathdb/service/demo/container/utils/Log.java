@@ -28,5 +28,6 @@ public class Log {
       new ConfigurationSource(Main.class.getResourceAsStream("/log4j2.yml"))));
 
     ThreadContext.put(Globals.CONTEXT_ID, FriendlyId.createFriendlyId());
+    LogManager.getLogger(Main.class).debug("Logger initialized");
   }
 }

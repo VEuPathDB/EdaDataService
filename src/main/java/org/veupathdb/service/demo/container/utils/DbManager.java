@@ -1,5 +1,6 @@
 package org.veupathdb.service.demo.container.utils;
 
+import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.db.platform.SupportedPlatform;
 import org.gusdb.fgputil.db.pool.DatabaseInstance;
 import org.gusdb.fgputil.db.pool.SimpleDbConfig;
@@ -80,7 +81,6 @@ public final class DbManager {
   private static final SupportedPlatform DEFAULT_PLATFORM =
     SupportedPlatform.ORACLE;
   private static final int DEFAULT_POOL_SIZE = 20;
-
 
   /*┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓*\
     ┃                                                                      ┃
