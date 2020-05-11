@@ -60,14 +60,17 @@ To use this project as a template for the development of a new service, use the
 . Clone your new project and cd into the cloned directory
 . Run `make cleanup-example install-dev-env`
 . Edit `service.properties` with your service's details.
-. Run `make fix-path` to
+. Run `make fix-path` to move the service code to the correct location
 . Edit `api.raml` with your API design
 . Create any necessary types in `docs/schema`
-. Run `make gen-jaxrs`
+. Run `make gen-jaxrs` to generate skeleton code
 . Implement the generated service interfaces.
-. Register your
+. Register your services in the `Resources` class.
+. Run `make test` to run any unit tests and verify that things compile.
 
-=== Environment
+=== Detailed Overview
+
+==== Environment
 
 Once your new project has been cloned, the development prerequisites can be
 installed using `make install-dev-env`.  This will install and build the following
@@ -84,7 +87,7 @@ packages:
 After (or during) installing the prerequisites, you may run
 `make cleanup-example` to remove the Java classes generated for the demo.
 
-=== Configuration
+==== Configuration
 
 Configuration for the build is primarily done through the `service.properties`
 file.  Here you can configure the project's name, version, container name,
@@ -95,13 +98,13 @@ If additional dependencies are required, they will be added to the
 the https://docs.gradle.org/current/userguide/declaring_dependencies.html[Gradle
 docs].
 
-=== API definition
+==== API definition
 
 The service api is defined in 2 places initially: the `api.raml` file and the
 type definition files under the directory `docs/schema`.  These files must be
 valid Raml 1.0 Librariesfootnote:[Modular Raml Guide:https://medium.com/raml-api/raml-101-libraries-and-datatypes-fragments-1889b2e82c27]footnote:[Modular Raml Guide: https://www.baeldung.com/modular-raml-includes-overlays-libraries-extensions].
 
-==== `api.raml`
+===== `api.raml`
 
 In the `api.raml` file, there is an include near the top of the file that
 declares the Raml file "uses" `docs/raml/library.raml`.  This file is generated
@@ -117,7 +120,7 @@ uses:
 Referencing types defined in the schema directory can be done by using the `lib`
 package name.
 
-==== Type Schema
+===== Type Schema
 
 Each raml library file under `docs/schema` should define a root `types` object
 defining the types used by the API.  The name of a types defined under the
@@ -184,10 +187,9 @@ public class HealthResponseImpl implements HealthResponse {
   }
 }
 ----
-
 ====
 
-=== Generating A Service
+==== Generating A Service
 
 Once your API is layed out, you can begin development of Java code by running
 `make gen-jaxrs`.  This will create a skeleton of the API in the `generated`
@@ -201,7 +203,7 @@ Once you have implemented the interfaces defined under
 `\{source-package}.generated.resources` they must be registered in the
 `\{source-package}.Resources` class.
 
-=== Run Your Service
+==== Run Your Service
 
 Running your service locally can be done by following the same steps as defined
 above in the <<Running the Example>> section:
