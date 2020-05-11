@@ -23,12 +23,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.synchronizedSet;
+import static java.util.Collections.*;
 import static java.util.Objects.isNull;
 import static org.veupathdb.service.demo.container.Globals.DB_ACCOUNT_SCHEMA;
 import static org.veupathdb.service.demo.container.utils.RequestKeys.AUTH_HEADER;
@@ -45,9 +42,15 @@ public class AuthFilter implements ContainerRequestFilter {
 
   private static final Logger LOG = LogManager.getLogger(AuthFilter.class);
 
-  private static final Set<String> AUTH_CACHE = synchronizedSet(new HashSet<>());
   private static final String MESSAGE = "Users must be logged in to access this"
     + " resource.";
+
+  /**
+   * Cache of resource classes or methods and whether or not they require
+   * authentication.  This is to prevent repeatedly reflectively searching
+   * the types for the {@link Authenticated} annotation.
+   */
+  private final Map<String, Boolean> AUTH_CACHE = synchronizedMap(new HashMap<>());
 
   private final Options opts;
   private final AccountManager acctMan;
@@ -107,27 +110,32 @@ public class AuthFilter implements ContainerRequestFilter {
     return Response.status(Status.UNAUTHORIZED).entity(MESSAGE).build();
   }
 
-  static boolean isAuthRequired(ResourceInfo res) {
+  boolean isAuthRequired(ResourceInfo res) {
     LOG.trace("AuthFilter#isAuthRequired");
 
     final var meth = res.getResourceMethod();
     final var type = res.getResourceClass();
 
-    if (AUTH_CACHE.contains(type.getName()))
-      return true;
+    final var typeName = type.getName();
+    final var methName = typeName + '#' + meth.getName();
 
-    final var methName = type.getName() + '#' + meth.getName();
-
-    if (AUTH_CACHE.contains(methName))
+    if (AUTH_CACHE.getOrDefault(typeName, false))
       return true;
+    else if (AUTH_CACHE.containsKey(methName))
+      return AUTH_CACHE.get(methName);
 
     if (methodHasAuth(meth)) {
-      AUTH_CACHE.add(methName);
+      AUTH_CACHE.put(methName, true);
       return true;
+    } else {
+      AUTH_CACHE.put(methName, false);
     }
+
     if (classHasAuth(type)) {
-      AUTH_CACHE.add(type.getName());
+      AUTH_CACHE.put(typeName, true);
       return true;
+    } else {
+      AUTH_CACHE.put(typeName, false);
     }
 
     return false;
