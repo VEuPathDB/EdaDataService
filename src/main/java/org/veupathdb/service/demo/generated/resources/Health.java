@@ -1,12 +1,13 @@
 package org.veupathdb.service.demo.generated.resources;
 
+import org.veupathdb.service.demo.generated.model.HealthResponse;
+import org.veupathdb.service.demo.generated.model.ServerError;
+import org.veupathdb.service.demo.generated.support.ResponseDelegate;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
-import org.veupathdb.service.demo.generated.model.HealthResponse;
-import org.veupathdb.service.demo.generated.model.ServerError;
-import org.veupathdb.service.demo.generated.support.ResponseDelegate;
 
 @Path("/health")
 public interface Health {

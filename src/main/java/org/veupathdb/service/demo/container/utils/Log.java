@@ -7,13 +7,12 @@ import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.config.yaml.YamlConfiguration;
-//import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.veupathdb.service.demo.Main;
 import org.veupathdb.service.demo.container.Globals;
 
-import javax.ws.rs.core.Request;
-
 import java.io.IOException;
+
+//import org.slf4j.bridge.SLF4JBridgeHandler;
 
 public class Log {
   /**

@@ -1,17 +1,10 @@
 package org.veupathdb.service.demo.generated.resources;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Response;
-import org.veupathdb.service.demo.generated.model.HelloPostRequest;
-import org.veupathdb.service.demo.generated.model.HelloPostResponse;
-import org.veupathdb.service.demo.generated.model.HelloResponse;
-import org.veupathdb.service.demo.generated.model.ServerError;
-import org.veupathdb.service.demo.generated.model.UnauthorizedError;
+import org.veupathdb.service.demo.generated.model.*;
 import org.veupathdb.service.demo.generated.support.ResponseDelegate;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
 
 @Path("/hello")
 public interface Hello {

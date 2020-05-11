@@ -11,7 +11,6 @@ import javax.ws.rs.ApplicationPath;
 
 import java.io.IOException;
 
-import static java.lang.String.format;
 import static javax.ws.rs.core.UriBuilder.fromUri;
 import static org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory.createHttpServer;
 

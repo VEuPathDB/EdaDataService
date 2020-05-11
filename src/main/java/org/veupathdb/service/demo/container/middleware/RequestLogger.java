@@ -8,6 +8,7 @@ import javax.annotation.Priority;
 import javax.ws.rs.container.*;
 import javax.ws.rs.core.Response.Status.Family;
 import javax.ws.rs.ext.Provider;
+
 import java.util.function.Consumer;
 
 import static java.lang.String.format;

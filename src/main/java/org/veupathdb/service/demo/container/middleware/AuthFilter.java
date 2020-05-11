@@ -24,9 +24,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
-import static java.util.Collections.*;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.synchronizedMap;
 import static java.util.Objects.isNull;
 import static org.veupathdb.service.demo.container.Globals.DB_ACCOUNT_SCHEMA;
 import static org.veupathdb.service.demo.container.utils.RequestKeys.AUTH_HEADER;
@@ -51,9 +54,10 @@ public class AuthFilter implements ContainerRequestFilter {
    * authentication.  This is to prevent repeatedly reflectively searching
    * the types for the {@link Authenticated} annotation.
    */
-  private final Map<String, Boolean> AUTH_CACHE = synchronizedMap(new HashMap<>());
+  private final Map<String, Boolean> CACHE = synchronizedMap(new HashMap<>());
 
   private final Options opts;
+
   private final AccountManager acctMan;
 
   @Context
@@ -107,12 +111,23 @@ public class AuthFilter implements ContainerRequestFilter {
     LOG.debug("Request authenticated");
   }
 
+  /**
+   * Helper function to build an UnauthorizedError type.
+   */
   static Response build401() {
     var tmp = new UnauthorizedErrorImpl();
     tmp.setMessage(MESSAGE);
     return Response.status(Status.UNAUTHORIZED).entity(tmp).build();
   }
 
+  /**
+   * Checks if the given resource is annotated with the {@link Authenticated}
+   * annotation.
+   *
+   * @param res resource to check.
+   *
+   * @return whether or not the resource has the auth annotation.
+   */
   boolean isAuthRequired(ResourceInfo res) {
     LOG.trace("AuthFilter#isAuthRequired");
 
@@ -122,34 +137,50 @@ public class AuthFilter implements ContainerRequestFilter {
     final var typeName = type.getName();
     final var methName = typeName + '#' + meth.getName();
 
-    if (AUTH_CACHE.getOrDefault(typeName, false))
+    if (CACHE.getOrDefault(typeName, false))
       return true;
-    else if (AUTH_CACHE.containsKey(methName))
-      return AUTH_CACHE.get(methName);
+    else if (CACHE.containsKey(methName))
+      return CACHE.get(methName);
 
     if (methodHasAuth(meth)) {
-      AUTH_CACHE.put(methName, true);
+      CACHE.put(methName, true);
       return true;
     } else {
-      AUTH_CACHE.put(methName, false);
+      CACHE.put(methName, false);
     }
 
     if (classHasAuth(type)) {
-      AUTH_CACHE.put(typeName, true);
+      CACHE.put(typeName, true);
       return true;
     } else {
-      AUTH_CACHE.put(typeName, false);
+      CACHE.put(typeName, false);
     }
 
     return false;
   }
 
+  /**
+   * Reflectively checks whether or not the give method is annotated with
+   * {@link Authenticated}.
+   *
+   * @param meth Method to check
+   *
+   * @return whether or not the methods has the auth annotation.
+   */
   static boolean methodHasAuth(Method meth) {
     LOG.trace("AuthFilter#methodHasAuth");
     return Arrays.stream(meth.getDeclaredAnnotations())
       .anyMatch(Authenticated.class::isInstance);
   }
 
+  /**
+   * Reflectively checks whether or not the given class is annotated with
+   * {@link Authenticated}.
+   *
+   * @param type Class to check
+   *
+   * @return whether or not the class has the auth annotation.
+   */
   static boolean classHasAuth(Class<?> type) {
     LOG.trace("AuthFilter#classHasAuth");
     return Arrays.stream(type.getDeclaredAnnotations())

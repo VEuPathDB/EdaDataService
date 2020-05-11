@@ -1,9 +1,12 @@
 package org.veupathdb.service.demo.service;
 
-import org.veupathdb.service.demo.generated.model.*;
-import org.veupathdb.service.demo.generated.model.HelloResponse.GreetingType;
-import org.veupathdb.service.demo.generated.resources.Hello;
 import org.veupathdb.service.demo.container.middleware.AuthFilter.Authenticated;
+import org.veupathdb.service.demo.generated.model.HelloPostRequest;
+import org.veupathdb.service.demo.generated.model.HelloPostResponseImpl;
+import org.veupathdb.service.demo.generated.model.HelloResponse.GreetingType;
+import org.veupathdb.service.demo.generated.model.HelloResponseImpl;
+import org.veupathdb.service.demo.generated.model.ServerErrorImpl;
+import org.veupathdb.service.demo.generated.resources.Hello;
 
 import java.util.Random;
 

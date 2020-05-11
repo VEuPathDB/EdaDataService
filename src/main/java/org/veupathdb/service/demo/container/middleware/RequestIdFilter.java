@@ -11,9 +11,6 @@ import javax.annotation.Priority;
 import javax.ws.rs.container.*;
 import javax.ws.rs.ext.Provider;
 
-import java.io.IOException;
-import java.util.UUID;
-
 /**
  * Assigns a unique ID to each request for logging, error tracing purposes.
  */

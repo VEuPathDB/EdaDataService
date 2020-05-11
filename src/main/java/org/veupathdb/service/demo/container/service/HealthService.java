@@ -12,7 +12,6 @@ import org.veupathdb.service.demo.generated.model.HealthResponseImpl.InfoTypeImp
 import org.veupathdb.service.demo.generated.resources.Health;
 
 import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import java.time.Duration;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
