@@ -65,7 +65,7 @@ To use this project as a template for the development of a new service, use the
 . Create any necessary types in `docs/schema`
 . Run `make gen-jaxrs` to generate skeleton code
 . Implement the generated service interfaces.
-. Register your services in the `Resources` class.
+. Register your services in the `ResourceConfig` class.
 . Run `make test` to run any unit tests and verify that things compile.
 
 === Detailed Overview
