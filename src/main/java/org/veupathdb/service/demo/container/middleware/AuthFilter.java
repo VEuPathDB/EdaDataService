@@ -19,6 +19,8 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -41,13 +43,14 @@ import static org.veupathdb.service.demo.container.utils.RequestKeys.AUTH_HEADER
 @Priority(3)
 public class AuthFilter implements ContainerRequestFilter {
 
+  private static final Logger LOG = LogManager.getLogger(AuthFilter.class);
+
   private static final Set<String> AUTH_CACHE = synchronizedSet(new HashSet<>());
   private static final String MESSAGE = "Users must be logged in to access this"
     + " resource.";
 
   private final Options opts;
   private final AccountManager acctMan;
-  private final Logger log;
 
   @Context
   private ResourceInfo resource;
@@ -55,7 +58,6 @@ public class AuthFilter implements ContainerRequestFilter {
   public AuthFilter(Options opts, DatabaseInstance acctDb) {
     this.opts = opts;
     this.acctMan = new AccountManager(acctDb, DB_ACCOUNT_SCHEMA, emptyList());
-    this.log = LogManager.getLogger(getClass());
 
     // Only validate that the secret key is present if we actually need it.
     if (opts.getAuthSecretKey().isEmpty())
@@ -65,10 +67,12 @@ public class AuthFilter implements ContainerRequestFilter {
 
   @Override
   public void filter(ContainerRequestContext req) {
+    LOG.trace("AuthFilter#filter");
+
     if (!isAuthRequired(resource))
       return;
 
-    log.debug("Authenticating request");
+    LOG.debug("Authenticating request");
 
     final var rawAuth = req.getHeaderString(AUTH_HEADER);
 
@@ -80,20 +84,20 @@ public class AuthFilter implements ContainerRequestFilter {
     final var auth = LoginCookieFactory.parseCookieValue(rawAuth);
     if (!new LoginCookieFactory(
       opts.getAuthSecretKey().orElseThrow()).isValidCookie(auth)) {
-      log.debug("Authentication failed: bad cookie");
+      LOG.debug("Authentication failed: bad cookie");
       req.abortWith(build401());
       return;
     }
 
     final var profile = acctMan.getUserProfile(auth.getUsername());
     if (isNull(profile)) {
-      log.debug("Authentication failed: no such user");
+      LOG.debug("Authentication failed: no such user");
       req.abortWith(build401());
       return;
     }
 
     req.setProperty(Globals.REQUEST_USER, profile);
-    log.debug("Request authenticated");
+    LOG.debug("Request authenticated");
   }
 
   static Response build401() {
@@ -101,6 +105,8 @@ public class AuthFilter implements ContainerRequestFilter {
   }
 
   static boolean isAuthRequired(ResourceInfo res) {
+    LOG.trace("AuthFilter#isAuthRequired");
+
     final var meth = res.getResourceMethod();
     final var type = res.getResourceClass();
 
@@ -125,11 +131,13 @@ public class AuthFilter implements ContainerRequestFilter {
   }
 
   static boolean methodHasAuth(Method meth) {
+    LOG.trace("AuthFilter#methodHasAuth");
     return Arrays.stream(meth.getDeclaredAnnotations())
       .anyMatch(Authenticated.class::isInstance);
   }
 
   static boolean classHasAuth(Class<?> type) {
+    LOG.trace("AuthFilter#classHasAuth");
     return Arrays.stream(type.getDeclaredAnnotations())
       .anyMatch(Authenticated.class::isInstance);
   }
@@ -139,5 +147,6 @@ public class AuthFilter implements ContainerRequestFilter {
    * execute.
    */
   @Target({ ElementType.METHOD, ElementType.TYPE })
+  @Retention(RetentionPolicy.RUNTIME)
   public @interface Authenticated {}
 }
