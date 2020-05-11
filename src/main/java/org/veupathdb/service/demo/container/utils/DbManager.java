@@ -111,7 +111,7 @@ public final class DbManager {
     var platform = opts.getDbPlatform().orElse(DEFAULT_PLATFORM);
 
     acctDb = new DatabaseInstance(SimpleDbConfig.create(
-      opts.getDbPlatform().orElse(DEFAULT_PLATFORM),
+      platform,
       makeJdbcUrl(platform, opts),
       opts.getDbUser().orElseThrow(confErr(ERR_NO_ACCTDB_USER)),
       opts.getDbPass().orElseThrow(confErr(ERR_NO_ACCTDB_PASS)),
@@ -120,7 +120,8 @@ public final class DbManager {
 
     //noinspection OptionalGetWithoutIsPresent
     DependencyManager.getInstance().register(new DatabaseDependency(
-      "account-db", opts.getDbHost().get(), opts.getDbPort().get(), acctDb));
+      "account-db", opts.getDbHost().get(), opts.getDbPort().orElse(
+        platform == DEFAULT_PLATFORM ? ORACLE_PORT : POSTGRES_PORT), acctDb));
 
     return acctDb;
   }
