@@ -28,7 +28,7 @@ RUN wget https://download.java.net/java/early_access/alpine/10/binaries/openjdk-
     && mv apache-maven-3.6.3 /mvn \
     && git config --global advice.detachedHead false
 
-COPY bin/install-raml2jaxrs.sh bin/install-fgputil.sh bin/
+COPY bin bin
 
 RUN bin/install-fgputil.sh \
     && bin/install-raml2jaxrs.sh
