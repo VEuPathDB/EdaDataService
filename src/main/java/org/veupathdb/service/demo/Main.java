@@ -25,11 +25,12 @@ public class Main {
 
     final var log    = LogManager.getLogger(Main.class);
     final var opts   = Cli.ParseCLI(args, Options.getInstance());
+
+    DbManager.initAccountDatabase(opts);
+
     final var port   = opts.getServerPort().orElse(DEFAULT_PORT);
     final var server = createHttpServer(fromUri("//0.0.0.0").port(port).build(),
       new Resources(opts));
-
-    DbManager.initAccountDatabase(opts);
 
     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
       log.info("Server shutting down.");
