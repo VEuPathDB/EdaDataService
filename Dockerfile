@@ -21,7 +21,7 @@ RUN bin/install-fgputil.sh && bin/install-raml2jaxrs.sh
 COPY . .
 
 RUN cp -n /jdbc/* vendor \
-    && ./gradlew wrapper \
+    && ./gradlew tasks \
     && make jar
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
