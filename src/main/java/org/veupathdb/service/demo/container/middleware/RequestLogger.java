@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 import static java.lang.String.format;
 
 @Provider
-@Priority(1)
+@Priority(2)
 @PreMatching
 public class RequestLogger implements ContainerRequestFilter, ContainerResponseFilter {
   private static final String

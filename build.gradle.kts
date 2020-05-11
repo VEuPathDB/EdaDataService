@@ -70,11 +70,14 @@ dependencies {
   implementation("info.picocli:picocli:4.+")
   annotationProcessor("info.picocli:picocli-codegen:4.+")
 
-
   // Log4J
   implementation("org.apache.logging.log4j:log4j-api:${buildProps["version.log4j"]}")
   implementation("org.apache.logging.log4j:log4j-core:${buildProps["version.log4j"]}")
   implementation("org.apache.logging.log4j:log4j:${buildProps["version.log4j"]}")
+
+  // Metrics
+  implementation("io.prometheus:simpleclient:0.9.0")
+  implementation("io.prometheus:simpleclient_common:0.9.0")
 
   // Utils
   implementation("io.vulpine.lib:Jackfish:1.+")

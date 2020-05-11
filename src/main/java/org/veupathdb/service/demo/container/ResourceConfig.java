@@ -8,6 +8,7 @@ import org.veupathdb.service.demo.container.middleware.RequestLogger;
 import org.veupathdb.service.demo.container.middleware.RequestIdFilter;
 import org.veupathdb.service.demo.container.service.ApiDocService;
 import org.veupathdb.service.demo.container.service.HealthService;
+import org.veupathdb.service.demo.container.service.MetricsService;
 import org.veupathdb.service.demo.container.utils.DbManager;
 
 import java.util.Arrays;
@@ -29,7 +30,8 @@ public class ResourceConfig extends org.glassfish.jersey.server.ResourceConfig {
 
     registerInstances(
       new ApiDocService(),
-      new HealthService(DependencyManager.getInstance())
+      new HealthService(DependencyManager.getInstance()),
+      new MetricsService()
     );
   }
 }

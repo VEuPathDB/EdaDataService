@@ -37,6 +37,18 @@ uses:
           application/json:
             type: lib.ServerErrorResponse
 
+/metrics:
+  displayName: Service Metrics
+  get:
+    responses:
+      200:
+        body:
+          text/plain:
+      500:
+        body:
+          application/json:
+            type: lib.ServerErrorResponse
+
 types:
   HealthResponse:
     description: Health details about the service
