@@ -1,9 +1,12 @@
 APP_PACKAGE  := $(shell ./gradlew -q print-package)
 PWD          := $(shell pwd)
-EXAMPLE_DIR  := src/main/java/org/veupathdb/service/demo
 MAIN_DIR     := src/main/java/$(shell echo $(APP_PACKAGE) | sed 's/\./\//g')
+TEST_DIR     := $(shell echo $(MAIN_DIR) | sed 's/main/test')
 GEN_DIR      := $(MAIN_DIR)/generated
 ALL_PACKABLE := $(shell find src/main -type f)
+
+EXAMPLE_DIR      := src/main/java/org/veupathdb/service/demo
+EXAMPLE_TEST_DIR := src/test/java/org/veupathdb/service/demo
 
 C_BLUE := "\\033[94m"
 C_NONE := "\\033[0m"
@@ -62,10 +65,12 @@ install-dev-env:
 	@bin/install-npm.sh
 
 fix-path:
-	ifneq ($(MAIN_DIR), $(EXAMPLE_DIR))
-		@mv -t $(MAIN_DIR) $(EXAMPLE_DIR)/*
-		@rm -rf $(EXAMPLE_DIR)
-	endif
+ifneq "$(MAIN_DIR)" "$(EXAMPLE_DIR)"
+	@mkdir -p $(MAIN_DIR)
+	@mv -t $(MAIN_DIR) $(EXAMPLE_DIR)/*
+	@mv -t $(TEST_DIR) $(EXAMPLE_TEST_DIR)/*
+	@rm -rf $(EXAMPLE_DIR) $(EXAMPLE_TEST_DIR)
+endif
 
 #
 # File based targets

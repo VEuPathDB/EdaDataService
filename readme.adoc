@@ -60,6 +60,7 @@ To use this project as a template for the development of a new service, use the
 . Clone your new project and cd into the cloned directory
 . Run `make cleanup-example install-dev-env`
 . Edit `service.properties` with your service's details.
+. Run `make fix-path` to
 . Edit `api.raml` with your API design
 . Create any necessary types in `docs/schema`
 . Run `make gen-jaxrs`
