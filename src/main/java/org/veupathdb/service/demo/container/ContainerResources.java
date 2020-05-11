@@ -15,7 +15,15 @@ import org.veupathdb.service.demo.container.utils.DbManager;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public class ResourceConfig extends org.glassfish.jersey.server.ResourceConfig {
+/**
+ * Container Meta Resources
+ *
+ * Universal services that should be available in all containerized services.
+ *
+ * This class is intended for framework internal use and is subject to change
+ * with framework updates.
+ */
+public class ContainerResources extends org.glassfish.jersey.server.ResourceConfig {
   private static final Class<?>[] DEFAULT_CLASSES = {
     JacksonFeature.class,
     PrometheusFilter.class,
@@ -23,7 +31,7 @@ public class ResourceConfig extends org.glassfish.jersey.server.ResourceConfig {
     RequestLogger.class,
   };
 
-  public ResourceConfig(Options opts, Class<?>... classes) {
+  public ContainerResources(Options opts, Class<?>... classes) {
     var providers = Arrays.stream(classes).collect(Collectors.toSet());
     providers.addAll(Arrays.asList(DEFAULT_CLASSES));
 

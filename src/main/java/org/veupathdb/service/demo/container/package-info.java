@@ -7,5 +7,8 @@
  *
  * The utils subpackage contains miscellaneous helpers, utilities, and
  * singletons.
+ *
+ * Classes in this package and it's subpackages are subject to update with the
+ * framework itself, and editing them may cause conflicts later.
  */
 package org.veupathdb.service.demo.container;
