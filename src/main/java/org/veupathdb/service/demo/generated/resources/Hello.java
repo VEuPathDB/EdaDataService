@@ -9,8 +9,8 @@ import javax.ws.rs.core.Response;
 import org.veupathdb.service.demo.generated.model.HelloPostRequest;
 import org.veupathdb.service.demo.generated.model.HelloPostResponse;
 import org.veupathdb.service.demo.generated.model.HelloResponse;
-import org.veupathdb.service.demo.generated.model.ServerErrorResponse;
-import org.veupathdb.service.demo.generated.model.UnauthorizedResponse;
+import org.veupathdb.service.demo.generated.model.ServerError;
+import org.veupathdb.service.demo.generated.model.UnauthorizedError;
 import org.veupathdb.service.demo.generated.support.ResponseDelegate;
 
 @Path("/hello")
@@ -39,13 +39,13 @@ public interface Hello {
       return new PostHelloResponse(responseBuilder.build(), entity);
     }
 
-    public static PostHelloResponse respond401WithApplicationJson(UnauthorizedResponse entity) {
+    public static PostHelloResponse respond401WithApplicationJson(UnauthorizedError entity) {
       Response.ResponseBuilder responseBuilder = Response.status(401).header("Content-Type", "application/json");
       responseBuilder.entity(entity);
       return new PostHelloResponse(responseBuilder.build(), entity);
     }
 
-    public static PostHelloResponse respond500WithApplicationJson(ServerErrorResponse entity) {
+    public static PostHelloResponse respond500WithApplicationJson(ServerError entity) {
       Response.ResponseBuilder responseBuilder = Response.status(500).header("Content-Type", "application/json");
       responseBuilder.entity(entity);
       return new PostHelloResponse(responseBuilder.build(), entity);

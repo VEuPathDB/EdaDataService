@@ -81,14 +81,14 @@ build/libs/service.jar: gen-jaxrs gen-docs vendor/fgputil-accountdb-1.0.0.jar ve
 	@./gradlew clean test jar
 
 
-gen-jaxrs:
+gen-jaxrs: api.raml merge-raml
 	@bin/generate-jaxrs.sh $(APP_PACKAGE)
 
-gen-docs: api.raml docs/raml/library.raml
+gen-docs: api.raml merge-raml
 	@echo "$(C_BLUE)Generating API Documentation$(C_NONE)"
-	@raml2html docs/raml/full-api.raml > docs/api.html
+	@raml2html docs/lib/full-api.raml > docs/api.html
 	@cp docs/api.html src/main/resources/api.html
 
-docs/raml/library.raml: $(SCHEMA_FILES)
-	@echo "$(C_BLUE)Converting JSON Schema to Raml$(C_NONE)"
+merge-raml:
+	@echo "$(C_BLUE)Merging Raml Schema$(C_NONE)"
 	@bin/merge-raml.sh

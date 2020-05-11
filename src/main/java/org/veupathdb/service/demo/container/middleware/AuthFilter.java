@@ -8,6 +8,7 @@ import org.gusdb.fgputil.web.LoginCookieFactory;
 import org.veupathdb.service.demo.config.InvalidConfigException;
 import org.veupathdb.service.demo.config.Options;
 import org.veupathdb.service.demo.container.Globals;
+import org.veupathdb.service.demo.generated.model.UnauthorizedErrorImpl;
 
 import javax.annotation.Priority;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -107,7 +108,9 @@ public class AuthFilter implements ContainerRequestFilter {
   }
 
   static Response build401() {
-    return Response.status(Status.UNAUTHORIZED).entity(MESSAGE).build();
+    var tmp = new UnauthorizedErrorImpl();
+    tmp.setMessage(MESSAGE);
+    return Response.status(Status.UNAUTHORIZED).entity(tmp).build();
   }
 
   boolean isAuthRequired(ResourceInfo res) {

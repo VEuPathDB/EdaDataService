@@ -3,27 +3,24 @@ package org.veupathdb.service.demo.generated.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonTypeName("bad-request")
 @JsonPropertyOrder({
     "status",
     "message"
 })
-public class ServerErrorResponseImpl implements ServerErrorResponse {
+public class BadRequestErrorImpl implements BadRequestError {
   @JsonProperty("status")
-  private ServerErrorResponse.StatusType status;
+  private final String status = _DISCRIMINATOR_TYPE_NAME;
 
   @JsonProperty("message")
   private String message;
 
   @JsonProperty("status")
-  public ServerErrorResponse.StatusType getStatus() {
+  public String getStatus() {
     return this.status;
-  }
-
-  @JsonProperty("status")
-  public void setStatus(ServerErrorResponse.StatusType status) {
-    this.status = status;
   }
 
   @JsonProperty("message")

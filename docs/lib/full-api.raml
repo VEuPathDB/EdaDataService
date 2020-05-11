@@ -11,6 +11,7 @@ extends: ../../api.raml
 
 uses:
   lib: ./library.raml
+  err: ./errors.raml
 
 #
 # Predefined Services
@@ -31,11 +32,11 @@ uses:
       200:
         body:
           application/json:
-            type: lib.HealthResponse
+            type: HealthResponse
       500:
         body:
           application/json:
-            type: lib.ServerErrorResponse
+            type: err.ServerError
 
 /metrics:
   displayName: Service Metrics
@@ -44,10 +45,6 @@ uses:
       200:
         body:
           text/plain:
-      500:
-        body:
-          application/json:
-            type: lib.ServerErrorResponse
 
 types:
   HealthResponse:
@@ -83,7 +80,6 @@ types:
             type: integer
             minimum: 1
             format: int64
-
 
   DependencyStatus:
     additionalProperties: false

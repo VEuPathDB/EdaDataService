@@ -13,7 +13,7 @@ echo "#%RAML 1.0 Library
 #                                                                              #
 ################################################################################
 
-types:" > docs/raml/library.raml
+types:" > docs/lib/library.raml
 
-find docs/schema -name '*.raml' | xargs -I '{}' sed 's/#.\+\|^types.\+//' {} | grep -vE "^ *$" >> docs/raml/library.raml
+find docs/schema -name '*.raml' | xargs -I '{}' sed 's/#.\+\|^types.\+//' {} | grep -vE "^ *$" >> docs/lib/library.raml
 

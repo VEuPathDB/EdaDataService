@@ -3,7 +3,8 @@ title: Example JaxRS Container Service
 version: v1.0.0
 mediaType: application/json
 uses:
-  lib: docs/raml/library.raml
+  lib: docs/lib/library.raml
+  err: docs/lib/errors.raml
 
 securitySchemes:
   cookie-auth:
@@ -42,8 +43,8 @@ securitySchemes:
       401:
         body:
           application/json:
-            type: lib.UnauthorizedResponse
+            type: err.UnauthorizedError
       500:
         body:
           application/json:
-            type: lib.ServerErrorResponse
+            type: err.ServerError

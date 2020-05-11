@@ -3,27 +3,24 @@ package org.veupathdb.service.demo.generated.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonTypeName("unauthorized")
 @JsonPropertyOrder({
     "status",
     "message"
 })
-public class UnauthorizedResponseImpl implements UnauthorizedResponse {
+public class UnauthorizedErrorImpl implements UnauthorizedError {
   @JsonProperty("status")
-  private UnauthorizedResponse.StatusType status;
+  private final String status = _DISCRIMINATOR_TYPE_NAME;
 
   @JsonProperty("message")
   private String message;
 
   @JsonProperty("status")
-  public UnauthorizedResponse.StatusType getStatus() {
+  public String getStatus() {
     return this.status;
-  }
-
-  @JsonProperty("status")
-  public void setStatus(UnauthorizedResponse.StatusType status) {
-    this.status = status;
   }
 
   @JsonProperty("message")
