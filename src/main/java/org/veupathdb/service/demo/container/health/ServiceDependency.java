@@ -46,5 +46,5 @@ abstract public class ServiceDependency extends ExternalDependency {
   abstract TestResult serviceTest();
 
   @Override
-  public void close() throws Exception {}
+  public void close() {}
 }

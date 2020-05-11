@@ -2,8 +2,22 @@ package org.veupathdb.service.demo.container.health;
 
 import org.veupathdb.service.demo.generated.model.DependencyStatus.OnlineType;
 
+/**
+ * Service Dependency
+ *
+ * A wrapper for external resources providing methods needed for performing
+ * health checks.
+ */
 public interface Dependency extends AutoCloseable {
+
+  /**
+   * Get the unique name of this dependency
+   */
   String getName();
+
+  /**
+   * Test the resource availability
+   */
   TestResult test();
 
   class TestResult {

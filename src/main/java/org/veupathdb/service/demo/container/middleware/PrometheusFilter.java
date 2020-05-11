@@ -24,13 +24,13 @@ implements ContainerRequestFilter, ContainerResponseFilter {
     .help("Total HTTP request count.")
     .labelNames("path", "method", "status")
     .register();
+
   private static final Histogram reqTime = Histogram.build()
     .name("http_request_duration")
     .help("Request times in milliseconds")
     .labelNames("path", "method")
     .buckets(0.005, 0.01, 0.1, 0.5, 1, 5, 10, Double.POSITIVE_INFINITY)
     .register();
-
 
   @Override
   public void filter(ContainerRequestContext req) {
