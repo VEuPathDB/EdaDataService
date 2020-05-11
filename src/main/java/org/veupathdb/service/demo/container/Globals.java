@@ -7,6 +7,6 @@ public final class Globals {
     DB_ACCOUNT_SCHEMA = "useraccounts.";
 
   public static final String
-    REQUEST_ID   = "request-id",
+    CONTEXT_ID = "context-id",
     REQUEST_USER = "";
 }

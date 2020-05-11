@@ -1,6 +1,8 @@
 package org.veupathdb.service.demo.container.middleware;
 
+import com.devskiller.friendly_id.FriendlyId;
 import org.apache.logging.log4j.ThreadContext;
+import org.veupathdb.service.demo.container.Globals;
 import org.veupathdb.service.demo.container.utils.RequestKeys;
 
 import javax.annotation.Priority;
@@ -21,14 +23,14 @@ public class RequestIdFilter implements ContainerRequestFilter,
 
   @Override
   public void filter(ContainerRequestContext req) {
-    var id = UUID.randomUUID().toString();
+    var id = FriendlyId.createFriendlyId();
     req.setProperty(RequestKeys.REQUEST_ID, id);
-    ThreadContext.put(RequestKeys.REQUEST_ID, id);
+    ThreadContext.put(Globals.CONTEXT_ID, id);
   }
 
   @Override
   public void filter(ContainerRequestContext req, ContainerResponseContext res) {
     ThreadContext.remove((String) req.getProperty(
-      RequestKeys.REQUEST_ID));
+      Globals.CONTEXT_ID));
   }
 }

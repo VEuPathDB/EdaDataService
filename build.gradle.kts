@@ -78,6 +78,7 @@ dependencies {
 
   // Utils
   implementation("io.vulpine.lib:Jackfish:1.1.0")
+  implementation("com.devskiller.friendly-id:friendly-id:1.1.0")
 
   // Unit Testing
   testImplementation("org.junit.jupiter:junit-jupiter-api:${buildProps["version.junit"]}")

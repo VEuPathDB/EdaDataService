@@ -36,7 +36,7 @@ import static org.veupathdb.service.demo.container.utils.RequestKeys.AUTH_HEADER
  * @see Authenticated
  */
 @Provider
-@Priority(2)
+@Priority(3)
 public class AuthFilter implements ContainerRequestFilter {
 
   private static final Set<String> AUTH_CACHE = synchronizedSet(new HashSet<>());
