@@ -17,9 +17,10 @@ import java.util.UUID;
  * Assigns a unique ID to each request for logging, error tracing purposes.
  */
 @Provider
-@Priority(Integer.MIN_VALUE)
+@Priority(0)
 public class RequestIdFilter implements ContainerRequestFilter,
   ContainerResponseFilter {
+
   @Override
   public void filter(ContainerRequestContext req) {
     var id = UUID.randomUUID().toString();

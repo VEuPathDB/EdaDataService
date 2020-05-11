@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 import static java.lang.String.format;
 
 @Provider
-@Priority(0)
+@Priority(1)
 public class Log4JFilter implements ContainerRequestFilter, ContainerResponseFilter {
   private static final String
     START_FORMAT = "%s Request start: %s %s",
@@ -27,7 +27,8 @@ public class Log4JFilter implements ContainerRequestFilter, ContainerResponseFil
 
   @Override
   public void filter(ContainerRequestContext req) {
-    LOG.debug((Supplier<?>) () -> format(START_FORMAT, req.getProperty(RequestKeys.REQUEST_ID),
+    LOG.debug((Supplier<?>) () -> format(START_FORMAT,
+      req.getProperty(RequestKeys.REQUEST_ID),
       req.getMethod(), req.getUriInfo().getPath()));
   }
 
