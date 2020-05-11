@@ -66,6 +66,12 @@ types:
           threads:
             type: integer
             minimum: 1
+          uptime: string
+          uptimeMillis:
+            type: integer
+            minimum: 1
+            format: int64
+
 
   DependencyStatus:
     additionalProperties: false

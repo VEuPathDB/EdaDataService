@@ -58,5 +58,17 @@ public interface HealthResponse {
 
     @JsonProperty("threads")
     void setThreads(int threads);
+
+    @JsonProperty("uptime")
+    String getUptime();
+
+    @JsonProperty("uptime")
+    void setUptime(String uptime);
+
+    @JsonProperty("uptimeMillis")
+    long getUptimeMillis();
+
+    @JsonProperty("uptimeMillis")
+    void setUptimeMillis(long uptimeMillis);
   }
 }

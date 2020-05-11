@@ -81,7 +81,9 @@ public class AuthFilter implements ContainerRequestFilter {
       return;
     }
 
-    final var auth = LoginCookieFactory.parseCookieValue(rawAuth);
+    final var auth = LoginCookieFactory.
+      parseCookieValue(rawAuth.replace("-remember-", "-"));
+
     if (!new LoginCookieFactory(
       opts.getAuthSecretKey().orElseThrow()).isValidCookie(auth)) {
       LOG.debug("Authentication failed: bad cookie");

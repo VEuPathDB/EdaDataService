@@ -56,10 +56,20 @@ public class HealthResponseImpl implements HealthResponse {
   }
 
   @JsonInclude(JsonInclude.Include.NON_NULL)
-  @JsonPropertyOrder("threads")
+  @JsonPropertyOrder({
+      "threads",
+      "uptime",
+      "uptimeMillis"
+  })
   public static class InfoTypeImpl implements HealthResponse.InfoType {
     @JsonProperty("threads")
     private int threads;
+
+    @JsonProperty("uptime")
+    private String uptime;
+
+    @JsonProperty("uptimeMillis")
+    private long uptimeMillis;
 
     @JsonIgnore
     private Map<String, Object> additionalProperties = new ExcludingMap();
@@ -72,6 +82,26 @@ public class HealthResponseImpl implements HealthResponse {
     @JsonProperty("threads")
     public void setThreads(int threads) {
       this.threads = threads;
+    }
+
+    @JsonProperty("uptime")
+    public String getUptime() {
+      return this.uptime;
+    }
+
+    @JsonProperty("uptime")
+    public void setUptime(String uptime) {
+      this.uptime = uptime;
+    }
+
+    @JsonProperty("uptimeMillis")
+    public long getUptimeMillis() {
+      return this.uptimeMillis;
+    }
+
+    @JsonProperty("uptimeMillis")
+    public void setUptimeMillis(long uptimeMillis) {
+      this.uptimeMillis = uptimeMillis;
     }
 
     @JsonAnyGetter

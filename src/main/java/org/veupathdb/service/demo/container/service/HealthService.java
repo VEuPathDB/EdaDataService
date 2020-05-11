@@ -11,6 +11,9 @@ import org.veupathdb.service.demo.generated.model.HealthResponseImpl;
 import org.veupathdb.service.demo.generated.model.HealthResponseImpl.InfoTypeImpl;
 import org.veupathdb.service.demo.generated.resources.Health;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+import java.time.Duration;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
@@ -36,8 +39,11 @@ public class HealthService implements Health {
       })
       .collect(Collectors.toList()));
 
+    var uptime = ManagementFactory.getRuntimeMXBean().getUptime();
     var info = new InfoTypeImpl();
     info.setThreads(Threads.currentThreadCount());
+    info.setUptime(durationString(uptime));
+    info.setUptimeMillis(uptime);
     response.setInfo(info);
 
     return GetHealthResponse.respond200WithApplicationJson(response);
@@ -50,4 +56,21 @@ public class HealthService implements Health {
     out.setOnline(e.getValue().isOnline());
     return out;
   }
+
+  static String durationString(long duration) {
+    var tmp = Duration.ofMillis(duration);
+    var days = tmp.toDaysPart();
+    var hours = tmp.toHoursPart();
+    var minutes = tmp.toMinutesPart();
+    var seconds = tmp.toSecondsPart();
+    var millis = tmp.toMillisPart();
+    if (days > 1)
+      return String.format("%dD%dh%dm%d.%ds", days, hours, minutes, seconds, millis);
+    if (hours > 1)
+      return String.format("%dh%dm%d.%ds", hours, minutes, seconds, millis);
+    if (minutes > 1)
+      return String.format("%dm%d.%ds", minutes, seconds, millis);
+    return String.format("%d.%ds", seconds, millis);
+  }
+
 }
