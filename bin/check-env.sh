@@ -18,7 +18,7 @@ if ! command -v mvn > /dev/null; then
 fi
 
 if ! command -v docker > /dev/null; then
-  echo "  ${WARN}Docker is not installed.  The command 'make run build-docker' will not work."
+  echo "  ${WARN}Docker is not installed.  The command 'make docker' will not work."
 fi
 
 if [ "${OK}" = "false" ]; then
