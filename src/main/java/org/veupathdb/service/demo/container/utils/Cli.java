@@ -18,7 +18,7 @@ public final class Cli {
    *
    * @return       Passthrough of the input config object
    */
-  public static <T> T ParseCLI(String[] args, T config) {
+  public static <T> T parseCLI(String[] args, T config) {
     var cli = new CommandLine(config)
       .setCaseInsensitiveEnumValuesAllowed(true)
       .setUnmatchedArgumentsAllowed(false);

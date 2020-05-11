@@ -24,7 +24,7 @@ public class Main {
     Log.initialize();
 
     final var log    = LogManager.getLogger(Main.class);
-    final var opts   = Cli.ParseCLI(args, Options.getInstance());
+    final var opts   = Cli.parseCLI(args, Options.getInstance());
 
     DbManager.initAccountDatabase(opts);
 

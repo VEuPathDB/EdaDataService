@@ -1,6 +1,5 @@
 package org.veupathdb.service.demo.container.utils;
 
-import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.db.platform.SupportedPlatform;
 import org.gusdb.fgputil.db.pool.DatabaseInstance;
 import org.gusdb.fgputil.db.pool.SimpleDbConfig;
