@@ -19,8 +19,6 @@ uses:
 /api:
   displayName: API Documentation
   get:
-    is:
-      - meta-endpoint
     responses:
       200:
         body:
@@ -29,8 +27,6 @@ uses:
 /health:
   displayName: Health Check
   get:
-    is:
-      - meta-endpoint
     responses:
       200:
         body:
@@ -58,7 +54,6 @@ types:
         enum:
           - healthy
           - unhealthy
-        required: true
       dependencies:
         description: |
           A list of external services that this service depends on and some details
@@ -66,19 +61,21 @@ types:
         type: array
         items:
           type: DependencyStatus
-        required: true
+      info:
+        properties:
+          threads:
+            type: integer
+            minimum: 1
 
   DependencyStatus:
-    type: object
+    additionalProperties: false
     properties:
       name:
         description: Name of the external depdendency.
         type: string
-        required: true
       reachable:
         description: Whether or not the external service is reachable.
         type: boolean
-        required: true
       online:
         description: |
           Whether or not the external service is online and available for
@@ -88,4 +85,3 @@ types:
           - yes
           - unknown
           - no
-        required: true

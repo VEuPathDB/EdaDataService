@@ -10,10 +10,7 @@ types:
         type: string
         enum:
           - unauthorized
-        required: true
-      message:
-        type: string
-        required: true
+      message: string
     additionalProperties: false
 
   ServerErrorResponse:
@@ -25,8 +22,6 @@ types:
         enum:
           - server-error
         required: true
-      message:
-        type: string
-        required: true
+      message: string
     additionalProperties: false
 

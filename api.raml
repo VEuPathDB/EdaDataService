@@ -16,12 +16,6 @@ securitySchemes:
           description: Auth_Key
           type: string
 
-traits:
-  service-endpoint:
-    displayName: Services
-  meta-endpoint:
-    displayName: Service Information
-
 
 #
 # Example Endpoints
@@ -30,8 +24,6 @@ traits:
 /hello:
   displayName: Hello World
   get:
-    is:
-      - service-endpoint
     responses:
       200:
         body:
@@ -39,8 +31,6 @@ traits:
             type: lib.HelloResponse
   post:
     securedBy: cookie-auth
-    is:
-      - service-endpoint
     body:
       application/json:
         type: lib.HelloPostRequest

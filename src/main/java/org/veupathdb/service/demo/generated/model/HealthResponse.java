@@ -1,8 +1,11 @@
 package org.veupathdb.service.demo.generated.model;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.List;
+import java.util.Map;
 
 @JsonDeserialize(
     as = HealthResponseImpl.class
@@ -20,6 +23,12 @@ public interface HealthResponse {
   @JsonProperty("dependencies")
   void setDependencies(List<DependencyStatus> dependencies);
 
+  @JsonProperty("info")
+  InfoType getInfo();
+
+  @JsonProperty("info")
+  void setInfo(InfoType info);
+
   enum StatusType {
     @JsonProperty("healthy")
     HEALTHY("healthy"),
@@ -32,5 +41,22 @@ public interface HealthResponse {
     StatusType(String name) {
       this.name = name;
     }
+  }
+
+  @JsonDeserialize(
+      as = HealthResponseImpl.InfoTypeImpl.class
+  )
+  interface InfoType {
+    @JsonAnyGetter
+    Map<String, Object> getAdditionalProperties();
+
+    @JsonAnySetter
+    void setAdditionalProperties(String key, Object value);
+
+    @JsonProperty("threads")
+    int getThreads();
+
+    @JsonProperty("threads")
+    void setThreads(int threads);
   }
 }

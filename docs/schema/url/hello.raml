@@ -10,10 +10,7 @@ types:
         type: string
         enum:
           - Hello World
-        required: true
-      anotherType:
-        type: AnotherType
-        required: true
+      anotherType: AnotherType
 
   HelloPostRequest:
     type: object
@@ -21,7 +18,6 @@ types:
       greet:
         description: Who do you want to say hello to?
         type: string
-        required: true
     additionalProperties: false
 
   HelloPostResponse:
@@ -30,7 +26,6 @@ types:
       message:
         description: Generated greeting
         type: string
-        required: true
     additionalProperties: false
 
   AnotherType:
