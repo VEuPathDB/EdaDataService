@@ -36,7 +36,7 @@ RUN bin/install-fgputil.sh \
 COPY . .
 
 RUN cp -n /jdbc/* vendor \
-    && ./gradlew tasks > /dev/null \
+    && ./gradlew wrapper \
     && make jar
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
