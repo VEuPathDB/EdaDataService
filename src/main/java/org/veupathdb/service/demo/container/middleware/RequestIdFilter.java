@@ -26,10 +26,12 @@ implements ContainerRequestFilter, ContainerResponseFilter {
 
   @Override
   public void filter(ContainerRequestContext req) {
-    log.trace("RequestIdFilter#filter(req)");
     var id = FriendlyId.createFriendlyId();
-    req.setProperty(RequestKeys.REQUEST_ID, id);
     ThreadContext.put(Globals.CONTEXT_ID, id);
+    req.setProperty(RequestKeys.REQUEST_ID, id);
+
+    // At the end so it has the context id
+    log.trace("RequestIdFilter#filter(req)");
   }
 
   @Override
