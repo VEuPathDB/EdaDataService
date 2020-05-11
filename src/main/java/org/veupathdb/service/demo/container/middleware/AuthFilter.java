@@ -82,7 +82,7 @@ public class AuthFilter implements ContainerRequestFilter {
     }
 
     final var auth = LoginCookieFactory.
-      parseCookieValue(rawAuth.replace("-remember-", "-"));
+      parseCookieValue(rawAuth);
 
     if (!new LoginCookieFactory(
       opts.getAuthSecretKey().orElseThrow()).isValidCookie(auth)) {
