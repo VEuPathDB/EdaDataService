@@ -36,7 +36,7 @@ public class ContainerResources extends org.glassfish.jersey.server.ResourceConf
     providers.addAll(Arrays.asList(DEFAULT_CLASSES));
 
     registerClasses(providers)
-      .register(new AuthFilter(opts, DbManager.getAccountDatabase()));
+      .register(new AuthFilter(opts, DbManager.accountDatabase()));
 
     registerInstances(
       new ApiDocService(),

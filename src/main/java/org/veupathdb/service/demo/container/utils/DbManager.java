@@ -20,6 +20,15 @@ import java.util.function.Supplier;
 public final class DbManager {
   private DbManager() {}
 
+  private static DbManager instance;
+
+  public static DbManager getInstance() {
+    if (instance == null)
+      instance = new DbManager();
+
+    return instance;
+  }
+
   /*┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓*\
     ┃                                                                      ┃
     ┃    Error Messages                                                    ┃
@@ -87,7 +96,7 @@ public final class DbManager {
     ┃                                                                      ┃
   \*┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛*/
 
-  private static DatabaseInstance acctDb;
+  private DatabaseInstance acctDb;
 
 
   /*┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓*\
@@ -96,14 +105,7 @@ public final class DbManager {
     ┃                                                                      ┃
   \*┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛*/
 
-  /**
-   * Initialize a connection wrapper to the user account database.
-   *
-   * @param opts Configuration options
-   *
-   * @return the initialized DatabaseInstance
-   */
-  public static DatabaseInstance initAccountDatabase(Options opts) {
+  public DatabaseInstance newAccountDatabase(Options opts) {
     if (Objects.nonNull(acctDb))
       return acctDb;
 
@@ -114,15 +116,30 @@ public final class DbManager {
     //noinspection OptionalGetWithoutIsPresent
     DependencyManager.getInstance().register(new DatabaseDependency(
       "account-db", opts.getDbHost().get(), opts.getDbPort().orElse(
-        platform == DEFAULT_PLATFORM ? ORACLE_PORT : POSTGRES_PORT), acctDb));
+      platform == DEFAULT_PLATFORM ? ORACLE_PORT : POSTGRES_PORT), acctDb));
 
     return acctDb;
   }
 
-  public static DatabaseInstance getAccountDatabase() {
+  /**
+   * Initialize a connection wrapper to the user account database.
+   *
+   * @param opts Configuration options
+   *
+   * @return the initialized DatabaseInstance
+   */
+  public static DatabaseInstance initAccountDatabase(Options opts) {
+    return getInstance().newAccountDatabase(opts);
+  }
+
+  public DatabaseInstance getAccountDatabase() {
     if (Objects.isNull(acctDb))
       throw new IllegalStateException(ERR_ACCTDB_NOT_INIT);
     return acctDb;
+  }
+
+  public static DatabaseInstance accountDatabase() {
+    return getInstance().getAccountDatabase();
   }
 
   /*┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓*\
@@ -134,7 +151,7 @@ public final class DbManager {
   /**
    * Creates an Oracle JDBC connection string from the given options.
    */
-  public static String makeOracleJdbcUrl(Options opts) {
+  public String makeOracleJdbcUrl(Options opts) {
     return String.format(ORACLE_URL,
       opts.getDbHost().orElseThrow(confErr(ERR_NO_ACCTDB_HOST)),
       opts.getDbPort().orElse(ORACLE_PORT),
@@ -144,7 +161,7 @@ public final class DbManager {
   /**
    * Creates a Postgres JDBC connection string from the given options.
    */
-  public static String makePostgresJdbcUrl(Options opts) {
+  public String makePostgresJdbcUrl(Options opts) {
     return String.format(POSTGRES_URL,
       opts.getDbHost().orElseThrow(confErr(ERR_NO_ACCTDB_HOST)),
       opts.getDbPort().orElse(POSTGRES_PORT),
@@ -158,7 +175,7 @@ public final class DbManager {
     ┃                                                                      ┃
   \*┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛*/
 
-  static SimpleDbConfig initDbConfig(Options opts) {
+  SimpleDbConfig initDbConfig(Options opts) {
     var platform = opts.getDbPlatform().orElse(DEFAULT_PLATFORM);
 
     return SimpleDbConfig.create(
@@ -170,7 +187,7 @@ public final class DbManager {
     );
   }
 
-  static String makeJdbcUrl(SupportedPlatform platform, Options opts) {
+  String makeJdbcUrl(SupportedPlatform platform, Options opts) {
     return switch (platform) {
       case ORACLE -> makeOracleJdbcUrl(opts);
       case POSTGRESQL -> makePostgresJdbcUrl(opts);

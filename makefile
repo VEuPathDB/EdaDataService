@@ -53,8 +53,8 @@ docker:
 .PHONY: cleanup-example
 cleanup-example:
 	@echo "$(C_BLUE)Removing demo code$(C_NONE)"
-	@find "$(GEN_DIR)" -type d -delete
-	@rm -rf "$(MAIN_DIR)/service/*"
+	@rm -rf $(GEN_DIR);
+	@rm -rf "$(MAIN_DIR)/service/HelloWorld.java"
 
 .PHONY: install-dev-env
 install-dev-env:
