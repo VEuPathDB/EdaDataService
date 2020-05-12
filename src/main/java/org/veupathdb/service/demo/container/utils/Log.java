@@ -21,7 +21,7 @@ public class Log {
    * force them through log4j.
    */
   public static void initialize() throws IOException {
-    java.util.logging.LogManager.getLogManager().reset();
+    Statics.getInstance().javaLogManager().reset();
 
     Configurator.initialize(
       new YamlConfiguration((LoggerContext) LogManager.getContext(),

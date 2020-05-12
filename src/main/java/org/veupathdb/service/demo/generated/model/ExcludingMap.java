@@ -1,5 +1,9 @@
 package org.veupathdb.service.demo.generated.model;
 
+import java.lang.IllegalArgumentException;
+import java.lang.Object;
+import java.lang.Override;
+import java.lang.String;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;

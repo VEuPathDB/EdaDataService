@@ -3,6 +3,7 @@ package org.veupathdb.service.demo.container.utils;
 import picocli.CommandLine;
 import picocli.CommandLine.UnmatchedArgumentException;
 
+import java.lang.reflect.Modifier;
 import java.util.Objects;
 import java.util.function.Predicate;
 
@@ -31,7 +32,7 @@ public final class Cli {
 
       if (match) {
         cli.usage(System.out);
-        Runtime.getRuntime().exit(0);
+        Statics.getInstance().runtime().exit(0);
       }
 
       throw new RuntimeException("Unrecognized argument(s) " + e.getUnmatched());
@@ -48,12 +49,17 @@ public final class Cli {
    *
    * @param opts Object to process.
    */
-  static void emptyToNull(Object opts) {
+  static <T> void emptyToNull(T opts) {
     try {
       for (var prop : opts.getClass().getDeclaredFields()) {
+        var mods = prop.getModifiers();
+        if (Modifier.isFinal(mods))
+          continue;
+
         prop.setAccessible(true);
 
         var tmp = prop.get(opts);
+
         if (Objects.isNull(tmp))
           continue;
 
@@ -63,7 +69,7 @@ public final class Cli {
           prop.set(opts, null);
         }
       }
-    } catch (IllegalAccessException e) {
+    } catch (Throwable e) {
       throw new RuntimeException(e);
     }
   }

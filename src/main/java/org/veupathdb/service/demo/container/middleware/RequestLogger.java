@@ -1,8 +1,8 @@
 package org.veupathdb.service.demo.container.middleware;
 
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.Supplier;
+import org.veupathdb.service.demo.container.utils.Statics;
 
 import javax.annotation.Priority;
 import javax.ws.rs.container.*;
@@ -18,15 +18,14 @@ import static java.lang.String.format;
 @PreMatching
 public class RequestLogger implements ContainerRequestFilter, ContainerResponseFilter {
   private static final String
-    START_FORMAT = "Request start: %s %s",
+    START_FORMAT = "Request start: {} {}",
     END_FORMAT   = "Request end: %s %s %d";
 
-  private static final Logger LOG = LogManager.getLogger(RequestLogger.class);
+  private final Logger LOG = Statics.logger(RequestLogger.class);
 
   @Override
   public void filter(ContainerRequestContext req) {
-    LOG.debug((Supplier<?>) () -> format(START_FORMAT, req.getMethod(),
-      "/" + req.getUriInfo().getPath()));
+    LOG.debug(START_FORMAT, req.getMethod(), "/" + req.getUriInfo().getPath());
   }
 
   @Override

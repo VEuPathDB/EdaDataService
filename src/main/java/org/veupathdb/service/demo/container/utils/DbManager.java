@@ -109,13 +109,7 @@ public final class DbManager {
 
     var platform = opts.getDbPlatform().orElse(DEFAULT_PLATFORM);
 
-    acctDb = new DatabaseInstance(SimpleDbConfig.create(
-      platform,
-      makeJdbcUrl(platform, opts),
-      opts.getDbUser().orElseThrow(confErr(ERR_NO_ACCTDB_USER)),
-      opts.getDbPass().orElseThrow(confErr(ERR_NO_ACCTDB_PASS)),
-      opts.getDbPoolSize().orElse(DEFAULT_POOL_SIZE)
-    ));
+    acctDb = new DatabaseInstance(initDbConfig(opts));
 
     //noinspection OptionalGetWithoutIsPresent
     DependencyManager.getInstance().register(new DatabaseDependency(
@@ -130,7 +124,6 @@ public final class DbManager {
       throw new IllegalStateException(ERR_ACCTDB_NOT_INIT);
     return acctDb;
   }
-
 
   /*┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓*\
     ┃                                                                      ┃
@@ -165,14 +158,26 @@ public final class DbManager {
     ┃                                                                      ┃
   \*┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛*/
 
-  private static String makeJdbcUrl(SupportedPlatform platform, Options opts) {
+  static SimpleDbConfig initDbConfig(Options opts) {
+    var platform = opts.getDbPlatform().orElse(DEFAULT_PLATFORM);
+
+    return SimpleDbConfig.create(
+      platform,
+      makeJdbcUrl(platform, opts),
+      opts.getDbUser().orElseThrow(confErr(ERR_NO_ACCTDB_USER)),
+      opts.getDbPass().orElseThrow(confErr(ERR_NO_ACCTDB_PASS)),
+      opts.getDbPoolSize().orElse(DEFAULT_POOL_SIZE)
+    );
+  }
+
+  static String makeJdbcUrl(SupportedPlatform platform, Options opts) {
     return switch (platform) {
       case ORACLE -> makeOracleJdbcUrl(opts);
       case POSTGRESQL -> makePostgresJdbcUrl(opts);
     };
   }
 
-  private static Supplier<InvalidConfigException> confErr(String message) {
+  static Supplier<InvalidConfigException> confErr(String message) {
     return () -> new InvalidConfigException(message);
   }
 }
