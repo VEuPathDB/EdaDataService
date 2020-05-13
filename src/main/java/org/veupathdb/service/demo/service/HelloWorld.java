@@ -6,7 +6,7 @@ import javax.ws.rs.core.Context;
 
 import java.util.Random;
 
-import org.veupathdb.service.demo.container.middleware.AuthFilter.Authenticated;
+import org.veupathdb.lib.container.jaxrs.middleware.AuthFilter.Authenticated;
 import org.veupathdb.service.demo.generated.model.HelloPostRequest;
 import org.veupathdb.service.demo.generated.model.HelloPostResponseImpl;
 import org.veupathdb.service.demo.generated.model.HelloResponse.GreetingType;

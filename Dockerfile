@@ -14,9 +14,10 @@ RUN jlink --compress=2 --module-path /opt/jdk/jmods \
     && apk add --no-cache git sed findutils coreutils make npm \
     && git config --global advice.detachedHead false
 
-COPY bin bin
+ENV DOCKER=build
+COPY makefile .
 
-RUN bin/install-fgputil.sh && bin/install-raml2jaxrs.sh
+RUN make install-dev-env
 
 COPY . .
 
