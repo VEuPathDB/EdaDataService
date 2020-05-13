@@ -18,7 +18,7 @@ import org.veupathdb.service.demo.generated.resources.Hello;
 public class HelloWorld implements Hello {
 
   @Context
-  private Optional<UserProfile> user;
+  private UserProfile user;
 
   @Override
   public GetHelloResponse getHello() {
@@ -40,10 +40,10 @@ public class HelloWorld implements Hello {
     }
 
     var out = new HelloPostResponseImpl();
-    out.setMessage(String.format("Hello %s!",
-      user.map(UserProfile::getProperties)
-        .map(p -> p.get("firstName"))
-        .orElse("whut")));
+    out.setMessage(String.format("Hello %s!", Optional.ofNullable(user)
+      .map(UserProfile::getProperties)
+      .map(p -> p.get("firstName"))
+      .orElse("whut")));
 
     return PostHelloResponse.respond200WithApplicationJson(out);
   }
