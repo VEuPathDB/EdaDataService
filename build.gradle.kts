@@ -52,8 +52,7 @@ dependencies {
     "vendor/xstreams.jar"
   ))
 
-
-  implementation((findProject(":core") as Any? ?: "org.veupathdb.lib:jaxrs-container-core:1.0.1" as Any?)!!)
+  implementation((findProject(":core") as Any? ?: ("org.veupathdb.lib:jaxrs-container-core:1.0.1" as Any?))!!)
 
 
   // Jersey
