@@ -21,7 +21,8 @@ RUN make install-dev-env
 
 COPY . .
 
-RUN cp -n /jdbc/* vendor \
+RUN mkdir -p vendor \
+    && cp -n /jdbc/* vendor \
     && echo Installing Gradle \
     && ./gradlew dependencies --configuration runtimeClasspath \
     && make jar
