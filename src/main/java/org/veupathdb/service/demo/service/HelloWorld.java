@@ -39,7 +39,7 @@ public class HelloWorld implements Hello {
     }
 
     var out = new HelloPostResponseImpl();
-    out.setMessage(String.format("Hello %s!", entity.getGreet()));
+    out.setMessage(String.format("Hello %s!", user.getProperties().get("firstName")));
 
     return PostHelloResponse.respond200WithApplicationJson(out);
   }
