@@ -1,5 +1,11 @@
 package org.veupathdb.service.demo.service;
 
+import org.glassfish.grizzly.http.server.Request;
+
+import javax.ws.rs.core.Context;
+
+import java.util.Random;
+
 import org.veupathdb.service.demo.container.middleware.AuthFilter.Authenticated;
 import org.veupathdb.service.demo.generated.model.HelloPostRequest;
 import org.veupathdb.service.demo.generated.model.HelloPostResponseImpl;
@@ -8,9 +14,13 @@ import org.veupathdb.service.demo.generated.model.HelloResponseImpl;
 import org.veupathdb.service.demo.generated.model.ServerErrorImpl;
 import org.veupathdb.service.demo.generated.resources.Hello;
 
-import java.util.Random;
-
 public class HelloWorld implements Hello {
+
+  private final Request request;
+
+  public HelloWorld(@Context Request req) {
+    request = req;
+  }
 
   @Override
   public GetHelloResponse getHello() {

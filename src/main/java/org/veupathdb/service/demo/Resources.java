@@ -1,9 +1,7 @@
 package org.veupathdb.service.demo;
 
-import org.veupathdb.service.demo.config.Options;
-import org.veupathdb.service.demo.container.ContainerResources;
-import org.veupathdb.service.demo.container.health.DependencyManager;
-import org.veupathdb.service.demo.container.service.HealthService;
+import org.veupathdb.lib.container.jaxrs.config.Options;
+import org.veupathdb.lib.container.jaxrs.server.ContainerResources;
 import org.veupathdb.service.demo.service.HelloWorld;
 
 /**
@@ -14,10 +12,13 @@ import org.veupathdb.service.demo.service.HelloWorld;
  */
 public class Resources extends ContainerResources {
   public Resources(Options opts) {
-    super(opts,
+    super(opts);
+  }
 
-      HelloWorld.class
-
-    );
+  @Override
+  protected Object[] resources() {
+    return new Object[] {
+      HelloWorld.class,
+    };
   }
 }

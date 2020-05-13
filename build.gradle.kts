@@ -16,6 +16,9 @@ version = buildProps["project.version"] ?: error("empty 2")
 
 repositories {
   jcenter()
+  maven {
+    url = uri("https://dl.bintray.com/veupathdb/maven")
+  }
 }
 
 dependencies {
@@ -52,8 +55,8 @@ dependencies {
     "vendor/xstreams.jar"
   ))
 
-  // JavaX
-  implementation("javax.ws.rs:javax.ws.rs-api:2.+")
+  implementation("org.veupathdb.lib:jaxrs-container-core:1.0.1")
+
 
   // Jersey
   implementation("org.glassfish.jersey.containers:jersey-container-grizzly2-http:${buildProps["version.jersey"]}")
@@ -63,7 +66,6 @@ dependencies {
 
   // Jackson
   implementation("com.fasterxml.jackson.core:jackson-databind:${buildProps["version.jackson"]}")
-  implementation("com.fasterxml.jackson.core:jackson-annotations:${buildProps["version.jackson"]}")
   implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${buildProps["version.jackson"]}")
 
   // CLI

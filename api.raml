@@ -2,19 +2,21 @@
 title: Example JaxRS Container Service
 version: v1.0.0
 mediaType: application/json
-uses:
-  lib: docs/lib/library.raml
-  err: docs/lib/errors.raml
 
+uses:
+  err: .tools/raml/errors.raml
+  lib: schema/library.raml
+
+# TODO: THIS SHOULD BE HEADER
 securitySchemes:
-  cookie-auth:
+  header-auth:
     description: Authentication based on a WDK auth cookie.
     type:
       x-custom
     describedBy:
       headers:
-        Cookie:
-          description: Auth_Key
+        Auth_Key:
+          description: Authorization header.
           type: string
 
 
@@ -31,7 +33,7 @@ securitySchemes:
           application/json:
             type: lib.HelloResponse
   post:
-    securedBy: cookie-auth
+    securedBy: header-auth
     body:
       application/json:
         type: lib.HelloPostRequest

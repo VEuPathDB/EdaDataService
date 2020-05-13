@@ -4,6 +4,7 @@ MAIN_DIR     := src/main/java/$(shell echo $(APP_PACKAGE) | sed 's/\./\//g')
 TEST_DIR     := $(shell echo $(MAIN_DIR) | sed 's/main/test/')
 GEN_DIR      := $(MAIN_DIR)/generated
 ALL_PACKABLE := $(shell find src/main -type f)
+BIN_DIR := .tools/bin
 
 EXAMPLE_DIR      := src/main/java/org/veupathdb/service/demo
 EXAMPLE_TEST_DIR := src/test/java/org/veupathdb/service/demo
@@ -34,6 +35,10 @@ default:
 	@echo "    Ensures the current dev environment has the necessary "
 	@echo "    installable tools to build this project."
 	@echo ""
+	@echo "$(C_BLUE)  make gen-jaxrs$(C_NONE)"
+	@echo "    Ensures the current dev environment has the necessary "
+	@echo "    installable tools to build this project."
+	@echo ""
 
 .PHONY: compile
 compile: install-dev-env gen-jaxrs gen-docs
@@ -52,25 +57,28 @@ docker:
 
 .PHONY: cleanup-example
 cleanup-example:
-	@echo "$(C_BLUE)Removing demo code$(C_NONE)"
-	@rm -rf $(GEN_DIR);
-	@rm -rf "$(MAIN_DIR)/service/HelloWorld.java"
+	@$(BIN_DIR)/demo-cleanup.sh
 
 .PHONY: install-dev-env
 install-dev-env:
-	@bin/check-env.sh
-	@bin/install-fgputil.sh
-	@bin/install-oracle.sh
-	@bin/install-raml2jaxrs.sh
-	@bin/install-npm.sh
+	@if [ ! -d .tools ]; then git clone -q https://github.com/VEuPathDB/lib-jaxrs-container-build-utils .tools; fi
+	@$(BIN_DIR)/check-env.sh
+	@$(BIN_DIR)/install-fgputil.sh
+	@$(BIN_DIR)/install-oracle.sh
+	@$(BIN_DIR)/install-raml2jaxrs.sh
+	@$(BIN_DIR)/install-npm.sh
 
 fix-path:
-ifneq "$(MAIN_DIR)" "$(EXAMPLE_DIR)"
-	@mkdir -p $(MAIN_DIR)
-	@mv -t $(MAIN_DIR) $(EXAMPLE_DIR)/*
-	@mv -t $(TEST_DIR) $(EXAMPLE_TEST_DIR)/*
-	@rm -rf $(EXAMPLE_DIR) $(EXAMPLE_TEST_DIR)
-endif
+	@$(BIN_DIR)/fix-path.sh
+
+gen-jaxrs: api.raml merge-raml
+	@$(BIN_DIR)/generate-jaxrs.sh $(APP_PACKAGE)
+
+gen-docs: api.raml merge-raml
+	@$(BIN_DIR)/generate-docs.sh
+
+merge-raml:
+	@$(BIN_DIR)/merge-raml.sh
 
 #
 # File based targets
@@ -79,16 +87,3 @@ endif
 build/libs/service.jar: gen-jaxrs gen-docs vendor/fgputil-accountdb-1.0.0.jar vendor/fgputil-util-1.0.0.jar build.gradle.kts service.properties
 	@echo "$(C_BLUE)Building application jar$(C_NONE)"
 	@./gradlew clean test jar
-
-
-gen-jaxrs: api.raml merge-raml
-	@bin/generate-jaxrs.sh $(APP_PACKAGE)
-
-gen-docs: api.raml merge-raml
-	@echo "$(C_BLUE)Generating API Documentation$(C_NONE)"
-	@raml2html docs/lib/full-api.raml > docs/api.html
-	@cp docs/api.html src/main/resources/api.html
-
-merge-raml:
-	@echo "$(C_BLUE)Merging Raml Schema$(C_NONE)"
-	@bin/merge-raml.sh
