@@ -16,9 +16,6 @@ version = buildProps["project.version"] ?: error("empty 2")
 
 repositories {
   jcenter()
-  maven {
-    url = uri("https://dl.bintray.com/veupathdb/maven")
-  }
 }
 
 dependencies {
