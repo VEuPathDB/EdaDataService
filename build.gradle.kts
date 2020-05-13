@@ -52,7 +52,8 @@ dependencies {
     "vendor/xstreams.jar"
   ))
 
-  implementation("org.veupathdb.lib:jaxrs-container-core:1.0.1")
+
+  implementation(findProject(":core") ?: "org.veupathdb.lib:jaxrs-container-core:1.0.1")
 
 
   // Jersey
@@ -94,7 +95,10 @@ tasks.jar {
     attributes["Implementation-Title"] = buildProps["project.name"]
     attributes["Implementation-Version"] = buildProps["project.version"]
   }
+  println("Packaging Components")
   from(configurations.runtimeClasspath.get().map {
+    println("  " + it.name)
+
     if (it.isDirectory) it else zipTree(it).matching {
       exclude { f -> f.name.toLowerCase().contains("log4j") &&
         f.name.toLowerCase().contains(".dat") } } })

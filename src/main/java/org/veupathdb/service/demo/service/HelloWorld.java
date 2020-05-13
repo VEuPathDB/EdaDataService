@@ -1,10 +1,11 @@
 package org.veupathdb.service.demo.service;
 
-import org.glassfish.grizzly.http.server.Request;
+import org.gusdb.fgputil.accountdb.UserProfile;
 
 import javax.ws.rs.core.Context;
 
 import java.util.Random;
+import java.util.ServiceLoader.Provider;
 
 import org.veupathdb.lib.container.jaxrs.middleware.AuthFilter.Authenticated;
 import org.veupathdb.service.demo.generated.model.HelloPostRequest;
@@ -16,11 +17,8 @@ import org.veupathdb.service.demo.generated.resources.Hello;
 
 public class HelloWorld implements Hello {
 
-  private final Request request;
-
-  public HelloWorld(@Context Request req) {
-    request = req;
-  }
+  @Context
+  private Provider<UserProfile> user;
 
   @Override
   public GetHelloResponse getHello() {
