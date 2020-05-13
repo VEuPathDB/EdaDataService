@@ -61,7 +61,7 @@ cleanup-example:
 
 .PHONY: install-dev-env
 install-dev-env:
-	@if [ ! -d .tools ]; then git clone -q https://github.com/VEuPathDB/lib-jaxrs-container-build-utils .tools; fi
+	@if [ ! -d .tools ]; then git clone https://github.com/VEuPathDB/lib-jaxrs-container-build-utils .tools; fi
 	@$(BIN_DIR)/check-env.sh
 	@$(BIN_DIR)/install-fgputil.sh
 	@$(BIN_DIR)/install-oracle.sh
