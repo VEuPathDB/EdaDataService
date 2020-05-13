@@ -2,7 +2,8 @@ package org.veupathdb.service.demo.service;
 
 import org.gusdb.fgputil.accountdb.UserProfile;
 
-import javax.ws.rs.core.Context;
+import javax.inject.Inject;
+import javax.inject.Provider;
 
 import java.util.Random;
 
@@ -16,8 +17,8 @@ import org.veupathdb.service.demo.generated.resources.Hello;
 
 public class HelloWorld implements Hello {
 
-  @Context
-  private UserProfile user;
+  @Inject
+  private Provider<UserProfile> user;
 
   @Override
   public GetHelloResponse getHello() {
@@ -39,7 +40,7 @@ public class HelloWorld implements Hello {
     }
 
     var out = new HelloPostResponseImpl();
-    out.setMessage(String.format("Hello %s!", user.getProperties().get("firstName")));
+    out.setMessage(String.format("Hello %s!", user.get().getProperties().get("firstName")));
 
     return PostHelloResponse.respond200WithApplicationJson(out);
   }
