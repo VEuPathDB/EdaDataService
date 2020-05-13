@@ -53,7 +53,7 @@ dependencies {
   ))
 
 
-  implementation(findProject(":core") as Any? ?: "org.veupathdb.lib:jaxrs-container-core:1.0.1")
+  implementation((findProject(":core") as Any? ?: "org.veupathdb.lib:jaxrs-container-core:1.0.1" as Any?)!!)
 
 
   // Jersey
