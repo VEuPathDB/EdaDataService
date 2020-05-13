@@ -4,10 +4,10 @@ import org.gusdb.fgputil.accountdb.UserProfile;
 
 import javax.ws.rs.core.Context;
 
+import java.util.Optional;
 import java.util.Random;
 
 import org.veupathdb.lib.container.jaxrs.middleware.AuthFilter.Authenticated;
-import org.veupathdb.lib.container.jaxrs.providers.UserProvider;
 import org.veupathdb.service.demo.generated.model.HelloPostRequest;
 import org.veupathdb.service.demo.generated.model.HelloPostResponseImpl;
 import org.veupathdb.service.demo.generated.model.HelloResponse.GreetingType;
@@ -18,7 +18,7 @@ import org.veupathdb.service.demo.generated.resources.Hello;
 public class HelloWorld implements Hello {
 
   @Context
-  private UserProvider users;
+  private Optional<UserProfile> user;
 
   @Override
   public GetHelloResponse getHello() {
@@ -40,10 +40,10 @@ public class HelloWorld implements Hello {
     }
 
     var out = new HelloPostResponseImpl();
-    out.setMessage(String.format("Hello %s!", users.getUser()
-      .map(UserProfile::getProperties)
-      .map(p -> p.get("firstName"))
-      .orElse("whut")));
+    out.setMessage(String.format("Hello %s!",
+      user.map(UserProfile::getProperties)
+        .map(p -> p.get("firstName"))
+        .orElse("whut")));
 
     return PostHelloResponse.respond200WithApplicationJson(out);
   }
