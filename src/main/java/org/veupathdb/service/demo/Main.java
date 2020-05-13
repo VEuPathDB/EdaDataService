@@ -18,6 +18,9 @@ public class Main extends Server {
 
   @Override
   protected ContainerResources newResourceConfig(Options options) {
-    return new Resources(options);
+    final var out =  new Resources(options);
+    out.property("jersey.config.server.tracing.type", "ALL")
+      .property("jersey.config.server.tracing.threshold", "VERBOSE");
+    return out;
   }
 }

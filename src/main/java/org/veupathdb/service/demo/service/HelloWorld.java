@@ -5,7 +5,6 @@ import org.gusdb.fgputil.accountdb.UserProfile;
 import javax.ws.rs.core.Context;
 
 import java.util.Random;
-import java.util.ServiceLoader.Provider;
 
 import org.veupathdb.lib.container.jaxrs.middleware.AuthFilter.Authenticated;
 import org.veupathdb.service.demo.generated.model.HelloPostRequest;
@@ -18,7 +17,7 @@ import org.veupathdb.service.demo.generated.resources.Hello;
 public class HelloWorld implements Hello {
 
   @Context
-  private Provider<UserProfile> user;
+  private UserProfile user;
 
   @Override
   public GetHelloResponse getHello() {
