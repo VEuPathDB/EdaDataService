@@ -19,6 +19,7 @@ public class Main extends Server {
     // production ready.
     out.property("jersey.config.server.tracing.type", "ALL")
       .property("jersey.config.server.tracing.threshold", "VERBOSE");
+
     return out;
   }
 }

@@ -15,6 +15,11 @@ public class Resources extends ContainerResources {
     super(opts);
   }
 
+  /**
+   * Returns an array of JaxRS endpoints, providers, and contexts.
+   *
+   * Entries in the array can be either classes or instances.
+   */
   @Override
   protected Object[] resources() {
     return new Object[] {
