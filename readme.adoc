@@ -31,7 +31,8 @@ project.
 After the environment has been set up, the project can be built, tested, and
 packaged using `make jar`.
 
-Starting the server can be done by running `java -jar build/lib/service.jar`.
+Starting the server can be done by simply running
+`java -jar build/lib/service.jar`.
 
 === In Docker
 
@@ -93,7 +94,7 @@ docs].
 The service api is defined in 2 places initially:
 
 . The `api.raml` file which contains the server endpoints.
-. The `docs/schema` folder which contains type schema definitions. +
+. The `schema` folder which contains type schema definitions. +
   These files must be valid Raml 1.0 Libraries.footnote:[https://medium.com/raml-api/raml-101-libraries-and-datatypes-fragments-1889b2e82c27[Modular Raml Guide 1]]footnote:[https://www.baeldung.com/modular-raml-includes-overlays-libraries-extensions[Modular Raml Guide 2]]
 
 ===== `api.raml`
@@ -101,20 +102,21 @@ The service api is defined in 2 places initially:
 ====== Including Type Definitions
 
 In the `api.raml` file, there is a statement near the top of the file that
-declares the Raml file "uses" `docs/raml/library.raml`.  This is a generated
-file based on the contents of the schema library under `docs/schema`.  The
+declares the Raml file "uses" `schema/library.raml`.  This is a generated
+file based on the contents of the schema library under `schema`.  The
 `library.raml` file should not be edited directly.
 
 .`api.raml`: `uses` declaration
 [source, yaml, linenums, start=5]
 ----
 uses:
-  lib: docs/raml/library.raml
+  err: .tools/raml/errors.raml
+  lib: schema/library.raml
 ----
 
 The `uses` keyword maps an import alias to the imported library.  This import
 alias is used to access the types defined in that library.  In the case of the
-above example, library types would be available using `lib.MyType`
+above example, library types would be available using `lib.\{MyTypeName}`
 
 .`api.raml`: Library type usage.
 [source, yaml, linenums, start=36]
@@ -126,7 +128,7 @@ above example, library types would be available using `lib.MyType`
 
 ===== Type Schema
 
-Each raml library file under `docs/schema` should define a root `types` object
+Each raml library file under `schema` should define a root `types` object
 defining the types used by the API.  The name of the types defined under the
 `types` object will be the name of the generated Java classes based on those
 types.
