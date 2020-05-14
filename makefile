@@ -57,7 +57,7 @@ docker:
 
 .PHONY: cleanup-example
 cleanup-example:
-	@$(BIN_DIR)/demo-cleanup.sh
+	@$(BIN_DIR)/demo-cleanup.sh $(MAIN_DIR)
 
 .PHONY: install-dev-env
 install-dev-env:
