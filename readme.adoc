@@ -85,9 +85,9 @@ file.  Here you can configure the project's name, version, container name,
 Java package structure, etc...
 
 If additional dependencies are required, they will be added to the
-`build.gradle.kts` file.  For information about adding gradle dependencies see
-the https://docs.gradle.org/current/userguide/declaring_dependencies.html[Gradle
-docs].
+`dependencies.gradle.kts` file.  For information about adding gradle
+dependency declarations see the
+https://docs.gradle.org/current/userguide/declaring_dependencies.html[Gradle docs].
 
 ==== API definition
 
