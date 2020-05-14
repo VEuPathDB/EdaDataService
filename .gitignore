@@ -10,3 +10,5 @@ api.html
 *.jar
 
 !gradle-wrapper.jar
+/run.sh
+*.env
