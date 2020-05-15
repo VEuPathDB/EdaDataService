@@ -8,26 +8,31 @@
 ################################################################################
 
 types:
-  HelloResponse:
-    additionalProperties: false
+  AnotherType:
+    type: object
     properties:
+      something?: string
+  HelloPostRequest:
+    type: object
+    properties:
+      greet:
+        type: string
+        description: Who do you want to say hello to?
+    additionalProperties: false
+  HelloPostResponse:
+    type: object
+    properties:
+      message:
+        type: string
+        description: Generated greeting
+    additionalProperties: false
+  HelloResponse:
+    type: object
+    properties:
+      anotherType: AnotherType
       greeting:
         type: string
         enum:
-          - Hello World
-      anotherType: AnotherType
-  HelloPostRequest:
-    properties:
-      greet:
-        description: Who do you want to say hello to?
-        type: string
+        - Hello World
     additionalProperties: false
-  HelloPostResponse:
-    properties:
-      message:
-        description: Generated greeting
-        type: string
-    additionalProperties: false
-  AnotherType:
-    properties:
-      something?: string
+

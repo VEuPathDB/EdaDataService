@@ -66,6 +66,7 @@ install-dev-env:
 	@$(BIN_DIR)/install-fgputil.sh
 	@$(BIN_DIR)/install-oracle.sh
 	@$(BIN_DIR)/install-raml2jaxrs.sh
+	@$(BIN_DIR)/install-raml-merge.sh
 	@$(BIN_DIR)/install-npm.sh
 
 fix-path:
@@ -78,7 +79,7 @@ gen-docs: api.raml merge-raml
 	@$(BIN_DIR)/generate-docs.sh
 
 merge-raml:
-	@$(BIN_DIR)/merge-raml.sh
+	@$(BIN_DIR)/merge-raml schema > schema/library.raml
 
 #
 # File based targets
