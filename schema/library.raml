@@ -1,4 +1,5 @@
 #%RAML 1.0 Library
+---
 
 ################################################################################
 #                                                                              #
@@ -8,31 +9,31 @@
 ################################################################################
 
 types:
+  HelloResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      greeting:
+        type: string
+        enum:
+          - Hello World
+      anotherType: AnotherType
+  HelloPostRequest:
+    type: object
+    additionalProperties: false
+    properties:
+      greet:
+        description: Who do you want to say hello to?
+        type: string
+  HelloPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      message:
+        description: Generated greeting
+        type: string
   AnotherType:
     type: object
     properties:
       something?: string
-  HelloPostRequest:
-    type: object
-    properties:
-      greet:
-        type: string
-        description: Who do you want to say hello to?
-    additionalProperties: false
-  HelloPostResponse:
-    type: object
-    properties:
-      message:
-        type: string
-        description: Generated greeting
-    additionalProperties: false
-  HelloResponse:
-    type: object
-    properties:
-      anotherType: AnotherType
-      greeting:
-        type: string
-        enum:
-        - Hello World
-    additionalProperties: false
 

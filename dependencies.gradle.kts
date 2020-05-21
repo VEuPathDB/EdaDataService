@@ -17,8 +17,10 @@ dependencies {
 
   // FgpUtil jars
   implementation(files(
-    "vendor/fgputil-util-1.0.0.jar",
-    "vendor/fgputil-accountdb-1.0.0.jar"
+    "vendor/fgputil-accountdb-1.0.0.jar",
+    "vendor/fgputil-core-1.0.0.jar",
+    "vendor/fgputil-db-1.0.0.jar",
+    "vendor/fgputil-web-1.0.0.jar"
   ))
 
   // Compatibility bridge to support the long dead log4j-1.X
@@ -45,7 +47,7 @@ dependencies {
 
 
   // Core lib, prefers local checkout if available
-  implementation(findProject(":core") ?: "org.veupathdb.lib:jaxrs-container-core:1.0.8")
+  implementation(findProject(":core") ?: "org.veupathdb.lib:jaxrs-container-core:1.1.0")
 
 
   // Jersey
