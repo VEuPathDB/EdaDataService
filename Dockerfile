@@ -9,7 +9,7 @@ LABEL service="demo-service"
 
 WORKDIR /workspace
 RUN jlink --compress=2 --module-path /opt/jdk/jmods \
-       --add-modules java.base,java.logging,java.xml,java.desktop,java.management,java.sql \
+       --add-modules java.base,java.logging,java.xml,java.desktop,java.management,java.sql,java.naming \
        --output /jlinked \
     && apk add --no-cache git sed findutils coreutils make npm \
     && git config --global advice.detachedHead false
