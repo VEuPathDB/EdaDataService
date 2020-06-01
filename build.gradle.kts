@@ -31,8 +31,13 @@ tasks.jar {
     println("  " + it.name)
 
     if (it.isDirectory) it else zipTree(it).matching {
-      exclude { f -> f.name.toLowerCase().contains("log4j") &&
-        f.name.toLowerCase().contains(".dat") } } })
+      exclude { f ->
+        val name = f.name.toLowerCase()
+        (name.contains("log4j") && name.contains(".dat")) ||
+          name.endsWith(".sf") ||
+          name.endsWith(".dsa") ||
+          name.endsWith(".rsa")
+      } } })
   archiveFileName.set("service.jar")
 }
 
