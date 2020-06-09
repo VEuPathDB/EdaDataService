@@ -13,6 +13,8 @@ endif::[]
 Elizabeth Paige Harper <epharper@upenn.edu>
 v1.0.0
 
+// TODO: Explain the raml-2-jaxrs / raml-2-json-schema / etc.. and any hacks or weirdness that people may need to know when modifying this project.
+
 == Running the Example
 
 === Locally
