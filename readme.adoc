@@ -284,6 +284,50 @@ up the necessary prerequisites.  This is a temporary solution to be used until
   are converted into a gradle library
 - The team as a whole is familiar with Gradle and Docker
 
+==== Generating Jax-RS Code
+
+The `make gen-jaxrs` command is backed by the https://github.com/mulesoft-labs/raml-for-jax-rs[Mulesoft Raml-for-JaxRs library].
+
+===== Hiccups and limitations
+
+The RAML to JaxRS conversion library has the following known issues that are
+likely to impact use of the tool:
+
+Enums::
++
+--
+* Enum generation creates types that do not allow access to the raw backing
+  text, which may be desired when constructing complex responses.
+* Enum generation may cause the generator to fail with cryptic errors involving
+  bad imports for the Java builtin type `String`
+--
++
+One alternative/workaround for this is defining the enum type in Java and typing
+the RAML as string with the possible values defined as examples.
+
+Inheritance::
+
+Extending types can work out for trees with at most 1 parent depth, however
+going beyond that may cause things to generate in a way that has compile errors.
+
+`additionalProperties` aka `//:`::
+
+Using a catchall block for maps with anything other than a simple value type
+will cause the java type to be `Map<String, Object>`.  Additionally even a
+simple value type _may_ have this result.
+
+==== Hacks and Oddities
+
+===== FgpUtil
+
+Due to the fact that FgpUtil is not a Gradle project, in a Maven repo, or safe
+to use with standard imports (due to likelyhood of dependency conflicts), at
+present, this dependency is built separately from the rest of the project by one
+of the make targets and is included as a local, runtime dependency.
+
+Due to this method of including FgpUtil, additional dependencies have been added
+to support it in addition to bridging compatibility issues.
+
 === The project root
 
 The root directory of this project contains multiple standard files used by
