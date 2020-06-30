@@ -47,7 +47,7 @@ dependencies {
 
 
   // Core lib, prefers local checkout if available
-  implementation(findProject(":core") ?: "org.veupathdb.lib:jaxrs-container-core:1.1.2")
+  implementation(findProject(":core") ?: "org.veupathdb.lib:jaxrs-container-core:1.6.0")
 
 
   // Jersey
