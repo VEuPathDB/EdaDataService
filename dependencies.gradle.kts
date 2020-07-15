@@ -1,7 +1,13 @@
-val jersey  = "2.+"
-val jackson = "2.+"
-val junit   = "5.+"
-val log4j   = "2.+"
+//
+// Version Numbers
+//
+val coreLib = "2.3.1" // Container core lib version
+
+val jersey  = "2.+"   // Jersey/JaxRS version
+val jackson = "2.+"   // FasterXML Jackson version
+val junit   = "5.+"   // JUnit version
+val log4j   = "2.+"   // Log4J version
+val metrics = "0.9.0" // Prometheus lib version
 
 val implementation by configurations
 val runtimeOnly    by configurations
@@ -47,7 +53,7 @@ dependencies {
 
 
   // Core lib, prefers local checkout if available
-  implementation(findProject(":core") ?: "org.veupathdb.lib:jaxrs-container-core:1.6.0")
+  implementation(findProject(":core") ?: "org.veupathdb.lib:jaxrs-container-core:${coreLib}")
 
 
   // Jersey
@@ -66,8 +72,8 @@ dependencies {
   implementation("org.apache.logging.log4j:log4j:${log4j}")
 
   // Metrics
-  implementation("io.prometheus:simpleclient:0.9.0")
-  implementation("io.prometheus:simpleclient_common:0.9.0")
+  implementation("io.prometheus:simpleclient:${metrics}")
+  implementation("io.prometheus:simpleclient_common:${metrics}")
 
   // Utils
   implementation("io.vulpine.lib:Jackfish:1.+")

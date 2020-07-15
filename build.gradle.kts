@@ -1,5 +1,7 @@
 import java.util.Properties
 import java.io.FileInputStream
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 plugins {
   java
@@ -43,6 +45,24 @@ tasks.jar {
 
 tasks.register("print-package") { print(fullPack) }
 tasks.register("print-container-name") { print(buildProps["container.name"]) }
+
+tasks.withType<Test> {
+    testLogging {
+      events.addAll(listOf(TestLogEvent.FAILED,
+        TestLogEvent.SKIPPED,
+        TestLogEvent.STANDARD_OUT,
+        TestLogEvent.STANDARD_ERROR,
+        TestLogEvent.PASSED))
+
+      exceptionFormat = TestExceptionFormat.FULL
+      showExceptions = true
+      showCauses = true
+      showStackTraces = true
+      showStandardStreams = true
+      enableAssertions = true
+  }
+  ignoreFailures = true // Always try to run all tests for all modules
+}
 
 val test by tasks.getting(Test::class) {
   // Use junit platform for unit tests
