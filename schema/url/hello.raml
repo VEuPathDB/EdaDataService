@@ -1,0 +1,30 @@
+#%RAML 1.0 Library
+
+types:
+  # Type name determines the name of the Java class that will be generated.
+  HelloResponse:
+    additionalProperties: false
+    properties:
+      greeting:
+        type: string
+        enum:
+          - Hello World
+      anotherType: AnotherType
+
+  HelloPostRequest:
+    properties:
+      greet:
+        description: Who do you want to say hello to?
+        type: string
+    additionalProperties: false
+
+  HelloPostResponse:
+    properties:
+      message:
+        description: Generated greeting
+        type: string
+    additionalProperties: false
+
+  AnotherType:
+    properties:
+      something?: string
