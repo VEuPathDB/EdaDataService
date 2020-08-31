@@ -1,0 +1,14 @@
+.gradle/
+.idea/
+/build/
+/vendor/
+/.tools/
+generated/
+api.html
+
+
+*.jar
+
+!gradle-wrapper.jar
+/run.sh
+*.env
