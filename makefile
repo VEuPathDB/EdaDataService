@@ -74,7 +74,8 @@ install-dev-env:
 	@$(BIN_DIR)/install-npm.sh
 
 fix-path:
-	@$(BIN_DIR)/fix-path.sh
+	@$(BIN_DIR)/fix-path.sh $(EXAMPLE_DIR) $(MAIN_DIR)
+	@$(BIN_DIR)/fix-path.sh $(EXAMPLE_TEST_DIR) $(TEST_DIR)
 
 gen-jaxrs: api.raml merge-raml
 	@$(BIN_DIR)/generate-jaxrs.sh $(APP_PACKAGE)
