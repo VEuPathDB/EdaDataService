@@ -61,7 +61,7 @@ To use this project as a template for the development of a new service, use the
 === Quick Start
 
 . Clone your new project and cd into the cloned directory
-. Run `make cleanup-example install-dev-env`
+. Run `make install-dev-env cleanup-example`
 . Edit `service.properties` with your service's details.
 . Run `make fix-path` to move the service code to the correct location
 . Edit `api.raml` with your API design
