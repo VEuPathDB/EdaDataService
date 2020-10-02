@@ -14,6 +14,11 @@ val buildProps = Properties()
 buildProps.load(FileInputStream(File(rootDir, "service.properties")))
 val fullPack = "${buildProps["app.package.root"]}.${buildProps["app.package.service"]}"
 
+java {
+  targetCompatibility = JavaVersion.VERSION_14
+  sourceCompatibility = JavaVersion.VERSION_14
+}
+
 // Project settings
 group = buildProps["project.group"] ?: error("empty 1")
 version = buildProps["project.version"] ?: error("empty 2")
