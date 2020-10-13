@@ -9,23 +9,21 @@
 ################################################################################
 
 types:
-  AnalysesGetResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      analyses: AnalysisOverview[]
-  AnalysisOverview:
-    type: object
-    properties:
-      name: string
   ScatterPlotPostRequest:
     type: object
     additionalProperties: false
     properties:
-      processingPlaceholder: SomeThing
-      visualization: ScatterSpec
-  ScatterSpec:
+      study: string
+      subset:
+        type: API_Filter[]
+        required: false
+      derivedVariables:
+        type: DerivedVariable[]
+        required: false
+      config: ScatterPlotSpec
+  ScatterPlotSpec:
     type: object
+    additionalProperties: false
     properties:
       xAxisVariable: string
       yAxisVariable: string
@@ -61,12 +59,134 @@ types:
       intervalSE:
         type: number[]
         required: false
+  StudiesGetResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      studies: API_StudyOverview[]
+  StudyIdGetResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      study: API_StudyDetail
+  EntityIdGetResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      entity: API_Entity
+  API_StudyOverview:
+    type: object
+    properties:
+      id: string
+      name: string
+  API_StudyDetail:
+    type: object
+    properties:
+      id: string
+      name: string
+      rootEntity: API_Entity
+  API_Entity:
+    type: object
+    properties:
+      id: string
+      name: string
+      description: string
+      children?: API_Entity[]
+      variablesTree: API_VariablesTreeElement[]
+  API_VariablesTreeElement:
+    type: object
+    discriminator: type
+    properties:
+      id: string
+      name: string
+      description: string
+      children?: API_VariablesTreeElement[]
+      type: string
+  API_VariablesCategory:
+    type: API_VariablesTreeElement
+    discriminatorValue: category
+  API_StringVariable:
+    type: API_VariablesTreeElement
+    discriminatorValue: string
+  API_NumberVariable:
+    type: API_VariablesTreeElement
+    discriminatorValue: number
+    properties:
+      numberValueSpec:
+        type: object
+        properties:
+          isContinuous: boolean
+          precision: integer
+  API_DateVariable:
+    type: API_VariablesTreeElement
+    discriminatorValue: date
+    properties:
+      dateValueSpec:
+        type: object
+        properties:
+          isContinuous: boolean
+  AnalysesGetResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      analyses: AnalysisOverview[]
+  AnalysisOverview:
+    type: object
+    properties:
+      name: string
+  DerivedVariable:
+    type: object
+    properties:
+      entityId: string
+      name: string
+      dependentVariables: string[]
+      construction: object
+  API_Filter:
+    type: object
+    discriminator: type
+    properties:
+      entityId: string
+      variableId: string
+      type: string
+  API_StringSetFilter:
+    type: API_Filter
+    discriminatorValue: stringSet
+    properties:
+      stringSet: string[]
+  API_NumberSetFilter:
+    type: API_Filter
+    discriminatorValue: numberSet
+    properties:
+      numberSet: number[]
+  API_DateSetFilter:
+    type: API_Filter
+    discriminatorValue: dateSet
+    properties:
+      dateSet: string[] # how to constrain this to a date?
+  API_NumberRangeFilter:
+    type: API_Filter
+    discriminatorValue: numberRange
+    properties:
+      min: number
+      max: number
+  API_DateRangeFilter:
+    type: API_Filter
+    discriminatorValue: dateRange
+    properties:
+      min: string
+      max: string
   HistogramPostRequest:
     type: object
     additionalProperties: false
     properties:
-      processingPlaceholder: SomeThing
-      visualization: HistogramSpec
+      study: string
+      subset:
+        type: API_Filter[]
+        required: false
+      derivedVariables:
+        type: DerivedVariable[]
+        required: false
+      config: HistogramSpec
   HistogramSpec:
     type: object
     properties:
@@ -100,36 +220,24 @@ types:
       label:
         type: string[]
         minItems: 1
-  SomeThing:
+  RecordCountPostRequest:
     type: object
     additionalProperties: false
     properties:
-      someStuff: string
-  HelloResponse:
+      study: string
+      subset:
+        type: API_Filter[]
+        required: false
+      derivedVariables:
+        type: DerivedVariable[]
+        required: false
+      config: RecordCountSpec
+  RecordCountSpec:
+    type: object
+    additionalProperties: false
+  RecordCountPostResponse:
     type: object
     additionalProperties: false
     properties:
-      greeting:
-        type: string
-        enum:
-          - Hello World
-      anotherType: AnotherType
-  HelloPostRequest:
-    type: object
-    additionalProperties: false
-    properties:
-      greet:
-        description: Who do you want to say hello to?
-        type: string
-  HelloPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      message:
-        description: Generated greeting
-        type: string
-  AnotherType:
-    type: object
-    properties:
-      something?: string
+      recordCount: number
 

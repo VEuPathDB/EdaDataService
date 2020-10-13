@@ -12,3 +12,11 @@ api.html
 !gradle-wrapper.jar
 /run.sh
 *.env
+
+/bin
+.project
+.settings
+.classpath
+
+*~
+.*~

@@ -1,0 +1,59 @@
+#%RAML 1.0 Library
+
+types:
+  # Type name determines the name of the Java class that will be generated.
+
+  ScatterPlotPostRequest:
+    additionalProperties: false
+    properties:
+      study: string
+      subset:
+        required: false
+        type: API_Filter[]
+      derivedVariables:
+        required: false
+        type: DerivedVariable[]
+      config:
+        type: ScatterPlotSpec
+
+  ScatterPlotSpec:
+    additionalProperties: false
+    properties:
+      xAxisVariable: 
+        type: string
+      yAxisVariable: 
+        type: string
+      overlayVariable: 
+        type: string
+        required: false
+      facetVariable: 
+        type: string[]
+        maxItems: 2
+        required: false
+
+  ScatterPlotPostResponse:
+    additionalProperties: false
+    properties:
+      group:
+        type: string
+        required: false
+      panel:
+        type: string
+        required: false
+      seriesY:
+        type: number[]
+        minItems: 1
+        required: true
+      seriesX:
+        type: number[]
+        minItems: 1
+        required: true
+      intervalX:
+        type: number[]
+        required: false
+      intervalY:
+        type: number[]
+        required: false
+      intervalSE:
+        type: number[]
+        required: false

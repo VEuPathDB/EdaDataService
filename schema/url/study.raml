@@ -1,0 +1,81 @@
+#%RAML 1.0 Library
+
+types:
+  # Type name determines the name of the Java class that will be generated.
+  StudiesGetResponse:
+    additionalProperties: false
+    properties:
+      studies: API_StudyOverview[]
+
+  StudyIdGetResponse:
+    additionalProperties: false
+    properties:
+      study: API_StudyDetail
+
+  EntityIdGetResponse:
+    additionalProperties: false
+    properties:
+      entity: API_Entity
+
+  API_StudyOverview:
+    type: object
+    properties:
+      id:
+        required: true
+        type: string
+      name:
+        required: true
+        type: string
+
+  API_StudyDetail:
+    type: object
+    properties:
+      id: string
+      name: string
+      rootEntity: API_Entity
+
+  API_Entity:
+    type: object
+    properties:
+      id: string
+      name: string
+      description: string
+      children?: API_Entity[]
+      variablesTree: API_VariablesTreeElement[]
+
+  API_VariablesTreeElement:
+    type: object
+    discriminator: type
+    properties:
+      id: string
+      name: string
+      description: string
+      children?: API_VariablesTreeElement[]
+      type: string # need to validate that this is category, string, number, date
+          
+  API_VariablesCategory:
+    type: API_VariablesTreeElement
+    discriminatorValue: category
+ 
+  API_StringVariable:
+    type: API_VariablesTreeElement
+    discriminatorValue: string
+    
+  API_NumberVariable:
+    type: API_VariablesTreeElement
+    discriminatorValue: number
+    properties:
+      numberValueSpec:
+        type: object
+        properties:
+          isContinuous: boolean
+          precision: integer
+
+  API_DateVariable:
+    type: API_VariablesTreeElement
+    discriminatorValue: date
+    properties:
+      dateValueSpec:
+        type: object
+        properties:
+          isContinuous: boolean

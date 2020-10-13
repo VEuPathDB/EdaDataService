@@ -1,4 +1,4 @@
-package org.veupathdb.service.demo;
+package org.veupathdb.service.edads;
 
 import org.veupathdb.lib.container.jaxrs.config.Options;
 import org.veupathdb.lib.container.jaxrs.server.ContainerResources;

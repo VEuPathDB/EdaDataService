@@ -2,7 +2,7 @@
 
 extends: https://raw.githubusercontent.com/VEuPathDB/docs-api-schema/v2.0.1/libraries/base-service.raml
 
-title: EDA Workspace Data Service
+title: EDA Workspace Data Service API
 version: v1.0.0
 mediaType: application/json
 
@@ -27,6 +27,43 @@ securitySchemes:
 # Endpoints
 #
 
+/studies:
+  displayName: Available Studies
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: lib.StudiesGetResponse
+
+  /{study-id}:
+    uriParameters:
+      study-id:
+        description: ID of the study of interest
+        type: string
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              type: lib.StudyIdGetResponse
+
+    /entities:
+
+      /{entity-id}:
+        uriParameters:
+          entity-id:
+            description: ID of the entity of interest
+            type: string
+        get:
+          description: |
+            In the response, `variablesTree` will be a subclass of [VariablesTreeElement](#type:lib.VariablesTreeElement)
+          responses:
+            200:
+              body:
+                application/json:
+                  type: lib.EntityIdGetResponse
+
 /analyses:
   displayName: Available Analyses
   get:
@@ -35,50 +72,51 @@ securitySchemes:
         body:
           application/json:
             type: lib.AnalysesGetResponse
-  /countOfEntities:
-    get:
+
+  /record-count:
+    post:
+      description: Returns a count of the records in the subset
+      body:
+        application/json:
+          type: lib.RecordCountPostRequest
       responses:
         200:
           body:
-            text/plain:
-    /{study-id}:
-      get:
-        responses:
-          200:
-            body:
-              text/plain:
-  /scatterPlot:
+            application/json:
+              type: lib.RecordCountPostResponse
+        500:
+          body:
+            application/json:
+              type: error.ServerError
+
+  /scatterplot:
     post:
-      securedBy: header-auth
+      description: Returns data required to create a scatterplot visualization
       body:
         application/json:
           type: lib.ScatterPlotPostRequest
       responses:
         200:
           body:
-            application/json: lib.ScatterPlotPostResponse
-        401:
-          body:
             application/json:
-              type: error.UnauthorizedError
+              type: lib.ScatterPlotPostResponse
         500:
           body:
             application/json:
               type: error.ServerError
+
+
   /histogram:
     post:
-      securedBy: header-auth
+      description: Returns data required to create a histogram visualization
       body:
         application/json:
           type: lib.HistogramPostRequest
       responses:
         200:
           body:
-            application/json: lib.HistogramPostResponse
-        401:
-          body:
             application/json:
-              type: error.UnauthorizedError
+              type: lib.HistogramPostResponse
         500:
           body:
             application/json:
