@@ -3,7 +3,7 @@
 types:
   # Type name determines the name of the Java class that will be generated.
 
-  ScatterPlotPostRequest:
+  ScatterplotPostRequest:
     additionalProperties: false
     properties:
       study: string
@@ -14,9 +14,9 @@ types:
         required: false
         type: DerivedVariable[]
       config:
-        type: ScatterPlotSpec
+        type: ScatterplotSpec
 
-  ScatterPlotSpec:
+  ScatterplotSpec:
     additionalProperties: false
     properties:
       xAxisVariable: 
@@ -31,7 +31,7 @@ types:
         maxItems: 2
         required: false
 
-  ScatterPlotPostResponse:
+  ScatterplotPostResponse:
     additionalProperties: false
     properties:
       group:
