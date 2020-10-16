@@ -16,9 +16,9 @@ import org.veupathdb.service.edads.generated.model.RecordCountPostResponseStream
 import org.veupathdb.service.edads.generated.model.ScatterplotPostRequest;
 import org.veupathdb.service.edads.generated.model.ScatterplotPostResponseStream;
 import org.veupathdb.service.edads.generated.resources.Analyses;
-import org.veupathdb.service.edads.plugins.histogram.HistogramPlugin;
-import org.veupathdb.service.edads.plugins.recordcount.RecordCountPlugin;
-import org.veupathdb.service.edads.plugins.scatterplot.ScatterplotPlugin;
+import org.veupathdb.service.edads.plugin.histogram.HistogramPlugin;
+import org.veupathdb.service.edads.plugin.recordcount.RecordCountPlugin;
+import org.veupathdb.service.edads.plugin.scatterplot.ScatterplotPlugin;
 
 public class AnalysesService implements Analyses {
 

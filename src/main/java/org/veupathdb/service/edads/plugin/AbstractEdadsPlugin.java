@@ -1,4 +1,4 @@
-package org.veupathdb.service.edads.core;
+package org.veupathdb.service.edads.plugin;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 
 import org.gusdb.fgputil.validation.ValidationBundle;
 
-public abstract class EdadsPlugin<T> implements Consumer<OutputStream> {
+public abstract class AbstractEdadsPlugin<T> implements Consumer<OutputStream> {
 
   protected T _request;
 
@@ -14,7 +14,7 @@ public abstract class EdadsPlugin<T> implements Consumer<OutputStream> {
 
   protected abstract void writeResults(OutputStream out) throws IOException;
 
-  public EdadsPlugin<T> processRequest(T request) {
+  public AbstractEdadsPlugin<T> processRequest(T request) {
     _request = request;
     validateRequest(_request);
     return this;

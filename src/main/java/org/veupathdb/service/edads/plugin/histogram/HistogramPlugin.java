@@ -1,13 +1,13 @@
-package org.veupathdb.service.edads.plugins.histogram;
+package org.veupathdb.service.edads.plugin.histogram;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
 import org.gusdb.fgputil.validation.ValidationBundle;
-import org.veupathdb.service.edads.core.EdadsPlugin;
 import org.veupathdb.service.edads.generated.model.HistogramPostRequest;
+import org.veupathdb.service.edads.plugin.AbstractEdadsPlugin;
 
-public class HistogramPlugin extends EdadsPlugin<HistogramPostRequest>{
+public class HistogramPlugin extends AbstractEdadsPlugin<HistogramPostRequest>{
 
   @Override
   protected ValidationBundle validateRequest(HistogramPostRequest request) {
