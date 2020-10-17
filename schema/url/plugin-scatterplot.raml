@@ -4,17 +4,9 @@ types:
   # Type name determines the name of the Java class that will be generated.
 
   ScatterplotPostRequest:
-    additionalProperties: false
+    type: BaseAnalysisConfig
     properties:
-      study: string
-      subset:
-        required: false
-        type: API_Filter[]
-      derivedVariables:
-        required: false
-        type: DerivedVariable[]
-      config:
-        type: ScatterplotSpec
+      config: ScatterplotSpec
 
   ScatterplotSpec:
     additionalProperties: false

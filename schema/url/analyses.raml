@@ -9,8 +9,16 @@ types:
       analyses: AnalysisOverview[]
 
   AnalysisOverview:
-    type: object
     properties:
-      name:
-        required: true
-        type: string
+      name: string
+
+  BaseAnalysisConfig:
+    additionalProperties: false
+    properties:
+      study: string
+      subset:
+        required: false
+        type: API_Filter[]
+      derivedVariables:
+        required: false
+        type: DerivedVariable[]
