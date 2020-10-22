@@ -9,6 +9,48 @@
 ################################################################################
 
 types:
+  ScatterplotPostRequest:
+    type: BaseAnalysisConfig
+    properties:
+      config: ScatterplotSpec
+  ScatterplotSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      xAxisVariable: string
+      yAxisVariable: string
+      overlayVariable:
+        type: string
+        required: false
+      facetVariable:
+        type: string[]
+        maxItems: 2
+        required: false
+  ScatterplotPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      group:
+        type: string
+        required: false
+      panel:
+        type: string
+        required: false
+      seriesY:
+        type: number[]
+        minItems: 1
+      seriesX:
+        type: number[]
+        minItems: 1
+      intervalX:
+        type: number[]
+        required: false
+      intervalY:
+        type: number[]
+        required: false
+      intervalSE:
+        type: number[]
+        required: false
   StudiesGetResponse:
     type: object
     additionalProperties: false
@@ -51,16 +93,23 @@ types:
       name: string
       description: string
       children?: API_VariablesTreeElement[]
-      type: string
+      type: API_VariablesTreeElementType
+  API_VariablesTreeElementType:
+    type: string
+    enum:
+      - category
+      - string
+      - number
+      - date
   API_VariablesCategory:
     type: API_VariablesTreeElement
-    discriminatorValue: category
+    discriminatorValue: 'category'
   API_StringVariable:
     type: API_VariablesTreeElement
-    discriminatorValue: string
+    discriminatorValue: 'string'
   API_NumberVariable:
     type: API_VariablesTreeElement
-    discriminatorValue: number
+    discriminatorValue: 'number'
     properties:
       numberValueSpec:
         type: object
@@ -69,7 +118,7 @@ types:
           precision: integer
   API_DateVariable:
     type: API_VariablesTreeElement
-    discriminatorValue: date
+    discriminatorValue: 'date'
     properties:
       dateValueSpec:
         type: object
@@ -108,31 +157,39 @@ types:
     properties:
       entityId: string
       variableId: string
-      type: string
+      type: API_FilterType
+  API_FilterType:
+    type: string
+    enum:
+      - stringSet
+      - numberSet
+      - dateSet
+      - numberRange
+      - dateRange
   API_StringSetFilter:
     type: API_Filter
-    discriminatorValue: stringSet
+    discriminatorValue: 'stringSet'
     properties:
       stringSet: string[]
   API_NumberSetFilter:
     type: API_Filter
-    discriminatorValue: numberSet
+    discriminatorValue: 'numberSet'
     properties:
       numberSet: number[]
   API_DateSetFilter:
     type: API_Filter
-    discriminatorValue: dateSet
+    discriminatorValue: 'dateSet'
     properties:
       dateSet: string[] # how to constrain this to a date?
   API_NumberRangeFilter:
     type: API_Filter
-    discriminatorValue: numberRange
+    discriminatorValue: 'numberRange'
     properties:
       min: number
       max: number
   API_DateRangeFilter:
     type: API_Filter
-    discriminatorValue: dateRange
+    discriminatorValue: 'dateRange'
     properties:
       min: string
       max: string
@@ -186,46 +243,4 @@ types:
     additionalProperties: false
     properties:
       recordCount: number
-  ScatterplotPostRequest:
-    type: BaseAnalysisConfig
-    properties:
-      config: ScatterplotSpec
-  ScatterplotSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      xAxisVariable: string
-      yAxisVariable: string
-      overlayVariable:
-        type: string
-        required: false
-      facetVariable:
-        type: string[]
-        maxItems: 2
-        required: false
-  ScatterplotPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      group:
-        type: string
-        required: false
-      panel:
-        type: string
-        required: false
-      seriesY:
-        type: number[]
-        minItems: 1
-      seriesX:
-        type: number[]
-        minItems: 1
-      intervalX:
-        type: number[]
-        required: false
-      intervalY:
-        type: number[]
-        required: false
-      intervalSE:
-        type: number[]
-        required: false
 

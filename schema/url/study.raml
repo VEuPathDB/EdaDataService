@@ -51,19 +51,22 @@ types:
       name: string
       description: string
       children?: API_VariablesTreeElement[]
-      type: string # need to validate that this is category, string, number, date
-          
+      type: API_VariablesTreeElementType # need to validate that this is category, string, number, date
+
+  API_VariablesTreeElementType:
+    enum: [ 'category', 'string', 'number', 'date' ]
+
   API_VariablesCategory:
     type: API_VariablesTreeElement
-    discriminatorValue: category
+    discriminatorValue: 'category'
  
   API_StringVariable:
     type: API_VariablesTreeElement
-    discriminatorValue: string
+    discriminatorValue: 'string'
     
   API_NumberVariable:
     type: API_VariablesTreeElement
-    discriminatorValue: number
+    discriminatorValue: 'number'
     properties:
       numberValueSpec:
         type: object
@@ -73,7 +76,7 @@ types:
 
   API_DateVariable:
     type: API_VariablesTreeElement
-    discriminatorValue: date
+    discriminatorValue: 'date'
     properties:
       dateValueSpec:
         type: object

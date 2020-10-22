@@ -60,6 +60,7 @@ dependencies {
   implementation("org.glassfish.jersey.containers:jersey-container-grizzly2-http:${jersey}")
   implementation("org.glassfish.jersey.containers:jersey-container-grizzly2-servlet:${jersey}")
   implementation("org.glassfish.jersey.media:jersey-media-json-jackson:${jersey}")
+  implementation("org.glassfish.jersey.core:jersey-client:${jersey}")
   runtimeOnly("org.glassfish.jersey.inject:jersey-hk2:${jersey}")
 
   // Jackson

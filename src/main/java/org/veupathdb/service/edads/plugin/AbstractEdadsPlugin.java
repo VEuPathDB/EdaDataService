@@ -35,4 +35,5 @@ public abstract class AbstractEdadsPlugin<T extends BaseAnalysisConfig> implemen
       throw new RuntimeException("Unable to stream results", e);
     }
   }
+
 }
