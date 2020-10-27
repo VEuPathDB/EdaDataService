@@ -25,6 +25,7 @@ import org.veupathdb.service.edads.generated.model.DerivedVariable;
 import org.veupathdb.service.edads.model.EntityDef;
 import org.veupathdb.service.edads.model.StreamSpec;
 import org.veupathdb.service.edads.model.VariableDef;
+import org.veupathdb.service.edads.service.EdaClient;
 import org.veupathdb.service.edads.service.StudiesService;
 
 public abstract class AbstractEdadsPlugin<T extends BaseAnalysisConfig, S> implements Consumer<OutputStream> {
@@ -35,8 +36,9 @@ public abstract class AbstractEdadsPlugin<T extends BaseAnalysisConfig, S> imple
   protected abstract void writeResults(OutputStream out, List<InputStream> dataStreams) throws IOException;
 
   private boolean _requestProcessed = false;
-  private Optional<List<DerivedVariable>> _derivedVariables;
+  private APIStudyDetail _study;
   private Optional<List<APIFilter>> _subset;
+  private Optional<List<DerivedVariable>> _derivedVariables;
   private List<StreamSpec> _requiredStreams;
 
   public final AbstractEdadsPlugin<T,S> processRequest(T request) throws ValidationException {
@@ -45,14 +47,14 @@ public abstract class AbstractEdadsPlugin<T extends BaseAnalysisConfig, S> imple
     S pluginSpec = getSpecObject(request);
 
     // validate requested study exists and fetch metadata
-    APIStudyDetail study = StudiesService.getStudy(request.getStudy());
+    _study = StudiesService.getStudy(request.getStudy());
 
     // check for subset and derived entity properties of request
-    _derivedVariables = Optional.ofNullable(request.getDerivedVariables());
     _subset = Optional.ofNullable(request.getSubset());
+    _derivedVariables = Optional.ofNullable(request.getDerivedVariables());
 
     // construct available variables for each entity from metadata and derived variable config
-    Map<String, EntityDef> supplementedEntities = supplementEntities(study.getRootEntity(), _derivedVariables);
+    Map<String, EntityDef> supplementedEntities = supplementEntities(_study.getRootEntity(), _derivedVariables);
 
     // ask subclass to validate the configuration
     validate(pluginSpec, supplementedEntities).throwIfInvalid();
@@ -142,7 +144,12 @@ public abstract class AbstractEdadsPlugin<T extends BaseAnalysisConfig, S> imple
     AutoCloseableList<InputStream> dataStreams = new AutoCloseableList<>();
     try {
       for (StreamSpec spec : _requiredStreams) {
-        dataStreams.add(getDataStream(spec));
+        dataStreams.add(EdaClient.getDataStream(
+            _study,
+            _subset,
+            _derivedVariables,
+            spec
+        ));
       }
       return dataStreams;
     }
@@ -150,11 +157,6 @@ public abstract class AbstractEdadsPlugin<T extends BaseAnalysisConfig, S> imple
       dataStreams.close();
       throw new RuntimeException("Unable to fetch all required data", e);
     }
-  }
-
-  private InputStream getDataStream(StreamSpec spec) {
-    // TODO: open connection to subsetting (and later stream processing) service and request data
-    return null;
   }
 
 }

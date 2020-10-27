@@ -9,94 +9,6 @@
 ################################################################################
 
 types:
-  StudiesGetResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      studies: API_StudyOverview[]
-  StudyIdGetResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      study: API_StudyDetail
-  EntityIdGetResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      entity: API_Entity
-  API_StudyOverview:
-    type: object
-    properties:
-      id: string
-      name: string
-  API_StudyDetail:
-    type: object
-    properties:
-      id: string
-      name: string
-      rootEntity: API_Entity
-  API_Entity:
-    type: object
-    properties:
-      id: string
-      name: string
-      description: string
-      children?: API_Entity[]
-      variables: API_Variable[]
-  API_Variable:
-    type: object
-    discriminator: type
-    properties:
-      id: string
-      name: string
-      displayName: string
-      parentId: string
-      type: API_VariableType
-  API_VariableType:
-    type: string
-    enum:
-      - category
-      - string
-      - number
-      - date
-  API_VariablesCategory:
-    type: API_Variable
-    discriminatorValue: category
-  API_StringVariable:
-    type: API_Variable
-    discriminatorValue: string
-  API_NumberVariable:
-    type: API_Variable
-    discriminatorValue: number
-    properties:
-      isContinuous: boolean
-      precision: integer
-      units: string
-  API_DateVariable:
-    type: API_Variable
-    discriminatorValue: date
-    properties:
-      isContinuous: boolean
-  AnalysesGetResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      analyses: AnalysisOverview[]
-  AnalysisOverview:
-    type: object
-    properties:
-      name: string
-  BaseAnalysisConfig:
-    type: object
-    additionalProperties: false
-    properties:
-      study: string
-      subset:
-        type: API_Filter[]
-        required: false
-      derivedVariables:
-        type: DerivedVariable[]
-        required: false
   DerivedVariable:
     type: object
     properties:
@@ -238,5 +150,93 @@ types:
         required: false
       intervalSE:
         type: number[]
+        required: false
+  StudiesGetResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      studies: API_StudyOverview[]
+  StudyIdGetResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      study: API_StudyDetail
+  EntityIdGetResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      entity: API_Entity
+  API_StudyOverview:
+    type: object
+    properties:
+      id: string
+      name: string
+  API_StudyDetail:
+    type: object
+    properties:
+      id: string
+      name: string
+      rootEntity: API_Entity
+  API_Entity:
+    type: object
+    properties:
+      id: string
+      name: string
+      description: string
+      children?: API_Entity[]
+      variables: API_Variable[]
+  API_Variable:
+    type: object
+    discriminator: type
+    properties:
+      id: string
+      name: string
+      displayName: string
+      parentId: string
+      type: API_VariableType
+  API_VariableType:
+    type: string
+    enum:
+      - category
+      - string
+      - number
+      - date
+  API_VariablesCategory:
+    type: API_Variable
+    discriminatorValue: category
+  API_StringVariable:
+    type: API_Variable
+    discriminatorValue: string
+  API_NumberVariable:
+    type: API_Variable
+    discriminatorValue: number
+    properties:
+      isContinuous: boolean
+      precision: integer
+      units: string
+  API_DateVariable:
+    type: API_Variable
+    discriminatorValue: date
+    properties:
+      isContinuous: boolean
+  AnalysesGetResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      analyses: AnalysisOverview[]
+  AnalysisOverview:
+    type: object
+    properties:
+      name: string
+  BaseAnalysisConfig:
+    type: object
+    additionalProperties: false
+    properties:
+      study: string
+      subset:
+        type: API_Filter[]
+        required: false
+      derivedVariables:
+        type: DerivedVariable[]
         required: false
 
