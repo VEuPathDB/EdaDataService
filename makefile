@@ -78,7 +78,7 @@ install-dev-env:
 	@$(BIN_DIR)/install-npm.sh
 
 clean:
-	@rm -rf .gradle .tools vendor build docs
+	@rm -rf .gradle .tools vendor build
 
 fix-path:
 	@$(BIN_DIR)/fix-path.sh $(EXAMPLE_DIR) $(MAIN_DIR)
