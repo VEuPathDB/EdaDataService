@@ -113,7 +113,6 @@ build/libs/service.jar: \
       vendor/fgputil-servlet-1.0.0.jar \
       vendor/fgputil-solr-1.0.0.jar \
       vendor/fgputil-test-1.0.0.jar \
-      vendor/fgputil-util-1.0.0.jar \
       vendor/fgputil-web-1.0.0.jar \
       vendor/fgputil-xml-1.0.0.jar \
       build.gradle.kts \
