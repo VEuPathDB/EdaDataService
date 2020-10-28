@@ -1,6 +1,6 @@
 package org.veupathdb.service.edads.service;
 
-import static org.veupathdb.service.edads.service.Utilities.getResponseObject;
+import static org.veupathdb.service.edads.util.NetworkUtils.getResponseObject;
 
 import org.veupathdb.service.edads.generated.model.APIStudyDetail;
 import org.veupathdb.service.edads.generated.model.EntityIdGetResponse;
@@ -8,7 +8,7 @@ import org.veupathdb.service.edads.generated.model.StudiesGetResponse;
 import org.veupathdb.service.edads.generated.model.StudyIdGetResponse;
 import org.veupathdb.service.edads.generated.resources.Studies;
 
-public class StudiesService implements Studies {
+public class PassThroughService implements Studies {
 
   @Override
   public GetStudiesResponse getStudies() {

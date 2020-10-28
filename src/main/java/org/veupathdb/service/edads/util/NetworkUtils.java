@@ -1,4 +1,4 @@
-package org.veupathdb.service.edads.service;
+package org.veupathdb.service.edads.util;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,7 +21,7 @@ import org.veupathdb.service.edads.Resources;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class Utilities {
+public class NetworkUtils {
 
   public static class RequestFailure extends TwoTuple<StatusType, String> {
 

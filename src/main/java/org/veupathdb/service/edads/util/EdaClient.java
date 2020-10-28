@@ -1,4 +1,4 @@
-package org.veupathdb.service.edads.service;
+package org.veupathdb.service.edads.util;
 
 import java.io.InputStream;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.veupathdb.service.edads.generated.model.APIFilter;
 import org.veupathdb.service.edads.generated.model.APIStudyDetail;
 import org.veupathdb.service.edads.generated.model.DerivedVariable;
-import org.veupathdb.service.edads.model.StreamSpec;
+import org.veupathdb.service.edads.util.StreamSpec;
 
 public class EdaClient {
 

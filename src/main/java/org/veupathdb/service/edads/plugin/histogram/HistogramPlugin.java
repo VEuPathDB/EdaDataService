@@ -7,11 +7,10 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 import org.gusdb.fgputil.validation.ValidationBundle;
-import org.gusdb.fgputil.validation.ValidationLevel;
 import org.veupathdb.service.edads.generated.model.HistogramPostRequest;
 import org.veupathdb.service.edads.generated.model.HistogramSpec;
-import org.veupathdb.service.edads.model.EntityDef;
-import org.veupathdb.service.edads.model.StreamSpec;
+import org.veupathdb.service.edads.util.EntityDef;
+import org.veupathdb.service.edads.util.StreamSpec;
 import org.veupathdb.service.edads.plugin.AbstractEdadsPlugin;
 
 public class HistogramPlugin extends AbstractEdadsPlugin<HistogramPostRequest, HistogramSpec>{

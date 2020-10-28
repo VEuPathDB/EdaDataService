@@ -1,8 +1,6 @@
-package org.veupathdb.service.edads.model;
+package org.veupathdb.service.edads.util;
 
 import java.util.ArrayList;
-import java.util.List;
-import org.gusdb.fgputil.validation.ValidationBundle;
 
 public class StreamSpec extends ArrayList<VariableDef> {
 

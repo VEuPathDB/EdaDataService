@@ -1,4 +1,4 @@
-package org.veupathdb.service.edads.model;
+package org.veupathdb.service.edads.util;
 
 import org.veupathdb.service.edads.generated.model.APIVariableType;
 

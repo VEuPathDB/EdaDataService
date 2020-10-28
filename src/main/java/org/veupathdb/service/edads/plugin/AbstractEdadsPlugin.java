@@ -22,11 +22,11 @@ import org.veupathdb.service.edads.generated.model.APIStudyDetail;
 import org.veupathdb.service.edads.generated.model.APIVariableType;
 import org.veupathdb.service.edads.generated.model.BaseAnalysisConfig;
 import org.veupathdb.service.edads.generated.model.DerivedVariable;
-import org.veupathdb.service.edads.model.EntityDef;
-import org.veupathdb.service.edads.model.StreamSpec;
-import org.veupathdb.service.edads.model.VariableDef;
-import org.veupathdb.service.edads.service.EdaClient;
-import org.veupathdb.service.edads.service.StudiesService;
+import org.veupathdb.service.edads.util.EntityDef;
+import org.veupathdb.service.edads.util.StreamSpec;
+import org.veupathdb.service.edads.util.VariableDef;
+import org.veupathdb.service.edads.util.EdaClient;
+import org.veupathdb.service.edads.service.PassThroughService;
 
 public abstract class AbstractEdadsPlugin<T extends BaseAnalysisConfig, S> implements Consumer<OutputStream> {
 
@@ -47,7 +47,7 @@ public abstract class AbstractEdadsPlugin<T extends BaseAnalysisConfig, S> imple
     S pluginSpec = getSpecObject(request);
 
     // validate requested study exists and fetch metadata
-    _study = StudiesService.getStudy(request.getStudy());
+    _study = PassThroughService.getStudy(request.getStudy());
 
     // check for subset and derived entity properties of request
     _subset = Optional.ofNullable(request.getSubset());
