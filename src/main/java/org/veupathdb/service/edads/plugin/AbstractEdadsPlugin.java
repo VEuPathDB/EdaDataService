@@ -73,8 +73,8 @@ public abstract class AbstractEdadsPlugin<T extends BaseAnalysisConfig, S> imple
     ValidationBundle.ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
     for (StreamSpec spec : requestedStreams) {
       for (VariableDef requestedVar : spec) {
-        if (!spec.getEntity().containsKey(requestedVar.getName())) {
-          validation.addError("Entity " + spec.getEntity().getName() + " does not contain variable " + requestedVar.getName());
+        if (!spec.getEntity().containsKey(requestedVar.getId())) {
+          validation.addError("Entity " + spec.getEntity().getId() + " does not contain variable " + requestedVar.getId());
         }
       }
     }
@@ -89,20 +89,20 @@ public abstract class AbstractEdadsPlugin<T extends BaseAnalysisConfig, S> imple
     // add variables for this entity
     entity.getVariables().stream()
       .filter(var -> !var.getType().equals(APIVariableType.CATEGORY))
-      .map(var -> new VariableDef(var.getId(), var.getName(), var.getType()))
-      .forEach(vd -> entityDef.put(vd.getName(), vd));
+      .map(var -> new VariableDef(var.getId(), var.getType()))
+      .forEach(vd -> entityDef.put(vd.getId(), vd));
 
     // add derived variables for this entity
     derivedVariables
       .map(list -> list.stream()
         .filter(dr -> dr.getEntityId().equals(entity.getId()))
-        .map(dr -> new VariableDef(dr.getName(), dr.getName(), dr.getType()))
-        .filter(vd -> !entityDef.containsKey(vd.getName())) // skip if entity already contains the variable; will throw later
+        .map(dr -> new VariableDef(dr.getVariableId(), dr.getType()))
+        .filter(vd -> !entityDef.containsKey(vd.getId())) // skip if entity already contains the variable; will throw later
         .collect(Collectors.toList()))
       .orElse(Collections.emptyList())
-      .forEach(vd -> entityDef.put(vd.getName(), vd));
+      .forEach(vd -> entityDef.put(vd.getId(), vd));
 
-    entities.put(entityDef.getName(), entityDef);
+    entities.put(entityDef.getId(), entityDef);
     entity.getChildren()
       .forEach(child -> entities.putAll(supplementEntities(child, derivedVariables)));
     return entities;
