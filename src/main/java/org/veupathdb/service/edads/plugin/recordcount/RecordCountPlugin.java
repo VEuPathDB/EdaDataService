@@ -35,7 +35,7 @@ public class RecordCountPlugin extends AbstractEdadsPlugin<RecordCountPostReques
 
   @Override
   protected List<StreamSpec> getRequestedStreams(RecordCountSpec pluginSpec) {
-    String pkVarName = getEntityMap().get(pluginSpec.getEntityId()).get(0).getId();
+    String pkVarName = pluginSpec.getEntityId() + "_id";
     return new ListBuilder<StreamSpec>(new StreamSpec(pluginSpec.getEntityId()).addVariable(pkVarName)).toList();
   }
 
