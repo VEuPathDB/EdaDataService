@@ -23,46 +23,9 @@ securitySchemes:
           type: string
 
 
-#
+####################################
 # Endpoints
-#
-
-/studies:
-  displayName: Available Studies
-  get:
-    responses:
-      200:
-        body:
-          application/json:
-            type: lib.StudiesGetResponse
-
-  /{study-id}:
-    uriParameters:
-      study-id:
-        description: ID of the study of interest
-        type: string
-    get:
-      responses:
-        200:
-          body:
-            application/json:
-              type: lib.StudyIdGetResponse
-
-    /entities:
-
-      /{entity-id}:
-        uriParameters:
-          entity-id:
-            description: ID of the entity of interest
-            type: string
-        get:
-          description: |
-            In the response, `variablesTree` will be a subclass of [VariablesTreeElement](#type:lib.VariablesTreeElement)
-          responses:
-            200:
-              body:
-                application/json:
-                  type: lib.EntityIdGetResponse
+####################################
 
 /analyses:
   displayName: Available Analyses

@@ -22,12 +22,12 @@ public class HistogramPlugin extends AbstractEdadsPlugin<HistogramPostRequest, H
   }
 
   @Override
-  protected ValidationBundle validate(HistogramSpec pluginSpec, Map<String, EntityDef> entities) {
+  protected ValidationBundle validateConfig(HistogramSpec pluginSpec) {
     return null;
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(HistogramSpec pluginSpec, Map<String, EntityDef> supplementedEntities) {
+  protected List<StreamSpec> getRequestedStreams(HistogramSpec pluginSpec) {
     return null;
   }
 

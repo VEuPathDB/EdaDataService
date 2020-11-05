@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.gusdb.fgputil.AutoCloseableList;
 import org.gusdb.fgputil.validation.ValidationBundle;
 import org.gusdb.fgputil.validation.ValidationException;
@@ -26,55 +27,73 @@ import org.veupathdb.service.edads.util.EntityDef;
 import org.veupathdb.service.edads.util.StreamSpec;
 import org.veupathdb.service.edads.util.VariableDef;
 import org.veupathdb.service.edads.util.EdaClient;
-import org.veupathdb.service.edads.service.PassThroughService;
 
 public abstract class AbstractEdadsPlugin<T extends BaseAnalysisConfig, S> implements Consumer<OutputStream> {
 
   protected abstract Class<S> getConfigurationClass();
-  protected abstract ValidationBundle validate(S pluginSpec, Map<String,EntityDef> entities);
-  protected abstract List<StreamSpec> getRequestedStreams(S pluginSpec, Map<String,EntityDef> supplementedEntities);
+  protected abstract ValidationBundle validateConfig(S pluginSpec);
+  protected abstract List<StreamSpec> getRequestedStreams(S pluginSpec);
   protected abstract void writeResults(OutputStream out, List<InputStream> dataStreams) throws IOException;
 
   private boolean _requestProcessed = false;
+  private S _pluginSpec;
   private APIStudyDetail _study;
   private Optional<List<APIFilter>> _subset;
   private Optional<List<DerivedVariable>> _derivedVariables;
+  private Map<String, EntityDef> _supplementedEntityMap;
   private List<StreamSpec> _requiredStreams;
 
   public final AbstractEdadsPlugin<T,S> processRequest(T request) throws ValidationException {
 
     // validate config type matches class provided by subclass
-    S pluginSpec = getSpecObject(request);
+    _pluginSpec = getSpecObject(request);
 
     // validate requested study exists and fetch metadata
-    _study = PassThroughService.getStudy(request.getStudy());
+    _study = EdaClient.getStudy(request.getStudy());
 
     // check for subset and derived entity properties of request
     _subset = Optional.ofNullable(request.getSubset());
     _derivedVariables = Optional.ofNullable(request.getDerivedVariables());
 
     // construct available variables for each entity from metadata and derived variable config
-    Map<String, EntityDef> supplementedEntities = supplementEntities(_study.getRootEntity(), _derivedVariables);
+    _supplementedEntityMap = supplementEntities(_study.getRootEntity(), _derivedVariables);
 
     // ask subclass to validate the configuration
-    validate(pluginSpec, supplementedEntities).throwIfInvalid();
+    validateConfig(_pluginSpec).throwIfInvalid();
 
     // get list of data streams required by this subclass
-    _requiredStreams = getRequestedStreams(pluginSpec, supplementedEntities);
+    _requiredStreams = getRequestedStreams(_pluginSpec);
 
     // validate stream specs provided by the subclass
-    validate(_requiredStreams, supplementedEntities).throwIfInvalid();
+    validateStreamSpecs(_requiredStreams).throwIfInvalid();
 
+    // setup complete; return this object on which accept(OutputStream) will be
+    // called.  Required streams will be opened and passed to the subclass, which
+    // will interpret them as needed and write the result to the given OutputStream
     _requestProcessed = true;
     return this;
   }
 
-  private ValidationBundle validate(List<StreamSpec> requestedStreams, Map<String,EntityDef> entities) {
+  protected String getStudyId() {
+    return _study.getId();
+  }
+
+  protected Map<String, EntityDef> getEntityMap() {
+    return _supplementedEntityMap;
+  }
+
+  private ValidationBundle validateStreamSpecs(List<StreamSpec> requestedStreams) {
     ValidationBundle.ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
     for (StreamSpec spec : requestedStreams) {
-      for (VariableDef requestedVar : spec) {
-        if (!spec.getEntity().containsKey(requestedVar.getId())) {
-          validation.addError("Entity " + spec.getEntity().getId() + " does not contain variable " + requestedVar.getId());
+      EntityDef entity = _supplementedEntityMap.get(spec.getEntityId());
+      if (entity == null) {
+        validation.addError("Entity " + spec.getEntityId() + " does not exist in study " + _study.getId());
+      }
+      else {
+        for (String requestedVar : spec) {
+          if (!entity.containsKey(requestedVar)) {
+            validation.addError("Entity " + entity.getId() + " does not contain variable " + requestedVar);
+          }
         }
       }
     }
@@ -84,7 +103,7 @@ public abstract class AbstractEdadsPlugin<T extends BaseAnalysisConfig, S> imple
   // can erase tree structure here since we only care about variables available on a particular entity
   private static Map<String, EntityDef> supplementEntities(APIEntity entity, Optional<List<DerivedVariable>> derivedVariables) {
     Map<String, EntityDef> entities = new HashMap<>();
-    EntityDef entityDef = new EntityDef(entity.getId(), entity.getName());
+    EntityDef entityDef = new EntityDef(entity.getId());
 
     // add variables for this entity
     entity.getVariables().stream()
@@ -126,7 +145,7 @@ public abstract class AbstractEdadsPlugin<T extends BaseAnalysisConfig, S> imple
   }
 
   @Override
-  public void accept(OutputStream out) {
+  public final void accept(OutputStream out) {
     try {
       if (!_requestProcessed) {
         throw new RuntimeException("Output cannot be streamed until request has been processed.");

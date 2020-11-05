@@ -2,15 +2,20 @@ package org.veupathdb.service.edads.util;
 
 import java.util.ArrayList;
 
-public class StreamSpec extends ArrayList<VariableDef> {
+public class StreamSpec extends ArrayList<String> {
 
-  private EntityDef _entity;
+  private String _entityId;
 
-  public StreamSpec(EntityDef entity) {
-    _entity = entity;
+  public StreamSpec(String entityId) {
+    _entityId = entityId;
   }
 
-  public EntityDef getEntity() {
-    return _entity;
+  public String getEntityId() {
+    return _entityId;
+  }
+
+  public StreamSpec addVariable(String variableId) {
+    add(variableId);
+    return this;
   }
 }

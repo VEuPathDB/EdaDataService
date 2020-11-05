@@ -34,7 +34,7 @@ dependencies {
 
   // Extra FgpUtil dependencies
   runtimeOnly("org.apache.commons:commons-dbcp2:2.+")
-  runtimeOnly("org.json:json:20190722")
+  implementation("org.json:json:20190722")
   runtimeOnly("com.fasterxml.jackson.datatype:jackson-datatype-json-org:${jackson}")
   runtimeOnly("com.fasterxml.jackson.module:jackson-module-parameter-names:${jackson}")
   runtimeOnly("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jackson}")

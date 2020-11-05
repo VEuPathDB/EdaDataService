@@ -6,7 +6,7 @@ public class EntityDef extends HashMap<String, VariableDef> {
 
   private final String _id;
 
-  public EntityDef(String id, String name) {
+  public EntityDef(String id) {
     _id = id;
   }
 

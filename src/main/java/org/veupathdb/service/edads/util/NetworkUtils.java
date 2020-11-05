@@ -41,6 +41,9 @@ public class NetworkUtils {
     public StatusType getStatusType() { return getFirst(); }
     public String getResponseBody() { return getSecond(); }
 
+    public String toString() {
+      return getStatusType().getStatusCode() + " " + getStatusType().getReasonPhrase() + ": " + getResponseBody();
+    }
   }
 
   public static <T> T getResponseObject(String urlPath, Class<T> responseObjectClass) {
@@ -52,8 +55,8 @@ public class NetworkUtils {
     }
   }
 
-  public static <T> Either<InputStream,RequestFailure> makePostRequest(
-      String url, T postBodyObject, String expectedResponseType) throws JsonProcessingException {
+  public static Either<InputStream,RequestFailure> makePostRequest(
+      String url, Object postBodyObject, String expectedResponseType) throws JsonProcessingException {
 
     Response response =  ClientBuilder.newClient()
       .target(url)

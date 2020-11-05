@@ -21,12 +21,12 @@ public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostReques
   }
 
   @Override
-  protected ValidationBundle validate(ScatterplotSpec pluginSpec, Map<String, EntityDef> entities) {
+  protected ValidationBundle validateConfig(ScatterplotSpec pluginSpec) {
     return null;
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(ScatterplotSpec pluginSpec, Map<String, EntityDef> supplementedEntities) {
+  protected List<StreamSpec> getRequestedStreams(ScatterplotSpec pluginSpec) {
     return null;
   }
 
