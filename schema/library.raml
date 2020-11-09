@@ -9,135 +9,6 @@
 ################################################################################
 
 types:
-  EntityCountPostRequest:
-    type: object
-    additionalProperties: false
-    properties:
-      filters: API_Filter[]
-  EntityCountPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      count: integer
-  VariableDistributionPostRequest:
-    type: object
-    additionalProperties: false
-    properties:
-      filters: API_Filter[]
-  VariableDistributionPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      entitiesCount:
-        type: integer
-        minimum: 0
-      distribution:
-        type: object
-        properties:
-          //: integer
-  EntityTabularPostRequest:
-    type: object
-    additionalProperties: false
-    properties:
-      outputVariableIds: string[]
-      filters: API_Filter[]
-  EntityTabularPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      counts: string[][]
-  StudiesGetResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      studies: API_StudyOverview[]
-  StudyIdGetResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      study: API_StudyDetail
-  API_StudyOverview:
-    type: object
-    properties:
-      id: string
-      name: string
-  API_StudyDetail:
-    type: object
-    properties:
-      id: string
-      name: string
-      rootEntity: API_Entity
-  API_Entity:
-    type: object
-    properties:
-      id: string
-      displayName: string
-      displayNamePlural: string
-      description: string
-      children?: API_Entity[]
-      variables: API_Variable[]
-  API_Variable:
-    type: object
-    discriminator: type
-    properties:
-      id: string
-      providerLabel: string
-      displayName: string
-      parentId: string
-      type: API_VariableType
-  API_VariableType:
-    type: string
-    enum:
-      - category
-      - string
-      - number
-      - date
-  API_VariablesCategory:
-    type: API_Variable
-    discriminatorValue: category
-  API_StringVariable:
-    type: API_Variable
-    discriminatorValue: string
-  API_NumberVariable:
-    type: API_Variable
-    discriminatorValue: number
-    properties:
-      isContinuous: boolean
-      precision: integer
-      units: string
-  API_DateVariable:
-    type: API_Variable
-    discriminatorValue: date
-    properties:
-      isContinuous: boolean
-  AnalysesGetResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      analyses: AnalysisOverview[]
-  AnalysisOverview:
-    type: object
-    properties:
-      name: string
-  BaseAnalysisConfig:
-    type: object
-    additionalProperties: false
-    properties:
-      study: string
-      subset:
-        type: API_Filter[]
-        required: false
-      derivedVariables:
-        type: DerivedVariable[]
-        required: false
-  DerivedVariable:
-    type: object
-    properties:
-      entityId: string
-      variableId: string
-      type: API_VariableType
-      dependentVariables: string[]
-      construction: object
   API_Filter:
     type: object
     discriminator: type
@@ -274,4 +145,133 @@ types:
       intervalSE:
         type: number[]
         required: false
+  EntityCountPostRequest:
+    type: object
+    additionalProperties: false
+    properties:
+      filters: API_Filter[]
+  EntityCountPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      count: integer
+  VariableDistributionPostRequest:
+    type: object
+    additionalProperties: false
+    properties:
+      filters: API_Filter[]
+  VariableDistributionPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      entitiesCount:
+        type: integer
+        minimum: 0
+      distribution:
+        type: object
+        properties:
+          //: integer
+  EntityTabularPostRequest:
+    type: object
+    additionalProperties: false
+    properties:
+      outputVariableIds: string[]
+      filters: API_Filter[]
+  EntityTabularPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      counts: string[][]
+  StudiesGetResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      studies: API_StudyOverview[]
+  StudyIdGetResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      study: API_StudyDetail
+  API_StudyOverview:
+    type: object
+    properties:
+      id: string
+      name: string
+  API_StudyDetail:
+    type: object
+    properties:
+      id: string
+      name: string
+      rootEntity: API_Entity
+  API_Entity:
+    type: object
+    properties:
+      id: string
+      displayName: string
+      displayNamePlural: string
+      description: string
+      children?: API_Entity[]
+      variables: API_Variable[]
+  API_Variable:
+    type: object
+    discriminator: type
+    properties:
+      id: string
+      providerLabel: string
+      displayName: string
+      parentId: string
+      type: API_VariableType
+  API_VariableType:
+    type: string
+    enum:
+      - category
+      - string
+      - number
+      - date
+  API_VariablesCategory:
+    type: API_Variable
+    discriminatorValue: category
+  API_StringVariable:
+    type: API_Variable
+    discriminatorValue: string
+  API_NumberVariable:
+    type: API_Variable
+    discriminatorValue: number
+    properties:
+      isContinuous: boolean
+      precision: integer
+      units: string
+  API_DateVariable:
+    type: API_Variable
+    discriminatorValue: date
+    properties:
+      isContinuous: boolean
+  AnalysesGetResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      analyses: AnalysisOverview[]
+  AnalysisOverview:
+    type: object
+    properties:
+      name: string
+  BaseAnalysisConfig:
+    type: object
+    additionalProperties: false
+    properties:
+      study: string
+      subset:
+        type: API_Filter[]
+        required: false
+      derivedVariables:
+        type: DerivedVariable[]
+        required: false
+  DerivedVariable:
+    type: object
+    properties:
+      entityId: string
+      variableId: string
+      type: API_VariableType
+      dependentVariables: string[]
+      construction: object
 
