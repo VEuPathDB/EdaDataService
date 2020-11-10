@@ -9,6 +9,58 @@
 ################################################################################
 
 types:
+  HistogramPostRequest:
+    type: BaseAnalysisConfig
+    properties:
+      config: HistogramSpec
+  HistogramSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      xAxisVariable: string
+      binWidth: number
+      valueSpec:
+        type: string
+        enum:
+          - count
+          - proportion
+      overlayVariable:
+        type: string
+        required: false
+      facetVariable:
+        type: string[]
+        maxItems: 2
+        required: false
+  HistogramPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      group:
+        type: string
+        required: false
+      panel:
+        type: string
+        required: false
+      value:
+        type: number[]
+        minItems: 1
+      label:
+        type: string[]
+        minItems: 1
+  RecordCountPostRequest:
+    type: BaseAnalysisConfig
+    properties:
+      config: RecordCountSpec
+  RecordCountSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      entityId: string
+  RecordCountPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      recordCount: number
   ScatterplotPostRequest:
     type: BaseAnalysisConfig
     properties:
@@ -222,56 +274,4 @@ types:
     properties:
       min: string
       max: string
-  HistogramPostRequest:
-    type: BaseAnalysisConfig
-    properties:
-      config: HistogramSpec
-  HistogramSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      xAxisVariable: string
-      binWidth: number
-      valueSpec:
-        type: string
-        enum:
-          - count
-          - proportion
-      overlayVariable:
-        type: string
-        required: false
-      facetVariable:
-        type: string[]
-        maxItems: 2
-        required: false
-  HistogramPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      group:
-        type: string
-        required: false
-      panel:
-        type: string
-        required: false
-      value:
-        type: number[]
-        minItems: 1
-      label:
-        type: string[]
-        minItems: 1
-  RecordCountPostRequest:
-    type: BaseAnalysisConfig
-    properties:
-      config: RecordCountSpec
-  RecordCountSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      entityId: string
-  RecordCountPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      recordCount: number
 
