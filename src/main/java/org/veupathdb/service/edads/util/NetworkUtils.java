@@ -13,6 +13,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response.StatusType;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.IoUtil;
 import org.gusdb.fgputil.Tuples.TwoTuple;
 import org.gusdb.fgputil.functional.Either;
@@ -22,6 +24,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class NetworkUtils {
+
+  private static Logger LOG = LogManager.getLogger(NetworkUtils.class);
 
   public static class RequestFailure extends TwoTuple<StatusType, String> {
 
@@ -58,10 +62,13 @@ public class NetworkUtils {
   public static Either<InputStream,RequestFailure> makePostRequest(
       String url, Object postBodyObject, String expectedResponseType) throws JsonProcessingException {
 
+    String json = serializeToJson(postBodyObject);
+    LOG.info("Will send following POST request to " + url + "\n" + json);
+
     Response response =  ClientBuilder.newClient()
       .target(url)
       .request(expectedResponseType)
-      .post(Entity.entity(serializeToJson(postBodyObject), MediaType.APPLICATION_JSON));
+      .post(Entity.entity(json, MediaType.APPLICATION_JSON));
 
     return response.getStatusInfo().getFamily().equals(Status.Family.SUCCESSFUL) ?
         Either.left((InputStream)response.getEntity()) :

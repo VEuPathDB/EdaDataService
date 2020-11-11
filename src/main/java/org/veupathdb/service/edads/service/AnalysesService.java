@@ -7,6 +7,8 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.ValidationException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.functional.FunctionalInterfaces;
 import org.veupathdb.lib.container.jaxrs.server.annotations.DisableJackson;
 import org.veupathdb.service.edads.generated.model.AnalysesGetResponse;
@@ -20,11 +22,13 @@ import org.veupathdb.service.edads.generated.model.RecordCountPostResponseStream
 import org.veupathdb.service.edads.generated.model.ScatterplotPostRequest;
 import org.veupathdb.service.edads.generated.model.ScatterplotPostResponseStream;
 import org.veupathdb.service.edads.generated.resources.Analyses;
-import org.veupathdb.service.edads.plugin.histogram.HistogramPlugin;
-import org.veupathdb.service.edads.plugin.recordcount.RecordCountPlugin;
-import org.veupathdb.service.edads.plugin.scatterplot.ScatterplotPlugin;
+import org.veupathdb.service.edads.plugin.HistogramPlugin;
+import org.veupathdb.service.edads.plugin.RecordCountPlugin;
+import org.veupathdb.service.edads.plugin.ScatterplotPlugin;
 
 public class AnalysesService implements Analyses {
+
+  private static Logger LOG = LogManager.getLogger(AnalysesService.class);
 
   private static final String[] ANALYSIS_NAMES = {
     "record-count",
@@ -60,6 +64,7 @@ public class AnalysesService implements Analyses {
       throw new BadRequestException(e.getMessage());
     }
     catch (Exception e) {
+      LOG.error("Could not execute analysis.", e);
       throw new ServerErrorException(e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
     }
   }

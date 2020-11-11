@@ -1,17 +1,15 @@
-package org.veupathdb.service.edads.plugin.scatterplot;
+package org.veupathdb.service.edads.plugin;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 import java.util.List;
-import java.util.Map;
 import org.gusdb.fgputil.validation.ValidationBundle;
 import org.veupathdb.service.edads.generated.model.ScatterplotPostRequest;
 import org.veupathdb.service.edads.generated.model.ScatterplotSpec;
-import org.veupathdb.service.edads.util.EntityDef;
 import org.veupathdb.service.edads.util.StreamSpec;
-import org.veupathdb.service.edads.plugin.AbstractEdadsPlugin;
+import org.veupathdb.service.edads.util.AbstractEdadsPlugin;
 
 public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostRequest, ScatterplotSpec> {
 

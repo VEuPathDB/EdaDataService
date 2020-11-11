@@ -1,4 +1,4 @@
-package org.veupathdb.service.edads.plugin.recordcount;
+package org.veupathdb.service.edads.plugin;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +14,7 @@ import org.gusdb.fgputil.validation.ValidationLevel;
 import org.veupathdb.service.edads.generated.model.RecordCountPostRequest;
 import org.veupathdb.service.edads.generated.model.RecordCountSpec;
 import org.veupathdb.service.edads.util.StreamSpec;
-import org.veupathdb.service.edads.plugin.AbstractEdadsPlugin;
+import org.veupathdb.service.edads.util.AbstractEdadsPlugin;
 import org.json.JSONObject;
 
 public class RecordCountPlugin extends AbstractEdadsPlugin<RecordCountPostRequest, RecordCountSpec> {
@@ -35,8 +35,8 @@ public class RecordCountPlugin extends AbstractEdadsPlugin<RecordCountPostReques
 
   @Override
   protected List<StreamSpec> getRequestedStreams(RecordCountSpec pluginSpec) {
-    String pkVarName = pluginSpec.getEntityId() + "_id";
-    return new ListBuilder<StreamSpec>(new StreamSpec(pluginSpec.getEntityId()).addVariable(pkVarName)).toList();
+    // only need one stream for the requested entity and no vars (IDs included automatically)
+    return new ListBuilder<StreamSpec>(new StreamSpec(pluginSpec.getEntityId())).toList();
   }
 
   @Override

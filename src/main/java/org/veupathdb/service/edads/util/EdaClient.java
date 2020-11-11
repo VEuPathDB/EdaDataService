@@ -3,6 +3,7 @@ package org.veupathdb.service.edads.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.gusdb.fgputil.functional.Either;
@@ -30,7 +31,7 @@ public class EdaClient {
       Optional<List<DerivedVariable>> derivedVariables,
       StreamSpec spec) {
     EntityTabularPostRequest request = new EntityTabularPostRequestImpl();
-    subset.ifPresent(filters -> request.setFilters(filters));
+    request.setFilters(subset.orElse(Collections.emptyList()));
     request.setOutputVariableIds(spec);
     String url = Resources.SUBSETTING_SERVICE_URL + "/studies/" + study.getId() + "/entities/" + spec.getEntityId() + "/tabular";
 
