@@ -41,9 +41,12 @@ public class RecordCountPlugin extends AbstractEdadsPlugin<RecordCountPostReques
 
   @Override
   protected void writeResults(OutputStream out, List<InputStream> dataStreams) throws IOException {
-    Wrapper<Integer> count = new Wrapper<>(0);
-    new Scanner(dataStreams.get(0)).useDelimiter("\n").forEachRemaining(str -> count.set(count.get()+1));
-    out.write(new JSONObject().put("recordCount", count).toString().getBytes());
+    Wrapper<Integer> rowCount = new Wrapper<>(0);
+    new Scanner(dataStreams.get(0))
+        .useDelimiter("\n")
+        .forEachRemaining(str -> rowCount.set(rowCount.get() + 1));
+    int recordCount = rowCount.get() - 1; // subtract 1 for header row
+    out.write(new JSONObject().put("recordCount", recordCount).toString().getBytes());
     out.flush();
   }
 }

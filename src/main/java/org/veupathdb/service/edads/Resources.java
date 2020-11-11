@@ -12,6 +12,8 @@ import org.veupathdb.service.edads.service.AnalysesService;
  */
 public class Resources extends ContainerResources {
 
+  private static final boolean DEVELOPMENT_MODE = true;
+
   public static final String SUBSETTING_SERVICE_URL;
   public static final String STREAM_PROCESSING_SERVICE_URL;
 
@@ -28,8 +30,15 @@ public class Resources extends ContainerResources {
     return value;
   }
 
+  public static boolean logResponseHeadersAsClient() {
+    return DEVELOPMENT_MODE;
+  }
+
   public Resources(Options opts) {
     super(opts);
+    if (DEVELOPMENT_MODE) {
+      enableJerseyTrace();
+    }
   }
 
   /**
