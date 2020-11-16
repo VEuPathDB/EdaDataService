@@ -9,6 +9,144 @@
 ################################################################################
 
 types:
+  API_Filter:
+    type: object
+    discriminator: type
+    properties:
+      entityId: string
+      variableId: string
+      type: API_FilterType
+  API_FilterType:
+    type: string
+    enum:
+      - stringSet
+      - numberSet
+      - dateSet
+      - numberRange
+      - dateRange
+  API_StringSetFilter:
+    type: API_Filter
+    discriminatorValue: 'stringSet'
+    properties:
+      stringSet: string[]
+  API_NumberSetFilter:
+    type: API_Filter
+    discriminatorValue: 'numberSet'
+    properties:
+      numberSet: number[]
+  API_DateSetFilter:
+    type: API_Filter
+    discriminatorValue: 'dateSet'
+    properties:
+      dateSet: string[] # how to constrain this to a date?
+  API_NumberRangeFilter:
+    type: API_Filter
+    discriminatorValue: 'numberRange'
+    properties:
+      min: number
+      max: number
+  API_DateRangeFilter:
+    type: API_Filter
+    discriminatorValue: 'dateRange'
+    properties:
+      min: string
+      max: string
+  HistogramPostRequest:
+    type: BaseAnalysisConfig
+    properties:
+      config: HistogramSpec
+  HistogramSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      entityId: string
+      xAxisVariable: string
+      binWidth: number
+      valueSpec:
+        type: string
+        enum:
+          - count
+          - proportion
+      overlayVariable:
+        type: string
+        required: false
+      facetVariable:
+        type: string[]
+        maxItems: 2
+        required: false
+  HistogramPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      group:
+        type: string
+        required: false
+      panel:
+        type: string
+        required: false
+      value:
+        type: number[]
+        minItems: 1
+      label:
+        type: string[]
+        minItems: 1
+  RecordCountPostRequest:
+    type: BaseAnalysisConfig
+    properties:
+      config: RecordCountSpec
+  RecordCountSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      entityId: string
+  RecordCountPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      recordCount: number
+  ScatterplotPostRequest:
+    type: BaseAnalysisConfig
+    properties:
+      config: ScatterplotSpec
+  ScatterplotSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      entityId: string
+      xAxisVariable: string
+      yAxisVariable: string
+      overlayVariable:
+        type: string
+        required: false
+      facetVariable:
+        type: string[]
+        maxItems: 2
+        required: false
+  ScatterplotPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      group:
+        type: string
+        required: false
+      panel:
+        type: string
+        required: false
+      seriesY:
+        type: number[]
+        minItems: 1
+      seriesX:
+        type: number[]
+        minItems: 1
+      intervalX:
+        type: number[]
+        required: false
+      intervalY:
+        type: number[]
+        required: false
+      intervalSE:
+        type: number[]
+        required: false
   EntityCountPostRequest:
     type: object
     additionalProperties: false
@@ -138,140 +276,4 @@ types:
       type: API_VariableType
       dependentVariables: string[]
       construction: object
-  API_Filter:
-    type: object
-    discriminator: type
-    properties:
-      entityId: string
-      variableId: string
-      type: API_FilterType
-  API_FilterType:
-    type: string
-    enum:
-      - stringSet
-      - numberSet
-      - dateSet
-      - numberRange
-      - dateRange
-  API_StringSetFilter:
-    type: API_Filter
-    discriminatorValue: 'stringSet'
-    properties:
-      stringSet: string[]
-  API_NumberSetFilter:
-    type: API_Filter
-    discriminatorValue: 'numberSet'
-    properties:
-      numberSet: number[]
-  API_DateSetFilter:
-    type: API_Filter
-    discriminatorValue: 'dateSet'
-    properties:
-      dateSet: string[] # how to constrain this to a date?
-  API_NumberRangeFilter:
-    type: API_Filter
-    discriminatorValue: 'numberRange'
-    properties:
-      min: number
-      max: number
-  API_DateRangeFilter:
-    type: API_Filter
-    discriminatorValue: 'dateRange'
-    properties:
-      min: string
-      max: string
-  HistogramPostRequest:
-    type: BaseAnalysisConfig
-    properties:
-      config: HistogramSpec
-  HistogramSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      xAxisVariable: string
-      binWidth: number
-      valueSpec:
-        type: string
-        enum:
-          - count
-          - proportion
-      overlayVariable:
-        type: string
-        required: false
-      facetVariable:
-        type: string[]
-        maxItems: 2
-        required: false
-  HistogramPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      group:
-        type: string
-        required: false
-      panel:
-        type: string
-        required: false
-      value:
-        type: number[]
-        minItems: 1
-      label:
-        type: string[]
-        minItems: 1
-  RecordCountPostRequest:
-    type: BaseAnalysisConfig
-    properties:
-      config: RecordCountSpec
-  RecordCountSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      entityId: string
-  RecordCountPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      recordCount: number
-  ScatterplotPostRequest:
-    type: BaseAnalysisConfig
-    properties:
-      config: ScatterplotSpec
-  ScatterplotSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      xAxisVariable: string
-      yAxisVariable: string
-      overlayVariable:
-        type: string
-        required: false
-      facetVariable:
-        type: string[]
-        maxItems: 2
-        required: false
-  ScatterplotPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      group:
-        type: string
-        required: false
-      panel:
-        type: string
-        required: false
-      seriesY:
-        type: number[]
-        minItems: 1
-      seriesX:
-        type: number[]
-        minItems: 1
-      intervalX:
-        type: number[]
-        required: false
-      intervalY:
-        type: number[]
-        required: false
-      intervalSE:
-        type: number[]
-        required: false
 

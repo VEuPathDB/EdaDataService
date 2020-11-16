@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -12,8 +13,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import javax.swing.text.html.parser.Entity;
 import org.gusdb.fgputil.AutoCloseableList;
+import org.gusdb.fgputil.FormatUtil;
 import org.gusdb.fgputil.validation.ValidationBundle;
+import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
 import org.veupathdb.service.edads.generated.model.APIEntity;
@@ -26,7 +30,7 @@ import org.veupathdb.service.edads.generated.model.DerivedVariable;
 public abstract class AbstractEdadsPlugin<T extends BaseAnalysisConfig, S> implements Consumer<OutputStream> {
 
   protected abstract Class<S> getConfigurationClass();
-  protected abstract ValidationBundle validateConfig(S pluginSpec);
+  protected abstract ValidationBundle validateConfig(S pluginSpec) throws ValidationException;
   protected abstract List<StreamSpec> getRequestedStreams(S pluginSpec);
   protected abstract void writeResults(OutputStream out, List<InputStream> dataStreams) throws IOException;
 
@@ -78,7 +82,7 @@ public abstract class AbstractEdadsPlugin<T extends BaseAnalysisConfig, S> imple
   }
 
   private ValidationBundle validateStreamSpecs(List<StreamSpec> requestedStreams) {
-    ValidationBundle.ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
+    ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
     for (StreamSpec spec : requestedStreams) {
       EntityDef entity = _supplementedEntityMap.get(spec.getEntityId());
       if (entity == null) {
@@ -178,4 +182,36 @@ public abstract class AbstractEdadsPlugin<T extends BaseAnalysisConfig, S> imple
     }
   }
 
+  protected EntityDef getValidEntity(ValidationBundleBuilder validation, String entityId) throws ValidationException {
+    EntityDef entity = getEntityMap().get(entityId);
+    if (entity == null) {
+      validation.addError("No entity exists on study '" + getStudyId() + "' with ID '" + entityId + "'.");
+      validation.build().throwIfInvalid();
+    }
+    return entity;
+  }
+
+  protected static void validateVariableName(ValidationBundleBuilder validation,
+      EntityDef entity, String variableUse, String variableName) {
+    List<APIVariableType> nonCategoryTypes = Arrays.stream(APIVariableType.values())
+        .filter(type -> !type.equals(APIVariableType.CATEGORY))
+        .collect(Collectors.toList());
+    validateVariableNameAndType(validation, entity, variableUse, variableName, nonCategoryTypes.toArray(new APIVariableType[0]));
+  }
+
+  protected static void validateVariableNameAndType(ValidationBundleBuilder validation,
+      EntityDef entity, String variableUse, String variableName, APIVariableType... allowedTypes) {
+    List<APIVariableType> allowedTypesList = Arrays.asList(allowedTypes);
+    if (allowedTypesList.contains(APIVariableType.CATEGORY)) {
+      throw new RuntimeException("Plugin should not be using categories as variables.");
+    }
+    String varDesc = variableName + ", used for " + variableUse + ", ";
+    VariableDef var = entity.get(variableName);
+    if (var == null) {
+      validation.addError(varDesc + "does not exist in entity " + entity.getId());
+    }
+    else if (!allowedTypesList.contains(var.getType())) {
+      validation.addError(varDesc + "must be one of the following types: " + FormatUtil.join(allowedTypes, ", "));
+    }
+  }
 }

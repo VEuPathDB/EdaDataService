@@ -10,6 +10,7 @@ import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.Wrapper;
 import org.gusdb.fgputil.validation.ValidationBundle;
 import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
+import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
 import org.veupathdb.service.edads.generated.model.RecordCountPostRequest;
 import org.veupathdb.service.edads.generated.model.RecordCountSpec;
@@ -25,11 +26,9 @@ public class RecordCountPlugin extends AbstractEdadsPlugin<RecordCountPostReques
   }
 
   @Override
-  protected ValidationBundle validateConfig(RecordCountSpec pluginSpec) {
+  protected ValidationBundle validateConfig(RecordCountSpec pluginSpec) throws ValidationException {
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
-    if (!getEntityMap().containsKey(pluginSpec.getEntityId())) {
-      validation.addError("No entity exists on study '" + getStudyId() + "' with ID '" + pluginSpec.getEntityId() + "'.");
-    }
+    getValidEntity(validation, pluginSpec.getEntityId());
     return validation.build();
   }
 
