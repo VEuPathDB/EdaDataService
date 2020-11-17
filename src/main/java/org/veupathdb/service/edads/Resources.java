@@ -16,10 +16,12 @@ public class Resources extends ContainerResources {
 
   public static final String SUBSETTING_SERVICE_URL;
   public static final String STREAM_PROCESSING_SERVICE_URL;
+  public static final String RSERVE_URL;
 
   static {
     SUBSETTING_SERVICE_URL = loadRequiredEnvVar("SUBSETTING_SERVICE_URL");
     STREAM_PROCESSING_SERVICE_URL = loadRequiredEnvVar("STREAM_PROCESSING_SERVICE_URL");
+    RSERVE_URL = loadRequiredEnvVar("RSERVE_URL");
   }
 
   private static String loadRequiredEnvVar(String name) {

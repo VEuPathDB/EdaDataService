@@ -51,6 +51,9 @@ dependencies {
     "vendor/xstreams.jar"
   ))
 
+  // REngine Java client to RServe
+  //implementation("org.rosuda.REngine:REngine:2.1.0")
+  implementation("org.rosuda.REngine:Rserve:1.8.1")
 
   // Core lib, prefers local checkout if available
   implementation(findProject(":core") ?: "org.veupathdb.lib:jaxrs-container-core:${coreLib}")

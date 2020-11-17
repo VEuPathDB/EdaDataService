@@ -5,21 +5,27 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import javax.swing.text.html.parser.Entity;
 import org.gusdb.fgputil.AutoCloseableList;
 import org.gusdb.fgputil.FormatUtil;
+import org.gusdb.fgputil.IoUtil;
+import org.gusdb.fgputil.functional.FunctionalInterfaces.ConsumerWithException;
 import org.gusdb.fgputil.validation.ValidationBundle;
 import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
+import org.rosuda.REngine.Rserve.RConnection;
+import org.rosuda.REngine.Rserve.RFileOutputStream;
+import org.veupathdb.service.edads.Resources;
 import org.veupathdb.service.edads.generated.model.APIEntity;
 import org.veupathdb.service.edads.generated.model.APIFilter;
 import org.veupathdb.service.edads.generated.model.APIStudyDetail;
@@ -79,6 +85,10 @@ public abstract class AbstractEdadsPlugin<T extends BaseAnalysisConfig, S> imple
 
   protected Map<String, EntityDef> getEntityMap() {
     return _supplementedEntityMap;
+  }
+
+  protected S getPluginSpec() {
+    return _pluginSpec;
   }
 
   private ValidationBundle validateStreamSpecs(List<StreamSpec> requestedStreams) {
@@ -213,5 +223,49 @@ public abstract class AbstractEdadsPlugin<T extends BaseAnalysisConfig, S> imple
     else if (!allowedTypesList.contains(var.getType())) {
       validation.addError(varDesc + "must be one of the following types: " + FormatUtil.join(allowedTypes, ", "));
     }
+  }
+
+  protected void useRConnection(ConsumerWithException<RConnection> consumer) {
+    RConnection c = null;
+    try {
+      String rServeUrlStr = Resources.RSERVE_URL;
+      URL rServeUrl = new URL(rServeUrlStr);
+      c = new RConnection(rServeUrl.getHost(), rServeUrl.getPort());
+      consumer.accept(c);
+    }
+    catch (Exception e) {
+      throw new RuntimeException("Unable to complete processing", e);
+    }
+    finally {
+      if (c != null) {
+        c.close();
+      }
+    }
+  }
+
+  protected void useRConnectionWithRemoteFiles(List<InputStream> dataStreams, String[] fileNames, ConsumerWithException<RConnection> consumer) {
+    if (dataStreams.size() != fileNames.length) {
+      throw new RuntimeException("Number of file names (" + fileNames.length +
+          ") must match number of data streams (" + dataStreams.size() + ").");
+    }
+    if (new HashSet<String>(Arrays.asList(fileNames)).size() != fileNames.length) {
+      throw new RuntimeException(("File names must be distinct. Provided: " + FormatUtil.join(fileNames, ",")));
+    }
+    useRConnection(connection -> {
+      try {
+        for (int i = 0; i < dataStreams.size(); i++) {
+          RFileOutputStream dataset = connection.createFile(fileNames[i]);
+          IoUtil.transferStream(dataset, dataStreams.get(i));
+          dataset.close();
+        }
+        // all files written; consumer may now use them in its RServe call
+        consumer.accept(connection);
+      }
+      finally {
+        for (int i = 0; i< fileNames.length; i++) {
+          connection.removeFile(fileNames[i]);
+        }
+      }
+    });
   }
 }
