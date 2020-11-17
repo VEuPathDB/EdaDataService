@@ -9,6 +9,7 @@ import org.gusdb.fgputil.validation.ValidationBundle;
 import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
+import org.rosuda.REngine.REXP;
 import org.veupathdb.service.edads.generated.model.APIVariableType;
 import org.veupathdb.service.edads.generated.model.ScatterplotPostRequest;
 import org.veupathdb.service.edads.generated.model.ScatterplotSpec;
@@ -54,8 +55,12 @@ public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostReques
   protected void writeResults(OutputStream out, List<InputStream> dataStreams) throws IOException {
     String[] fileNames = new String[]{ "file1.txt" };
     useRConnectionWithRemoteFiles(dataStreams, fileNames, connection -> {
-      ScatterplotSpec spec = getPluginSpec();
       // Call an R procedure that reads remote file "file1.txt" and write output to out
+      ScatterplotSpec spec = getPluginSpec();
+      connection.assign("datasetFileName", "file1.txt");
+      connection.assign("overlayVarName", spec.getOverlayVariable());
+      REXP response = connection.eval("someProcedureCall");
+      out.write(response.asString().getBytes());
     });
   }
 }
