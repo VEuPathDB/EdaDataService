@@ -4,10 +4,16 @@ import java.util.ArrayList;
 
 public class StreamSpec extends ArrayList<String> {
 
+  private String _name;
   private String _entityId;
 
-  public StreamSpec(String entityId) {
+  public StreamSpec(String name, String entityId) {
+    _name = name;
     _entityId = entityId;
+  }
+
+  public String getName() {
+    return _name;
   }
 
   public String getEntityId() {

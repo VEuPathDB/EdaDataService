@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Map;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationBundle;
 import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
@@ -19,13 +20,15 @@ import org.veupathdb.service.edads.util.StreamSpec;
 
 public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostRequest, ScatterplotSpec> {
 
+  private static final String DATAFILE_NAME = "file1.txt";
+
   @Override
-  protected Class<ScatterplotSpec> getConfigurationClass() {
+  protected Class<ScatterplotSpec> getAnalysisSpecClass() {
     return ScatterplotSpec.class;
   }
 
   @Override
-  protected ValidationBundle validateConfig(ScatterplotSpec pluginSpec) throws ValidationException {
+  protected ValidationBundle validateAnalysisSpec(ScatterplotSpec pluginSpec) throws ValidationException {
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
     EntityDef entity = getValidEntity(validation, pluginSpec.getEntityId());
     validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.NUMBER, APIVariableType.DATE);
@@ -43,7 +46,7 @@ public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostReques
 
   @Override
   protected List<StreamSpec> getRequestedStreams(ScatterplotSpec pluginSpec) {
-    StreamSpec spec = new StreamSpec(pluginSpec.getEntityId());
+    StreamSpec spec = new StreamSpec(DATAFILE_NAME, pluginSpec.getEntityId());
     spec.add(pluginSpec.getXAxisVariable());
     spec.add(pluginSpec.getYAxisVariable());
     spec.add(pluginSpec.getOverlayVariable());
@@ -52,12 +55,11 @@ public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostReques
   }
 
   @Override
-  protected void writeResults(OutputStream out, List<InputStream> dataStreams) throws IOException {
-    String[] fileNames = new String[]{ "file1.txt" };
-    useRConnectionWithRemoteFiles(dataStreams, fileNames, connection -> {
+  protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
+    useRConnectionWithRemoteFiles(dataStreams, connection -> {
       // Call an R procedure that reads remote file "file1.txt" and write output to out
       ScatterplotSpec spec = getPluginSpec();
-      connection.assign("datasetFileName", "file1.txt");
+      connection.assign("datasetFileName", DATAFILE_NAME);
       connection.assign("overlayVarName", spec.getOverlayVariable());
       REXP response = connection.eval("someProcedureCall");
       out.write(response.asString().getBytes());

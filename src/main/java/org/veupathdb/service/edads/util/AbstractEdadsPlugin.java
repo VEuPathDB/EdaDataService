@@ -9,10 +9,12 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.gusdb.fgputil.AutoCloseableList;
@@ -30,15 +32,15 @@ import org.veupathdb.service.edads.generated.model.APIEntity;
 import org.veupathdb.service.edads.generated.model.APIFilter;
 import org.veupathdb.service.edads.generated.model.APIStudyDetail;
 import org.veupathdb.service.edads.generated.model.APIVariableType;
-import org.veupathdb.service.edads.generated.model.BaseAnalysisConfig;
+import org.veupathdb.service.edads.generated.model.AnalysisRequestBase;
 import org.veupathdb.service.edads.generated.model.DerivedVariable;
 
-public abstract class AbstractEdadsPlugin<T extends BaseAnalysisConfig, S> implements Consumer<OutputStream> {
+public abstract class AbstractEdadsPlugin<T extends AnalysisRequestBase, S> implements Consumer<OutputStream> {
 
-  protected abstract Class<S> getConfigurationClass();
-  protected abstract ValidationBundle validateConfig(S pluginSpec) throws ValidationException;
+  protected abstract Class<S> getAnalysisSpecClass();
+  protected abstract ValidationBundle validateAnalysisSpec(S pluginSpec) throws ValidationException;
   protected abstract List<StreamSpec> getRequestedStreams(S pluginSpec);
-  protected abstract void writeResults(OutputStream out, List<InputStream> dataStreams) throws IOException;
+  protected abstract void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException;
 
   private boolean _requestProcessed = false;
   private S _pluginSpec;
@@ -64,7 +66,7 @@ public abstract class AbstractEdadsPlugin<T extends BaseAnalysisConfig, S> imple
     _supplementedEntityMap = supplementEntities(_study.getRootEntity(), _derivedVariables);
 
     // ask subclass to validate the configuration
-    validateConfig(_pluginSpec).throwIfInvalid();
+    validateAnalysisSpec(_pluginSpec).throwIfInvalid();
 
     // get list of data streams required by this subclass
     _requiredStreams = getRequestedStreams(_pluginSpec);
@@ -93,6 +95,10 @@ public abstract class AbstractEdadsPlugin<T extends BaseAnalysisConfig, S> imple
 
   private ValidationBundle validateStreamSpecs(List<StreamSpec> requestedStreams) {
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
+    Set<String> specNames = requestedStreams.stream().map(StreamSpec::getName).collect(Collectors.toSet());
+    if (specNames.size() != requestedStreams.size()) {
+      validation.addError("Stream specs must not duplicate names.");
+    }
     for (StreamSpec spec : requestedStreams) {
       EntityDef entity = _supplementedEntityMap.get(spec.getEntityId());
       if (entity == null) {
@@ -141,17 +147,17 @@ public abstract class AbstractEdadsPlugin<T extends BaseAnalysisConfig, S> imple
     try {
       Method configGetter = request.getClass().getMethod("getConfig");
       Object config = configGetter.invoke(request);
-      if (getConfigurationClass().isAssignableFrom(config.getClass())) {
+      if (getAnalysisSpecClass().isAssignableFrom(config.getClass())) {
         return (S)config;
       }
       throw new RuntimeException("Plugin class " + getClass().getName() +
-          " declares spec class "  + getConfigurationClass().getName() +
+          " declares spec class "  + getAnalysisSpecClass().getName() +
           " but " + request.getClass().getName() + "::getConfig()" +
           " returned " + config.getClass().getName() + ". The second must be a subclass of the first.");
     }
     catch (NoSuchMethodException noSuchMethodException) {
       throw new RuntimeException("Generated class " + request.getClass().getName() +
-          " must implement a no-arg method getConfig() which returns an instance of " + getConfigurationClass().getName());
+          " must implement a no-arg method getConfig() which returns an instance of " + getAnalysisSpecClass().getName());
     }
     catch(IllegalAccessException | InvocationTargetException e) {
       throw new RuntimeException("Misconfiguration of analysis plugin: " + getClass().getName(), e);
@@ -165,7 +171,11 @@ public abstract class AbstractEdadsPlugin<T extends BaseAnalysisConfig, S> imple
         throw new RuntimeException("Output cannot be streamed until request has been processed.");
       }
       try(AutoCloseableList<InputStream> dataStreams = buildDataStreams()) {
-        writeResults(out, dataStreams);
+        Map<String,InputStream> streamMap = new LinkedHashMap<>();
+        for (int i = 0; i < dataStreams.size(); i++) {
+          streamMap.put(_requiredStreams.get(i).getName(), dataStreams.get(i));
+        }
+        writeResults(out, streamMap);
       }
     }
     catch (IOException e) {
@@ -243,27 +253,20 @@ public abstract class AbstractEdadsPlugin<T extends BaseAnalysisConfig, S> imple
     }
   }
 
-  protected void useRConnectionWithRemoteFiles(List<InputStream> dataStreams, String[] fileNames, ConsumerWithException<RConnection> consumer) {
-    if (dataStreams.size() != fileNames.length) {
-      throw new RuntimeException("Number of file names (" + fileNames.length +
-          ") must match number of data streams (" + dataStreams.size() + ").");
-    }
-    if (new HashSet<String>(Arrays.asList(fileNames)).size() != fileNames.length) {
-      throw new RuntimeException(("File names must be distinct. Provided: " + FormatUtil.join(fileNames, ",")));
-    }
+  protected void useRConnectionWithRemoteFiles(Map<String, InputStream> dataStreams, ConsumerWithException<RConnection> consumer) {
     useRConnection(connection -> {
       try {
-        for (int i = 0; i < dataStreams.size(); i++) {
-          RFileOutputStream dataset = connection.createFile(fileNames[i]);
-          IoUtil.transferStream(dataset, dataStreams.get(i));
+        for (Entry<String, InputStream> stream : dataStreams.entrySet()) {
+          RFileOutputStream dataset = connection.createFile(stream.getKey());
+          IoUtil.transferStream(dataset, stream.getValue());
           dataset.close();
         }
         // all files written; consumer may now use them in its RServe call
         consumer.accept(connection);
       }
       finally {
-        for (int i = 0; i< fileNames.length; i++) {
-          connection.removeFile(fileNames[i]);
+        for (String name : dataStreams.keySet()) {
+          connection.removeFile(name);
         }
       }
     });

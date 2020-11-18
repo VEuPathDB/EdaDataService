@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import java.util.List;
+import java.util.Map;
 import org.gusdb.fgputil.validation.ValidationBundle;
 import org.veupathdb.service.edads.generated.model.HistogramPostRequest;
 import org.veupathdb.service.edads.generated.model.HistogramSpec;
@@ -13,14 +14,13 @@ import org.veupathdb.service.edads.util.AbstractEdadsPlugin;
 
 public class HistogramPlugin extends AbstractEdadsPlugin<HistogramPostRequest, HistogramSpec>{
 
-
   @Override
-  protected Class<HistogramSpec> getConfigurationClass() {
+  protected Class<HistogramSpec> getAnalysisSpecClass() {
     return HistogramSpec.class;
   }
 
   @Override
-  protected ValidationBundle validateConfig(HistogramSpec pluginSpec) {
+  protected ValidationBundle validateAnalysisSpec(HistogramSpec pluginSpec) {
     return null;
   }
 
@@ -30,7 +30,7 @@ public class HistogramPlugin extends AbstractEdadsPlugin<HistogramPostRequest, H
   }
 
   @Override
-  protected void writeResults(OutputStream out, List<InputStream> dataStreams) throws IOException {
+  protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
 
   }
 }
