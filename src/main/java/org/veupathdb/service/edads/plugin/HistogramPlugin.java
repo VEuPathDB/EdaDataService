@@ -21,16 +21,44 @@ public class HistogramPlugin extends AbstractEdadsPlugin<HistogramPostRequest, H
 
   @Override
   protected ValidationBundle validateAnalysisSpec(HistogramSpec pluginSpec) {
-    return null;
+    ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
+    EntityDef entity = getValidEntity(validation, pluginSpec.getEntityId());
+    validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.NUMBER, APIVariableType.DATE);
+    validateVariableNameAndType(validation, entity, "overlayVariable", pluginSpec.getOverlayVariable(), APIVariableType.STRING);
+    for (String facetVar : pluginSpec.getFacetVariable()) {
+      validateVariableName(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
+    }
+    return validation.build();
   }
 
   @Override
   protected List<StreamSpec> getRequestedStreams(HistogramSpec pluginSpec) {
-    return null;
+    StreamSpec spec = new StreamSpec(DATAFILE_NAME, pluginSpec.getEntityId());
+    spec.add(pluginSpec.getXAxisVariable());
+    spec.add(pluginSpec.getOverlayVariable());
+    spec.addAll(pluginSpec.getFacetVariable());
+    return new ListBuilder<StreamSpec>(spec).toList();
   }
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-
+    useRConnectionWithRemoteFiles(dataStreams, connection -> {
+      ScatterplotSpec spec = getPluginSpec();
+      connection.voidEval("data <- fread(" + DATAFILE_NAME + ")");
+      String[] variableNames = {"xAxisVariable",
+    		  					"overlayVariable",
+  								"facetVariable1",
+  								"facetVariable2"};
+      String[] variables = {spec.getXAxisVariable(),
+    		  				spec.getOverlayVariable(),
+        					Array.get(spec.getFacetVariable(),0),
+        					Array.get(spec.getFacetVariable(),1)};
+      RList plotRefMap = new RList(new REXP(variableNames), new REXP(variables))
+      connection.assign("map", plotRefMap);
+      connection.voidEval("names(map) <- c('id', 'plotRef')");
+      String response = connection.eval("histogram(data, map, " + spec.getBinWidth() + ", " + spec.getValueSpec() + ")").asString();
+      // TODO
+      out.write(response.asString().getBytes());
+	});
   }
 }

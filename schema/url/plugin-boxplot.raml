@@ -3,17 +3,20 @@
 types:
   # Type name determines the name of the Java class that will be generated.
 
-  ScatterplotPostRequest:
+  BoxplotPostRequest:
     type: AnalysisRequestBase
     properties:
-      config: ScatterplotSpec
+      config: BoxplotSpec
 
-  ScatterplotSpec:
+  BoxplotSpec:
     additionalProperties: false
     properties:
       entityId:
         type: string
-      smoothedMean:
+      points:
+        type: string
+        enum: ['outliers', 'all']
+      mean:
         type: string
         enum: ['true', 'false']
       xAxisVariable: 
@@ -28,7 +31,7 @@ types:
         maxItems: 2
         required: false
 
-  ScatterplotPostResponse:
+  BoxplotPostResponse:
     additionalProperties: false
     properties:
       group:
@@ -37,20 +40,32 @@ types:
       panel:
         type: string
         required: false
-      seriesY:
+      lowerfence:
         type: number[]
         minItems: 1
         required: true
-      seriesX:
+      upperfence:
         type: number[]
         minItems: 1
         required: true
-      intervalX:
+      q1:
         type: number[]
-        required: false
-      intervalY:
+        minItems: 1
+        required: true
+      q3:
         type: number[]
+        minItems: 1
+        required: true
+      median:
+        type: number[]
+        minItems: 1
+        required: true
+      outliers:
+        type: number[][]
         required: false
-      intervalSE:
+      rawData:
+        type: number[][]
+        required: false
+      mean:
         type: number[]
         required: false

@@ -1,41 +1,31 @@
 #%RAML 1.0 Library
 
 types:
+  # Type name determines the name of the Java class that will be generated.
 
-  HistogramPostRequest:
+  MosaicPostRequest:
     type: AnalysisRequestBase
     properties:
-      config: HistogramSpec
+      config: MosaicSpec
 
-  NumericBinWidth:
-    properties:
-      type: number
-    
-  DateBinWidth:
-    properties:
-      type: string
-
-  HistogramSpec:
+  MosaicSpec:
     additionalProperties: false
     properties:
       entityId:
         type: string
-      xAxisVariable:
+      xAxisVariable: 
         type: string
-      binWidth:
-        type: NumericBinWidth | DateBinWidth
-      valueSpec: 
+      yAxisVariable: 
         type: string
-        enum: ['count', 'proportion']
-      overlayVariable: 
-        type: string
-        required: false
       facetVariable: 
         type: string[]
         maxItems: 2
         required: false
 
-  HistogramPostResponse:
+# TODO make sure the response props have the right names, includes table values if needed etc
+# Currently, i just replicated bar plot, since they are visually similar. needs more thought
+
+  MosaicPostResponse:
     additionalProperties: false
     properties:
       group:
