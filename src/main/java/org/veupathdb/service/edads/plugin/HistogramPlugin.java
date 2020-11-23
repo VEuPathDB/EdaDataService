@@ -42,8 +42,8 @@ public class HistogramPlugin extends AbstractEdadsPlugin<HistogramPostRequest, H
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    ScatterplotSpec spec = getPluginSpec();
-    EntityDef entityDef = new EntityDef(pluginSpec.getEntityId());
+    HistogramSpec spec = getPluginSpec();
+    EntityDef entityDef = new EntityDef(spec.getEntityId());
     VariableDef xVar = entity.get(spec.getXAxisVariable());
     APIVariableType xType = xVar.getType();
     
