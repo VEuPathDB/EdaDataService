@@ -66,18 +66,18 @@ public class HistogramPlugin extends AbstractEdadsPlugin<HistogramPostRequest, H
 	  Double nextBinStart = binStart + binWidth;
 	  
 	  while(s.hasNextLine()){
-        Double val = s.nextLine().asDouble();
-        if (val >= nextBinStart) {
-          JSONObject histogram = new JSONObject;
-          histogram.put("label", "[" + binStart + " - " + nextBinStart + ")"); 
-          histogram.put("value", rowCount);
-          out.write(histogram.toString());
-          binStart = nextBinStart;
-          nextBinStart = nextBinStart + binWidth;
-          rowCount.set(1);
-        } else {
-          rowCount.set(rowCount.get() + 1);
-        }    
+            Double val = s.nextLine().asDouble();
+            if (val >= nextBinStart) {
+              JSONObject histogram = new JSONObject;
+              histogram.put("label", "[" + binStart + " - " + nextBinStart + ")"); 
+              histogram.put("value", rowCount);
+              out.write(histogram.toString());
+              binStart = nextBinStart;
+              nextBinStart = nextBinStart + binWidth;
+              rowCount.set(1);
+            } else {
+              rowCount.set(rowCount.get() + 1);
+            }    
 	  }
 	  
 	  s.close();
