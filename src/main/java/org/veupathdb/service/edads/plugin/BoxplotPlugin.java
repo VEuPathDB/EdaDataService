@@ -68,7 +68,8 @@ public class BoxplotPlugin extends AbstractEdadsPlugin<BoxplotPostRequest, Boxpl
       RList plotRefMap = new RList(new REXP(variableNames), new REXP(variables))
       connection.assign("map", plotRefMap);
       connection.voidEval("names(map) <- c('id', 'plotRef')");
-      String response = connection.eval("box(data, map, " + spec.getPoints() + ", " + spec.getMean() + ")").asString();
+      String outFile = connection.eval("box(data, map, " + spec.getPoints() + ", " + spec.getMean() + ")").asString();
+      RFileInputStream response = connection.openFile(outFile);
       // TODO
       out.write(response.asString().getBytes());
     });

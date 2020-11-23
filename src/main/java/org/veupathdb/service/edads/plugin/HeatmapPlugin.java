@@ -75,7 +75,8 @@ public class HeatmapPlugin extends AbstractEdadsPlugin<HeatmapPostRequest, Heatm
       RList plotRefMap = new RList(new REXP(variableNames), new REXP(variables))
       connection.assign("map", plotRefMap);
       connection.voidEval("names(map) <- c('id', 'plotRef')");
-      String response = connection.eval("heatmap(data, map, " + spec.getValueSpec() + ")").asString();
+      String outFile = connection.eval("heatmap(data, map, " + spec.getValueSpec() + ")").asString();
+      RFileInputStream response = connection.openFile(outFile);
       // TODO
       out.write(response.asString().getBytes());
     });

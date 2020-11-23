@@ -68,7 +68,8 @@ public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostReques
       RList plotRefMap = new RList(new REXP(variableNames), new REXP(variables))
       connection.assign("map", plotRefMap);
       connection.voidEval("names(map) <- c('id', 'plotRef')");
-      String response = connection.eval("scattergl(data, map, " + spec.getSmoothedMean() + ")").asString();
+      String outFile = connection.eval("scattergl(data, map, " + spec.getSmoothedMean() + ")").asString();
+      RFileInputStream response = connection.openFile(outFile);
       // TODO
       out.write(response.asString().getBytes());
     });

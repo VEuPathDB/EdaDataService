@@ -42,23 +42,65 @@ public class HistogramPlugin extends AbstractEdadsPlugin<HistogramPostRequest, H
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    useRConnectionWithRemoteFiles(dataStreams, connection -> {
-      ScatterplotSpec spec = getPluginSpec();
-      connection.voidEval("data <- fread(" + DATAFILE_NAME + ")");
-      String[] variableNames = {"xAxisVariable",
-    		  					"overlayVariable",
-  								"facetVariable1",
-  								"facetVariable2"};
-      String[] variables = {spec.getXAxisVariable(),
-    		  				spec.getOverlayVariable(),
-        					Array.get(spec.getFacetVariable(),0),
-        					Array.get(spec.getFacetVariable(),1)};
-      RList plotRefMap = new RList(new REXP(variableNames), new REXP(variables))
-      connection.assign("map", plotRefMap);
-      connection.voidEval("names(map) <- c('id', 'plotRef')");
-      String response = connection.eval("histogram(data, map, " + spec.getBinWidth() + ", " + spec.getValueSpec() + ")").asString();
-      // TODO
-      out.write(response.asString().getBytes());
-	});
+    ScatterplotSpec spec = getPluginSpec();
+    EntityDef entityDef = new EntityDef(pluginSpec.getEntityId());
+    VariableDef xVar = entity.get(spec.getXAxisVariable());
+    APIVariableType xType = xVar.getType();
+    
+	boolean simpleHistogram = false;
+    if (spec.getOverlayVariable == null 
+    		&& spec.getFacetVariable == null 
+    		&& xType.equals(APIVariableType.NUMBER
+    		&& spec.getValueSpec().equals('count'))
+    		&& dataStreams.size() == 1) {
+      simpleHistogram = true;
+    }
+
+	if (simpleHistogram) {
+	  Double binWidth = spec.getBinWidth().asDouble();
+	  Wrapper<Integer> rowCount = new Wrapper<>(0);
+	  Scanner s = new Scanner(dataStreams.get(0)).useDelimiter("\n");
+	  s.nextLine(); // ignore header, expecting single column representing ordered xVar values
+	  Double binStart = s.nextLine().asDouble();
+	  rowCount.set(1);
+	  Double nextBinStart = binStart + binWidth;
+	  
+	  while(s.hasNextLine()){
+        Double val = s.nextLine().asDouble();
+        if (val >= nextBinStart) {
+          JSONObject histogram = new JSONObject;
+          histogram.put("label", "[" + binStart + " - " + nextBinStart + ")"); 
+          histogram.put("value", rowCount);
+          out.write(histogram.toString());
+          binStart = nextBinStart;
+          nextBinStart = nextBinStart + binWidth;
+          rowCount.set(1);
+        } else {
+          rowCount.set(rowCount.get() + 1);
+        }    
+	  }
+	  
+	  s.close();
+	  out.flush();
+    } else {  
+      useRConnectionWithRemoteFiles(dataStreams, connection -> {
+        connection.voidEval("data <- fread(" + DATAFILE_NAME + ")");
+        String[] variableNames = {"xAxisVariable",
+       		  					  "overlayVariable",
+  								  "facetVariable1",
+  								  "facetVariable2"};
+        String[] variables = {spec.getXAxisVariable(),
+    		  				  spec.getOverlayVariable(),
+        					  Array.get(spec.getFacetVariable(),0),
+        					  Array.get(spec.getFacetVariable(),1)};
+        RList plotRefMap = new RList(new REXP(variableNames), new REXP(variables))
+        connection.assign("map", plotRefMap);
+        connection.voidEval("names(map) <- c('id', 'plotRef')");
+        String outFile = connection.eval("histogram(data, map, " + spec.getBinWidth() + ", " + spec.getValueSpec() + ")").asString();
+        RFileInputStream response = connection.openFile(outFile);
+        // TODO transfer one stream to another
+        out.write(response.asString().getBytes());
+	  });
+    }  
   }
 }
