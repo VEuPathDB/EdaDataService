@@ -50,8 +50,8 @@ public class HistogramPlugin extends AbstractEdadsPlugin<HistogramPostRequest, H
 	boolean simpleHistogram = false;
     if (spec.getOverlayVariable == null 
     		&& spec.getFacetVariable == null 
-    		&& xType.equals(APIVariableType.NUMBER
-    		&& spec.getValueSpec().equals('count'))
+    		&& xType.equals(APIVariableType.NUMBER)
+    		&& spec.getValueSpec().equals('count')
     		&& dataStreams.size() == 1) {
       simpleHistogram = true;
     }
