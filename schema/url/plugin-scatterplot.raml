@@ -13,9 +13,9 @@ types:
     properties:
       entityId:
         type: string
-      smoothedMean:
+      valueSpec:
         type: string
-        enum: ['true', 'false']
+        enum: ['smoothedMean', 'density', 'raw']
       xAxisVariable: 
         type: string
       yAxisVariable: 
@@ -40,11 +40,9 @@ types:
       seriesY:
         type: number[]
         minItems: 1
-        required: true
       seriesX:
         type: number[]
         minItems: 1
-        required: true
       intervalX:
         type: number[]
         required: false
@@ -52,5 +50,11 @@ types:
         type: number[]
         required: false
       intervalSE:
+        type: number[]
+        required: false
+      densityX:
+        type: number[]
+        required: false
+      densityY:
         type: number[]
         required: false

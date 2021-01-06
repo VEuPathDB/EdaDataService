@@ -77,8 +77,9 @@ public class HeatmapPlugin extends AbstractEdadsPlugin<HeatmapPostRequest, Heatm
       connection.voidEval("names(map) <- c('id', 'plotRef')");
       String outFile = connection.eval("heatmap(data, map, " + spec.getValueSpec() + ")").asString();
       RFileInputStream response = connection.openFile(outFile);
-      // TODO
-      out.write(response.asString().getBytes());
+      transferStream(response, out);
+      response.close();
+      out.flush();
     });
   }
 }

@@ -1,0 +1,75 @@
+#%RAML 1.0 Library
+
+types:
+
+  StudiesGetResponse:
+    additionalProperties: false
+    properties:
+      studies: API_StudyOverview[]
+
+  StudyIdGetResponse:
+    additionalProperties: false
+    properties:
+      study: API_StudyDetail
+
+  API_StudyOverview:
+    type: object
+    properties:
+      id:
+        required: true
+        type: string
+      name:
+        required: true
+        type: string
+
+  API_StudyDetail:
+    type: object
+    properties:
+      id: string
+      name: string
+      rootEntity: API_Entity
+
+  API_Entity:
+    type: object
+    properties:
+      id: string
+      displayName: string
+      displayNamePlural: string
+      description: string
+      children?: API_Entity[]
+      variables: API_Variable[]
+
+  API_Variable:
+    type: object
+    discriminator: type
+    properties:
+      id: string
+      providerLabel: string
+      displayName: string
+      parentId: string
+      type: API_VariableType
+
+  API_VariableType:
+    enum: [ 'category', 'string', 'number', 'date' ]
+
+  API_VariablesCategory:
+    type: API_Variable
+    discriminatorValue: category
+
+  API_StringVariable:
+    type: API_Variable
+    discriminatorValue: string
+
+  API_NumberVariable:
+    type: API_Variable
+    discriminatorValue: number
+    properties:
+      isContinuous: boolean
+      precision: integer
+      units: string
+
+  API_DateVariable:
+    type: API_Variable
+    discriminatorValue: date
+    properties:
+      isContinuous: boolean

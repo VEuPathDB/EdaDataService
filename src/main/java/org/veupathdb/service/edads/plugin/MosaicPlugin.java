@@ -66,8 +66,9 @@ public class MosaicPlugin extends AbstractEdadsPlugin<MosaicPostRequest, MosaicS
       connection.voidEval("names(map) <- c('id', 'plotRef')");
       String outFile = connection.eval("contingencyTable(data, map)").asString();
       RFileInputStream response = connection.openFile(outFile);
-      // TODO
-      out.write(response.asString().getBytes());
+      transferStream(response, out);
+      response.close();
+      out.flush();
     });
   }
 }

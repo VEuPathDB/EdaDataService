@@ -1,0 +1,40 @@
+#%RAML 1.0 Library
+
+types:
+
+  EntityCountPostRequest:
+    additionalProperties: false
+    properties:
+      filters: API_Filter[]
+
+  EntityCountPostResponse:
+    additionalProperties: false
+    properties:
+      count: integer
+
+  VariableDistributionPostRequest:
+    additionalProperties: false
+    properties:
+      filters: API_Filter[]
+
+  VariableDistributionPostResponse:
+    additionalProperties: false
+    properties:
+      entitiesCount:
+        type: integer
+        minimum: 0
+      distribution:
+        type: object
+        properties:
+          //: integer
+
+  EntityTabularPostRequest:
+    additionalProperties: false
+    properties:
+      outputVariableIds: string[]
+      filters: API_Filter[]
+
+  EntityTabularPostResponse:
+    additionalProperties: false
+    properties:
+      counts: string[][]

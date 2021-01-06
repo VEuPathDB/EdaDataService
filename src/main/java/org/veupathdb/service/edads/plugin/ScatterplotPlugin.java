@@ -52,26 +52,82 @@ public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostReques
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    useRConnectionWithRemoteFiles(dataStreams, connection -> {
-      ScatterplotSpec spec = getPluginSpec();
-      connection.voidEval("data <- fread(" + DATAFILE_NAME + ")");
-      String[] variableNames = {"xAxisVariable",
-								"yAxisVariable",
-								"overlayVariable",
-								"facetVariable1",
-								"facetVariable2"};
-      String[] variables = {spec.getXAxisVariable(),
-    		  				spec.getYAxisVariable(),
-    		  				spec.getOverlayVariable(),
-    		  				Array.get(spec.getFacetVariable(),0),
-    		  				Array.get(spec.getFacetVariable(),1)};
-      RList plotRefMap = new RList(new REXP(variableNames), new REXP(variables))
-      connection.assign("map", plotRefMap);
-      connection.voidEval("names(map) <- c('id', 'plotRef')");
-      String outFile = connection.eval("scattergl(data, map, " + spec.getSmoothedMean() + ")").asString();
-      RFileInputStream response = connection.openFile(outFile);
-      // TODO
-      out.write(response.asString().getBytes());
-    });
+    ScatterplotSpec spec = getPluginSpec();
+    
+    boolean simpleScatter = true;
+    // TODO consider adding facets to simpleBar ?
+    if (spec.getFacetVariable != null 
+         || !spec.getValueSpec().equals('count')
+         || dataStreams.size() != 1) {
+      simpleScatter = false;
+    }
+    
+    if (simpleScatter) {
+      EntityDef entity = new EntityDef(spec.getEntityId());
+      Scanner s = new Scanner(dataStreams.get(0)).useDelimiter("\n");
+      
+      int groupVarIndex = null;
+      int xVarIndex = 0;
+      int yVarIndex = 1;
+      String xVar = entity.get(spec.getXAxisVariable()).getId();
+      String yVar = entity.get(spec.getYAxisVariable()).getId();
+      String groupVar = null;
+      if (spec.getOverlayVariable() != null) {
+        groupVar = entity.get(spec.getOverlayVariable()).getId();
+      }
+      String[] header = s.nextLine().asString().split("\t");
+
+      int xVarIndex = 0;
+      int yVarIndex = 1;
+      int groupVarIndex = null;
+      for (int i = 0; i < header.length; i++) {
+        if (Array.get(header, i).equals(groupVar)) {
+          groupVarIndex = i;
+        } else if (Array.get(header, i).equals(xVar)) {
+          xVarIndex = i;
+        } else if (Array.get(header, i).equals(yVar)) {
+          yVarIndex = i;
+        }
+      }
+      
+      while(s.hasNextLine()) {
+        JSONObject scatterRow = new JSONObject;
+        String xValue = Array.get(row, xVarIndex);
+        String yValue = Array.get(row, yVarIndex);
+        if (groupVarIndex != null) {
+          String currentGroup = Array.get(row, groupVarIndex);
+          scatterRow.put("group", currentGroup)
+        }
+        scatterRow.put("seriesX", xValue); 
+        scatterRow.put("seriesY", yValue);
+        out.write(scatterRow.toString());
+      }
+      
+      s.close();
+      out.flush();
+    } else {
+      useRConnectionWithRemoteFiles(dataStreams, connection -> {
+        
+        connection.voidEval("data <- fread(" + DATAFILE_NAME + ")");
+        String[] variableNames = {"xAxisVariable",
+                          "yAxisVariable",
+                          "overlayVariable",
+                          "facetVariable1",
+                          "facetVariable2"};
+        String[] variables = {spec.getXAxisVariable(),
+                       spec.getYAxisVariable(),
+                       spec.getOverlayVariable(),
+                       Array.get(spec.getFacetVariable(),0),
+                       Array.get(spec.getFacetVariable(),1)};
+        RList plotRefMap = new RList(new REXP(variableNames), new REXP(variables))
+        connection.assign("map", plotRefMap);
+        connection.voidEval("names(map) <- c('id', 'plotRef')");
+        String outFile = connection.eval("scattergl(data, map, " + spec.getSmoothedMean() + ")").asString();
+        RFileInputStream response = connection.openFile(outFile);
+        transferStream(response, out);
+        response.close();
+        out.flush();
+      }); 
+    }
   }
 }

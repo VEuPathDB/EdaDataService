@@ -50,24 +50,99 @@ public class BarplotPlugin extends AbstractEdadsPlugin<BarplotPostRequest, Barpl
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    useRConnectionWithRemoteFiles(dataStreams, connection -> {
-      BarplotSpec spec = getPluginSpec();
-      connection.voidEval("data <- fread(" + DATAFILE_NAME + ")");
-      String[] variableNames = {"xAxisVariable",
-								"overlayVariable",
-								"facetVariable1",
-								"facetVariable2"};
-      String[] variables = {spec.getXAxisVariable(),
-    		  				spec.getOverlayVariable(),
-    		  				Array.get(spec.getFacetVariable(),0),
-    		  				Array.get(spec.getFacetVariable(),1)};
-      RList plotRefMap = new RList(new REXP(variableNames), new REXP(variables))
-      connection.assign("map", plotRefMap);
-      connection.voidEval("names(map) <- c('id', 'plotRef')");
-      String outFile = connection.eval("bar(data, map, " + spec.getValueSpec() + ")").asString();
-      RFileInputStream response = connection.openFile(outFile);
-      // TODO
-      out.write(response.asString().getBytes());
-    });
+    BarplotSpec spec = getPluginSpec();
+    
+    boolean simpleBar = true;
+    // TODO consider adding facets to simpleBar ?
+    if (spec.getFacetVariable != null 
+         || !spec.getValueSpec().equals('count')
+         || dataStreams.size() != 1) {
+      simpleBar = false;
+    }
+    
+    if (simpleBar) {
+      EntityDef entity = new EntityDef(spec.getEntityId());
+      Wrapper<Integer> rowCount = new Wrapper<>(0);
+      Scanner s = new Scanner(dataStreams.get(0)).useDelimiter("\n");
+      
+      int groupVarIndex = null;
+      int xVarIndex = 0;
+      String xVar = entity.get(spec.getXAxisVariable()).getId();
+      if (spec.getOverlayVariable != null) {
+        String groupVar = entity.get(spec.getOverlayVariable()).getId();
+        // expect two cols ordered by overlayVar and then xAxisVar
+        String[] header = s.nextLine().asString().split("\t");
+        groupVarIndex = 0;
+        xVarIndex = 1;
+        if (!Array.get(header, 0).equals(groupVar)) {
+          groupVarIndex = 1;
+          xVarIndex = 0;
+        }
+      } else {
+        s.nextLine(); // ignore header, expecting single column representing ordered xVar values
+      }
+      
+      String[] row = s.nextLine().asString().split("\t");
+      String currentXCategory = Array.get(row, xVarIndex);
+      String currentGroup = null;
+      if (groupVarIndex != null) {
+        currentGroup = Array.get(row, groupVarIndex);
+      }
+      rowCount.set(1);
+  
+      while(s.hasNextLine()) {
+        String[] row = s.nextLine().asString().split("\t");
+        String xCategory = Array.get(row, xVarIndex);
+        String group = null;
+        boolean increment = false;
+        if (groupVarIndex != null) {
+          String group = Array.get(row, groupVarIndex);
+          if (group.equals(currentGroup) && xCategory.equals(currentXCategory)) {
+            increment = true;
+          }
+        } else {
+          if (xCategory.equals(currentXCategory)) {
+            increment = true;
+          }
+        }
+        if (increment) {
+          rowCount.set(rowCount.get() + 1);
+        } else {
+          JSONObject barRow = new JSONObject;
+          if (currentGroup != null) {
+            barRow.put("group", currentGroup)
+          }
+          barRow.put("label", currentXCategory); 
+          barRow.put("value", rowCount);
+          out.write(barRow.toString());
+          currentGroup = group;
+          currentXCategory = xCategory;
+          rowCount.set(1);
+        }
+      }
+      
+      s.close();
+      out.flush();
+    } else {    
+      useRConnectionWithRemoteFiles(dataStreams, connection -> {
+        connection.voidEval("data <- fread(" + DATAFILE_NAME + ")");
+        String[] variableNames = {"xAxisVariable",
+	            						"overlayVariable",
+					         			"facetVariable1",
+								         "facetVariable2"};
+        String[] variables = {spec.getXAxisVariable(),
+    		         				spec.getOverlayVariable(),
+    		  		         		Array.get(spec.getFacetVariable(),0),
+    		  				         Array.get(spec.getFacetVariable(),1)};
+        RList plotRefMap = new RList(new REXP(variableNames), new REXP(variables))
+        connection.assign("map", plotRefMap);
+        connection.voidEval("names(map) <- c('id', 'plotRef')");
+        String outFile = connection.eval("bar(data, map, " + spec.getValueSpec() + ")").asString();
+        RFileInputStream response = connection.openFile(outFile);
+        transferStream(response, out);
+        response.close();
+        out.flush();
+      });
+    }
   }
 }

@@ -43,13 +43,15 @@ public class HistogramPlugin extends AbstractEdadsPlugin<HistogramPostRequest, H
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     HistogramSpec spec = getPluginSpec();
-    EntityDef entityDef = new EntityDef(spec.getEntityId());
+//  TODO revisit simpleHistogram for numBins rather than binWidth
+    EntityDef entity = new EntityDef(spec.getEntityId());
     VariableDef xVar = entity.get(spec.getXAxisVariable());
     APIVariableType xType = xVar.getType();
     
 	boolean simpleHistogram = false;
     if (spec.getOverlayVariable == null 
-    		&& spec.getFacetVariable == null 
+    		&& spec.getFacetVariable == null
+    		&& spec.getBinWidth != null
     		&& xType.equals(APIVariableType.NUMBER)
     		&& spec.getValueSpec().equals('count')
     		&& dataStreams.size() == 1) {
@@ -65,11 +67,12 @@ public class HistogramPlugin extends AbstractEdadsPlugin<HistogramPostRequest, H
 	  rowCount.set(1);
 	  Double nextBinStart = binStart + binWidth;
 	  
-	  while(s.hasNextLine()){
+	  while(s.hasNextLine()) {
             Double val = s.nextLine().asDouble();
             if (val >= nextBinStart) {
               JSONObject histogram = new JSONObject;
-              histogram.put("label", "[" + binStart + " - " + nextBinStart + ")"); 
+              histogram.put("binLabel", "[" + binStart + " - " + nextBinStart + ")");
+              histogram.put("binStart", binStart);
               histogram.put("value", rowCount);
               out.write(histogram.toString());
               binStart = nextBinStart;
@@ -82,7 +85,7 @@ public class HistogramPlugin extends AbstractEdadsPlugin<HistogramPostRequest, H
 	  
 	  s.close();
 	  out.flush();
-    } else {  
+    } else {   
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
         connection.voidEval("data <- fread(" + DATAFILE_NAME + ")");
         String[] variableNames = {"xAxisVariable",
@@ -98,9 +101,10 @@ public class HistogramPlugin extends AbstractEdadsPlugin<HistogramPostRequest, H
         connection.voidEval("names(map) <- c('id', 'plotRef')");
         String outFile = connection.eval("histogram(data, map, " + spec.getBinWidth() + ", " + spec.getValueSpec() + ")").asString();
         RFileInputStream response = connection.openFile(outFile);
-        // TODO transfer one stream to another
-        out.write(response.asString().getBytes());
+        transferStream(response, out);
+        response.close();
+        out.flush();
 	  });
-    }  
+//  }  
   }
 }
