@@ -69,12 +69,28 @@ securitySchemes:
               type: error.ServerError
 
 
-  /histogram:
+  /histogram-bin-width:
     post:
       description: Returns data required to create a histogram visualization
       body:
         application/json:
-          type: lib.HistogramPostRequest
+          type: lib.HistogramBinWidthPostRequest
+      responses:
+        200:
+          body:
+            application/json:
+              type: lib.HistogramPostResponse
+        500:
+          body:
+            application/json:
+              type: error.ServerError
+
+  /histogram-num-bins:
+    post:
+      description: Returns data required to create a histogram visualization
+      body:
+        application/json:
+          type: lib.HistogramNumBinsPostRequest
       responses:
         200:
           body:

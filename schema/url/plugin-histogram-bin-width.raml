@@ -1,0 +1,23 @@
+#%RAML 1.0 Library
+
+types:
+
+  HistogramBinWidthPostRequest:
+    type: HistogramPostRequest
+    properties:
+      config: HistogramBinWidthSpec
+
+  NumericBinWidth:
+    properties:
+      type: number
+    
+  DateBinWidth:
+    properties:
+      type: string
+
+  HistogramBinWidthSpec:
+    type: HistogramSpec
+    properties:
+      binWidth:
+        type: NumericBinWidth | DateBinWidth
+        required: false

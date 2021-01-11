@@ -1,0 +1,15 @@
+#%RAML 1.0 Library
+
+types:
+
+  HistogramNumBinsPostRequest:
+    type: HistogramPostRequest
+    properties:
+      config: HistogramNumBinsSpec
+
+  HistogramNumBinsSpec:
+    type: HistogramSpec
+    properties:
+      numBins:
+        type: number
+        required: false

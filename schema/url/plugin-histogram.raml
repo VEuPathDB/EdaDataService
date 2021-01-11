@@ -4,16 +4,6 @@ types:
 
   HistogramPostRequest:
     type: AnalysisRequestBase
-    properties:
-      config: HistogramSpec
-
-  NumericBinWidth:
-    properties:
-      type: number
-    
-  DateBinWidth:
-    properties:
-      type: string
 
   HistogramSpec:
     additionalProperties: false
@@ -22,9 +12,6 @@ types:
         type: string
       xAxisVariable:
         type: string
-      binWidth:
-        type: NumericBinWidth | DateBinWidth
-        required: false
       valueSpec: 
         type: string
         enum: ['count', 'proportion']
@@ -50,10 +37,12 @@ types:
         minItems: 1
         required: true
       binStart:
-      	type: string[]
-      	minItems: 1
-      	required: true
+        type: string[]
+        minItems: 1
+        required: true
       binLabel:
         type: string[]
         minItems: 1
         required: true
+      binWidth:
+        type: number
