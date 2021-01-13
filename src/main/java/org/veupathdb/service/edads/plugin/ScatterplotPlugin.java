@@ -5,12 +5,17 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
+import org.gusdb.fgputil.IoUtil;
 import org.gusdb.fgputil.ListBuilder;
+import org.gusdb.fgputil.Wrapper;
 import org.gusdb.fgputil.validation.ValidationBundle;
 import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
 import org.rosuda.REngine.REXP;
+import org.rosuda.REngine.RList;
+import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.veupathdb.service.edads.generated.model.APIVariableType;
 import org.veupathdb.service.edads.generated.model.ScatterplotPostRequest;
 import org.veupathdb.service.edads.generated.model.ScatterplotSpec;
@@ -57,7 +62,7 @@ public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostReques
     boolean simpleScatter = true;
     // TODO consider adding facets to simpleBar ?
     if (spec.getFacetVariable != null 
-         || !spec.getValueSpec().equals('count')
+         || !spec.getValueSpec().equals("count")
          || dataStreams.size() != 1) {
       simpleScatter = false;
     }
@@ -91,12 +96,12 @@ public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostReques
       }
       
       while(s.hasNextLine()) {
-        JSONObject scatterRow = new JSONObject;
+        JSONObject scatterRow = new JSONObject();
         String xValue = Array.get(row, xVarIndex);
         String yValue = Array.get(row, yVarIndex);
         if (groupVarIndex != null) {
           String currentGroup = Array.get(row, groupVarIndex);
-          scatterRow.put("group", currentGroup)
+          scatterRow.put("group", currentGroup);
         }
         scatterRow.put("seriesX", xValue); 
         scatterRow.put("seriesY", yValue);
@@ -107,19 +112,21 @@ public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostReques
       out.flush();
     } else {
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
-        
         connection.voidEval("data <- fread(" + DATAFILE_NAME + ")");
-        String[] variableNames = {"xAxisVariable",
-                          "yAxisVariable",
-                          "overlayVariable",
-                          "facetVariable1",
-                          "facetVariable2"};
-        String[] variables = {spec.getXAxisVariable(),
-                       spec.getYAxisVariable(),
-                       spec.getOverlayVariable(),
-                       Array.get(spec.getFacetVariable(),0),
-                       Array.get(spec.getFacetVariable(),1)};
-        RList plotRefMap = new RList(new REXP(variableNames), new REXP(variables))
+        List<String> variableNames = Arrays.asList(new String[]{
+          "xAxisVariable",
+          "yAxisVariable",
+          "overlayVariable",
+          "facetVariable1",
+          "facetVariable2"});
+        List<String> variables = Arrays.asList(new String[]{
+          spec.getXAxisVariable(),
+          spec.getYAxisVariable(),
+          spec.getOverlayVariable(),
+          spec.getFacetVariable().get(0),
+          spec.getFacetVariable().get(1)
+        });
+        RList plotRefMap = new RList(variables, variableNames);
         connection.assign("map", plotRefMap);
         connection.voidEval("names(map) <- c('id', 'plotRef')");
         String outFile = connection.eval("scattergl(data, map, " + spec.getSmoothedMean() + ")").asString();

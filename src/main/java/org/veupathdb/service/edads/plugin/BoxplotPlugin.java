@@ -11,6 +11,8 @@ import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
 import org.rosuda.REngine.REXP;
+import org.rosuda.REngine.RList;
+import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.veupathdb.service.edads.generated.model.APIVariableType;
 import org.veupathdb.service.edads.generated.model.BoxplotPostRequest;
 import org.veupathdb.service.edads.generated.model.BoxplotSpec;
@@ -55,17 +57,20 @@ public class BoxplotPlugin extends AbstractEdadsPlugin<BoxplotPostRequest, Boxpl
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       BoxplotSpec spec = getPluginSpec();
       connection.voidEval("data <- fread(" + DATAFILE_NAME + ")");
-      String[] variableNames = {"xAxisVariable",
-								"yAxisVariable",
-								"overlayVariable",
-								"facetVariable1",
-								"facetVariable2"};
-      String[] variables = {spec.getXAxisVariable(),
-    		  				spec.getYAxisVariable(),
-    		  				spec.getOverlayVariable(),
-    		  				Array.get(spec.getFacetVariable(),0),
-    		  				Array.get(spec.getFacetVariable(),1)};
-      RList plotRefMap = new RList(new REXP(variableNames), new REXP(variables))
+      List<String> variableNames = Arrays.asList(new String[]{
+        "xAxisVariable",
+		  "yAxisVariable",
+		  "overlayVariable",
+		  "facetVariable1",
+		  "facetVariable2"});
+      List<String> variables = Arrays.asList(new String[]{
+        spec.getXAxisVariable(),
+    	  spec.getYAxisVariable(),
+    	  spec.getOverlayVariable(),
+    	  spec.getFacetVariable().get(0),
+        spec.getFacetVariable().get(1)
+      });
+      RList plotRefMap = new RList(variables, variableNames);
       connection.assign("map", plotRefMap);
       connection.voidEval("names(map) <- c('id', 'plotRef')");
       String outFile = connection.eval("box(data, map, " + spec.getPoints() + ", " + spec.getMean() + ")").asString();

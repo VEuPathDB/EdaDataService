@@ -3,13 +3,25 @@ package org.veupathdb.service.edads.plugin;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
+import org.gusdb.fgputil.IoUtil;
+import org.gusdb.fgputil.ListBuilder;
+import org.gusdb.fgputil.Wrapper;
+import org.json.JSONObject;
+import org.rosuda.REngine.REXP;
+import org.rosuda.REngine.RList;
+import org.rosuda.REngine.Rserve.RFileInputStream;
+import org.veupathdb.service.edads.generated.model.APIVariableType;
 import org.veupathdb.service.edads.generated.model.HistogramNumBinsPostRequest;
 import org.veupathdb.service.edads.generated.model.HistogramNumBinsSpec;
+import org.veupathdb.service.edads.plugin.HistogramPlugin;
+import org.veupathdb.service.edads.util.EntityDef;
 import org.veupathdb.service.edads.util.StreamSpec;
-import org.veupathdb.service.edads.util.HistogramPlugin;
+import org.veupathdb.service.edads.util.VariableDef;
 
 public class HistogramNumBinsPlugin extends HistogramPlugin<HistogramNumBinsPostRequest, HistogramNumBinsSpec>{
 
@@ -64,15 +76,18 @@ public class HistogramNumBinsPlugin extends HistogramPlugin<HistogramNumBinsPost
 */  
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
         connection.voidEval("data <- fread(" + DATAFILE_NAME + ")");
-        String[] variableNames = {"xAxisVariable",
-       		  					  "overlayVariable",
-  								  "facetVariable1",
-  								  "facetVariable2"};
-        String[] variables = {spec.getXAxisVariable(),
-    		  				  spec.getOverlayVariable(),
-        					  Array.get(spec.getFacetVariable(),0),
-        					  Array.get(spec.getFacetVariable(),1)};
-        RList plotRefMap = new RList(new REXP(variableNames), new REXP(variables))
+        List<String> variableNames = Arrays.asList(new String[]{
+          "xAxisVariable",
+          "overlayVariable",
+          "facetVariable1",
+          "facetVariable2"});
+        List<String> variables = Arrays.asList(new String[]{
+          spec.getXAxisVariable(),
+          spec.getOverlayVariable(),
+          spec.getFacetVariable().get(0),
+          spec.getFacetVariable().get(1)
+        });
+        RList plotRefMap = new RList(variables, variableNames);
         connection.assign("map", plotRefMap);
         connection.voidEval("names(map) <- c('id', 'plotRef')");
         Integer numBins = spec.getNumBins().intValue();

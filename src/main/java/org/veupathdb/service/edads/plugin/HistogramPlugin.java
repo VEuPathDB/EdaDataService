@@ -3,16 +3,19 @@ package org.veupathdb.service.edads.plugin;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import java.util.List;
 import java.util.Map;
 import org.gusdb.fgputil.validation.ValidationBundle;
+import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
+import org.gusdb.fgputil.validation.ValidationException;
+import org.gusdb.fgputil.validation.ValidationLevel;
 import org.veupathdb.service.edads.generated.model.HistogramPostRequest;
 import org.veupathdb.service.edads.generated.model.HistogramSpec;
-import org.veupathdb.service.edads.util.StreamSpec;
 import org.veupathdb.service.edads.util.AbstractEdadsPlugin;
+import org.veupathdb.service.edads.util.EntityDef;
+import org.veupathdb.service.edads.util.StreamSpec;
 
-public class HistogramPlugin extends AbstractEdadsPlugin<HistogramPostRequest, HistogramSpec>{
+public class HistogramPlugin<HistogramPostRequest, HistogramSpec> extends AbstractEdadsPlugin<HistogramPostRequest, HistogramSpec>{
 
   @Override
   protected Class<HistogramSpec> getAnalysisSpecClass() {
