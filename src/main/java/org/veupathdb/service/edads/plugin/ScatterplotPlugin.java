@@ -3,6 +3,8 @@ package org.veupathdb.service.edads.plugin;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -13,7 +15,9 @@ import org.gusdb.fgputil.validation.ValidationBundle;
 import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
+import org.json.JSONObject;
 import org.rosuda.REngine.REXP;
+import org.rosuda.REngine.REXPList;
 import org.rosuda.REngine.RList;
 import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.veupathdb.service.edads.generated.model.APIVariableType;
@@ -40,7 +44,7 @@ public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostReques
     validateVariableNameAndType(validation, entity, "yAxisVariable", pluginSpec.getYAxisVariable(), APIVariableType.NUMBER, APIVariableType.DATE);
     validateVariableNameAndType(validation, entity, "overlayVariable", pluginSpec.getOverlayVariable(), APIVariableType.STRING);
     for (String facetVar : pluginSpec.getFacetVariable()) {
-      validateVariableName(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
+      validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
     }
     return validation.build();
   }
@@ -84,7 +88,7 @@ public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostReques
 
       int xVarIndex = 0;
       int yVarIndex = 1;
-      int groupVarIndex = null;
+      Integer groupVarIndex = null;
       for (int i = 0; i < header.length; i++) {
         if (Array.get(header, i).equals(groupVar)) {
           groupVarIndex = i;
@@ -96,6 +100,7 @@ public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostReques
       }
       
       while(s.hasNextLine()) {
+        row = s.nextLine().split("\t");
         JSONObject scatterRow = new JSONObject();
         String xValue = Array.get(row, xVarIndex);
         String yValue = Array.get(row, yVarIndex);
@@ -113,25 +118,20 @@ public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostReques
     } else {
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
         connection.voidEval("data <- fread(" + DATAFILE_NAME + ")");
-        List<String> variableNames = Arrays.asList(new String[]{
-          "xAxisVariable",
-          "yAxisVariable",
-          "overlayVariable",
-          "facetVariable1",
-          "facetVariable2"});
-        List<String> variables = Arrays.asList(new String[]{
-          spec.getXAxisVariable(),
-          spec.getYAxisVariable(),
-          spec.getOverlayVariable(),
-          spec.getFacetVariable().get(0),
-          spec.getFacetVariable().get(1)
-        });
-        RList plotRefMap = new RList(variables, variableNames);
-        connection.assign("map", plotRefMap);
-        connection.voidEval("names(map) <- c('id', 'plotRef')");
-        String outFile = connection.eval("scattergl(data, map, " + spec.getSmoothedMean() + ")").asString();
+        connection.voidEval("map <- data.frame("
+            + "'id'=c('xAxisVariable', "
+            + "       'yAxisVariable', "
+            + "       'overlayVariable', "
+            + "       'facetVariable1', "
+            + "       'facetVariable2'), "
+            + "'plotRef'=c(" + spec.getXAxisVariable()
+            + ", " +           spec.getYAxisVariable()
+            + ", " +           spec.getOverlayVariable()
+            + ", " +           spec.getFacetVariable().get(0)
+            + ", " +           spec.getFacetVariable().get(1) + "))");
+        String outFile = connection.eval("scattergl(data, map, " + spec.getValueSpec() + ")").asString();
         RFileInputStream response = connection.openFile(outFile);
-        transferStream(response, out);
+        IoUtil.transferStream(out, response);
         response.close();
         out.flush();
       }); 

@@ -3,14 +3,18 @@ package org.veupathdb.service.edads.plugin;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import org.gusdb.fgputil.IoUtil;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationBundle;
 import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
 import org.rosuda.REngine.REXP;
+import org.rosuda.REngine.REXPList;
 import org.rosuda.REngine.RList;
 import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.veupathdb.service.edads.generated.model.APIVariableType;
@@ -37,7 +41,7 @@ public class BoxplotPlugin extends AbstractEdadsPlugin<BoxplotPostRequest, Boxpl
     validateVariableNameAndType(validation, entity, "yAxisVariable", pluginSpec.getYAxisVariable(), APIVariableType.NUMBER);
     validateVariableNameAndType(validation, entity, "overlayVariable", pluginSpec.getOverlayVariable(), APIVariableType.STRING);
     for (String facetVar : pluginSpec.getFacetVariable()) {
-      validateVariableName(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
+      validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
     }
     return validation.build();
   }
@@ -57,25 +61,20 @@ public class BoxplotPlugin extends AbstractEdadsPlugin<BoxplotPostRequest, Boxpl
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       BoxplotSpec spec = getPluginSpec();
       connection.voidEval("data <- fread(" + DATAFILE_NAME + ")");
-      List<String> variableNames = Arrays.asList(new String[]{
-        "xAxisVariable",
-		  "yAxisVariable",
-		  "overlayVariable",
-		  "facetVariable1",
-		  "facetVariable2"});
-      List<String> variables = Arrays.asList(new String[]{
-        spec.getXAxisVariable(),
-    	  spec.getYAxisVariable(),
-    	  spec.getOverlayVariable(),
-    	  spec.getFacetVariable().get(0),
-        spec.getFacetVariable().get(1)
-      });
-      RList plotRefMap = new RList(variables, variableNames);
-      connection.assign("map", plotRefMap);
-      connection.voidEval("names(map) <- c('id', 'plotRef')");
+      connection.voidEval("map <- data.frame("
+          + "'id'=c('xAxisVariable', "
+          + "       'yAxisVariable', "
+          + "       'overlayVariable', "
+          + "       'facetVariable1', "
+          + "       'facetVariable2'), "
+          + "'plotRef'=c(" + spec.getXAxisVariable()
+          + ", " +           spec.getYAxisVariable()
+          + ", " +           spec.getOverlayVariable()
+          + ", " +           spec.getFacetVariable().get(0)
+          + ", " +           spec.getFacetVariable().get(1) + "))");
       String outFile = connection.eval("box(data, map, " + spec.getPoints() + ", " + spec.getMean() + ")").asString();
       RFileInputStream response = connection.openFile(outFile);
-      transferStream(response, out);
+      IoUtil.transferStream(out, response);
       response.close();
       out.flush();
     });

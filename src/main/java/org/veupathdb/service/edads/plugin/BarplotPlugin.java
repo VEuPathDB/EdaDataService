@@ -17,6 +17,7 @@ import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
 import org.json.JSONObject;
 import org.rosuda.REngine.REXP;
+import org.rosuda.REngine.REXPList;
 import org.rosuda.REngine.RList;
 import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.veupathdb.service.edads.generated.model.APIVariableType;
@@ -135,21 +136,15 @@ public class BarplotPlugin extends AbstractEdadsPlugin<BarplotPostRequest, Barpl
     } else {
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
         connection.voidEval("data <- fread(" + DATAFILE_NAME + ")");
-        List<String> variableNames = Arrays.asList(new String[]{
-            "xAxisVariable",
-            "overlayVariable",
-            "facetVariable1",
-            "facetVariable2"
-        });
-        List<String> variables = Arrays.asList(new String[]{
-            spec.getXAxisVariable(),
-            spec.getOverlayVariable(),
-            spec.getFacetVariable().get(0),
-            spec.getFacetVariable().get(1)
-        });
-        RList plotRefMap = new RList(variables, variableNames);
-        connection.assign("map", plotRefMap);
-        connection.voidEval("names(map) <- c('id', 'plotRef')");
+        connection.voidEval("map <- data.frame("
+            + "'id'=c('xAxisVariable', "
+            + "       'overlayVariable', "
+            + "       'facetVariable1', "
+            + "       'facetVariable2'), "
+            + "'plotRef'=c(" + spec.getXAxisVariable()
+            + ", " +           spec.getOverlayVariable()
+            + ", " +           spec.getFacetVariable().get(0)
+            + ", " +           spec.getFacetVariable().get(1) + "))");
         String outFile = connection.eval("bar(data, map, " + spec.getValueSpec() + ")").asString();
         RFileInputStream response = connection.openFile(outFile);
         IoUtil.transferStream(out, response);

@@ -17,6 +17,8 @@ import org.veupathdb.service.edads.util.StreamSpec;
 
 public class HistogramPlugin<HistogramPostRequest, HistogramSpec> extends AbstractEdadsPlugin<HistogramPostRequest, HistogramSpec>{
 
+  private static final String DATAFILE_NAME = "file1.txt";
+  
   @Override
   protected Class<HistogramSpec> getAnalysisSpecClass() {
     return HistogramSpec.class;
@@ -29,7 +31,7 @@ public class HistogramPlugin<HistogramPostRequest, HistogramSpec> extends Abstra
     validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.NUMBER, APIVariableType.DATE);
     validateVariableNameAndType(validation, entity, "overlayVariable", pluginSpec.getOverlayVariable(), APIVariableType.STRING);
     for (String facetVar : pluginSpec.getFacetVariable()) {
-      validateVariableName(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
+      validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
     }
     return validation.build();
   }

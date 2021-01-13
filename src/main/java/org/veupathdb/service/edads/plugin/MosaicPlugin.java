@@ -39,7 +39,7 @@ public class MosaicPlugin extends AbstractEdadsPlugin<MosaicPostRequest, MosaicS
     validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.NUMBER, APIVariableType.DATE);
     validateVariableNameAndType(validation, entity, "yAxisVariable", pluginSpec.getYAxisVariable(), APIVariableType.NUMBER, APIVariableType.DATE);
     for (String facetVar : pluginSpec.getFacetVariable()) {
-      validateVariableName(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
+      validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
     }
     return validation.build();
   }
@@ -58,21 +58,15 @@ public class MosaicPlugin extends AbstractEdadsPlugin<MosaicPostRequest, MosaicS
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       MosaicSpec spec = getPluginSpec();
       connection.voidEval("data <- fread(" + DATAFILE_NAME + ")");
-      List<String> variableNames = Arrays.asList(new String[]{
-          "xAxisVariable",
-          "yAxisVariable",
-          "facetVariable1",
-          "facetVariable2"
-      });
-      List<String> variables = Arrays.asList(new String[]{
-          spec.getXAxisVariable(),
-          spec.getYAxisVariable(),
-          spec.getFacetVariable().get(0),
-          spec.getFacetVariable().get(1)
-      });
-      RList plotRefMap = new RList(variables, variableNames);
-      connection.assign("map", plotRefMap);
-      connection.voidEval("names(map) <- c('id', 'plotRef')");
+      connection.voidEval("map <- data.frame("
+          + "'id'=c('xAxisVariable', "
+          + "       'yAxisVariable', "
+          + "       'facetVariable1', "
+          + "       'facetVariable2'), "
+          + "'plotRef'=c(" + spec.getXAxisVariable()
+          + ", " +           spec.getYAxisVariable()
+          + ", " +           spec.getFacetVariable().get(0)
+          + ", " +           spec.getFacetVariable().get(1) + "))");
       String outFile = connection.eval("contingencyTable(data, map)").asString();
       RFileInputStream response = connection.openFile(outFile);
       IoUtil.transferStream(out, response);

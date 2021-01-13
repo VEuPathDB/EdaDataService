@@ -13,6 +13,7 @@ import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.Wrapper;
 import org.json.JSONObject;
 import org.rosuda.REngine.REXP;
+import org.rosuda.REngine.REXPList;
 import org.rosuda.REngine.RList;
 import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.veupathdb.service.edads.generated.model.APIVariableType;
@@ -25,9 +26,11 @@ import org.veupathdb.service.edads.util.VariableDef;
 
 public class HistogramNumBinsPlugin extends HistogramPlugin<HistogramNumBinsPostRequest, HistogramNumBinsSpec>{
 
+  private static final String DATAFILE_NAME = "file1.txt";
+  
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    HistogramSpec spec = getPluginSpec();
+    HistogramNumBinsSpec spec = getPluginSpec();
 /*
 //  TODO revisit simpleHistogram for numBins rather than binWidth
     EntityDef entity = new EntityDef(spec.getEntityId());
@@ -76,27 +79,22 @@ public class HistogramNumBinsPlugin extends HistogramPlugin<HistogramNumBinsPost
 */  
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
         connection.voidEval("data <- fread(" + DATAFILE_NAME + ")");
-        List<String> variableNames = Arrays.asList(new String[]{
-          "xAxisVariable",
-          "overlayVariable",
-          "facetVariable1",
-          "facetVariable2"});
-        List<String> variables = Arrays.asList(new String[]{
-          spec.getXAxisVariable(),
-          spec.getOverlayVariable(),
-          spec.getFacetVariable().get(0),
-          spec.getFacetVariable().get(1)
-        });
-        RList plotRefMap = new RList(variables, variableNames);
-        connection.assign("map", plotRefMap);
-        connection.voidEval("names(map) <- c('id', 'plotRef')");
+        connection.voidEval("map <- data.frame("
+            + "'id'=c('xAxisVariable', "
+            + "       'overlayVariable', "
+            + "       'facetVariable1', "
+            + "       'facetVariable2'), "
+            + "'plotRef'=c(" + spec.getXAxisVariable()
+            + ", " +           spec.getOverlayVariable()
+            + ", " +           spec.getFacetVariable().get(0)
+            + ", " +           spec.getFacetVariable().get(1) + "))");
         Integer numBins = spec.getNumBins().intValue();
         connection.voidEval("x <- emptyStringToNull(map$id[map$plotRef == 'xAxisVariable'])");
         connection.voidEval("xRange <- max(data[[x]], na.rm=T) - min(data[[x]], na.rm=T)");
         connection.voidEval("binWidth <- xRange*1.01/" + numBins);
         String outFile = connection.eval("histogram(data, map, binWidth, " + spec.getValueSpec() + ")").asString();
         RFileInputStream response = connection.openFile(outFile);
-        transferStream(response, out);
+        IoUtil.transferStream(out, response);
         response.close();
         out.flush();
 	   });
