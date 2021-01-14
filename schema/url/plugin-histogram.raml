@@ -5,6 +5,10 @@ types:
   HistogramPostRequest:
     type: AnalysisRequestBase
 
+  ValueSpec:
+    type: string
+    enum: ['count', 'proportion']
+
   HistogramSpec:
     additionalProperties: false
     properties:
@@ -13,8 +17,7 @@ types:
       xAxisVariable:
         type: string
       valueSpec: 
-        type: string
-        enum: ['count', 'proportion']
+        type: ValueSpec
       overlayVariable: 
         type: string
         required: false

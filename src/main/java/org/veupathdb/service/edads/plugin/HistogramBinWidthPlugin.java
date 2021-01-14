@@ -11,6 +11,8 @@ import java.util.Scanner;
 import org.gusdb.fgputil.IoUtil;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.Wrapper;
+import org.gusdb.fgputil.validation.ValidationBundle;
+import org.gusdb.fgputil.validation.ValidationException;
 import org.json.JSONObject;
 import org.rosuda.REngine.REXP;
 import org.rosuda.REngine.REXPList;
@@ -27,7 +29,12 @@ import org.veupathdb.service.edads.util.VariableDef;
 public class HistogramBinWidthPlugin extends HistogramPlugin<HistogramBinWidthPostRequest, HistogramBinWidthSpec>{
 
   private static final String DATAFILE_NAME = "file1.txt";
-  
+
+  @Override
+  protected Class<HistogramBinWidthSpec> getAnalysisSpecClass() {
+    return HistogramBinWidthSpec.class;
+  }
+
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     HistogramBinWidthSpec spec = getPluginSpec();
@@ -46,22 +53,22 @@ public class HistogramBinWidthPlugin extends HistogramPlugin<HistogramBinWidthPo
     }
 
 	if (simpleHistogram) {
-	  Double binWidth = spec.getBinWidth().doubleValue();
+	  Double binWidth = spec.getBinWidth().getNumericBinWidth().getType().doubleValue();
 	  Wrapper<Integer> rowCount = new Wrapper<>(0);
 	  Scanner s = new Scanner(dataStreams.get(0)).useDelimiter("\n");
 	  s.nextLine(); // ignore header, expecting single column representing ordered xVar values
-	  Double binStart = s.nextLine().asDouble();
+	  Double binStart = Double.valueOf(s.nextLine());
 	  rowCount.set(1);
 	  Double nextBinStart = binStart + binWidth;
 	  
 	  while(s.hasNextLine()) {
-            Double val = s.nextLine().asDouble();
+            Double val = Double.valueOf(s.nextLine());
             if (val >= nextBinStart) {
               JSONObject histogram = new JSONObject();
               histogram.put("binLabel", "[" + binStart + " - " + nextBinStart + ")");
               histogram.put("binStart", binStart);
               histogram.put("value", rowCount);
-              out.write(histogram.toString());
+              out.write(histogram.toString().getBytes());
               binStart = nextBinStart;
               nextBinStart = nextBinStart + binWidth;
               rowCount.set(1);

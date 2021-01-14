@@ -21,7 +21,8 @@ import org.veupathdb.service.edads.generated.model.BoxplotPostRequest;
 import org.veupathdb.service.edads.generated.model.BoxplotPostResponseStream;
 import org.veupathdb.service.edads.generated.model.HeatmapPostRequest;
 import org.veupathdb.service.edads.generated.model.HeatmapPostResponseStream;
-import org.veupathdb.service.edads.generated.model.HistogramPostRequest;
+import org.veupathdb.service.edads.generated.model.HistogramBinWidthPostRequest;
+import org.veupathdb.service.edads.generated.model.HistogramNumBinsPostRequest;
 import org.veupathdb.service.edads.generated.model.HistogramPostResponseStream;
 import org.veupathdb.service.edads.generated.model.MosaicPostRequest;
 import org.veupathdb.service.edads.generated.model.MosaicPostResponseStream;
@@ -33,7 +34,8 @@ import org.veupathdb.service.edads.generated.resources.Analyses;
 import org.veupathdb.service.edads.plugin.BarplotPlugin;
 import org.veupathdb.service.edads.plugin.BoxplotPlugin;
 import org.veupathdb.service.edads.plugin.HeatmapPlugin;
-import org.veupathdb.service.edads.plugin.HistogramPlugin;
+import org.veupathdb.service.edads.plugin.HistogramBinWidthPlugin;
+import org.veupathdb.service.edads.plugin.HistogramNumBinsPlugin;
 import org.veupathdb.service.edads.plugin.MosaicPlugin;
 import org.veupathdb.service.edads.plugin.RecordCountPlugin;
 import org.veupathdb.service.edads.plugin.ScatterplotPlugin;
@@ -41,7 +43,7 @@ import org.veupathdb.service.edads.plugin.ScatterplotPlugin;
 
 public class AnalysesService implements Analyses {
 
-  private static Logger LOG = LogManager.getLogger(AnalysesService.class);
+  private static final Logger LOG = LogManager.getLogger(AnalysesService.class);
 
   private static final String[] ANALYSIS_NAMES = {
     "record-count",
@@ -102,9 +104,16 @@ public class AnalysesService implements Analyses {
 
   @DisableJackson
   @Override
-  public PostAnalysesHistogramResponse postAnalysesHistogram(HistogramPostRequest entity) {
-    return wrapPlugin(() -> PostAnalysesHistogramResponse.respond200WithApplicationJson(
-        new HistogramPostResponseStream(new HistogramPlugin().processRequest(entity))));
+  public PostAnalysesHistogramBinWidthResponse postAnalysesHistogramBinWidth(HistogramBinWidthPostRequest entity) {
+    return wrapPlugin(() -> PostAnalysesHistogramBinWidthResponse.respond200WithApplicationJson(
+        new HistogramPostResponseStream(new HistogramBinWidthPlugin().processRequest(entity))));
+  }
+
+  @DisableJackson
+  @Override
+  public PostAnalysesHistogramNumBinsResponse postAnalysesHistogramNumBins(HistogramNumBinsPostRequest entity) {
+    return wrapPlugin(() -> PostAnalysesHistogramNumBinsResponse.respond200WithApplicationJson(
+        new HistogramPostResponseStream(new HistogramNumBinsPlugin().processRequest(entity))));
   }
 
   @DisableJackson

@@ -27,7 +27,12 @@ import org.veupathdb.service.edads.util.VariableDef;
 public class HistogramNumBinsPlugin extends HistogramPlugin<HistogramNumBinsPostRequest, HistogramNumBinsSpec>{
 
   private static final String DATAFILE_NAME = "file1.txt";
-  
+
+  @Override
+  protected Class<HistogramNumBinsSpec> getAnalysisSpecClass() {
+    return HistogramNumBinsSpec.class;
+  }
+
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     HistogramNumBinsSpec spec = getPluginSpec();

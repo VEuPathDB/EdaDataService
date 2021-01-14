@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.Wrapper;
@@ -20,12 +21,12 @@ import org.json.JSONObject;
 public class RecordCountPlugin extends AbstractEdadsPlugin<RecordCountPostRequest, RecordCountSpec> {
 
   @Override
-  protected Class<RecordCountSpec> getConfigurationClass() {
+  protected Class<RecordCountSpec> getAnalysisSpecClass() {
     return RecordCountSpec.class;
   }
 
   @Override
-  protected ValidationBundle validateConfig(RecordCountSpec pluginSpec) {
+  protected ValidationBundle validateAnalysisSpec(RecordCountSpec pluginSpec) {
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
     if (!getEntityMap().containsKey(pluginSpec.getEntityId())) {
       validation.addError("No entity exists in study '" + getStudyId() + "' with ID '" + pluginSpec.getEntityId() + "'.");
@@ -36,11 +37,11 @@ public class RecordCountPlugin extends AbstractEdadsPlugin<RecordCountPostReques
   @Override
   protected List<StreamSpec> getRequestedStreams(RecordCountSpec pluginSpec) {
     // only need one stream for the requested entity and no vars (IDs included automatically)
-    return new ListBuilder<StreamSpec>(new StreamSpec(pluginSpec.getEntityId())).toList();
+    return new ListBuilder<StreamSpec>(new StreamSpec("stream1", pluginSpec.getEntityId())).toList();
   }
 
   @Override
-  protected void writeResults(OutputStream out, List<InputStream> dataStreams) throws IOException {
+  protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     Wrapper<Integer> rowCount = new Wrapper<>(0);
     new Scanner(dataStreams.get(0))
         .useDelimiter("\n")

@@ -4,21 +4,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import org.gusdb.fgputil.IoUtil;
 import org.gusdb.fgputil.ListBuilder;
-import org.gusdb.fgputil.Wrapper;
 import org.gusdb.fgputil.validation.ValidationBundle;
 import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
 import org.json.JSONObject;
-import org.rosuda.REngine.REXP;
-import org.rosuda.REngine.REXPList;
-import org.rosuda.REngine.RList;
 import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.veupathdb.service.edads.generated.model.APIVariableType;
 import org.veupathdb.service.edads.generated.model.ScatterplotPostRequest;
@@ -65,7 +60,7 @@ public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostReques
     
     boolean simpleScatter = true;
     // TODO consider adding facets to simpleBar ?
-    if (spec.getFacetVariable != null 
+    if (spec.getFacetVariable() != null
          || !spec.getValueSpec().equals("count")
          || dataStreams.size() != 1) {
       simpleScatter = false;
@@ -74,17 +69,14 @@ public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostReques
     if (simpleScatter) {
       EntityDef entity = new EntityDef(spec.getEntityId());
       Scanner s = new Scanner(dataStreams.get(0)).useDelimiter("\n");
-      
-      int groupVarIndex = null;
-      int xVarIndex = 0;
-      int yVarIndex = 1;
+
       String xVar = entity.get(spec.getXAxisVariable()).getId();
       String yVar = entity.get(spec.getYAxisVariable()).getId();
       String groupVar = null;
       if (spec.getOverlayVariable() != null) {
         groupVar = entity.get(spec.getOverlayVariable()).getId();
       }
-      String[] header = s.nextLine().asString().split("\t");
+      String[] header = s.nextLine().split("\t");
 
       int xVarIndex = 0;
       int yVarIndex = 1;
@@ -100,17 +92,17 @@ public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostReques
       }
       
       while(s.hasNextLine()) {
-        row = s.nextLine().split("\t");
+        String[] row = s.nextLine().split("\t");
         JSONObject scatterRow = new JSONObject();
-        String xValue = Array.get(row, xVarIndex);
-        String yValue = Array.get(row, yVarIndex);
+        String xValue = row[xVarIndex];
+        String yValue = row[yVarIndex];
         if (groupVarIndex != null) {
-          String currentGroup = Array.get(row, groupVarIndex);
+          String currentGroup = row[groupVarIndex];
           scatterRow.put("group", currentGroup);
         }
         scatterRow.put("seriesX", xValue); 
         scatterRow.put("seriesY", yValue);
-        out.write(scatterRow.toString());
+        out.write(scatterRow.toString().getBytes());
       }
       
       s.close();
