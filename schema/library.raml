@@ -86,92 +86,21 @@ types:
   API_DateVariable:
     type: API_Variable
     discriminatorValue: date
-  HistogramBinWidthPostRequest:
+  HistogramNumBinsPostRequest:
     type: HistogramPostRequest
     properties:
-      config: HistogramBinWidthSpec
-  NumericBinWidth:
-    type: object
-    properties:
-      type: number
-  DateBinWidth:
-    type: object
-    properties:
-      type: string
-  HistogramBinWidthSpec:
+      config: HistogramNumBinsSpec
+  HistogramNumBinsSpec:
     type: HistogramSpec
     properties:
-      binWidth:
-        type: NumericBinWidth | DateBinWidth
+      numBins:
+        type: number
         required: false
-  HistogramBinWidthPostResponse:
+  HistogramNumBinsPostResponse:
     type: HistogramPostResponse
     properties:
-      binWidth:
-        type: NumericBinWidth | DateBinWidth
-  ScatterplotPostRequest:
-    type: AnalysisRequestBase
-    properties:
-      config: ScatterplotSpec
-  ScatterplotSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      entityId: string
-      valueSpec:
-        type: string
-        enum:
-          - smoothedMean
-          - density
-          - raw
-      xAxisVariable: string
-      yAxisVariable: string
-      overlayVariable:
-        type: string
-        required: false
-      facetVariable:
-        type: string[]
-        maxItems: 2
-        required: false
-  ScatterplotPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      group:
-        type: string
-        required: false
-      panel:
-        type: string
-        required: false
-      seriesY:
-        type: number[]
-        minItems: 1
-      seriesX:
-        type: number[]
-        minItems: 1
-      intervalX:
-        type: number[]
-        required: false
-      intervalY:
-        type: number[]
-        required: false
-      intervalSE:
-        type: number[]
-        required: false
-      densityX:
-        type: number[]
-        required: false
-      densityY:
-        type: number[]
-        required: false
-  DerivedVariable:
-    type: object
-    properties:
-      entityId: string
-      variableId: string
-      type: API_VariableType
-      dependentVariables: string[]
-      construction: object
+      numBins:
+        type: number
   API_Filter:
     type: object
     discriminator: type
@@ -214,190 +143,6 @@ types:
     properties:
       min: string
       max: string
-  HeatmapPostRequest:
-    type: AnalysisRequestBase
-    properties:
-      config: HeatmapSpec
-  HeatmapSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      entityId: string
-      valueSpec:
-        type: string
-        enum:
-          - collection
-          - series
-      xAxisVariable: string
-      yAxisVariable: string
-      zAxisVariable:
-        type: string
-        required: false
-      facetVariable:
-        type: string[]
-        maxItems: 2
-        required: false
-  HeatmapPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      panel:
-        type: string
-        required: false
-      value:
-        type: number[][]
-        minItems: 1
-      label:
-        type: string[]
-        minItems: 1
-  RecordCountPostRequest:
-    type: AnalysisRequestBase
-    properties:
-      config: RecordCountSpec
-  RecordCountSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      entityId: string
-  RecordCountPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      recordCount: number
-  EntityCountPostRequest:
-    type: object
-    additionalProperties: false
-    properties:
-      filters: API_Filter[]
-  EntityCountPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      count: integer
-  VariableDistributionPostRequest:
-    type: object
-    additionalProperties: false
-    properties:
-      filters: API_Filter[]
-  VariableDistributionPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      entitiesCount:
-        type: integer
-        minimum: 0
-      distribution:
-        type: object
-        properties:
-          //: integer
-  EntityTabularPostRequest:
-    type: object
-    additionalProperties: false
-    properties:
-      outputVariableIds: string[]
-      filters: API_Filter[]
-  EntityTabularPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      counts: string[][]
-  BoxplotPostRequest:
-    type: AnalysisRequestBase
-    properties:
-      config: BoxplotSpec
-  BoxplotSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      entityId: string
-      points:
-        type: string
-        enum:
-          - outliers
-          - all
-      mean:
-        type: string
-        enum:
-          - "true"
-          - "false"
-      xAxisVariable: string
-      yAxisVariable: string
-      overlayVariable:
-        type: string
-        required: false
-      facetVariable:
-        type: string[]
-        maxItems: 2
-        required: false
-  BoxplotPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      group:
-        type: string
-        required: false
-      panel:
-        type: string
-        required: false
-      lowerfence:
-        type: number[]
-        minItems: 1
-      upperfence:
-        type: number[]
-        minItems: 1
-      q1:
-        type: number[]
-        minItems: 1
-      q3:
-        type: number[]
-        minItems: 1
-      median:
-        type: number[]
-        minItems: 1
-      outliers:
-        type: number[][]
-        required: false
-      rawData:
-        type: number[][]
-        required: false
-      mean:
-        type: number[]
-        required: false
-  HistogramNumBinsPostRequest:
-    type: HistogramPostRequest
-    properties:
-      config: HistogramNumBinsSpec
-  HistogramNumBinsSpec:
-    type: HistogramSpec
-    properties:
-      numBins:
-        type: number
-        required: false
-  HistogramNumBinsPostResponse:
-    type: HistogramPostResponse
-    properties:
-      numBins:
-        type: number
-  AnalysesGetResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      analyses: AnalysisOverview[]
-  AnalysisOverview:
-    type: object
-    properties:
-      name: string
-  AnalysisRequestBase:
-    type: object
-    additionalProperties: false
-    properties:
-      studyId: string
-      subset:
-        type: API_Filter[]
-        required: false
-      derivedVariables:
-        type: DerivedVariable[]
-        required: false
   BarplotPostRequest:
     type: AnalysisRequestBase
     properties:
@@ -475,6 +220,20 @@ types:
       binLabel:
         type: string[]
         minItems: 1
+  RecordCountPostRequest:
+    type: AnalysisRequestBase
+    properties:
+      config: RecordCountSpec
+  RecordCountSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      entityId: string
+  RecordCountPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      recordCount: number
   MosaicPostRequest:
     type: AnalysisRequestBase
     properties:
@@ -506,4 +265,245 @@ types:
       label:
         type: string[]
         minItems: 1
+  HeatmapPostRequest:
+    type: AnalysisRequestBase
+    properties:
+      config: HeatmapSpec
+  HeatmapSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      entityId: string
+      valueSpec:
+        type: string
+        enum:
+          - collection
+          - series
+      xAxisVariable: string
+      yAxisVariable: string
+      zAxisVariable:
+        type: string
+        required: false
+      facetVariable:
+        type: string[]
+        maxItems: 2
+        required: false
+  HeatmapPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      panel:
+        type: string
+        required: false
+      value:
+        type: number[][]
+        minItems: 1
+      label:
+        type: string[]
+        minItems: 1
+  AnalysesGetResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      analyses: AnalysisOverview[]
+  AnalysisOverview:
+    type: object
+    properties:
+      name: string
+  AnalysisRequestBase:
+    type: object
+    additionalProperties: false
+    properties:
+      studyId: string
+      subset:
+        type: API_Filter[]
+        required: false
+      derivedVariables:
+        type: DerivedVariable[]
+        required: false
+  ScatterplotPostRequest:
+    type: AnalysisRequestBase
+    properties:
+      config: ScatterplotSpec
+  ScatterplotSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      entityId: string
+      valueSpec:
+        type: string
+        enum:
+          - smoothedMean
+          - density
+          - raw
+      xAxisVariable: string
+      yAxisVariable: string
+      overlayVariable:
+        type: string
+        required: false
+      facetVariable:
+        type: string[]
+        maxItems: 2
+        required: false
+  ScatterplotPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      group:
+        type: string
+        required: false
+      panel:
+        type: string
+        required: false
+      seriesY:
+        type: number[]
+        minItems: 1
+      seriesX:
+        type: number[]
+        minItems: 1
+      intervalX:
+        type: number[]
+        required: false
+      intervalY:
+        type: number[]
+        required: false
+      intervalSE:
+        type: number[]
+        required: false
+      densityX:
+        type: number[]
+        required: false
+      densityY:
+        type: number[]
+        required: false
+  DerivedVariable:
+    type: object
+    properties:
+      entityId: string
+      variableId: string
+      type: API_VariableType
+      dependentVariables: string[]
+      construction: object
+  HistogramBinWidthPostRequest:
+    type: HistogramPostRequest
+    properties:
+      config: HistogramBinWidthSpec
+  NumericBinWidth:
+    type: object
+    properties:
+      type: number
+  DateBinWidth:
+    type: object
+    properties:
+      type: string
+  HistogramBinWidthSpec:
+    type: HistogramSpec
+    properties:
+      binWidth:
+        type: NumericBinWidth | DateBinWidth
+        required: false
+  HistogramBinWidthPostResponse:
+    type: HistogramPostResponse
+    properties:
+      binWidth:
+        type: NumericBinWidth | DateBinWidth
+  BoxplotPostRequest:
+    type: AnalysisRequestBase
+    properties:
+      config: BoxplotSpec
+  BoxplotSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      entityId: string
+      points:
+        type: string
+        enum:
+          - outliers
+          - all
+      mean:
+        type: string
+        enum:
+          - "true"
+          - "false"
+      xAxisVariable: string
+      yAxisVariable: string
+      overlayVariable:
+        type: string
+        required: false
+      facetVariable:
+        type: string[]
+        maxItems: 2
+        required: false
+  BoxplotPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      group:
+        type: string
+        required: false
+      panel:
+        type: string
+        required: false
+      lowerfence:
+        type: number[]
+        minItems: 1
+      upperfence:
+        type: number[]
+        minItems: 1
+      q1:
+        type: number[]
+        minItems: 1
+      q3:
+        type: number[]
+        minItems: 1
+      median:
+        type: number[]
+        minItems: 1
+      outliers:
+        type: number[][]
+        required: false
+      rawData:
+        type: number[][]
+        required: false
+      mean:
+        type: number[]
+        required: false
+  EntityCountPostRequest:
+    type: object
+    additionalProperties: false
+    properties:
+      filters: API_Filter[]
+  EntityCountPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      count: integer
+  VariableDistributionPostRequest:
+    type: object
+    additionalProperties: false
+    properties:
+      filters: API_Filter[]
+  VariableDistributionPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      entitiesCount:
+        type: integer
+        minimum: 0
+      distribution:
+        type: object
+        properties:
+          //: integer
+  EntityTabularPostRequest:
+    type: object
+    additionalProperties: false
+    properties:
+      outputVariableIds: string[]
+      filters: API_Filter[]
+  EntityTabularPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      counts: string[][]
 
