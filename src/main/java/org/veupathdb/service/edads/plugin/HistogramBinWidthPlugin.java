@@ -52,6 +52,9 @@ public class HistogramBinWidthPlugin extends HistogramPlugin<HistogramBinWidthPo
       simpleHistogram = true;
     }
 
+   // start w just R
+   simpleHistogram = false;
+   // TODO revise as data will be ordered by id not by value. need min and max from steve
 	if (simpleHistogram) {
 	  Double binWidth = spec.getBinWidth().getNumericBinWidth().getType().doubleValue();
 	  Wrapper<Integer> rowCount = new Wrapper<>(0);

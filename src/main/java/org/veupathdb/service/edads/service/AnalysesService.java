@@ -23,7 +23,8 @@ import org.veupathdb.service.edads.generated.model.HeatmapPostRequest;
 import org.veupathdb.service.edads.generated.model.HeatmapPostResponseStream;
 import org.veupathdb.service.edads.generated.model.HistogramBinWidthPostRequest;
 import org.veupathdb.service.edads.generated.model.HistogramNumBinsPostRequest;
-import org.veupathdb.service.edads.generated.model.HistogramPostResponseStream;
+import org.veupathdb.service.edads.generated.model.HistogramBinWidthPostResponseStream;
+import org.veupathdb.service.edads.generated.model.HistogramNumBinsPostResponseStream;
 import org.veupathdb.service.edads.generated.model.MosaicPostRequest;
 import org.veupathdb.service.edads.generated.model.MosaicPostResponseStream;
 import org.veupathdb.service.edads.generated.model.RecordCountPostRequest;
@@ -106,14 +107,14 @@ public class AnalysesService implements Analyses {
   @Override
   public PostAnalysesHistogramBinWidthResponse postAnalysesHistogramBinWidth(HistogramBinWidthPostRequest entity) {
     return wrapPlugin(() -> PostAnalysesHistogramBinWidthResponse.respond200WithApplicationJson(
-        new HistogramPostResponseStream(new HistogramBinWidthPlugin().processRequest(entity))));
+        new HistogramBinWidthPostResponseStream(new HistogramBinWidthPlugin().processRequest(entity))));
   }
 
   @DisableJackson
   @Override
   public PostAnalysesHistogramNumBinsResponse postAnalysesHistogramNumBins(HistogramNumBinsPostRequest entity) {
     return wrapPlugin(() -> PostAnalysesHistogramNumBinsResponse.respond200WithApplicationJson(
-        new HistogramPostResponseStream(new HistogramNumBinsPlugin().processRequest(entity))));
+        new HistogramNumBinsPostResponseStream(new HistogramNumBinsPlugin().processRequest(entity))));
   }
 
   @DisableJackson
