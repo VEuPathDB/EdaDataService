@@ -49,11 +49,12 @@ public class AnalysesService implements Analyses {
   private static final String[] ANALYSIS_NAMES = {
     "record-count",
     "scatterplot",
-    "histogram",
+    "histogram-num-bins",
+    "histogram-bin-width",
     "barplot",
     "boxplot",
     "heatmap",
-    "mosaic"
+    "mosaicplot"
   };
 
   private static final List<AnalysisOverview> ANALYSES_LIST = Arrays.stream(ANALYSIS_NAMES).map(name ->

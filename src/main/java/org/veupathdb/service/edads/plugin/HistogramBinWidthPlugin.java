@@ -84,17 +84,20 @@ public class HistogramBinWidthPlugin extends HistogramPlugin<HistogramBinWidthPo
 	  out.flush();
     } else {   
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
-        connection.voidEval("data <- fread(" + DATAFILE_NAME + ")");
+        connection.voidEval("data <- fread('" + DATAFILE_NAME + "')");
+        String overlayVar = ((spec.getOverlayVariable() == null) ? "" : spec.getOverlayVariable());
+        String facetVar1 = ((spec.getFacetVariable() == null) ? "" : spec.getFacetVariable().get(0));
+        String facetVar2 = ((spec.getFacetVariable() == null) ? "" : spec.getFacetVariable().get(1));
         connection.voidEval("map <- data.frame("
             + "'id'=c('xAxisVariable', "
             + "       'overlayVariable', "
             + "       'facetVariable1', "
             + "       'facetVariable2'), "
-            + "'plotRef'=c(" + spec.getXAxisVariable()
-            + ", " +           spec.getOverlayVariable()
-            + ", " +           spec.getFacetVariable().get(0)
-            + ", " +           spec.getFacetVariable().get(1) + "))");
-        String outFile = connection.eval("histogram(data, map, " + spec.getBinWidth() + ", " + spec.getValueSpec() + ")").asString();
+            + "'plotRef'=c('" + spec.getXAxisVariable() + "'"
+            + ", '" +           overlayVar + "'"
+            + ", '" +           facetVar1 + "'"
+            + ", '" +           facetVar2 + "', stringsAsFactors=FALSE))";
+        String outFile = connection.eval("histogram(data, map, '" + spec.getBinWidth() + "', '" + spec.getValueSpec().toString().toLowerCase() + "')").asString();
         RFileInputStream response = connection.openFile(outFile);
         IoUtil.transferStream(out, response);
         response.close();

@@ -22,9 +22,13 @@ public abstract class HistogramPlugin<S extends HistogramPostRequest, T extends 
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
     EntityDef entity = getValidEntity(validation, pluginSpec.getEntityId());
     validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.NUMBER, APIVariableType.DATE);
-    validateVariableNameAndType(validation, entity, "overlayVariable", pluginSpec.getOverlayVariable(), APIVariableType.STRING);
-    for (String facetVar : pluginSpec.getFacetVariable()) {
-      validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
+    if (pluginSpec.getOverlayVariable() != null) {
+      validateVariableNameAndType(validation, entity, "overlayVariable", pluginSpec.getOverlayVariable(), APIVariableType.STRING);
+    }
+    if (pluginSpec.getFacetVariable() != null) {
+      for (String facetVar : pluginSpec.getFacetVariable()) {
+        validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
+      }
     }
     return validation.build();
   }
@@ -33,8 +37,12 @@ public abstract class HistogramPlugin<S extends HistogramPostRequest, T extends 
   protected List<StreamSpec> getRequestedStreams(T pluginSpec) {
     StreamSpec spec = new StreamSpec(DATAFILE_NAME, pluginSpec.getEntityId());
     spec.add(pluginSpec.getXAxisVariable());
-    spec.add(pluginSpec.getOverlayVariable());
-    spec.addAll(pluginSpec.getFacetVariable());
+    if (pluginSpec.getOverlayVariable() != null) {
+      spec.add(pluginSpec.getOverlayVariable());
+    }    
+    if (pluginSpec.getFacetVariable() != null) {
+      spec.addAll(pluginSpec.getFacetVariable());
+    }
     return new ListBuilder<StreamSpec>(spec).toList();
   }
 }

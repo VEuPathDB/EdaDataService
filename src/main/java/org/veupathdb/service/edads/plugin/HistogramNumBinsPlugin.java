@@ -83,21 +83,24 @@ public class HistogramNumBinsPlugin extends HistogramPlugin<HistogramNumBinsPost
     } else { 
 */  
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
-        connection.voidEval("data <- fread(" + DATAFILE_NAME + ")");
+        connection.voidEval("data <- fread('" + DATAFILE_NAME + "')");
+        String overlayVar = ((spec.getOverlayVariable() == null) ? "" : spec.getOverlayVariable());
+        String facetVar1 = ((spec.getFacetVariable() == null) ? "" : spec.getFacetVariable().get(0));
+        String facetVar2 = ((spec.getFacetVariable() == null) ? "" : spec.getFacetVariable().get(1));
         connection.voidEval("map <- data.frame("
             + "'id'=c('xAxisVariable', "
             + "       'overlayVariable', "
             + "       'facetVariable1', "
             + "       'facetVariable2'), "
-            + "'plotRef'=c(" + spec.getXAxisVariable()
-            + ", " +           spec.getOverlayVariable()
-            + ", " +           spec.getFacetVariable().get(0)
-            + ", " +           spec.getFacetVariable().get(1) + "))");
+            + "'plotRef'=c('" + spec.getXAxisVariable() + "'"
+            + ", '" +           overlayVar + "'"
+            + ", '" +           facetVar1 + "'"
+            + ", '" +           facetVar2 + "', stringsAsFactors=FALSE))";
         Integer numBins = spec.getNumBins().intValue();
         connection.voidEval("x <- emptyStringToNull(map$id[map$plotRef == 'xAxisVariable'])");
         connection.voidEval("xRange <- max(data[[x]], na.rm=T) - min(data[[x]], na.rm=T)");
         connection.voidEval("binWidth <- xRange*1.01/" + numBins);
-        String outFile = connection.eval("histogram(data, map, binWidth, " + spec.getValueSpec() + ")").asString();
+        String outFile = connection.eval("histogram(data, map, binWidth, '" + spec.getValueSpec().toString().toLowerCase() + "')").asString();
         RFileInputStream response = connection.openFile(outFile);
         IoUtil.transferStream(out, response);
         response.close();

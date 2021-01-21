@@ -37,9 +37,13 @@ public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostReques
     EntityDef entity = getValidEntity(validation, pluginSpec.getEntityId());
     validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.NUMBER, APIVariableType.DATE);
     validateVariableNameAndType(validation, entity, "yAxisVariable", pluginSpec.getYAxisVariable(), APIVariableType.NUMBER, APIVariableType.DATE);
-    validateVariableNameAndType(validation, entity, "overlayVariable", pluginSpec.getOverlayVariable(), APIVariableType.STRING);
-    for (String facetVar : pluginSpec.getFacetVariable()) {
-      validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
+    if (pluginSpec.getOverlayVariable() != null) {
+      validateVariableNameAndType(validation, entity, "overlayVariable", pluginSpec.getOverlayVariable(), APIVariableType.STRING);
+    }
+    if (pluginSpec.getFacetVariable() != null) {
+      for (String facetVar : pluginSpec.getFacetVariable()) {
+        validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
+      }
     }
     return validation.build();
   }
@@ -49,8 +53,12 @@ public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostReques
     StreamSpec spec = new StreamSpec(DATAFILE_NAME, pluginSpec.getEntityId());
     spec.add(pluginSpec.getXAxisVariable());
     spec.add(pluginSpec.getYAxisVariable());
-    spec.add(pluginSpec.getOverlayVariable());
-    spec.addAll(pluginSpec.getFacetVariable());
+    if (pluginSpec.getOverlayVariable() != null) {
+      spec.add(pluginSpec.getOverlayVariable());
+    }
+    if (pluginSpec.getFacetVariable() != null) {
+      spec.addAll(pluginSpec.getFacetVariable());
+    }
     return new ListBuilder<StreamSpec>(spec).toList();
   }
 
@@ -109,19 +117,22 @@ public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostReques
       out.flush();
     } else {
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
-        connection.voidEval("data <- fread(" + DATAFILE_NAME + ")");
+        connection.voidEval("data <- fread('" + DATAFILE_NAME + "')");
+        String overlayVar = ((spec.getOverlayVariable() == null) ? "" : spec.getOverlayVariable());
+        String facetVar1 = ((spec.getFacetVariable() == null) ? "" : spec.getFacetVariable().get(0));
+        String facetVar2 = ((spec.getFacetVariable() == null) ? "" : spec.getFacetVariable().get(1));
         connection.voidEval("map <- data.frame("
             + "'id'=c('xAxisVariable', "
             + "       'yAxisVariable', "
             + "       'overlayVariable', "
             + "       'facetVariable1', "
             + "       'facetVariable2'), "
-            + "'plotRef'=c(" + spec.getXAxisVariable()
-            + ", " +           spec.getYAxisVariable()
-            + ", " +           spec.getOverlayVariable()
-            + ", " +           spec.getFacetVariable().get(0)
-            + ", " +           spec.getFacetVariable().get(1) + "))");
-        String outFile = connection.eval("scattergl(data, map, " + spec.getValueSpec() + ")").asString();
+            + "'plotRef'=c('" + spec.getXAxisVariable() + "'"
+            + ", '" +           spec.getYAxisVariable() + "'"
+            + ", '" +           overlayVar + "'"
+            + ", '" +           facetVar1 + "'"
+            + ", '" +           facetVar2 + "', stringsAsFactors=FALSE))";
+        String outFile = connection.eval("scattergl(data, map, '" + spec.getValueSpec().toString().toLowerCase() + "')").asString();
         RFileInputStream response = connection.openFile(outFile);
         IoUtil.transferStream(out, response);
         response.close();

@@ -38,8 +38,10 @@ public class MosaicPlugin extends AbstractEdadsPlugin<MosaicPostRequest, MosaicS
     EntityDef entity = getValidEntity(validation, pluginSpec.getEntityId());
     validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.NUMBER, APIVariableType.DATE);
     validateVariableNameAndType(validation, entity, "yAxisVariable", pluginSpec.getYAxisVariable(), APIVariableType.NUMBER, APIVariableType.DATE);
-    for (String facetVar : pluginSpec.getFacetVariable()) {
-      validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
+    if (pluginSpec.getFacetVariable() != null) {
+      for (String facetVar : pluginSpec.getFacetVariable()) {
+        validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
+      }
     }
     return validation.build();
   }
@@ -49,7 +51,9 @@ public class MosaicPlugin extends AbstractEdadsPlugin<MosaicPostRequest, MosaicS
     StreamSpec spec = new StreamSpec(DATAFILE_NAME, pluginSpec.getEntityId());
     spec.add(pluginSpec.getXAxisVariable());
     spec.add(pluginSpec.getYAxisVariable());
-    spec.addAll(pluginSpec.getFacetVariable());
+    if (pluginSpec.getFacetVariable() != null) {
+      spec.addAll(pluginSpec.getFacetVariable());
+    }
     return new ListBuilder<StreamSpec>(spec).toList();
   }
 
@@ -57,16 +61,18 @@ public class MosaicPlugin extends AbstractEdadsPlugin<MosaicPostRequest, MosaicS
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       MosaicSpec spec = getPluginSpec();
-      connection.voidEval("data <- fread(" + DATAFILE_NAME + ")");
+      connection.voidEval("data <- fread('" + DATAFILE_NAME + "')");
+      String facetVar1 = ((spec.getFacetVariable() == null) ? "" : spec.getFacetVariable().get(0));
+      String facetVar2 = ((spec.getFacetVariable() == null) ? "" : spec.getFacetVariable().get(1));
       connection.voidEval("map <- data.frame("
           + "'id'=c('xAxisVariable', "
           + "       'yAxisVariable', "
           + "       'facetVariable1', "
           + "       'facetVariable2'), "
-          + "'plotRef'=c(" + spec.getXAxisVariable()
-          + ", " +           spec.getYAxisVariable()
-          + ", " +           spec.getFacetVariable().get(0)
-          + ", " +           spec.getFacetVariable().get(1) + "))");
+          + "'plotRef'=c('" + spec.getXAxisVariable()  + "'"
+          + ", '" +           spec.getYAxisVariable()  + "'"
+          + ", '" +           facetVar1 + "'"
+          + ", '" +           facetVar2 + "', stringsAsFactors=FALSE))";
       String outFile = connection.eval("contingencyTable(data, map)").asString();
       RFileInputStream response = connection.openFile(outFile);
       IoUtil.transferStream(out, response);

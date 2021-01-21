@@ -41,9 +41,13 @@ public class BarplotPlugin extends AbstractEdadsPlugin<BarplotPostRequest, Barpl
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
     EntityDef entity = getValidEntity(validation, pluginSpec.getEntityId());
     validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.STRING);
-    validateVariableNameAndType(validation, entity, "overlayVariable", pluginSpec.getOverlayVariable(), APIVariableType.STRING);
-    for (String facetVar : pluginSpec.getFacetVariable()) {
-      validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
+    if (pluginSpec.getOverlayVariable() != null) {
+      validateVariableNameAndType(validation, entity, "overlayVariable", pluginSpec.getOverlayVariable(), APIVariableType.STRING); 
+    }
+    if (pluginSpec.getFacetVariable() != null) {
+      for (String facetVar : pluginSpec.getFacetVariable()) {
+        validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
+      }
     }
     return validation.build();
   }
@@ -52,8 +56,13 @@ public class BarplotPlugin extends AbstractEdadsPlugin<BarplotPostRequest, Barpl
   protected List<StreamSpec> getRequestedStreams(BarplotSpec pluginSpec) {
     StreamSpec spec = new StreamSpec(DATAFILE_NAME, pluginSpec.getEntityId());
     spec.add(pluginSpec.getXAxisVariable());
-    spec.add(pluginSpec.getOverlayVariable());
-    spec.addAll(pluginSpec.getFacetVariable());
+    if (pluginSpec.getOverlayVariable() != null) {
+      spec.add(pluginSpec.getOverlayVariable());
+    }
+    if (pluginSpec.getFacetVariable() != null) {
+      spec.addAll(pluginSpec.getFacetVariable());  
+    }
+    
     return new ListBuilder<StreamSpec>(spec).toList();
   }
 
@@ -135,17 +144,21 @@ public class BarplotPlugin extends AbstractEdadsPlugin<BarplotPostRequest, Barpl
       out.flush();
     } else {
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
-        connection.voidEval("data <- fread(" + DATAFILE_NAME + ")");
-        connection.voidEval("map <- data.frame("
-            + "'id'=c('xAxisVariable', "
+        connection.voidEval("data <- fread('" + DATAFILE_NAME + "')");
+        String overlayVar = ((spec.getOverlayVariable() == null) ? "" : spec.getOverlayVariable());
+        String facetVar1 = ((spec.getFacetVariable() == null) ? "" : spec.getFacetVariable().get(0));
+        String facetVar2 = ((spec.getFacetVariable() == null) ? "" : spec.getFacetVariable().get(1));
+        String createMapString = "map <- data.frame("
+            + "'plotRef'=c('xAxisVariable', "
             + "       'overlayVariable', "
             + "       'facetVariable1', "
             + "       'facetVariable2'), "
-            + "'plotRef'=c(" + spec.getXAxisVariable()
-            + ", " +           spec.getOverlayVariable()
-            + ", " +           spec.getFacetVariable().get(0)
-            + ", " +           spec.getFacetVariable().get(1) + "))");
-        String outFile = connection.eval("bar(data, map, " + spec.getValueSpec() + ")").asString();
+            + "'id'=c('" + spec.getXAxisVariable() + "'"
+            + ", '" +           overlayVar + "'"
+            + ", '" +           facetVar1 + "'"
+            + ", '" +           facetVar2 + "', stringsAsFactors=FALSE))";
+        connection.voidEval(createMapString);
+        String outFile = connection.eval("bar(data, map, '" + spec.getValueSpec().toString().toLowerCase() + "')").asString();
         RFileInputStream response = connection.openFile(outFile);
         IoUtil.transferStream(out, response);
         response.close();

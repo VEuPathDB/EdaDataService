@@ -39,9 +39,13 @@ public class HeatmapPlugin extends AbstractEdadsPlugin<HeatmapPostRequest, Heatm
     EntityDef entity = getValidEntity(validation, pluginSpec.getEntityId());
     validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.STRING);
     validateVariableNameAndType(validation, entity, "yAxisVariable", pluginSpec.getYAxisVariable(), APIVariableType.STRING);
-    validateVariableNameAndType(validation, entity, "zAxisVariable", pluginSpec.getYAxisVariable(), APIVariableType.NUMBER);
-    for (String facetVar : pluginSpec.getFacetVariable()) {
-      validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
+    if (pluginSpec.getZAxisVariable() != null) {
+      validateVariableNameAndType(validation, entity, "zAxisVariable", pluginSpec.getYAxisVariable(), APIVariableType.NUMBER);
+    }
+    if (pluginSpec.getFacetVariable() != null) {
+      for (String facetVar : pluginSpec.getFacetVariable()) {
+        validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
+      }
     }
     if (pluginSpec.getValueSpec().equals("series") && pluginSpec.getZAxisVariable() == null) {
     	validation.addError("zAxisVariable required for heatmap of type 'series'.");
@@ -54,8 +58,12 @@ public class HeatmapPlugin extends AbstractEdadsPlugin<HeatmapPostRequest, Heatm
     StreamSpec spec = new StreamSpec(DATAFILE_NAME, pluginSpec.getEntityId());
     spec.add(pluginSpec.getXAxisVariable());
     spec.add(pluginSpec.getYAxisVariable());
-    spec.add(pluginSpec.getZAxisVariable());
-    spec.addAll(pluginSpec.getFacetVariable());
+    if (pluginSpec.getZAxisVariable() != null) {
+      spec.add(pluginSpec.getZAxisVariable());
+    }
+    if (pluginSpec.getFacetVariable() != null) {
+      spec.addAll(pluginSpec.getFacetVariable());
+    }
     return new ListBuilder<StreamSpec>(spec).toList();
   }
 
@@ -63,19 +71,22 @@ public class HeatmapPlugin extends AbstractEdadsPlugin<HeatmapPostRequest, Heatm
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       HeatmapSpec spec = getPluginSpec();
-      connection.voidEval("data <- fread(" + DATAFILE_NAME + ")");
+      connection.voidEval("data <- fread('" + DATAFILE_NAME + "')");
+      String zAxisVar = ((spec.getZAxisVariable() == null) ? "" : spec.getZAxisVariable());
+      String facetVar1 = ((spec.getFacetVariable() == null) ? "" : spec.getFacetVariable().get(0));
+      String facetVar2 = ((spec.getFacetVariable() == null) ? "" : spec.getFacetVariable().get(1));
       connection.voidEval("map <- data.frame("
           + "'id'=c('xAxisVariable', "
           + "       'yAxisVariable', "
           + "       'zAxisVariable', "
           + "       'facetVariable1', "
           + "       'facetVariable2'), "
-          + "'plotRef'=c(" + spec.getXAxisVariable()
-          + ", " +           spec.getYAxisVariable()
-          + ", " +           spec.getZAxisVariable()
-          + ", " +           spec.getFacetVariable().get(0)
-          + ", " +           spec.getFacetVariable().get(1) + "))");
-      String outFile = connection.eval("heatmap(data, map, " + spec.getValueSpec() + ")").asString();
+          + "'plotRef'=c('" + spec.getXAxisVariable()  + "'"
+          + ", '" +           spec.getYAxisVariable()  + "'"
+          + ", '" +           zAxisVar + "'"
+          + ", '" +           facetVar1 + "'"
+          + ", '" +           facetVar2 + "', stringsAsFactors=FALSE))";
+      String outFile = connection.eval("heatmap(data, map, '" + spec.getValueSpec().toString().toLowerCase() + "')").asString();
       RFileInputStream response = connection.openFile(outFile);
       IoUtil.transferStream(out, response);
       response.close();
