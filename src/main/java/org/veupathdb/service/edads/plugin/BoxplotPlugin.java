@@ -82,7 +82,7 @@ public class BoxplotPlugin extends AbstractEdadsPlugin<BoxplotPostRequest, Boxpl
           + ", '" +           spec.getYAxisVariable() + "'"
           + ", '" +           overlayVar + "'"
           + ", '" +           facetVar1 + "'"
-          + ", '" +           facetVar2 + "', stringsAsFactors=FALSE))";
+          + ", '" +           facetVar2 + "', stringsAsFactors=FALSE))");
       String outFile = connection.eval("box(data, map, '" + spec.getPoints().toString().toLowerCase() + "', '" + spec.getMean().toString().toLowerCase() + "')").asString();
       RFileInputStream response = connection.openFile(outFile);
       IoUtil.transferStream(out, response);

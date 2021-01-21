@@ -72,7 +72,7 @@ public class MosaicPlugin extends AbstractEdadsPlugin<MosaicPostRequest, MosaicS
           + "'plotRef'=c('" + spec.getXAxisVariable()  + "'"
           + ", '" +           spec.getYAxisVariable()  + "'"
           + ", '" +           facetVar1 + "'"
-          + ", '" +           facetVar2 + "', stringsAsFactors=FALSE))";
+          + ", '" +           facetVar2 + "', stringsAsFactors=FALSE))");
       String outFile = connection.eval("contingencyTable(data, map)").asString();
       RFileInputStream response = connection.openFile(outFile);
       IoUtil.transferStream(out, response);
