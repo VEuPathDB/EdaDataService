@@ -131,7 +131,7 @@ public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostReques
             + ", '" +           spec.getYAxisVariable() + "'"
             + ", '" +           overlayVar + "'"
             + ", '" +           facetVar1 + "'"
-            + ", '" +           facetVar2 + "', stringsAsFactors=FALSE))");
+            + ", '" +           facetVar2 + "'), stringsAsFactors=FALSE)");
         String outFile = connection.eval("scattergl(data, map, '" + spec.getValueSpec().toString().toLowerCase() + "')").asString();
         RFileInputStream response = connection.openFile(outFile);
         IoUtil.transferStream(out, response);

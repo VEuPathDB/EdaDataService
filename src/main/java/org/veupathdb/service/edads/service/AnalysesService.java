@@ -25,6 +25,8 @@ import org.veupathdb.service.edads.generated.model.HistogramBinWidthPostRequest;
 import org.veupathdb.service.edads.generated.model.HistogramNumBinsPostRequest;
 import org.veupathdb.service.edads.generated.model.HistogramBinWidthPostResponseStream;
 import org.veupathdb.service.edads.generated.model.HistogramNumBinsPostResponseStream;
+import org.veupathdb.service.edads.generated.model.MapPostRequest;
+import org.veupathdb.service.edads.generated.model.MapPostResponseStream;
 import org.veupathdb.service.edads.generated.model.MosaicPostRequest;
 import org.veupathdb.service.edads.generated.model.MosaicPostResponseStream;
 import org.veupathdb.service.edads.generated.model.RecordCountPostRequest;
@@ -37,6 +39,7 @@ import org.veupathdb.service.edads.plugin.BoxplotPlugin;
 import org.veupathdb.service.edads.plugin.HeatmapPlugin;
 import org.veupathdb.service.edads.plugin.HistogramBinWidthPlugin;
 import org.veupathdb.service.edads.plugin.HistogramNumBinsPlugin;
+import org.veupathdb.service.edads.plugin.MapPlugin;
 import org.veupathdb.service.edads.plugin.MosaicPlugin;
 import org.veupathdb.service.edads.plugin.RecordCountPlugin;
 import org.veupathdb.service.edads.plugin.ScatterplotPlugin;
@@ -48,6 +51,7 @@ public class AnalysesService implements Analyses {
 
   private static final String[] ANALYSIS_NAMES = {
     "record-count",
+    "map",
     "scatterplot",
     "histogram-num-bins",
     "histogram-bin-width",
@@ -97,6 +101,13 @@ public class AnalysesService implements Analyses {
         new RecordCountPostResponseStream(new RecordCountPlugin().processRequest(entity))));
   }
 
+  @DisableJackson
+  @Override
+  public PostAnalysesMapResponse postAnalysesMap(MapPostRequest entity) {
+    return wrapPlugin(() -> PostAnalysesMapResponse.respond200WithApplicationJson(
+        new MapPostResponseStream(new MapPlugin().processRequest(entity))));
+  }
+  
   @DisableJackson
   @Override
   public PostAnalysesScatterplotResponse postAnalysesScatterplot(ScatterplotPostRequest entity) {

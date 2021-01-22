@@ -96,7 +96,7 @@ public class HistogramBinWidthPlugin extends HistogramPlugin<HistogramBinWidthPo
             + "'plotRef'=c('" + spec.getXAxisVariable() + "'"
             + ", '" +           overlayVar + "'"
             + ", '" +           facetVar1 + "'"
-            + ", '" +           facetVar2 + "', stringsAsFactors=FALSE))");
+            + ", '" +           facetVar2 + "'), stringsAsFactors=FALSE)");
         String outFile = connection.eval("histogram(data, map, '" + spec.getBinWidth() + "', '" + spec.getValueSpec().toString().toLowerCase() + "')").asString();
         RFileInputStream response = connection.openFile(outFile);
         IoUtil.transferStream(out, response);

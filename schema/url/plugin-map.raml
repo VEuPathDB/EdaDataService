@@ -1,0 +1,35 @@
+#%RAML 1.0 Library
+
+types:
+
+  MapPostRequest:
+    type: AnalysisRequestBase
+    properties:
+      config: RecordCountSpec
+
+  MapSpec:
+    additionalProperties: false
+    type: object
+    properties:
+      entityId: 
+        type: string
+
+  MapPostResponse:
+    additionalProperties: false
+    properties:
+      geohash: 
+        type: string
+      entity_count:
+        type: number
+      avg_lat:
+        type: number
+      avg_lon:
+        type: number
+      min_lat:
+        type: number
+      min_lon:
+        type: number
+      max_lat:
+        type: number
+      max_lon:
+        type: number

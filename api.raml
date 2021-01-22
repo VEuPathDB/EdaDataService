@@ -51,6 +51,22 @@ securitySchemes:
           body:
             application/json:
               type: error.ServerError
+              
+  /map:
+    post:
+      description: Returns data required to make MapVeu markers
+      body:
+        application/json:
+          type: lib.MapPostRequest
+      responses:
+        200:
+          body:
+            application/json:
+              type: lib.MapPostResponse
+        500:
+          body:
+            application/json:
+              type: error.ServerError
 
   /scatterplot:
     post:

@@ -95,7 +95,7 @@ public class HistogramNumBinsPlugin extends HistogramPlugin<HistogramNumBinsPost
             + "'plotRef'=c('" + spec.getXAxisVariable() + "'"
             + ", '" +           overlayVar + "'"
             + ", '" +           facetVar1 + "'"
-            + ", '" +           facetVar2 + "', stringsAsFactors=FALSE))");
+            + ", '" +           facetVar2 + "'), stringsAsFactors=FALSE)");
         Integer numBins = spec.getNumBins().intValue();
         connection.voidEval("x <- emptyStringToNull(map$id[map$plotRef == 'xAxisVariable'])");
         connection.voidEval("xRange <- max(data[[x]], na.rm=T) - min(data[[x]], na.rm=T)");

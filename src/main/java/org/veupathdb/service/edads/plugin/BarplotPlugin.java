@@ -156,7 +156,7 @@ public class BarplotPlugin extends AbstractEdadsPlugin<BarplotPostRequest, Barpl
             + "'id'=c('" + spec.getXAxisVariable() + "'"
             + ", '" +           overlayVar + "'"
             + ", '" +           facetVar1 + "'"
-            + ", '" +           facetVar2 + "', stringsAsFactors=FALSE))";
+            + ", '" +           facetVar2 + "'), stringsAsFactors=FALSE)";
         connection.voidEval(createMapString);
         String outFile = connection.eval("bar(data, map, '" + spec.getValueSpec().toString().toLowerCase() + "')").asString();
         RFileInputStream response = connection.openFile(outFile);
