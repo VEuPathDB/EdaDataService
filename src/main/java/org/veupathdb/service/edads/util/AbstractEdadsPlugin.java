@@ -59,7 +59,7 @@ public abstract class AbstractEdadsPlugin<T extends AnalysisRequestBase, S> impl
     _study = EdaClient.getStudy(request.getStudyId());
 
     // check for subset and derived entity properties of request
-    _subset = Optional.ofNullable(request.getSubset());
+    _subset = Optional.ofNullable(request.getFilters());
     _derivedVariables = Optional.ofNullable(request.getDerivedVariables());
 
     // construct available variables for each entity from metadata and derived variable config
