@@ -51,7 +51,7 @@ public class AnalysesService implements Analyses {
 
   private static final String[] ANALYSIS_NAMES = {
     "record-count",
-    "map",
+    "map-markers",
     "scatterplot",
     "histogram-num-bins",
     "histogram-bin-width",
@@ -103,8 +103,8 @@ public class AnalysesService implements Analyses {
 
   @DisableJackson
   @Override
-  public PostAnalysesMapResponse postAnalysesMap(MapPostRequest entity) {
-    return wrapPlugin(() -> PostAnalysesMapResponse.respond200WithApplicationJson(
+  public PostAnalysesMapMarkersResponse postAnalysesMapMarkers(MapPostRequest entity) {
+    return wrapPlugin(() -> PostAnalysesMapMarkersResponse.respond200WithApplicationJson(
         new MapPostResponseStream(new MapPlugin().processRequest(entity))));
   }
   

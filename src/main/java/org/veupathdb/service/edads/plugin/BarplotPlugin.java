@@ -78,6 +78,8 @@ public class BarplotPlugin extends AbstractEdadsPlugin<BarplotPostRequest, Barpl
       simpleBar = false;
     }
     
+    //until i figure out the sort issue
+    simpleBar = false;
     if (simpleBar) {
       EntityDef entity = new EntityDef(spec.getEntityId());
       Wrapper<Integer> rowCount = new Wrapper<>(0);
@@ -89,6 +91,7 @@ public class BarplotPlugin extends AbstractEdadsPlugin<BarplotPostRequest, Barpl
       if (spec.getOverlayVariable() != null) {
         String groupVar = entity.get(spec.getOverlayVariable()).getId();
         // expect two cols ordered by overlayVar and then xAxisVar
+        // TODO will be ordered by entity id
         String[] header = s.nextLine().split("\t");
         groupVarIndex = 0;
         xVarIndex = 1;

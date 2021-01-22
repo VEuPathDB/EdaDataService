@@ -13,23 +13,25 @@ types:
     properties:
       entityId: 
         type: string
+      geoAggregateVariable:
+        type: string
 
   MapPostResponse:
     additionalProperties: false
     properties:
-      geohash: 
+      geoAggregateValue:
         type: string
-      entity_count:
+      entityCount:
         type: number
-      avg_lat:
+      avgLat:
         type: number
-      avg_lon:
+      avgLon:
         type: number
-      min_lat:
+      minLat:
         type: number
-      min_lon:
+      minLon:
         type: number
-      max_lat:
+      maxLat:
         type: number
-      max_lon:
+      maxLon:
         type: number

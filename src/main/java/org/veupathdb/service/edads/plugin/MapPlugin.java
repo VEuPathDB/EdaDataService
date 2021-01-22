@@ -3,19 +3,21 @@ package org.veupathdb.service.edads.plugin;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import org.gusdb.fgputil.ListBuilder;
-import org.gusdb.fgputil.Wrapper;
 import org.gusdb.fgputil.validation.ValidationBundle;
 import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationLevel;
 import org.veupathdb.service.edads.generated.model.MapPostRequest;
 import org.veupathdb.service.edads.generated.model.MapSpec;
-import org.veupathdb.service.edads.util.StreamSpec;
 import org.veupathdb.service.edads.util.AbstractEdadsPlugin;
+import org.veupathdb.service.edads.util.EntityDef;
+import org.veupathdb.service.edads.util.StreamSpec;
 import org.json.JSONObject;
 
 public class MapPlugin extends AbstractEdadsPlugin<MapPostRequest, MapSpec> {
@@ -42,6 +44,75 @@ public class MapPlugin extends AbstractEdadsPlugin<MapPostRequest, MapSpec> {
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    //TODO
+    MapSpec spec = getPluginSpec();
+    
+    Map<String, List<Double>> geoVarLatMap = new HashMap<String, List<Double>>();
+    Map<String, List<Double>> geoVarLonMap = new HashMap<String, List<Double>>();
+    Map<String, Integer> geoVarEntityCount = new HashMap<String, Integer>();
+    Scanner s = new Scanner(dataStreams.get(0)).useDelimiter("\n");
+ 
+    String entityId = spec.getEntityId();
+    EntityDef entity = new EntityDef(entityId);
+    String geoAggregateVar = entity.get(spec.getGeoAggregateVariable()).getId();
+    // TODO for now assume lat and lon cols are called exactly that
+    String[] header = s.nextLine().split("\t");
+    
+    int idIndex = 0;
+    int geoVarIndex = 1;
+    int latIndex = 2;
+    int lonIndex = 3;
+    for (int i = 0; i < header.length; i++) {
+      if (header[i].equals(entityId)) {
+        idIndex = i;
+      } else if (header[i].equals(geoAggregateVar)) {
+        geoVarIndex = i;
+      } else if (header[i].equals("lat")) {
+        latIndex = i;
+      } else if (header[i].equals("lon")) {
+        lonIndex = i;
+      }
+    }
+
+    while(s.hasNextLine()) {
+      String[] row = s.nextLine().split("\t");
+      geoVarLatMap.putIfAbsent(row[geoVarIndex], new ArrayList<Double>());
+      geoVarLatMap.get(row[geoVarIndex]).add(Double.valueOf(row[latIndex]));
+      geoVarLonMap.putIfAbsent(row[geoVarIndex], new ArrayList<Double>());
+      geoVarLonMap.get(row[geoVarIndex]).add(Double.valueOf(row[lonIndex]));
+      geoVarEntityCount.putIfAbsent(row[geoVarIndex], 1);
+      geoVarEntityCount.put(row[geoVarIndex], geoVarEntityCount.get(Integer.valueOf(row[geoVarIndex]))+1);
+    }
+
+    for (Map.Entry mapElement : geoVarEntityCount.entrySet()) { 
+      String key = (String)mapElement.getKey();
+      Double latMin = Collections.min(geoVarLatMap.get(key));
+      Double latMax = Collections.max(geoVarLatMap.get(key));
+      Double latAvg = findAverage(geoVarLatMap.get(key));
+      Double lonMin = Collections.min(geoVarLonMap.get(key));
+      Double lonMax = Collections.max(geoVarLonMap.get(key));
+      Double lonAvg = findAverage(geoVarLonMap.get(key));
+      int entityCount = ((int)mapElement.getValue()); 
+      out.write(new JSONObject().put("geoAggregateValue", key)
+                                .put("entityCount", entityCount)
+                                .put("avgLat", latAvg)
+                                .put("avgLon", lonAvg)
+                                .put("maxLat", latMax)
+                                .put("maxLon", lonMax)
+                                .put("minLat", latMin)
+                                .put("minLon", lonMin)
+                                .toString().getBytes()); 
+    }  
+    out.flush();
+  }
+  
+  private double findAverage(List <Double> values) {
+    Double sum = 0.0;
+    if(!values.isEmpty()) {
+      for (Double value : values) {
+          sum += value;
+      }
+      return sum / values.size();
+    }
+    return sum;
   }
 }
