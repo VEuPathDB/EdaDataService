@@ -54,7 +54,8 @@ public class MapPlugin extends AbstractEdadsPlugin<MapPostRequest, MapSpec> {
     String entityId = spec.getEntityId();
     EntityDef entity = new EntityDef(entityId);
     String geoAggregateVar = entity.get(spec.getGeoAggregateVariable()).getId();
-    // TODO for now assume lat and lon cols are called exactly that
+    String lonVar = entity.get(spec.getLongitudeVariable()).getId();
+    String latVar = entity.get(spec.getLattitudeVariable()).getId();
     String[] header = s.nextLine().split("\t");
     
     int idIndex = 0;
@@ -66,9 +67,9 @@ public class MapPlugin extends AbstractEdadsPlugin<MapPostRequest, MapSpec> {
         idIndex = i;
       } else if (header[i].equals(geoAggregateVar)) {
         geoVarIndex = i;
-      } else if (header[i].equals("lat")) {
+      } else if (header[i].equals(latVar)) {
         latIndex = i;
-      } else if (header[i].equals("lon")) {
+      } else if (header[i].equals(lonVar)) {
         lonIndex = i;
       }
     }
