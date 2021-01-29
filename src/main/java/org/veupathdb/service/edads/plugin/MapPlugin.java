@@ -12,7 +12,9 @@ import java.util.Scanner;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationBundle;
 import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
+import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
+import org.veupathdb.service.edads.generated.model.APIVariableType;
 import org.veupathdb.service.edads.generated.model.MapPostRequest;
 import org.veupathdb.service.edads.generated.model.MapSpec;
 import org.veupathdb.service.edads.util.AbstractEdadsPlugin;
@@ -28,18 +30,24 @@ public class MapPlugin extends AbstractEdadsPlugin<MapPostRequest, MapSpec> {
   }
 
   @Override
-  protected ValidationBundle validateAnalysisSpec(MapSpec pluginSpec) {
+  protected ValidationBundle validateAnalysisSpec(MapSpec pluginSpec) throws ValidationException {
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
-    if (!getEntityMap().containsKey(pluginSpec.getEntityId())) {
-      validation.addError("No entity exists in study '" + getStudyId() + "' with ID '" + pluginSpec.getEntityId() + "'.");
-    }
+    EntityDef entity = getValidEntity(validation, pluginSpec.getEntityId());
+    validateVariableNameAndType(validation, entity, "geoAggregateVariable", pluginSpec.getGeoAggregateVariable(), APIVariableType.STRING);
+    validateVariableNameAndType(validation, entity, "latitudeVariable", pluginSpec.getLatitudeVariable(), APIVariableType.NUMBER); 
+    validateVariableNameAndType(validation, entity, "longitudeVariable", pluginSpec.getLongitudeVariable(), APIVariableType.NUMBER);
+
     return validation.build();
   }
 
   @Override
   protected List<StreamSpec> getRequestedStreams(MapSpec pluginSpec) {
-    // only need one stream for the requested entity and no vars (IDs included automatically)
-    return new ListBuilder<StreamSpec>(new StreamSpec("stream1", pluginSpec.getEntityId())).toList();
+    StreamSpec spec = new StreamSpec("stream1", pluginSpec.getEntityId());
+    spec.add(pluginSpec.getGeoAggregateVariable());
+    spec.add(pluginSpec.getLatitudeVariable());
+    spec.add(pluginSpec.getLongitudeVariable());  
+    
+    return new ListBuilder<StreamSpec>(spec).toList();
   }
 
   @Override
@@ -55,7 +63,7 @@ public class MapPlugin extends AbstractEdadsPlugin<MapPostRequest, MapSpec> {
     EntityDef entity = new EntityDef(entityId);
     String geoAggregateVar = entity.get(spec.getGeoAggregateVariable()).getId();
     String lonVar = entity.get(spec.getLongitudeVariable()).getId();
-    String latVar = entity.get(spec.getLattitudeVariable()).getId();
+    String latVar = entity.get(spec.getLatitudeVariable()).getId();
     String[] header = s.nextLine().split("\t");
     
     int idIndex = 0;

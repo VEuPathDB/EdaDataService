@@ -99,8 +99,6 @@ public class BarplotPlugin extends AbstractEdadsPlugin<BarplotPostRequest, Barpl
           groupVarIndex = 1;
           xVarIndex = 0;
         }
-      } else {
-        s.nextLine(); // ignore header, expecting single column representing ordered xVar values
       }
 
       // read the header

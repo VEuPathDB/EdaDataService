@@ -73,12 +73,12 @@ public class BoxplotPlugin extends AbstractEdadsPlugin<BoxplotPostRequest, Boxpl
       String facetVar1 = ((spec.getFacetVariable() == null) ? "" : spec.getFacetVariable().get(0));
       String facetVar2 = ((spec.getFacetVariable() == null) ? "" : spec.getFacetVariable().get(1));
       connection.voidEval("map <- data.frame("
-          + "'id'=c('xAxisVariable', "
+          + "'plotRef'=c('xAxisVariable', "
           + "       'yAxisVariable', "
           + "       'overlayVariable', "
           + "       'facetVariable1', "
           + "       'facetVariable2'), "
-          + "'plotRef'=c('" + spec.getXAxisVariable() + "'"
+          + "'id'=c('" + spec.getXAxisVariable() + "'"
           + ", '" +           spec.getYAxisVariable() + "'"
           + ", '" +           overlayVar + "'"
           + ", '" +           facetVar1 + "'"

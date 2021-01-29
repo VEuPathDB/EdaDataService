@@ -88,16 +88,16 @@ public class HistogramNumBinsPlugin extends HistogramPlugin<HistogramNumBinsPost
         String facetVar1 = ((spec.getFacetVariable() == null) ? "" : spec.getFacetVariable().get(0));
         String facetVar2 = ((spec.getFacetVariable() == null) ? "" : spec.getFacetVariable().get(1));
         connection.voidEval("map <- data.frame("
-            + "'id'=c('xAxisVariable', "
+            + "'plotRef'=c('xAxisVariable', "
             + "       'overlayVariable', "
             + "       'facetVariable1', "
             + "       'facetVariable2'), "
-            + "'plotRef'=c('" + spec.getXAxisVariable() + "'"
+            + "'id'=c('" + spec.getXAxisVariable() + "'"
             + ", '" +           overlayVar + "'"
             + ", '" +           facetVar1 + "'"
             + ", '" +           facetVar2 + "'), stringsAsFactors=FALSE)");
         Integer numBins = spec.getNumBins().intValue();
-        connection.voidEval("x <- emptyStringToNull(map$id[map$plotRef == 'xAxisVariable'])");
+        connection.voidEval("x <- emptyStringToNull(map$plotRef[map$id == 'xAxisVariable'])");
         connection.voidEval("xRange <- max(data[[x]], na.rm=T) - min(data[[x]], na.rm=T)");
         connection.voidEval("binWidth <- xRange*1.01/" + numBins);
         String outFile = connection.eval("histogram(data, map, binWidth, '" + spec.getValueSpec().toString().toLowerCase() + "')").asString();
