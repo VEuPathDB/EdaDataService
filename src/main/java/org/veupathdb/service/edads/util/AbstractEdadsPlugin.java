@@ -17,6 +17,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.AutoCloseableList;
 import org.gusdb.fgputil.FormatUtil;
 import org.gusdb.fgputil.IoUtil;
@@ -36,6 +38,8 @@ import org.veupathdb.service.edads.generated.model.AnalysisRequestBase;
 import org.veupathdb.service.edads.generated.model.DerivedVariable;
 
 public abstract class AbstractEdadsPlugin<T extends AnalysisRequestBase, S> implements Consumer<OutputStream> {
+
+  private static final Logger LOG = LogManager.getLogger(AbstractEdadsPlugin.class);
 
   protected abstract Class<S> getAnalysisSpecClass();
   protected abstract ValidationBundle validateAnalysisSpec(S pluginSpec) throws ValidationException;
@@ -170,6 +174,7 @@ public abstract class AbstractEdadsPlugin<T extends AnalysisRequestBase, S> impl
       if (!_requestProcessed) {
         throw new RuntimeException("Output cannot be streamed until request has been processed.");
       }
+      LOG.info("Building " + _requiredStreams.size() + " required data streams.");
       try(AutoCloseableList<InputStream> dataStreams = buildDataStreams()) {
         Map<String,InputStream> streamMap = new LinkedHashMap<>();
         for (int i = 0; i < dataStreams.size(); i++) {
@@ -197,6 +202,7 @@ public abstract class AbstractEdadsPlugin<T extends AnalysisRequestBase, S> impl
       return dataStreams;
     }
     catch (Exception e) {
+      // if exception occurs while creating streams; close any that successfully opened, then throw
       dataStreams.close();
       throw new RuntimeException("Unable to fetch all required data", e);
     }
