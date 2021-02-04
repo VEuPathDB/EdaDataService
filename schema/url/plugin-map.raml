@@ -14,17 +14,17 @@ types:
       entityId: 
         type: string
       geoAggregateVariable:
-        type: string
+        type: VariableSpec
       longitudeVariable:
-        type: string
+        type: VariableSpec
       latitudeVariable:
-        type: string
+        type: VariableSpec
 
   MapPostResponse:
     additionalProperties: false
     properties:
       geoAggregateValue:
-        type: string
+        type: VariableSpec
       entityCount:
         type: number
       avgLat:

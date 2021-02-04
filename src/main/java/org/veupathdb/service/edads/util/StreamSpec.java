@@ -1,27 +1,28 @@
 package org.veupathdb.service.edads.util;
 
 import java.util.ArrayList;
+import org.veupathdb.service.edads.generated.model.VariableSpec;
 
-public class StreamSpec extends ArrayList<String> {
+public class StreamSpec extends ArrayList<VariableSpec> {
 
-  private String _name;
+  private String _streamName;
   private String _entityId;
 
-  public StreamSpec(String name, String entityId) {
-    _name = name;
+  public StreamSpec(String streamName, String entityId) {
+    _streamName = streamName;
     _entityId = entityId;
   }
 
-  public String getName() {
-    return _name;
+  public String getStreamName() {
+    return _streamName;
   }
 
   public String getEntityId() {
     return _entityId;
   }
 
-  public StreamSpec addVariable(String variableId) {
-    add(variableId);
+  public StreamSpec addVariable(VariableSpec variableSpec) {
+    add(variableSpec);
     return this;
   }
 }

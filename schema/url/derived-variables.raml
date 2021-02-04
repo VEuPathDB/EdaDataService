@@ -3,10 +3,14 @@
 types:
   # Type name determines the name of the Java class that will be generated.
 
+  DerivationType:
+    type: string
+    enum: ['transform', 'reduction']
+
   DerivedVariable:
+    type: VariableSpec
     properties:
-      entityId: string
-      variableId: string
-      type: API_VariableType
-      dependentVariables: string[]
+      variableType: API_VariableType
+      derivationType: DerivationType
+      dependentVariables: VariableSpec[]
       construction: object # TBD

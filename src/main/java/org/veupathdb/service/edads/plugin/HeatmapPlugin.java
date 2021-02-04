@@ -3,8 +3,6 @@ package org.veupathdb.service.edads.plugin;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.gusdb.fgputil.IoUtil;
@@ -13,13 +11,11 @@ import org.gusdb.fgputil.validation.ValidationBundle;
 import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
-import org.rosuda.REngine.REXP;
-import org.rosuda.REngine.REXPList;
-import org.rosuda.REngine.RList;
 import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.veupathdb.service.edads.generated.model.APIVariableType;
 import org.veupathdb.service.edads.generated.model.HeatmapPostRequest;
 import org.veupathdb.service.edads.generated.model.HeatmapSpec;
+import org.veupathdb.service.edads.generated.model.VariableSpec;
 import org.veupathdb.service.edads.util.AbstractEdadsPlugin;
 import org.veupathdb.service.edads.util.EntityDef;
 import org.veupathdb.service.edads.util.StreamSpec;
@@ -43,11 +39,11 @@ public class HeatmapPlugin extends AbstractEdadsPlugin<HeatmapPostRequest, Heatm
       validateVariableNameAndType(validation, entity, "zAxisVariable", pluginSpec.getYAxisVariable(), APIVariableType.NUMBER);
     }
     if (pluginSpec.getFacetVariable() != null) {
-      for (String facetVar : pluginSpec.getFacetVariable()) {
+      for (VariableSpec facetVar : pluginSpec.getFacetVariable()) {
         validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
       }
     }
-    if (pluginSpec.getValueSpec().equals("series") && pluginSpec.getZAxisVariable() == null) {
+    if (pluginSpec.getValueSpec().equals(HeatmapSpec.ValueSpecType.SERIES) && pluginSpec.getZAxisVariable() == null) {
     	validation.addError("zAxisVariable required for heatmap of type 'series'.");
     }
     return validation.build();
@@ -72,20 +68,17 @@ public class HeatmapPlugin extends AbstractEdadsPlugin<HeatmapPostRequest, Heatm
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       HeatmapSpec spec = getPluginSpec();
       connection.voidEval("data <- fread('" + DATAFILE_NAME + "')");
-      String zAxisVar = ((spec.getZAxisVariable() == null) ? "" : spec.getZAxisVariable());
-      String facetVar1 = ((spec.getFacetVariable() == null) ? "" : spec.getFacetVariable().get(0));
-      String facetVar2 = ((spec.getFacetVariable() == null) ? "" : spec.getFacetVariable().get(1));
       connection.voidEval("map <- data.frame("
           + "'plotRef'=c('xAxisVariable', "
           + "       'yAxisVariable', "
           + "       'zAxisVariable', "
           + "       'facetVariable1', "
           + "       'facetVariable2'), "
-          + "'id'=c('" + spec.getXAxisVariable()  + "'"
-          + ", '" +           spec.getYAxisVariable()  + "'"
-          + ", '" +           zAxisVar + "'"
-          + ", '" +           facetVar1 + "'"
-          + ", '" +           facetVar2 + "'), stringsAsFactors=FALSE)");
+          + "'id'=c('" + toColNameOrEmpty(spec.getXAxisVariable()) + "'"
+          + ", '" + toColNameOrEmpty(spec.getYAxisVariable()) + "'"
+          + ", '" + toColNameOrEmpty(spec.getZAxisVariable()) + "'"
+          + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(0)) + "'"
+          + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(1)) + "'), stringsAsFactors=FALSE)");
       String outFile = connection.eval("heatmap(data, map, '" + spec.getValueSpec().toString().toLowerCase() + "')").asString();
       RFileInputStream response = connection.openFile(outFile);
       IoUtil.transferStream(out, response);

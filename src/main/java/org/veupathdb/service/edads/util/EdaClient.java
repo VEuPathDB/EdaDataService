@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.gusdb.fgputil.functional.Either;
 import org.veupathdb.service.edads.Resources;
 import org.veupathdb.service.edads.generated.model.APIFilter;
@@ -27,12 +28,14 @@ public class EdaClient {
 
   public static InputStream getDataStream(
       APIStudyDetail study,
-      Optional<List<APIFilter>> subset,
-      Optional<List<DerivedVariable>> derivedVariables,
+      List<APIFilter> subset,
+      List<DerivedVariable> derivedVariables,
       StreamSpec spec) {
     EntityTabularPostRequest request = new EntityTabularPostRequestImpl();
-    request.setFilters(subset.orElse(Collections.emptyList()));
-    request.setOutputVariableIds(spec);
+    request.setFilters(subset);
+    request.setOutputVariableIds(spec.stream()
+      .map(var -> var.getVariableId())
+      .collect(Collectors.toList()));
     String url = Resources.SUBSETTING_SERVICE_URL + "/studies/" + study.getId() + "/entities/" + spec.getEntityId() + "/tabular";
 
     try {

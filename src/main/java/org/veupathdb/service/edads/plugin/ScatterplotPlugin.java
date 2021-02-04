@@ -18,6 +18,7 @@ import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.veupathdb.service.edads.generated.model.APIVariableType;
 import org.veupathdb.service.edads.generated.model.ScatterplotPostRequest;
 import org.veupathdb.service.edads.generated.model.ScatterplotSpec;
+import org.veupathdb.service.edads.generated.model.VariableSpec;
 import org.veupathdb.service.edads.util.AbstractEdadsPlugin;
 import org.veupathdb.service.edads.util.EntityDef;
 import org.veupathdb.service.edads.util.StreamSpec;
@@ -41,7 +42,7 @@ public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostReques
       validateVariableNameAndType(validation, entity, "overlayVariable", pluginSpec.getOverlayVariable(), APIVariableType.STRING);
     }
     if (pluginSpec.getFacetVariable() != null) {
-      for (String facetVar : pluginSpec.getFacetVariable()) {
+      for (VariableSpec facetVar : pluginSpec.getFacetVariable()) {
         validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
       }
     }
@@ -69,21 +70,18 @@ public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostReques
     boolean simpleScatter = true;
     // TODO consider adding facets to simpleBar ?
     if (spec.getFacetVariable() != null
-         || !spec.getValueSpec().equals("count")
+         || !spec.getValueSpec().equals("count") // FIXME: Scatterplot's value spec type does not include COUNT; when added change to enum value
          || dataStreams.size() != 1) {
       simpleScatter = false;
     }
-    
+
+    String xVar = toColNameOrEmpty(spec.getXAxisVariable());
+    String yVar = toColNameOrEmpty(spec.getYAxisVariable());
+    String groupVar = toColNameOrEmpty(spec.getOverlayVariable());
+
     if (simpleScatter) {
       EntityDef entity = new EntityDef(spec.getEntityId());
-      Scanner s = new Scanner(dataStreams.get(0)).useDelimiter("\n");
-
-      String xVar = entity.get(spec.getXAxisVariable()).getId();
-      String yVar = entity.get(spec.getYAxisVariable()).getId();
-      String groupVar = null;
-      if (spec.getOverlayVariable() != null) {
-        groupVar = entity.get(spec.getOverlayVariable()).getId();
-      }
+      Scanner s = new Scanner(dataStreams.get(DATAFILE_NAME)).useDelimiter("\n");
       String[] header = s.nextLine().split("\t");
 
       int xVarIndex = 0;
@@ -118,24 +116,21 @@ public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostReques
     } else {
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
         connection.voidEval("data <- fread('" + DATAFILE_NAME + "')");
-        String overlayVar = ((spec.getOverlayVariable() == null) ? "" : spec.getOverlayVariable());
-        String facetVar1 = ((spec.getFacetVariable() == null) ? "" : spec.getFacetVariable().get(0));
-        String facetVar2 = ((spec.getFacetVariable() == null) ? "" : spec.getFacetVariable().get(1));
         connection.voidEval("map <- data.frame("
             + "'plotRef'=c('xAxisVariable', "
             + "       'yAxisVariable', "
             + "       'overlayVariable', "
             + "       'facetVariable1', "
             + "       'facetVariable2'), "
-            + "'id'=c('" + spec.getXAxisVariable() + "'"
-            + ", '" +           spec.getYAxisVariable() + "'"
-            + ", '" +           overlayVar + "'"
-            + ", '" +           facetVar1 + "'"
-            + ", '" +           facetVar2 + "'), stringsAsFactors=FALSE)");
+            + "'id'=c('" + xVar + "'"
+            + ", '" + yVar + "'"
+            + ", '" + groupVar + "'"
+            + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(0)) + "'"
+            + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(1)) + "'), stringsAsFactors=FALSE)");
         String outFile = connection.eval("scattergl(data, map, '" + spec.getValueSpec().toString().toLowerCase() + "')").asString();
-        RFileInputStream response = connection.openFile(outFile);
-        IoUtil.transferStream(out, response);
-        response.close();
+        try (RFileInputStream response = connection.openFile(outFile)) {
+          IoUtil.transferStream(out, response);
+        }
         out.flush();
       }); 
     }

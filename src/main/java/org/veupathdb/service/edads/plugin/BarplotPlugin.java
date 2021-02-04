@@ -3,29 +3,26 @@ package org.veupathdb.service.edads.plugin;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import org.gusdb.fgputil.IoUtil;
 import org.gusdb.fgputil.ListBuilder;
-import org.gusdb.fgputil.Wrapper;
 import org.gusdb.fgputil.validation.ValidationBundle;
 import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
 import org.json.JSONObject;
-import org.rosuda.REngine.REXP;
-import org.rosuda.REngine.REXPList;
-import org.rosuda.REngine.RList;
 import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.veupathdb.service.edads.generated.model.APIVariableType;
 import org.veupathdb.service.edads.generated.model.BarplotPostRequest;
 import org.veupathdb.service.edads.generated.model.BarplotSpec;
+import org.veupathdb.service.edads.generated.model.VariableSpec;
 import org.veupathdb.service.edads.util.AbstractEdadsPlugin;
 import org.veupathdb.service.edads.util.EntityDef;
 import org.veupathdb.service.edads.util.StreamSpec;
+
+import static org.veupathdb.service.edads.util.VariableDef.toColumnName;
 
 public class BarplotPlugin extends AbstractEdadsPlugin<BarplotPostRequest, BarplotSpec> {
 
@@ -45,7 +42,7 @@ public class BarplotPlugin extends AbstractEdadsPlugin<BarplotPostRequest, Barpl
       validateVariableNameAndType(validation, entity, "overlayVariable", pluginSpec.getOverlayVariable(), APIVariableType.STRING); 
     }
     if (pluginSpec.getFacetVariable() != null) {
-      for (String facetVar : pluginSpec.getFacetVariable()) {
+      for (VariableSpec facetVar : pluginSpec.getFacetVariable()) {
         validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
       }
     }
@@ -69,11 +66,12 @@ public class BarplotPlugin extends AbstractEdadsPlugin<BarplotPostRequest, Barpl
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     BarplotSpec spec = getPluginSpec();
+    EntityDef entity = getEntityMap().get(spec.getEntityId());
     
     boolean simpleBar = true;
     // TODO consider adding facets to simpleBar ?
     if (spec.getFacetVariable() != null
-         || !spec.getValueSpec().equals("count")
+         || !spec.getValueSpec().equals(BarplotSpec.ValueSpecType.COUNT)
          || dataStreams.size() != 1) {
       simpleBar = false;
     }
@@ -81,15 +79,14 @@ public class BarplotPlugin extends AbstractEdadsPlugin<BarplotPostRequest, Barpl
     //until i figure out the sort issue
     simpleBar = false;
     if (simpleBar) {
-      EntityDef entity = new EntityDef(spec.getEntityId());
-      Wrapper<Integer> rowCount = new Wrapper<>(0);
-      Scanner s = new Scanner(dataStreams.get(0)).useDelimiter("\n");
+      int rowCount = 0;
+      Scanner s = new Scanner(dataStreams.get(DATAFILE_NAME)).useDelimiter("\n");
       
       Integer groupVarIndex = null;
       int xVarIndex = 0;
-      String xVar = entity.get(spec.getXAxisVariable()).getId();
+      String xVar = entity.getVariable(spec.getXAxisVariable()).toColumnName();
       if (spec.getOverlayVariable() != null) {
-        String groupVar = entity.get(spec.getOverlayVariable()).getId();
+        String groupVar = toColumnName(spec.getOverlayVariable());
         // expect two cols ordered by overlayVar and then xAxisVar
         // TODO will be ordered by entity id
         String[] header = s.nextLine().split("\t");
@@ -108,7 +105,7 @@ public class BarplotPlugin extends AbstractEdadsPlugin<BarplotPostRequest, Barpl
       if (groupVarIndex != null) {
         currentGroup = row[groupVarIndex];
       }
-      rowCount.set(1);
+      rowCount = 1;
   
       while(s.hasNextLine()) {
         row = s.nextLine().split("\t");
@@ -126,7 +123,7 @@ public class BarplotPlugin extends AbstractEdadsPlugin<BarplotPostRequest, Barpl
           }
         }
         if (increment) {
-          rowCount.set(rowCount.get() + 1);
+          rowCount++;
         } else {
           JSONObject barRow = new JSONObject();
           if (currentGroup != null) {
@@ -137,32 +134,30 @@ public class BarplotPlugin extends AbstractEdadsPlugin<BarplotPostRequest, Barpl
           out.write(barRow.toString().getBytes());
           currentGroup = group;
           currentXCategory = xCategory;
-          rowCount.set(1);
+          rowCount = 1;
         }
       }
       
       s.close();
       out.flush();
-    } else {
+    }
+    else {
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
         connection.voidEval("data <- fread('" + DATAFILE_NAME + "')");
-        String overlayVar = ((spec.getOverlayVariable() == null) ? "" : spec.getOverlayVariable());
-        String facetVar1 = ((spec.getFacetVariable() == null) ? "" : spec.getFacetVariable().get(0));
-        String facetVar2 = ((spec.getFacetVariable() == null) ? "" : spec.getFacetVariable().get(1));
         String createMapString = "map <- data.frame("
             + "'plotRef'=c('xAxisVariable', "
             + "       'overlayVariable', "
             + "       'facetVariable1', "
             + "       'facetVariable2'), "
-            + "'id'=c('" + spec.getXAxisVariable() + "'"
-            + ", '" +           overlayVar + "'"
-            + ", '" +           facetVar1 + "'"
-            + ", '" +           facetVar2 + "'), stringsAsFactors=FALSE)";
+            + "'id'=c('" + toColNameOrEmpty(spec.getXAxisVariable()) + "'"
+            + ", '" + toColNameOrEmpty(spec.getOverlayVariable()) + "'"
+            + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(0)) + "'"
+            + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(1)) + "'), stringsAsFactors=FALSE)";
         connection.voidEval(createMapString);
         String outFile = connection.eval("bar(data, map, '" + spec.getValueSpec().toString().toLowerCase() + "')").asString();
-        RFileInputStream response = connection.openFile(outFile);
-        IoUtil.transferStream(out, response);
-        response.close();
+        try (RFileInputStream response = connection.openFile(outFile)) {
+          IoUtil.transferStream(out, response);
+        }
         out.flush();
       });
     }

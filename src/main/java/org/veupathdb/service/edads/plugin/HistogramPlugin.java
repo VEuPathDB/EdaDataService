@@ -9,13 +9,14 @@ import org.gusdb.fgputil.validation.ValidationLevel;
 import org.veupathdb.service.edads.generated.model.APIVariableType;
 import org.veupathdb.service.edads.generated.model.HistogramPostRequest;
 import org.veupathdb.service.edads.generated.model.HistogramSpec;
+import org.veupathdb.service.edads.generated.model.VariableSpec;
 import org.veupathdb.service.edads.util.AbstractEdadsPlugin;
 import org.veupathdb.service.edads.util.EntityDef;
 import org.veupathdb.service.edads.util.StreamSpec;
 
 public abstract class HistogramPlugin<S extends HistogramPostRequest, T extends HistogramSpec> extends AbstractEdadsPlugin<S, T>{
 
-  private static final String DATAFILE_NAME = "file1.txt";
+  protected static final String DATAFILE_NAME = "file1.txt";
 
   @Override
   protected ValidationBundle validateAnalysisSpec(T pluginSpec) throws ValidationException {
@@ -26,7 +27,7 @@ public abstract class HistogramPlugin<S extends HistogramPostRequest, T extends 
       validateVariableNameAndType(validation, entity, "overlayVariable", pluginSpec.getOverlayVariable(), APIVariableType.STRING);
     }
     if (pluginSpec.getFacetVariable() != null) {
-      for (String facetVar : pluginSpec.getFacetVariable()) {
+      for (VariableSpec facetVar : pluginSpec.getFacetVariable()) {
         validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
       }
     }

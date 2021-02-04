@@ -24,6 +24,8 @@ import org.json.JSONObject;
 
 public class MapPlugin extends AbstractEdadsPlugin<MapPostRequest, MapSpec> {
 
+  private static final String STREAM_NAME = "stream1";
+
   @Override
   protected Class<MapSpec> getAnalysisSpecClass() {
     return MapSpec.class;
@@ -42,7 +44,7 @@ public class MapPlugin extends AbstractEdadsPlugin<MapPostRequest, MapSpec> {
 
   @Override
   protected List<StreamSpec> getRequestedStreams(MapSpec pluginSpec) {
-    StreamSpec spec = new StreamSpec("stream1", pluginSpec.getEntityId());
+    StreamSpec spec = new StreamSpec(STREAM_NAME, pluginSpec.getEntityId());
     spec.add(pluginSpec.getGeoAggregateVariable());
     spec.add(pluginSpec.getLatitudeVariable());
     spec.add(pluginSpec.getLongitudeVariable());  
@@ -57,13 +59,13 @@ public class MapPlugin extends AbstractEdadsPlugin<MapPostRequest, MapSpec> {
     Map<String, List<Double>> geoVarLatMap = new HashMap<String, List<Double>>();
     Map<String, List<Double>> geoVarLonMap = new HashMap<String, List<Double>>();
     Map<String, Integer> geoVarEntityCount = new HashMap<String, Integer>();
-    Scanner s = new Scanner(dataStreams.get(0)).useDelimiter("\n");
+    Scanner s = new Scanner(dataStreams.get(STREAM_NAME)).useDelimiter("\n");
  
     String entityId = spec.getEntityId();
     EntityDef entity = new EntityDef(entityId);
-    String geoAggregateVar = entity.get(spec.getGeoAggregateVariable()).getId();
-    String lonVar = entity.get(spec.getLongitudeVariable()).getId();
-    String latVar = entity.get(spec.getLatitudeVariable()).getId();
+    String geoAggregateVar = toColNameOrEmpty(spec.getGeoAggregateVariable());
+    String lonVar = toColNameOrEmpty(spec.getLongitudeVariable());
+    String latVar = toColNameOrEmpty(spec.getLatitudeVariable());
     String[] header = s.nextLine().split("\t");
     
     int idIndex = 0;
@@ -82,6 +84,7 @@ public class MapPlugin extends AbstractEdadsPlugin<MapPostRequest, MapSpec> {
       }
     }
 
+    // FIXME: lat/lon cannot be simply averaged, right?  Don't we need to take into account N/S, E/W?
     while(s.hasNextLine()) {
       String[] row = s.nextLine().split("\t");
       geoVarLatMap.putIfAbsent(row[geoVarIndex], new ArrayList<Double>());
@@ -89,7 +92,7 @@ public class MapPlugin extends AbstractEdadsPlugin<MapPostRequest, MapSpec> {
       geoVarLonMap.putIfAbsent(row[geoVarIndex], new ArrayList<Double>());
       geoVarLonMap.get(row[geoVarIndex]).add(Double.valueOf(row[lonIndex]));
       geoVarEntityCount.putIfAbsent(row[geoVarIndex], 1);
-      geoVarEntityCount.put(row[geoVarIndex], geoVarEntityCount.get(Integer.valueOf(row[geoVarIndex]))+1);
+      geoVarEntityCount.put(row[geoVarIndex], geoVarEntityCount.get(row[geoVarIndex])+1);
     }
 
     for (Map.Entry mapElement : geoVarEntityCount.entrySet()) { 

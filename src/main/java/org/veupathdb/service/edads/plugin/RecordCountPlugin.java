@@ -20,6 +20,8 @@ import org.json.JSONObject;
 
 public class RecordCountPlugin extends AbstractEdadsPlugin<RecordCountPostRequest, RecordCountSpec> {
 
+  private static final String STREAM_NAME = "stream1";
+
   @Override
   protected Class<RecordCountSpec> getAnalysisSpecClass() {
     return RecordCountSpec.class;
@@ -37,13 +39,16 @@ public class RecordCountPlugin extends AbstractEdadsPlugin<RecordCountPostReques
   @Override
   protected List<StreamSpec> getRequestedStreams(RecordCountSpec pluginSpec) {
     // only need one stream for the requested entity and no vars (IDs included automatically)
-    return new ListBuilder<StreamSpec>(new StreamSpec("stream1", pluginSpec.getEntityId())).toList();
+    StreamSpec spec = new StreamSpec(STREAM_NAME, pluginSpec.getEntityId())
+        // add first var in entity to work around no-vars bug in subsetting service
+        .addVariable(getEntityMap().get(pluginSpec.getEntityId()).get(0));
+    return new ListBuilder<StreamSpec>(spec).toList();
   }
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     Wrapper<Integer> rowCount = new Wrapper<>(0);
-    new Scanner(dataStreams.get(0))
+    new Scanner(dataStreams.get(STREAM_NAME))
         .useDelimiter("\n")
         .forEachRemaining(str -> rowCount.set(rowCount.get() + 1));
     int recordCount = rowCount.get() - 1; // subtract 1 for header row

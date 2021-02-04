@@ -8,7 +8,6 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,12 +29,12 @@ import org.gusdb.fgputil.validation.ValidationLevel;
 import org.rosuda.REngine.Rserve.RConnection;
 import org.rosuda.REngine.Rserve.RFileOutputStream;
 import org.veupathdb.service.edads.Resources;
-import org.veupathdb.service.edads.generated.model.APIEntity;
 import org.veupathdb.service.edads.generated.model.APIFilter;
 import org.veupathdb.service.edads.generated.model.APIStudyDetail;
 import org.veupathdb.service.edads.generated.model.APIVariableType;
 import org.veupathdb.service.edads.generated.model.AnalysisRequestBase;
 import org.veupathdb.service.edads.generated.model.DerivedVariable;
+import org.veupathdb.service.edads.generated.model.VariableSpec;
 
 public abstract class AbstractEdadsPlugin<T extends AnalysisRequestBase, S> implements Consumer<OutputStream> {
 
@@ -49,8 +48,8 @@ public abstract class AbstractEdadsPlugin<T extends AnalysisRequestBase, S> impl
   private boolean _requestProcessed = false;
   private S _pluginSpec;
   private APIStudyDetail _study;
-  private Optional<List<APIFilter>> _subset;
-  private Optional<List<DerivedVariable>> _derivedVariables;
+  private List<APIFilter> _subset;
+  private List<DerivedVariable> _derivedVariables;
   private Map<String, EntityDef> _supplementedEntityMap;
   private List<StreamSpec> _requiredStreams;
 
@@ -63,11 +62,11 @@ public abstract class AbstractEdadsPlugin<T extends AnalysisRequestBase, S> impl
     _study = EdaClient.getStudy(request.getStudyId());
 
     // check for subset and derived entity properties of request
-    _subset = Optional.ofNullable(request.getFilters());
-    _derivedVariables = Optional.ofNullable(request.getDerivedVariables());
+    _subset = Optional.ofNullable(request.getFilters()).orElse(Collections.emptyList());
+    _derivedVariables = Optional.ofNullable(request.getDerivedVariables()).orElse(Collections.emptyList());
 
     // construct available variables for each entity from metadata and derived variable config
-    _supplementedEntityMap = supplementEntities(_study.getRootEntity(), _derivedVariables);
+    _supplementedEntityMap = VariableManagement.supplementEntities(_study, _derivedVariables);
 
     // ask subclass to validate the configuration
     validateAnalysisSpec(_pluginSpec).throwIfInvalid();
@@ -99,7 +98,7 @@ public abstract class AbstractEdadsPlugin<T extends AnalysisRequestBase, S> impl
 
   private ValidationBundle validateStreamSpecs(List<StreamSpec> requestedStreams) {
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
-    Set<String> specNames = requestedStreams.stream().map(StreamSpec::getName).collect(Collectors.toSet());
+    Set<String> specNames = requestedStreams.stream().map(StreamSpec::getStreamName).collect(Collectors.toSet());
     if (specNames.size() != requestedStreams.size()) {
       validation.addError("Stream specs must not duplicate names.");
     }
@@ -109,41 +108,14 @@ public abstract class AbstractEdadsPlugin<T extends AnalysisRequestBase, S> impl
         validation.addError("Entity " + spec.getEntityId() + " does not exist in study " + _study.getId());
       }
       else {
-        for (String requestedVar : spec) {
-          if (!entity.containsKey(requestedVar)) {
-            validation.addError("Entity " + entity.getId() + " does not contain variable " + requestedVar);
+        for (VariableSpec requestedVar : spec) {
+          if (!entity.hasVariable(requestedVar)) {
+            validation.addError("Entity " + entity.getId() + " does not support variable " + JsonUtil.serialize(requestedVar));
           }
         }
       }
     }
     return validation.build();
-  }
-
-  // can erase tree structure here since we only care about variables available on a particular entity
-  private static Map<String, EntityDef> supplementEntities(APIEntity entity, Optional<List<DerivedVariable>> derivedVariables) {
-    Map<String, EntityDef> entities = new HashMap<>();
-    EntityDef entityDef = new EntityDef(entity.getId());
-
-    // add variables for this entity
-    entity.getVariables().stream()
-      .filter(var -> !var.getType().equals(APIVariableType.CATEGORY))
-      .map(var -> new VariableDef(var.getId(), var.getType()))
-      .forEach(vd -> entityDef.put(vd.getId(), vd));
-
-    // add derived variables for this entity
-    derivedVariables
-      .map(list -> list.stream()
-        .filter(dr -> dr.getEntityId().equals(entity.getId()))
-        .map(dr -> new VariableDef(dr.getVariableId(), dr.getType()))
-        .filter(vd -> !entityDef.containsKey(vd.getId())) // skip if entity already contains the variable; will throw later
-        .collect(Collectors.toList()))
-      .orElse(Collections.emptyList())
-      .forEach(vd -> entityDef.put(vd.getId(), vd));
-
-    entities.put(entityDef.getId(), entityDef);
-    entity.getChildren()
-      .forEach(child -> entities.putAll(supplementEntities(child, derivedVariables)));
-    return entities;
   }
 
   @SuppressWarnings("unchecked")
@@ -178,7 +150,7 @@ public abstract class AbstractEdadsPlugin<T extends AnalysisRequestBase, S> impl
       try(AutoCloseableList<InputStream> dataStreams = buildDataStreams()) {
         Map<String,InputStream> streamMap = new LinkedHashMap<>();
         for (int i = 0; i < dataStreams.size(); i++) {
-          streamMap.put(_requiredStreams.get(i).getName(), dataStreams.get(i));
+          streamMap.put(_requiredStreams.get(i).getStreamName(), dataStreams.get(i));
         }
         writeResults(out, streamMap);
       }
@@ -218,30 +190,33 @@ public abstract class AbstractEdadsPlugin<T extends AnalysisRequestBase, S> impl
   }
 
   protected static void validateVariableName(ValidationBundleBuilder validation,
-      EntityDef entity, String variableUse, String variableName) {
+      EntityDef entity, String variableUse, VariableSpec variable) {
     List<APIVariableType> nonCategoryTypes = Arrays.stream(APIVariableType.values())
         .filter(type -> !type.equals(APIVariableType.CATEGORY))
         .collect(Collectors.toList());
-    validateVariableNameAndType(validation, entity, variableUse, variableName, nonCategoryTypes.toArray(new APIVariableType[0]));
+    validateVariableNameAndType(validation, entity, variableUse, variable, nonCategoryTypes.toArray(new APIVariableType[0]));
   }
 
   protected static void validateVariableNameAndType(ValidationBundleBuilder validation,
-      EntityDef entity, String variableUse, String variableName, APIVariableType... allowedTypes) {
+      EntityDef entity, String variableUse, VariableSpec varSpec, APIVariableType... allowedTypes) {
     List<APIVariableType> allowedTypesList = Arrays.asList(allowedTypes);
     if (allowedTypesList.contains(APIVariableType.CATEGORY)) {
       throw new RuntimeException("Plugin should not be using categories as variables.");
     }
-    String varDesc = variableName + ", used for " + variableUse + ", ";
-    VariableDef var = entity.get(variableName);
-    if (var == null) {
+    String varDesc = "Variable " + JsonUtil.serialize(varSpec) + ", used for " + variableUse + ", ";
+    if (!entity.hasVariable(varSpec)) {
       validation.addError(varDesc + "does not exist in entity " + entity.getId());
     }
-    else if (!allowedTypesList.contains(var.getType())) {
+    else if (!allowedTypesList.contains(entity.getVariable(varSpec).getType())) {
       validation.addError(varDesc + "must be one of the following types: " + FormatUtil.join(allowedTypes, ", "));
     }
   }
 
-  protected void useRConnection(ConsumerWithException<RConnection> consumer) {
+  protected static String toColNameOrEmpty(VariableSpec var) {
+    return var == null ? "" : VariableDef.toColumnName(var);
+  }
+
+  protected static void useRConnection(ConsumerWithException<RConnection> consumer) {
     RConnection c = null;
     try {
       String rServeUrlStr = Resources.RSERVE_URL;
@@ -259,7 +234,7 @@ public abstract class AbstractEdadsPlugin<T extends AnalysisRequestBase, S> impl
     }
   }
 
-  protected void useRConnectionWithRemoteFiles(Map<String, InputStream> dataStreams, ConsumerWithException<RConnection> consumer) {
+  protected static void useRConnectionWithRemoteFiles(Map<String, InputStream> dataStreams, ConsumerWithException<RConnection> consumer) {
     useRConnection(connection -> {
       try {
         for (Entry<String, InputStream> stream : dataStreams.entrySet()) {
