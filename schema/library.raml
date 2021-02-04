@@ -9,6 +9,88 @@
 ################################################################################
 
 types:
+  HeatmapPostRequest:
+    type: AnalysisRequestBase
+    properties:
+      config: HeatmapSpec
+  HeatmapSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      entityId: string
+      valueSpec:
+        type: string
+        enum:
+          - collection
+          - series
+      xAxisVariable: VariableSpec
+      yAxisVariable: VariableSpec
+      zAxisVariable:
+        type: VariableSpec
+        required: false
+      facetVariable:
+        type: VariableSpec[]
+        maxItems: 2
+        required: false
+  HeatmapPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      panel:
+        type: string
+        required: false
+      value:
+        type: number[][]
+        minItems: 1
+      label:
+        type: string[]
+        minItems: 1
+  HistogramNumBinsPostRequest:
+    type: HistogramPostRequest
+    properties:
+      config: HistogramNumBinsSpec
+  HistogramNumBinsSpec:
+    type: HistogramSpec
+    properties:
+      numBins:
+        type: number
+        required: false
+  HistogramNumBinsPostResponse:
+    type: HistogramPostResponse
+    properties:
+      numBins:
+        type: number
+  MosaicPostRequest:
+    type: AnalysisRequestBase
+    properties:
+      config: MosaicSpec
+  MosaicSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      entityId: string
+      xAxisVariable: VariableSpec
+      yAxisVariable: VariableSpec
+      facetVariable:
+        type: VariableSpec[]
+        maxItems: 2
+        required: false
+  MosaicPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      group:
+        type: string
+        required: false
+      panel:
+        type: string
+        required: false
+      value:
+        type: number[]
+        minItems: 1
+      label:
+        type: string[]
+        minItems: 1
   HistogramBinWidthPostRequest:
     type: HistogramPostRequest
     properties:
@@ -32,6 +114,45 @@ types:
     properties:
       binWidth:
         type: NumericBinWidth | DateBinWidth
+  HistogramPostRequest: AnalysisRequestBase
+  ValueSpec:
+    type: string
+    enum:
+      - count
+      - proportion
+  HistogramSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      entityId: string
+      xAxisVariable: VariableSpec
+      valueSpec: ValueSpec
+      overlayVariable:
+        type: VariableSpec
+        required: false
+      facetVariable:
+        type: VariableSpec[]
+        maxItems: 2
+        required: false
+  HistogramPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      group:
+        type: string
+        required: false
+      panel:
+        type: string
+        required: false
+      value:
+        type: number[]
+        minItems: 1
+      binStart:
+        type: string[]
+        minItems: 1
+      binLabel:
+        type: string[]
+        minItems: 1
   ScatterplotPostRequest:
     type: AnalysisRequestBase
     properties:
@@ -87,100 +208,26 @@ types:
       densityY:
         type: number[]
         required: false
-  VariableSpec:
+  AnalysesGetResponse:
     type: object
     additionalProperties: false
     properties:
-      entityId: string
-      variableId: string
-  EntityCountPostRequest:
+      analyses: AnalysisOverview[]
+  AnalysisOverview:
+    type: object
+    properties:
+      name: string
+  AnalysisRequestBase:
     type: object
     additionalProperties: false
     properties:
-      filters: API_Filter[]
-  EntityCountPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      count: integer
-  VariableDistributionPostRequest:
-    type: object
-    additionalProperties: false
-    properties:
-      filters: API_Filter[]
-  VariableDistributionPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      entitiesCount:
-        type: integer
-        minimum: 0
-      distribution:
-        type: object
-        properties:
-          //: integer
-  EntityTabularPostRequest:
-    type: object
-    additionalProperties: false
-    properties:
-      outputVariableIds: string[]
-      filters: API_Filter[]
-  EntityTabularPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      counts: string[][]
-  HeatmapPostRequest:
-    type: AnalysisRequestBase
-    properties:
-      config: HeatmapSpec
-  HeatmapSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      entityId: string
-      valueSpec:
-        type: string
-        enum:
-          - collection
-          - series
-      xAxisVariable: VariableSpec
-      yAxisVariable: VariableSpec
-      zAxisVariable:
-        type: VariableSpec
+      studyId: string
+      filters:
+        type: API_Filter[]
         required: false
-      facetVariable:
-        type: VariableSpec[]
-        maxItems: 2
+      derivedVariables:
+        type: DerivedVariable[]
         required: false
-  HeatmapPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      panel:
-        type: string
-        required: false
-      value:
-        type: number[][]
-        minItems: 1
-      label:
-        type: string[]
-        minItems: 1
-  HistogramNumBinsPostRequest:
-    type: HistogramPostRequest
-    properties:
-      config: HistogramNumBinsSpec
-  HistogramNumBinsSpec:
-    type: HistogramSpec
-    properties:
-      numBins:
-        type: number
-        required: false
-  HistogramNumBinsPostResponse:
-    type: HistogramPostResponse
-    properties:
-      numBins:
-        type: number
   StudiesGetResponse:
     type: object
     additionalProperties: false
@@ -262,202 +309,6 @@ types:
   API_LongitudeVariable:
     type: API_Variable
     discriminatorValue: longitude
-  RecordCountPostRequest:
-    type: AnalysisRequestBase
-    properties:
-      config: RecordCountSpec
-  RecordCountSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      entityId: string
-  RecordCountPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      recordCount: number
-  DerivationType:
-    type: string
-    enum:
-      - transform
-      - reduction
-  DerivedVariable:
-    type: VariableSpec
-    properties:
-      variableType: API_VariableType
-      derivationType: DerivationType
-      dependentVariables: VariableSpec[]
-      construction: object # TBD
-  HistogramPostRequest: AnalysisRequestBase
-  ValueSpec:
-    type: string
-    enum:
-      - count
-      - proportion
-  HistogramSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      entityId: string
-      xAxisVariable: VariableSpec
-      valueSpec: ValueSpec
-      overlayVariable:
-        type: VariableSpec
-        required: false
-      facetVariable:
-        type: VariableSpec[]
-        maxItems: 2
-        required: false
-  HistogramPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      group:
-        type: string
-        required: false
-      panel:
-        type: string
-        required: false
-      value:
-        type: number[]
-        minItems: 1
-      binStart:
-        type: string[]
-        minItems: 1
-      binLabel:
-        type: string[]
-        minItems: 1
-  MapPostRequest:
-    type: AnalysisRequestBase
-    properties:
-      config: MapSpec
-  MapSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      entityId: string
-      geoAggregateVariable: VariableSpec
-      longitudeVariable: VariableSpec
-      latitudeVariable: VariableSpec
-  MapPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      geoAggregateValue: VariableSpec
-      entityCount: number
-      avgLat: number
-      avgLon: number
-      minLat: number
-      minLon: number
-      maxLat: number
-      maxLon: number
-  API_Filter:
-    type: object
-    discriminator: type
-    properties:
-      entityId: string
-      variableId: string
-      type: API_FilterType
-  API_FilterType:
-    type: string
-    enum:
-      - stringSet
-      - numberSet
-      - dateSet
-      - numberRange
-      - dateRange
-      - longitudeRange
-  API_StringSetFilter:
-    type: API_Filter
-    discriminatorValue: 'stringSet'
-    properties:
-      stringSet: string[]
-  API_NumberSetFilter:
-    type: API_Filter
-    discriminatorValue: 'numberSet'
-    properties:
-      numberSet: number[]
-  API_DateSetFilter:
-    type: API_Filter
-    discriminatorValue: 'dateSet'
-    properties:
-      dateSet: string[] # how to constrain this to a date?
-  API_NumberRangeFilter:
-    type: API_Filter
-    discriminatorValue: 'numberRange'
-    properties:
-      min: number
-      max: number
-  API_DateRangeFilter:
-    type: API_Filter
-    discriminatorValue: 'dateRange'
-    properties:
-      min: string
-      max: string
-  API_LongitudeRangeFilter:
-    type: API_Filter
-    discriminatorValue: 'longitudeRange'
-    properties:
-      left: number
-      right: number
-  BarplotPostRequest:
-    type: AnalysisRequestBase
-    properties:
-      config: BarplotSpec
-  BarplotSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      entityId: string
-      valueSpec:
-        type: string
-        enum:
-          - identity
-          - count
-      xAxisVariable: VariableSpec
-      overlayVariable:
-        type: VariableSpec
-        required: false
-      facetVariable:
-        type: VariableSpec[]
-        maxItems: 2
-        required: false
-  BarplotPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      group:
-        type: string
-        required: false
-      panel:
-        type: string
-        required: false
-      value:
-        type: number[]
-        minItems: 1
-      label:
-        type: string[]
-        minItems: 1
-  AnalysesGetResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      analyses: AnalysisOverview[]
-  AnalysisOverview:
-    type: object
-    properties:
-      name: string
-  AnalysisRequestBase:
-    type: object
-    additionalProperties: false
-    properties:
-      studyId: string
-      filters:
-        type: API_Filter[]
-        required: false
-      derivedVariables:
-        type: DerivedVariable[]
-        required: false
   BoxplotPostRequest:
     type: AnalysisRequestBase
     properties:
@@ -520,22 +371,41 @@ types:
       mean:
         type: number[]
         required: false
-  MosaicPostRequest:
+  DerivationType:
+    type: string
+    enum:
+      - transform
+      - reduction
+  DerivedVariable:
+    type: VariableSpec
+    properties:
+      variableType: API_VariableType
+      derivationType: DerivationType
+      dependentVariables: VariableSpec[]
+      construction: object # TBD
+  BarplotPostRequest:
     type: AnalysisRequestBase
     properties:
-      config: MosaicSpec
-  MosaicSpec:
+      config: BarplotSpec
+  BarplotSpec:
     type: object
     additionalProperties: false
     properties:
       entityId: string
+      valueSpec:
+        type: string
+        enum:
+          - identity
+          - count
       xAxisVariable: VariableSpec
-      yAxisVariable: VariableSpec
+      overlayVariable:
+        type: VariableSpec
+        required: false
       facetVariable:
         type: VariableSpec[]
         maxItems: 2
         required: false
-  MosaicPostResponse:
+  BarplotPostResponse:
     type: object
     additionalProperties: false
     properties:
@@ -551,4 +421,134 @@ types:
       label:
         type: string[]
         minItems: 1
+  MapPostRequest:
+    type: AnalysisRequestBase
+    properties:
+      config: MapSpec
+  MapSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      entityId: string
+      geoAggregateVariable: VariableSpec
+      longitudeVariable: VariableSpec
+      latitudeVariable: VariableSpec
+  MapPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      geoAggregateValue: VariableSpec
+      entityCount: number
+      avgLat: number
+      avgLon: number
+      minLat: number
+      minLon: number
+      maxLat: number
+      maxLon: number
+  RecordCountPostRequest:
+    type: AnalysisRequestBase
+    properties:
+      config: RecordCountSpec
+  RecordCountSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      entityId: string
+  RecordCountPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      recordCount: number
+  API_Filter:
+    type: object
+    discriminator: type
+    properties:
+      entityId: string
+      variableId: string
+      type: API_FilterType
+  API_FilterType:
+    type: string
+    enum:
+      - stringSet
+      - numberSet
+      - dateSet
+      - numberRange
+      - dateRange
+      - longitudeRange
+  API_StringSetFilter:
+    type: API_Filter
+    discriminatorValue: 'stringSet'
+    properties:
+      stringSet: string[]
+  API_NumberSetFilter:
+    type: API_Filter
+    discriminatorValue: 'numberSet'
+    properties:
+      numberSet: number[]
+  API_DateSetFilter:
+    type: API_Filter
+    discriminatorValue: 'dateSet'
+    properties:
+      dateSet: string[] # how to constrain this to a date?
+  API_NumberRangeFilter:
+    type: API_Filter
+    discriminatorValue: 'numberRange'
+    properties:
+      min: number
+      max: number
+  API_DateRangeFilter:
+    type: API_Filter
+    discriminatorValue: 'dateRange'
+    properties:
+      min: string
+      max: string
+  API_LongitudeRangeFilter:
+    type: API_Filter
+    discriminatorValue: 'longitudeRange'
+    properties:
+      left: number
+      right: number
+  VariableSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      entityId: string
+      variableId: string
+  EntityCountPostRequest:
+    type: object
+    additionalProperties: false
+    properties:
+      filters: API_Filter[]
+  EntityCountPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      count: integer
+  VariableDistributionPostRequest:
+    type: object
+    additionalProperties: false
+    properties:
+      filters: API_Filter[]
+  VariableDistributionPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      entitiesCount:
+        type: integer
+        minimum: 0
+      distribution:
+        type: object
+        properties:
+          //: integer
+  EntityTabularPostRequest:
+    type: object
+    additionalProperties: false
+    properties:
+      outputVariableIds: string[]
+      filters: API_Filter[]
+  EntityTabularPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      counts: string[][]
 

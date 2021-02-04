@@ -60,9 +60,9 @@ public class MapPlugin extends AbstractEdadsPlugin<MapPostRequest, MapSpec> {
     Map<String, List<Double>> geoVarLonMap = new HashMap<String, List<Double>>();
     Map<String, Integer> geoVarEntityCount = new HashMap<String, Integer>();
     Scanner s = new Scanner(dataStreams.get(STREAM_NAME)).useDelimiter("\n");
- 
-    String entityId = spec.getEntityId();
-    EntityDef entity = new EntityDef(entityId);
+
+    EntityDef entity = getEntityMap().get(spec.getEntityId());
+    String entityIdCol = entity.getIdColumnName();
     String geoAggregateVar = toColNameOrEmpty(spec.getGeoAggregateVariable());
     String lonVar = toColNameOrEmpty(spec.getLongitudeVariable());
     String latVar = toColNameOrEmpty(spec.getLatitudeVariable());
@@ -73,7 +73,7 @@ public class MapPlugin extends AbstractEdadsPlugin<MapPostRequest, MapSpec> {
     int latIndex = 2;
     int lonIndex = 3;
     for (int i = 0; i < header.length; i++) {
-      if (header[i].equals(entityId)) {
+      if (header[i].equals(entityIdCol)) {
         idIndex = i;
       } else if (header[i].equals(geoAggregateVar)) {
         geoVarIndex = i;
