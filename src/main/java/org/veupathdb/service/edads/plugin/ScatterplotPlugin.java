@@ -68,9 +68,8 @@ public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostReques
     ScatterplotSpec spec = getPluginSpec();
     
     boolean simpleScatter = true;
-    // TODO consider adding facets to simpleBar ?
     if (spec.getFacetVariable() != null
-         || !spec.getValueSpec().equals("count") // FIXME: Scatterplot's value spec type does not include COUNT; when added change to enum value
+         || !spec.getValueSpec().equals(ScatterplotSpec.ValueSpecType.RAW)
          || dataStreams.size() != 1) {
       simpleScatter = false;
     }

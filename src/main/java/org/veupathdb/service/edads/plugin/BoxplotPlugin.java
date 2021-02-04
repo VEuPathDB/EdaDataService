@@ -79,9 +79,9 @@ public class BoxplotPlugin extends AbstractEdadsPlugin<BoxplotPostRequest, Boxpl
       String outFile = connection.eval("box(data, map, '" +
           spec.getPoints().toString().toLowerCase() + "', '" +
           spec.getMean().toString().toLowerCase() + "')").asString();
-      RFileInputStream response = connection.openFile(outFile);
-      IoUtil.transferStream(out, response);
-      response.close();
+      try (RFileInputStream response = connection.openFile(outFile)) {
+        IoUtil.transferStream(out, response);
+      }
       out.flush();
     });
   }

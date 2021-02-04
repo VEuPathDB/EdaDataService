@@ -80,9 +80,9 @@ public class HeatmapPlugin extends AbstractEdadsPlugin<HeatmapPostRequest, Heatm
           + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(0)) + "'"
           + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(1)) + "'), stringsAsFactors=FALSE)");
       String outFile = connection.eval("heatmap(data, map, '" + spec.getValueSpec().toString().toLowerCase() + "')").asString();
-      RFileInputStream response = connection.openFile(outFile);
-      IoUtil.transferStream(out, response);
-      response.close();
+      try (RFileInputStream response = connection.openFile(outFile)) {
+        IoUtil.transferStream(out, response);
+      }
       out.flush();
     });
   }
