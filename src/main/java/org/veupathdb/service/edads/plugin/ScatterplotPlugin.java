@@ -79,7 +79,7 @@ public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostReques
     String groupVar = toColNameOrEmpty(spec.getOverlayVariable());
 
     if (simpleScatter) {
-      EntityDef entity = new EntityDef(spec.getEntityId());
+      EntityDef entity = getEntityMap().get(spec.getEntityId());
       Scanner s = new Scanner(dataStreams.get(DATAFILE_NAME)).useDelimiter("\n");
       String[] header = s.nextLine().split("\t");
 

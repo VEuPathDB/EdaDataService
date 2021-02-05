@@ -25,7 +25,7 @@ public class HistogramBinWidthPlugin extends HistogramPlugin<HistogramBinWidthPo
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     HistogramBinWidthSpec spec = getPluginSpec();
-    EntityDef entity = new EntityDef(spec.getEntityId());
+    EntityDef entity = getEntityMap().get(spec.getEntityId());
     VariableDef xVar = entity.getVariable(spec.getXAxisVariable());
     APIVariableType xType = xVar.getType();
 

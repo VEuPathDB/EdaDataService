@@ -4,12 +4,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.veupathdb.service.edads.generated.model.APIEntity;
 import org.veupathdb.service.edads.generated.model.APIStudyDetail;
 import org.veupathdb.service.edads.generated.model.APIVariableType;
 import org.veupathdb.service.edads.generated.model.DerivedVariable;
 
 public class VariableManagement {
+
+  private static final Logger LOG = LogManager.getLogger(VariableManagement.class);
 
   /**
    * Generates a map from entity name to entity def, which is just the entity name
@@ -38,7 +42,7 @@ public class VariableManagement {
   private static Map<String, EntityDef> supplementEntities(APIEntity entity,
       List<DerivedVariable> allSpecifiedDerivedVariables, List<VariableDef> parentNativeVars) {
     Map<String, EntityDef> entities = new HashMap<>();
-    EntityDef entityDef = new EntityDef(entity.getId());
+    EntityDef entityDef = new EntityDef(entity.getId(), entity.getDisplayName(), entity.getIdColumnName());
 
     // add inherited variables from parent
     parentNativeVars.stream()
@@ -68,6 +72,9 @@ public class VariableManagement {
 
     // add this entity to the map
     entities.put(entityDef.getId(), entityDef);
+
+    // log resulting list
+    LOG.info("Supplemented Entity: " + entityDef);
 
     // add child entities to map
     for (APIEntity childEntity : entity.getChildren()) {
