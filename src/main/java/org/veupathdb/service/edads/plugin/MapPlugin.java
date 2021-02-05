@@ -91,7 +91,7 @@ public class MapPlugin extends AbstractEdadsPlugin<MapPostRequest, MapSpec> {
       geoVarLatMap.get(row[geoVarIndex]).add(Double.valueOf(row[latIndex]));
       geoVarLonMap.putIfAbsent(row[geoVarIndex], new ArrayList<Double>());
       geoVarLonMap.get(row[geoVarIndex]).add(Double.valueOf(row[lonIndex]));
-      geoVarEntityCount.putIfAbsent(row[geoVarIndex], 1);
+      geoVarEntityCount.putIfAbsent(row[geoVarIndex], 0);
       geoVarEntityCount.put(row[geoVarIndex], geoVarEntityCount.get(row[geoVarIndex])+1);
     }
 
