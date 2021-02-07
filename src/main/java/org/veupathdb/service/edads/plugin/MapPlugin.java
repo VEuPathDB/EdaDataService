@@ -37,7 +37,7 @@ public class MapPlugin extends AbstractEdadsPlugin<MapPostRequest, MapSpec> {
     EntityDef entity = getValidEntity(validation, pluginSpec.getEntityId());
     validateVariableNameAndType(validation, entity, "geoAggregateVariable", pluginSpec.getGeoAggregateVariable(), APIVariableType.STRING);
     validateVariableNameAndType(validation, entity, "latitudeVariable", pluginSpec.getLatitudeVariable(), APIVariableType.NUMBER); 
-    validateVariableNameAndType(validation, entity, "longitudeVariable", pluginSpec.getLongitudeVariable(), APIVariableType.NUMBER);
+    validateVariableNameAndType(validation, entity, "longitudeVariable", pluginSpec.getLongitudeVariable(), APIVariableType.LONGITUDE);
 
     return validation.build();
   }
