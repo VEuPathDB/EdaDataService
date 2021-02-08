@@ -97,8 +97,9 @@ merge-raml:
 	curl https://raw.githubusercontent.com/VEuPathDB/EdaCommon/main/schema/study.raml > schema/url/study.raml
 	curl https://raw.githubusercontent.com/VEuPathDB/EdaCommon/main/schema/filter.raml > schema/url/filter.raml
 	curl https://raw.githubusercontent.com/VEuPathDB/EdaCommon/main/schema/query.raml > schema/url/query.raml
+	curl https://raw.githubusercontent.com/VEuPathDB/EdaCommon/main/schema/merged-query.raml > schema/url/merged-query.raml
 	@$(BIN_DIR)/merge-raml schema > schema/library.raml
-	rm schema/url/study.raml schema/url/filter.raml schema/url/query.raml
+	rm schema/url/study.raml schema/url/filter.raml schema/url/query.raml schema/url/merged-query.raml
 
 #
 # File based targets
