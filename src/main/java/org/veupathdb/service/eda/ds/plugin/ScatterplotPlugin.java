@@ -1,4 +1,4 @@
-package org.veupathdb.service.edads.plugin;
+package org.veupathdb.service.eda.ds.plugin;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,13 +15,13 @@ import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
 import org.json.JSONObject;
 import org.rosuda.REngine.Rserve.RFileInputStream;
-import org.veupathdb.service.edads.generated.model.APIVariableType;
-import org.veupathdb.service.edads.generated.model.ScatterplotPostRequest;
-import org.veupathdb.service.edads.generated.model.ScatterplotSpec;
-import org.veupathdb.service.edads.generated.model.VariableSpec;
-import org.veupathdb.service.edads.util.AbstractEdadsPlugin;
-import org.veupathdb.service.edads.util.EntityDef;
-import org.veupathdb.service.edads.util.StreamSpec;
+import org.veupathdb.service.eda.ds.util.AbstractEdadsPlugin;
+import org.veupathdb.service.eda.ds.util.EntityDef;
+import org.veupathdb.service.eda.ds.util.StreamSpec;
+import org.veupathdb.service.eda.generated.model.APIVariableType;
+import org.veupathdb.service.eda.generated.model.ScatterplotPostRequest;
+import org.veupathdb.service.eda.generated.model.ScatterplotSpec;
+import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostRequest, ScatterplotSpec> {
 

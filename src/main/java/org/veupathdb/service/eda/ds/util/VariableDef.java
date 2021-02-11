@@ -1,11 +1,11 @@
-package org.veupathdb.service.edads.util;
+package org.veupathdb.service.eda.ds.util;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import org.veupathdb.service.edads.generated.model.APIVariable;
-import org.veupathdb.service.edads.generated.model.APIVariableType;
-import org.veupathdb.service.edads.generated.model.VariableSpec;
-import org.veupathdb.service.edads.generated.model.VariableSpecImpl;
+import org.veupathdb.service.eda.generated.model.APIVariable;
+import org.veupathdb.service.eda.generated.model.APIVariableType;
+import org.veupathdb.service.eda.generated.model.VariableSpec;
+import org.veupathdb.service.eda.generated.model.VariableSpecImpl;
 
 /**
  * Wrapper containing only what a plugin would need to know about a variable for

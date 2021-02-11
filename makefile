@@ -1,8 +1,8 @@
+GEN_PACKAGE  := $(shell ./gradlew -q print-gen-package)
 APP_PACKAGE  := $(shell ./gradlew -q print-package)
 PWD          := $(shell pwd)
 MAIN_DIR     := src/main/java/$(shell echo $(APP_PACKAGE) | sed 's/\./\//g')
 TEST_DIR     := $(shell echo $(MAIN_DIR) | sed 's/main/test/')
-GEN_DIR      := $(MAIN_DIR)/generated
 ALL_PACKABLE := $(shell find src/main -type f)
 BIN_DIR := .tools/bin
 
@@ -85,9 +85,9 @@ fix-path:
 	@$(BIN_DIR)/fix-path.sh $(EXAMPLE_TEST_DIR) $(TEST_DIR)
 
 gen-jaxrs: api.raml merge-raml
-	@$(BIN_DIR)/generate-jaxrs.sh $(APP_PACKAGE)
-	@$(BIN_DIR)/generate-jaxrs-streams.sh $(APP_PACKAGE)
-	@$(BIN_DIR)/generate-jaxrs-postgen-mods.sh $(APP_PACKAGE)
+	@$(BIN_DIR)/generate-jaxrs.sh $(GEN_PACKAGE)
+	@$(BIN_DIR)/generate-jaxrs-streams.sh $(GEN_PACKAGE)
+	@$(BIN_DIR)/generate-jaxrs-postgen-mods.sh $(GEN_PACKAGE)
 
 gen-docs: api.raml merge-raml
 	@$(BIN_DIR)/generate-docs.sh

@@ -12,6 +12,7 @@ apply(from = "dependencies.gradle.kts")
 // Load Props
 val buildProps = Properties()
 buildProps.load(FileInputStream(File(rootDir, "service.properties")))
+val genPack = "${buildProps["app.package.root"]}"
 val fullPack = "${buildProps["app.package.root"]}.${buildProps["app.package.service"]}"
 
 java {
@@ -48,6 +49,7 @@ tasks.jar {
   archiveFileName.set("service.jar")
 }
 
+tasks.register("print-gen-package") { print(genPack) }
 tasks.register("print-package") { print(fullPack) }
 tasks.register("print-container-name") { print(buildProps["container.name"]) }
 

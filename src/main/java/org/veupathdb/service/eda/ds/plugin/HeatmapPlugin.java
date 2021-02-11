@@ -1,4 +1,4 @@
-package org.veupathdb.service.edads.plugin;
+package org.veupathdb.service.eda.ds.plugin;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,42 +12,51 @@ import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
 import org.rosuda.REngine.Rserve.RFileInputStream;
-import org.veupathdb.service.edads.generated.model.APIVariableType;
-import org.veupathdb.service.edads.generated.model.MosaicPostRequest;
-import org.veupathdb.service.edads.generated.model.MosaicSpec;
-import org.veupathdb.service.edads.generated.model.VariableSpec;
-import org.veupathdb.service.edads.util.AbstractEdadsPlugin;
-import org.veupathdb.service.edads.util.EntityDef;
-import org.veupathdb.service.edads.util.StreamSpec;
+import org.veupathdb.service.eda.ds.util.AbstractEdadsPlugin;
+import org.veupathdb.service.eda.ds.util.EntityDef;
+import org.veupathdb.service.eda.ds.util.StreamSpec;
+import org.veupathdb.service.eda.generated.model.APIVariableType;
+import org.veupathdb.service.eda.generated.model.HeatmapPostRequest;
+import org.veupathdb.service.eda.generated.model.HeatmapSpec;
+import org.veupathdb.service.eda.generated.model.VariableSpec;
 
-public class MosaicPlugin extends AbstractEdadsPlugin<MosaicPostRequest, MosaicSpec> {
+public class HeatmapPlugin extends AbstractEdadsPlugin<HeatmapPostRequest, HeatmapSpec> {
 
   private static final String DATAFILE_NAME = "file1.txt";
 
   @Override
-  protected Class<MosaicSpec> getAnalysisSpecClass() {
-    return MosaicSpec.class;
+  protected Class<HeatmapSpec> getAnalysisSpecClass() {
+    return HeatmapSpec.class;
   }
 
   @Override
-  protected ValidationBundle validateAnalysisSpec(MosaicSpec pluginSpec) throws ValidationException {
+  protected ValidationBundle validateAnalysisSpec(HeatmapSpec pluginSpec) throws ValidationException {
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
     EntityDef entity = getValidEntity(validation, pluginSpec.getEntityId());
-    validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.NUMBER, APIVariableType.DATE);
-    validateVariableNameAndType(validation, entity, "yAxisVariable", pluginSpec.getYAxisVariable(), APIVariableType.NUMBER, APIVariableType.DATE);
+    validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.STRING);
+    validateVariableNameAndType(validation, entity, "yAxisVariable", pluginSpec.getYAxisVariable(), APIVariableType.STRING);
+    if (pluginSpec.getZAxisVariable() != null) {
+      validateVariableNameAndType(validation, entity, "zAxisVariable", pluginSpec.getYAxisVariable(), APIVariableType.NUMBER);
+    }
     if (pluginSpec.getFacetVariable() != null) {
       for (VariableSpec facetVar : pluginSpec.getFacetVariable()) {
         validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
       }
     }
+    if (pluginSpec.getValueSpec().equals(HeatmapSpec.ValueSpecType.SERIES) && pluginSpec.getZAxisVariable() == null) {
+    	validation.addError("zAxisVariable required for heatmap of type 'series'.");
+    }
     return validation.build();
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(MosaicSpec pluginSpec) {
+  protected List<StreamSpec> getRequestedStreams(HeatmapSpec pluginSpec) {
     StreamSpec spec = new StreamSpec(DATAFILE_NAME, pluginSpec.getEntityId());
     spec.add(pluginSpec.getXAxisVariable());
     spec.add(pluginSpec.getYAxisVariable());
+    if (pluginSpec.getZAxisVariable() != null) {
+      spec.add(pluginSpec.getZAxisVariable());
+    }
     if (pluginSpec.getFacetVariable() != null) {
       spec.addAll(pluginSpec.getFacetVariable());
     }
@@ -57,18 +66,20 @@ public class MosaicPlugin extends AbstractEdadsPlugin<MosaicPostRequest, MosaicS
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
-      MosaicSpec spec = getPluginSpec();
+      HeatmapSpec spec = getPluginSpec();
       connection.voidEval("data <- fread('" + DATAFILE_NAME + "')");
       connection.voidEval("map <- data.frame("
           + "'plotRef'=c('xAxisVariable', "
           + "       'yAxisVariable', "
+          + "       'zAxisVariable', "
           + "       'facetVariable1', "
           + "       'facetVariable2'), "
           + "'id'=c('" + toColNameOrEmpty(spec.getXAxisVariable()) + "'"
-          + ", '" + toColNameOrEmpty(spec.getYAxisVariable())  + "'"
+          + ", '" + toColNameOrEmpty(spec.getYAxisVariable()) + "'"
+          + ", '" + toColNameOrEmpty(spec.getZAxisVariable()) + "'"
           + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(0)) + "'"
           + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(1)) + "'), stringsAsFactors=FALSE)");
-      String outFile = connection.eval("contingencyTable(data, map)").asString();
+      String outFile = connection.eval("heatmap(data, map, '" + spec.getValueSpec().toString().toLowerCase() + "')").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
       }

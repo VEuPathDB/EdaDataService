@@ -1,4 +1,4 @@
-package org.veupathdb.service.edads.plugin;
+package org.veupathdb.service.eda.ds.plugin;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,12 +8,12 @@ import java.util.Scanner;
 import org.gusdb.fgputil.IoUtil;
 import org.json.JSONObject;
 import org.rosuda.REngine.Rserve.RFileInputStream;
-import org.veupathdb.service.edads.generated.model.APIVariableType;
-import org.veupathdb.service.edads.generated.model.HistogramBinWidthPostRequest;
-import org.veupathdb.service.edads.generated.model.HistogramBinWidthSpec;
-import org.veupathdb.service.edads.generated.model.ValueSpec;
-import org.veupathdb.service.edads.util.EntityDef;
-import org.veupathdb.service.edads.util.VariableDef;
+import org.veupathdb.service.eda.generated.model.APIVariableType;
+import org.veupathdb.service.eda.generated.model.HistogramBinWidthPostRequest;
+import org.veupathdb.service.eda.generated.model.HistogramBinWidthSpec;
+import org.veupathdb.service.eda.generated.model.ValueSpec;
+import org.veupathdb.service.eda.ds.util.EntityDef;
+import org.veupathdb.service.eda.ds.util.VariableDef;
 
 public class HistogramBinWidthPlugin extends HistogramPlugin<HistogramBinWidthPostRequest, HistogramBinWidthSpec>{
 

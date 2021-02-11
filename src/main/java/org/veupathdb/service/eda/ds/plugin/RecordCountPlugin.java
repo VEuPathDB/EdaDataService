@@ -1,4 +1,4 @@
-package org.veupathdb.service.edads.plugin;
+package org.veupathdb.service.eda.ds.plugin;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,10 +12,10 @@ import org.gusdb.fgputil.Wrapper;
 import org.gusdb.fgputil.validation.ValidationBundle;
 import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationLevel;
-import org.veupathdb.service.edads.generated.model.RecordCountPostRequest;
-import org.veupathdb.service.edads.generated.model.RecordCountSpec;
-import org.veupathdb.service.edads.util.StreamSpec;
-import org.veupathdb.service.edads.util.AbstractEdadsPlugin;
+import org.veupathdb.service.eda.generated.model.RecordCountPostRequest;
+import org.veupathdb.service.eda.generated.model.RecordCountSpec;
+import org.veupathdb.service.eda.ds.util.StreamSpec;
+import org.veupathdb.service.eda.ds.util.AbstractEdadsPlugin;
 import org.json.JSONObject;
 
 public class RecordCountPlugin extends AbstractEdadsPlugin<RecordCountPostRequest, RecordCountSpec> {

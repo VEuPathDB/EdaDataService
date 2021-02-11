@@ -1,4 +1,4 @@
-package org.veupathdb.service.edads;
+package org.veupathdb.service.eda.ds;
 
 import org.veupathdb.lib.container.jaxrs.config.Options;
 import org.veupathdb.lib.container.jaxrs.server.ContainerResources;

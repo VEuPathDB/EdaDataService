@@ -1,7 +1,7 @@
-package org.veupathdb.service.edads.util;
+package org.veupathdb.service.eda.ds.util;
 
 import java.util.ArrayList;
-import org.veupathdb.service.edads.generated.model.VariableSpec;
+import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 public class StreamSpec extends ArrayList<VariableSpec> {
 

@@ -1,4 +1,4 @@
-package org.veupathdb.service.edads.util;
+package org.veupathdb.service.eda.ds.util;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,13 +28,13 @@ import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
 import org.rosuda.REngine.Rserve.RConnection;
 import org.rosuda.REngine.Rserve.RFileOutputStream;
-import org.veupathdb.service.edads.Resources;
-import org.veupathdb.service.edads.generated.model.APIFilter;
-import org.veupathdb.service.edads.generated.model.APIStudyDetail;
-import org.veupathdb.service.edads.generated.model.APIVariableType;
-import org.veupathdb.service.edads.generated.model.AnalysisRequestBase;
-import org.veupathdb.service.edads.generated.model.DerivedVariable;
-import org.veupathdb.service.edads.generated.model.VariableSpec;
+import org.veupathdb.service.eda.ds.Resources;
+import org.veupathdb.service.eda.generated.model.APIFilter;
+import org.veupathdb.service.eda.generated.model.APIStudyDetail;
+import org.veupathdb.service.eda.generated.model.APIVariableType;
+import org.veupathdb.service.eda.generated.model.AnalysisRequestBase;
+import org.veupathdb.service.eda.generated.model.DerivedVariable;
+import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 public abstract class AbstractEdadsPlugin<T extends AnalysisRequestBase, S> implements Consumer<OutputStream> {
 

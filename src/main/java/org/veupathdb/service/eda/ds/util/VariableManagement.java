@@ -1,4 +1,4 @@
-package org.veupathdb.service.edads.util;
+package org.veupathdb.service.eda.ds.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.veupathdb.service.edads.generated.model.APIEntity;
-import org.veupathdb.service.edads.generated.model.APIStudyDetail;
-import org.veupathdb.service.edads.generated.model.APIVariableType;
-import org.veupathdb.service.edads.generated.model.DerivedVariable;
+import org.veupathdb.service.eda.generated.model.APIEntity;
+import org.veupathdb.service.eda.generated.model.APIStudyDetail;
+import org.veupathdb.service.eda.generated.model.APIVariableType;
+import org.veupathdb.service.eda.generated.model.DerivedVariable;
 
 public class VariableManagement {
 

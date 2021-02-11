@@ -1,4 +1,4 @@
-package org.veupathdb.service.edads.plugin;
+package org.veupathdb.service.eda.ds.plugin;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -6,8 +6,8 @@ import java.io.OutputStream;
 import java.util.Map;
 import org.gusdb.fgputil.IoUtil;
 import org.rosuda.REngine.Rserve.RFileInputStream;
-import org.veupathdb.service.edads.generated.model.HistogramNumBinsPostRequest;
-import org.veupathdb.service.edads.generated.model.HistogramNumBinsSpec;
+import org.veupathdb.service.eda.generated.model.HistogramNumBinsPostRequest;
+import org.veupathdb.service.eda.generated.model.HistogramNumBinsSpec;
 
 public class HistogramNumBinsPlugin extends HistogramPlugin<HistogramNumBinsPostRequest, HistogramNumBinsSpec>{
 

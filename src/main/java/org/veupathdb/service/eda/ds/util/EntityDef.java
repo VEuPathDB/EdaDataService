@@ -1,10 +1,10 @@
-package org.veupathdb.service.edads.util;
+package org.veupathdb.service.eda.ds.util;
 
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.json.JSONObject;
-import org.veupathdb.service.edads.generated.model.VariableSpec;
+import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 public class EntityDef extends ArrayList<VariableDef> {
 

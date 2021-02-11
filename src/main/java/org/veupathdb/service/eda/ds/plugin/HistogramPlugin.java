@@ -1,4 +1,4 @@
-package org.veupathdb.service.edads.plugin;
+package org.veupathdb.service.eda.ds.plugin;
 
 import java.util.List;
 import org.gusdb.fgputil.ListBuilder;
@@ -6,15 +6,15 @@ import org.gusdb.fgputil.validation.ValidationBundle;
 import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
-import org.veupathdb.service.edads.generated.model.APIVariableType;
-import org.veupathdb.service.edads.generated.model.HistogramPostRequest;
-import org.veupathdb.service.edads.generated.model.HistogramSpec;
-import org.veupathdb.service.edads.generated.model.VariableSpec;
-import org.veupathdb.service.edads.util.AbstractEdadsPlugin;
-import org.veupathdb.service.edads.util.EntityDef;
-import org.veupathdb.service.edads.util.StreamSpec;
+import org.veupathdb.service.eda.ds.util.AbstractEdadsPlugin;
+import org.veupathdb.service.eda.ds.util.EntityDef;
+import org.veupathdb.service.eda.generated.model.APIVariableType;
+import org.veupathdb.service.eda.generated.model.HistogramPostRequest;
+import org.veupathdb.service.eda.generated.model.HistogramSpec;
+import org.veupathdb.service.eda.generated.model.VariableSpec;
+import org.veupathdb.service.eda.ds.util.StreamSpec;
 
-public abstract class HistogramPlugin<S extends HistogramPostRequest, T extends HistogramSpec> extends AbstractEdadsPlugin<S, T>{
+public abstract class HistogramPlugin<S extends HistogramPostRequest, T extends HistogramSpec> extends AbstractEdadsPlugin<S, T> {
 
   protected static final String DATAFILE_NAME = "file1.txt";
 

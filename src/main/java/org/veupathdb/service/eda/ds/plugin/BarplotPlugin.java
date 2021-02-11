@@ -1,4 +1,4 @@
-package org.veupathdb.service.edads.plugin;
+package org.veupathdb.service.eda.ds.plugin;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,15 +14,14 @@ import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
 import org.json.JSONObject;
 import org.rosuda.REngine.Rserve.RFileInputStream;
-import org.veupathdb.service.edads.generated.model.APIVariableType;
-import org.veupathdb.service.edads.generated.model.BarplotPostRequest;
-import org.veupathdb.service.edads.generated.model.BarplotSpec;
-import org.veupathdb.service.edads.generated.model.VariableSpec;
-import org.veupathdb.service.edads.util.AbstractEdadsPlugin;
-import org.veupathdb.service.edads.util.EntityDef;
-import org.veupathdb.service.edads.util.StreamSpec;
-
-import static org.veupathdb.service.edads.util.VariableDef.toColumnName;
+import org.veupathdb.service.eda.ds.util.AbstractEdadsPlugin;
+import org.veupathdb.service.eda.ds.util.EntityDef;
+import org.veupathdb.service.eda.ds.util.StreamSpec;
+import org.veupathdb.service.eda.ds.util.VariableDef;
+import org.veupathdb.service.eda.generated.model.APIVariableType;
+import org.veupathdb.service.eda.generated.model.BarplotPostRequest;
+import org.veupathdb.service.eda.generated.model.BarplotSpec;
+import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 public class BarplotPlugin extends AbstractEdadsPlugin<BarplotPostRequest, BarplotSpec> {
 
@@ -86,7 +85,7 @@ public class BarplotPlugin extends AbstractEdadsPlugin<BarplotPostRequest, Barpl
       int xVarIndex = 0;
       String xVar = entity.getVariable(spec.getXAxisVariable()).toColumnName();
       if (spec.getOverlayVariable() != null) {
-        String groupVar = toColumnName(spec.getOverlayVariable());
+        String groupVar = VariableDef.toColumnName(spec.getOverlayVariable());
         // expect two cols ordered by overlayVar and then xAxisVar
         // TODO will be ordered by entity id
         String[] header = s.nextLine().split("\t");
