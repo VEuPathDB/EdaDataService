@@ -1,7 +1,8 @@
 //
 // Version Numbers
 //
-val coreLib = "4.2.2" // Container core lib version
+val coreLib   = "4.3.0" // Container core lib version
+val edaCommon = "1.0.0" // EDA Common version
 
 val jersey  = "2.+"   // Jersey/JaxRS version
 val jackson = "2.+"   // FasterXML Jackson version
@@ -14,6 +15,9 @@ val runtimeOnly    by configurations
 
 val testImplementation by configurations
 val testRuntimeOnly    by configurations
+
+// register a task that prints EDACommon version; used to pull down raml lib
+tasks.register("print-eda-common-version") { print(edaCommon) }
 
 dependencies {
 
@@ -55,9 +59,9 @@ dependencies {
   //implementation("org.rosuda.REngine:REngine:2.1.0")
   implementation("org.rosuda.REngine:Rserve:1.8.1")
 
-  // Core lib, prefers local checkout if available
+  // VEuPathDB libs, prefer local checkouts if available
   implementation(findProject(":core") ?: "org.veupathdb.lib:jaxrs-container-core:${coreLib}")
-
+  implementation(findProject(":edaCommon") ?: "org.veupathdb.service.eda:eda-common:${edaCommon}")
 
   // Jersey
   implementation("org.glassfish.jersey.containers:jersey-container-grizzly2-http:${jersey}")

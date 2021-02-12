@@ -12,3 +12,9 @@ if (core.exists()) {
   include(":core")
   project(":core").projectDir = core
 }
+
+val edaCommon = file("../EdaCommon");
+if (edaCommon.exists()) {
+  include(":edaCommon")
+  project(":edaCommon").projectDir = edaCommon
+}
