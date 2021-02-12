@@ -54,7 +54,7 @@ securitySchemes:
               
   /map-markers:
     post:
-      description: Returns data required to make MapVeu markers
+      description: Returns data required to make MapVeu markers <br> Java impl- working <br> R impl- NA
       body:
         application/json:
           type: lib.MapPostRequest
@@ -70,7 +70,7 @@ securitySchemes:
 
   /scatterplot:
     post:
-      description: Returns data required to create a scatterplot visualization
+      description: Returns data required to create a scatterplot visualization <br> Java impl- NA <br> R impl- drafted, passing unit tests, not confirmed working
       body:
         application/json:
           type: lib.ScatterplotPostRequest
@@ -87,7 +87,7 @@ securitySchemes:
 
   /histogram-bin-width:
     post:
-      description: Returns data required to create a histogram visualization
+      description: Returns data required to create a histogram visualization <br> Java impl- NA <br> R impl- working
       body:
         application/json:
           type: lib.HistogramBinWidthPostRequest
@@ -103,7 +103,7 @@ securitySchemes:
 
   /histogram-num-bins:
     post:
-      description: Returns data required to create a histogram visualization
+      description: Returns data required to create a histogram visualization <br> Java impl- NA <br> R impl- drafted, passing unit tests, not confirmed working
       body:
         application/json:
           type: lib.HistogramNumBinsPostRequest
@@ -119,7 +119,7 @@ securitySchemes:
 
   /boxplot:
     post:
-      description: Returns data required to create a boxplot visualization
+      description: Returns data required to create a boxplot visualization <br> Java impl- NA <br> R impl- drafted
       body:
         application/json:
           type: lib.BoxplotPostRequest
@@ -135,7 +135,7 @@ securitySchemes:
               
   /heatmap:
     post:
-      description: Returns data required to create a heatmap visualization
+      description: Returns data required to create a heatmap visualization <br> Java impl- NA <br> R impl- drafted
       body:
         application/json:
           type: lib.HeatmapPostRequest
@@ -151,7 +151,7 @@ securitySchemes:
               
   /barplot:
     post:
-      description: Returns data required to create a bar or pie plot visualization
+      description: Returns data required to create a bar or pie plot visualization <br> Java impl- drafted, not working <br> R impl- drafted, passing unit tests, not confirmed working
       body:
         application/json:
           type: lib.BarplotPostRequest
@@ -167,7 +167,7 @@ securitySchemes:
               
   /mosaic:
     post:
-      description: Returns data required to create a mosaic plot visualization
+      description: Returns data required to create a mosaic plot visualization <br> Java impl- NA <br> R impl- drafted
       body:
         application/json:
           type: lib.MosaicPostRequest
