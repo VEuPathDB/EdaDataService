@@ -73,6 +73,8 @@ public class HistogramBinWidthPlugin extends HistogramPlugin<HistogramBinWidthPo
     else {
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
         connection.voidEval("data <- fread('" + DATAFILE_NAME + "')");
+        String facetVar1 = spec.getFacetVariable() != null ? spec.getFacetVariable().get(0).toString() : "";
+        String facetVar2 = spec.getFacetVariable() != null ? spec.getFacetVariable().get(1).toString() : "";
         connection.voidEval("map <- data.frame("
             + "'plotRef'=c('xAxisVariable', "
             + "       'overlayVariable', "
@@ -80,10 +82,11 @@ public class HistogramBinWidthPlugin extends HistogramPlugin<HistogramBinWidthPo
             + "       'facetVariable2'), "
             + "'id'=c('" + toColNameOrEmpty(spec.getXAxisVariable()) + "'"
             + ", '" + toColNameOrEmpty(spec.getOverlayVariable()) + "'"
-            + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(0)) + "'"
-            + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(1)) + "'), stringsAsFactors=FALSE)");
-        String outFile = connection.eval("histogram(data, map, '" +
-            spec.getBinWidth() + "', '" +
+            + ", '" + facetVar1 + "'"
+            + ", '" + facetVar2 + "'), stringsAsFactors=FALSE)");
+        String binWidth = spec.getBinWidth() == null ? "NULL" : "'" + spec.getBinWidth() + "'";
+        String outFile = connection.eval("histogram(data, map, " +
+            binWidth + ", '" +
             spec.getValueSpec().toString().toLowerCase() + "')").asString();
         try (RFileInputStream response = connection.openFile(outFile)) {
           IoUtil.transferStream(out, response);
