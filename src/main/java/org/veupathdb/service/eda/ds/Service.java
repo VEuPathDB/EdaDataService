@@ -1,4 +1,4 @@
-package org.veupathdb.service.eda.ds.service;
+package org.veupathdb.service.eda.ds;
 
 import java.util.Arrays;
 import java.util.List;
@@ -45,10 +45,11 @@ import org.veupathdb.service.eda.ds.plugin.MapPlugin;
 import org.veupathdb.service.eda.ds.plugin.MosaicPlugin;
 
 
-public class AnalysesService implements Analyses {
+public class Service implements Analyses {
 
-  private static final Logger LOG = LogManager.getLogger(AnalysesService.class);
+  private static final Logger LOG = LogManager.getLogger(Service.class);
 
+  // NOTE: these names should match the url segments defined in the api.raml
   private static final String[] ANALYSIS_NAMES = {
     "record-count",
     "map-markers",

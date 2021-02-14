@@ -15,15 +15,16 @@ import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
 import org.json.JSONObject;
 import org.rosuda.REngine.Rserve.RFileInputStream;
-import org.veupathdb.service.eda.ds.util.AbstractEdadsPlugin;
-import org.veupathdb.service.eda.ds.util.EntityDef;
-import org.veupathdb.service.eda.ds.util.StreamSpec;
+import org.veupathdb.service.eda.common.model.EntityDef;
+import org.veupathdb.service.eda.common.client.StreamSpec;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.ScatterplotPostRequest;
 import org.veupathdb.service.eda.generated.model.ScatterplotSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
-public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostRequest, ScatterplotSpec> {
+import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
+
+public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, ScatterplotSpec> {
 
   private static final String DATAFILE_NAME = "file1.txt";
 
@@ -79,7 +80,7 @@ public class ScatterplotPlugin extends AbstractEdadsPlugin<ScatterplotPostReques
     String groupVar = toColNameOrEmpty(spec.getOverlayVariable());
 
     if (simpleScatter) {
-      EntityDef entity = getEntityMap().get(spec.getEntityId());
+      EntityDef entity = getReferenceMetadata().getEntity(spec.getEntityId());
       Scanner s = new Scanner(dataStreams.get(DATAFILE_NAME)).useDelimiter("\n");
       String[] header = s.nextLine().split("\t");
 

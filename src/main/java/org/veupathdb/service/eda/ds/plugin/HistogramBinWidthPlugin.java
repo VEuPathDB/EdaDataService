@@ -12,8 +12,10 @@ import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.HistogramBinWidthPostRequest;
 import org.veupathdb.service.eda.generated.model.HistogramBinWidthSpec;
 import org.veupathdb.service.eda.generated.model.ValueSpec;
-import org.veupathdb.service.eda.ds.util.EntityDef;
-import org.veupathdb.service.eda.ds.util.VariableDef;
+import org.veupathdb.service.eda.common.model.EntityDef;
+import org.veupathdb.service.eda.common.model.VariableDef;
+
+import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
 public class HistogramBinWidthPlugin extends HistogramPlugin<HistogramBinWidthPostRequest, HistogramBinWidthSpec>{
 
@@ -25,7 +27,7 @@ public class HistogramBinWidthPlugin extends HistogramPlugin<HistogramBinWidthPo
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     HistogramBinWidthSpec spec = getPluginSpec();
-    EntityDef entity = getEntityMap().get(spec.getEntityId());
+    EntityDef entity = getReferenceMetadata().getEntity(spec.getEntityId());
     VariableDef xVar = entity.getVariable(spec.getXAxisVariable());
     APIVariableType xType = xVar.getType();
 

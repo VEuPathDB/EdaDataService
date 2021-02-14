@@ -9,6 +9,8 @@ import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.veupathdb.service.eda.generated.model.HistogramNumBinsPostRequest;
 import org.veupathdb.service.eda.generated.model.HistogramNumBinsSpec;
 
+import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
+
 public class HistogramNumBinsPlugin extends HistogramPlugin<HistogramNumBinsPostRequest, HistogramNumBinsSpec>{
 
   @Override

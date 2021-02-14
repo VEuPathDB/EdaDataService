@@ -14,15 +14,14 @@ import org.gusdb.fgputil.validation.ValidationBundle;
 import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
-import org.veupathdb.service.eda.ds.util.AbstractEdadsPlugin;
-import org.veupathdb.service.eda.ds.util.EntityDef;
-import org.veupathdb.service.eda.ds.util.StreamSpec;
+import org.veupathdb.service.eda.common.model.EntityDef;
+import org.veupathdb.service.eda.common.client.StreamSpec;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.MapPostRequest;
 import org.veupathdb.service.eda.generated.model.MapSpec;
 import org.json.JSONObject;
 
-public class MapPlugin extends AbstractEdadsPlugin<MapPostRequest, MapSpec> {
+public class MapPlugin extends AbstractPlugin<MapPostRequest, MapSpec> {
 
   private static final String STREAM_NAME = "stream1";
 
@@ -38,7 +37,6 @@ public class MapPlugin extends AbstractEdadsPlugin<MapPostRequest, MapSpec> {
     validateVariableNameAndType(validation, entity, "geoAggregateVariable", pluginSpec.getGeoAggregateVariable(), APIVariableType.STRING);
     validateVariableNameAndType(validation, entity, "latitudeVariable", pluginSpec.getLatitudeVariable(), APIVariableType.NUMBER); 
     validateVariableNameAndType(validation, entity, "longitudeVariable", pluginSpec.getLongitudeVariable(), APIVariableType.LONGITUDE);
-
     return validation.build();
   }
 
@@ -47,8 +45,7 @@ public class MapPlugin extends AbstractEdadsPlugin<MapPostRequest, MapSpec> {
     StreamSpec spec = new StreamSpec(STREAM_NAME, pluginSpec.getEntityId());
     spec.add(pluginSpec.getGeoAggregateVariable());
     spec.add(pluginSpec.getLatitudeVariable());
-    spec.add(pluginSpec.getLongitudeVariable());  
-    
+    spec.add(pluginSpec.getLongitudeVariable());
     return new ListBuilder<StreamSpec>(spec).toList();
   }
 
@@ -61,7 +58,7 @@ public class MapPlugin extends AbstractEdadsPlugin<MapPostRequest, MapSpec> {
     Map<String, Integer> geoVarEntityCount = new HashMap<String, Integer>();
     Scanner s = new Scanner(dataStreams.get(STREAM_NAME)).useDelimiter("\n");
 
-    EntityDef entity = getEntityMap().get(spec.getEntityId());
+    EntityDef entity = getReferenceMetadata().getEntity(spec.getEntityId());
     String entityIdCol = entity.getIdColumnName();
     String geoAggregateVar = toColNameOrEmpty(spec.getGeoAggregateVariable());
     String lonVar = toColNameOrEmpty(spec.getLongitudeVariable());

@@ -2,7 +2,10 @@ package org.veupathdb.service.eda.ds;
 
 import org.veupathdb.lib.container.jaxrs.config.Options;
 import org.veupathdb.lib.container.jaxrs.server.ContainerResources;
-import org.veupathdb.service.eda.ds.service.AnalysesService;
+import org.veupathdb.service.eda.common.client.ClientUtil;
+
+import static org.gusdb.fgputil.runtime.Environment.getOptionalVar;
+import static org.gusdb.fgputil.runtime.Environment.getRequiredVar;
 
 /**
  * Service Resource Registration.
@@ -12,34 +15,18 @@ import org.veupathdb.service.eda.ds.service.AnalysesService;
  */
 public class Resources extends ContainerResources {
 
-  private static final boolean DEVELOPMENT_MODE = true;
+  private static final boolean DEVELOPMENT_MODE =
+      Boolean.valueOf(getOptionalVar("DEVELOPMENT_MODE", "true"));
 
-  public static final String SUBSETTING_SERVICE_URL;
-  public static final String STREAM_PROCESSING_SERVICE_URL;
-  public static final String RSERVE_URL;
-
-  static {
-    SUBSETTING_SERVICE_URL = loadRequiredEnvVar("SUBSETTING_SERVICE_URL");
-    STREAM_PROCESSING_SERVICE_URL = loadRequiredEnvVar("STREAM_PROCESSING_SERVICE_URL");
-    RSERVE_URL = loadRequiredEnvVar("RSERVE_URL");
-  }
-
-  private static String loadRequiredEnvVar(String name) {
-    String value = System.getenv(name);
-    if (value == null) {
-      throw new RuntimeException("Required environment variable '" + name + "' is not defined.");
-    }
-    return value;
-  }
-
-  public static boolean logResponseHeadersAsClient() {
-    return DEVELOPMENT_MODE;
-  }
+  public static final String SUBSETTING_SERVICE_URL = getRequiredVar("SUBSETTING_SERVICE_URL");
+  public static final String MERGING_SERVICE_URL = getRequiredVar("MERGING_SERVICE_URL");
+  public static final String RSERVE_URL = getRequiredVar("RSERVE_URL");
 
   public Resources(Options opts) {
     super(opts);
     if (DEVELOPMENT_MODE) {
       enableJerseyTrace();
+      ClientUtil.LOG_RESPONSE_HEADERS = true;
     }
   }
 
@@ -51,7 +38,7 @@ public class Resources extends ContainerResources {
   @Override
   protected Object[] resources() {
     return new Object[] {
-      AnalysesService.class,
+      Service.class,
     };
   }
 }

@@ -14,16 +14,16 @@ import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
 import org.json.JSONObject;
 import org.rosuda.REngine.Rserve.RFileInputStream;
-import org.veupathdb.service.eda.ds.util.AbstractEdadsPlugin;
-import org.veupathdb.service.eda.ds.util.EntityDef;
-import org.veupathdb.service.eda.ds.util.StreamSpec;
-import org.veupathdb.service.eda.ds.util.VariableDef;
+import org.veupathdb.service.eda.common.model.EntityDef;
+import org.veupathdb.service.eda.common.client.StreamSpec;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.BarplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BarplotSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
-public class BarplotPlugin extends AbstractEdadsPlugin<BarplotPostRequest, BarplotSpec> {
+import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
+
+public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpec> {
 
   private static final String DATAFILE_NAME = "file1.txt";
 
@@ -38,7 +38,7 @@ public class BarplotPlugin extends AbstractEdadsPlugin<BarplotPostRequest, Barpl
     EntityDef entity = getValidEntity(validation, pluginSpec.getEntityId());
     validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.STRING);
     if (pluginSpec.getOverlayVariable() != null) {
-      validateVariableNameAndType(validation, entity, "overlayVariable", pluginSpec.getOverlayVariable(), APIVariableType.STRING); 
+      validateVariableNameAndType(validation, entity, "overlayVariable", pluginSpec.getOverlayVariable(), APIVariableType.STRING);
     }
     if (pluginSpec.getFacetVariable() != null) {
       for (VariableSpec facetVar : pluginSpec.getFacetVariable()) {
@@ -58,14 +58,13 @@ public class BarplotPlugin extends AbstractEdadsPlugin<BarplotPostRequest, Barpl
     if (pluginSpec.getFacetVariable() != null) {
       spec.addAll(pluginSpec.getFacetVariable());  
     }
-    
     return new ListBuilder<StreamSpec>(spec).toList();
   }
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     BarplotSpec spec = getPluginSpec();
-    EntityDef entity = getEntityMap().get(spec.getEntityId());
+    EntityDef entity = getReferenceMetadata().getEntity(spec.getEntityId());
     
     boolean simpleBar = true;
     // TODO consider adding facets to simpleBar ?
@@ -83,9 +82,9 @@ public class BarplotPlugin extends AbstractEdadsPlugin<BarplotPostRequest, Barpl
       
       Integer groupVarIndex = null;
       int xVarIndex = 0;
-      String xVar = entity.getVariable(spec.getXAxisVariable()).toColumnName();
+      String xVar = toColNameOrEmpty(entity.getVariable(spec.getXAxisVariable()));
       if (spec.getOverlayVariable() != null) {
-        String groupVar = VariableDef.toColumnName(spec.getOverlayVariable());
+        String groupVar = toColNameOrEmpty(spec.getOverlayVariable());
         // expect two cols ordered by overlayVar and then xAxisVar
         // TODO will be ordered by entity id
         String[] header = s.nextLine().split("\t");

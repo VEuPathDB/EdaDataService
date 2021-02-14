@@ -12,15 +12,16 @@ import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
 import org.rosuda.REngine.Rserve.RFileInputStream;
-import org.veupathdb.service.eda.ds.util.AbstractEdadsPlugin;
-import org.veupathdb.service.eda.ds.util.EntityDef;
-import org.veupathdb.service.eda.ds.util.StreamSpec;
+import org.veupathdb.service.eda.common.model.EntityDef;
+import org.veupathdb.service.eda.common.client.StreamSpec;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.HeatmapPostRequest;
 import org.veupathdb.service.eda.generated.model.HeatmapSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
-public class HeatmapPlugin extends AbstractEdadsPlugin<HeatmapPostRequest, HeatmapSpec> {
+import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
+
+public class HeatmapPlugin extends AbstractPlugin<HeatmapPostRequest, HeatmapSpec> {
 
   private static final String DATAFILE_NAME = "file1.txt";
 

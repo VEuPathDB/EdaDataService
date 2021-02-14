@@ -11,14 +11,14 @@ import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.Wrapper;
 import org.gusdb.fgputil.validation.ValidationBundle;
 import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
+import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
 import org.veupathdb.service.eda.generated.model.RecordCountPostRequest;
 import org.veupathdb.service.eda.generated.model.RecordCountSpec;
-import org.veupathdb.service.eda.ds.util.StreamSpec;
-import org.veupathdb.service.eda.ds.util.AbstractEdadsPlugin;
+import org.veupathdb.service.eda.common.client.StreamSpec;
 import org.json.JSONObject;
 
-public class RecordCountPlugin extends AbstractEdadsPlugin<RecordCountPostRequest, RecordCountSpec> {
+public class RecordCountPlugin extends AbstractPlugin<RecordCountPostRequest, RecordCountSpec> {
 
   private static final String STREAM_NAME = "stream1";
 
@@ -28,11 +28,9 @@ public class RecordCountPlugin extends AbstractEdadsPlugin<RecordCountPostReques
   }
 
   @Override
-  protected ValidationBundle validateAnalysisSpec(RecordCountSpec pluginSpec) {
+  protected ValidationBundle validateAnalysisSpec(RecordCountSpec pluginSpec) throws ValidationException {
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
-    if (!getEntityMap().containsKey(pluginSpec.getEntityId())) {
-      validation.addError("No entity exists in study '" + getStudyId() + "' with ID '" + pluginSpec.getEntityId() + "'.");
-    }
+    getValidEntity(validation, pluginSpec.getEntityId());
     return validation.build();
   }
 
@@ -41,7 +39,7 @@ public class RecordCountPlugin extends AbstractEdadsPlugin<RecordCountPostReques
     // only need one stream for the requested entity and no vars (IDs included automatically)
     StreamSpec spec = new StreamSpec(STREAM_NAME, pluginSpec.getEntityId())
         // add first var in entity to work around no-vars bug in subsetting service
-        .addVariable(getEntityMap().get(pluginSpec.getEntityId()).get(0));
+        .addVariable(getReferenceMetadata().getEntity(pluginSpec.getEntityId()).get(0));
     return new ListBuilder<StreamSpec>(spec).toList();
   }
 
