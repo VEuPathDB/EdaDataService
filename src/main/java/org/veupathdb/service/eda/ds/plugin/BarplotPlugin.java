@@ -143,6 +143,8 @@ public class BarplotPlugin extends AbstractEdadsPlugin<BarplotPostRequest, Barpl
     else {
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
         connection.voidEval("data <- fread('" + DATAFILE_NAME + "')");
+        String facetVar1 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(0)) : "";
+        String facetVar2 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(1)) : "";
         String createMapString = "map <- data.frame("
             + "'plotRef'=c('xAxisVariable', "
             + "       'overlayVariable', "
@@ -150,8 +152,8 @@ public class BarplotPlugin extends AbstractEdadsPlugin<BarplotPostRequest, Barpl
             + "       'facetVariable2'), "
             + "'id'=c('" + toColNameOrEmpty(spec.getXAxisVariable()) + "'"
             + ", '" + toColNameOrEmpty(spec.getOverlayVariable()) + "'"
-            + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(0)) + "'"
-            + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(1)) + "'), stringsAsFactors=FALSE)";
+            + ", '" + facetVar1 + "'"
+            + ", '" + facetVar2 + "'), stringsAsFactors=FALSE)";
         connection.voidEval(createMapString);
         String outFile = connection.eval("bar(data, map, '" + spec.getValueSpec().toString().toLowerCase() + "')").asString();
         try (RFileInputStream response = connection.openFile(outFile)) {

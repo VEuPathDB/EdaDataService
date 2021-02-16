@@ -71,8 +71,8 @@ public class HistogramBinWidthPlugin extends HistogramPlugin<HistogramBinWidthPo
     else {
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
         connection.voidEval("data <- fread('" + DATAFILE_NAME + "')");
-        String facetVar1 = spec.getFacetVariable() != null ? spec.getFacetVariable().get(0).toString() : "";
-        String facetVar2 = spec.getFacetVariable() != null ? spec.getFacetVariable().get(1).toString() : "";
+        String facetVar1 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(0)) : "";
+        String facetVar2 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(1)) : "";
         connection.voidEval("map <- data.frame("
             + "'plotRef'=c('xAxisVariable', "
             + "       'overlayVariable', "

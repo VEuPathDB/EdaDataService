@@ -67,6 +67,8 @@ public class HistogramNumBinsPlugin extends HistogramPlugin<HistogramNumBinsPost
 */  
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
         connection.voidEval("data <- fread('" + DATAFILE_NAME + "')");
+        String facetVar1 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(0)) : "";
+        String facetVar2 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(1)) : "";
         connection.voidEval("map <- data.frame("
             + "'plotRef'=c('xAxisVariable', "
             + "       'overlayVariable', "
@@ -74,13 +76,17 @@ public class HistogramNumBinsPlugin extends HistogramPlugin<HistogramNumBinsPost
             + "       'facetVariable2'), "
             + "'id'=c('" + toColNameOrEmpty(spec.getXAxisVariable()) + "'"
             + ", '" + toColNameOrEmpty(spec.getOverlayVariable()) + "'"
-            + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(0)) + "'"
-            + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(1)) + "'), stringsAsFactors=FALSE)");
-        int numBins = spec.getNumBins().intValue();
-        connection.voidEval("x <- emptyStringToNull(map$plotRef[map$id == 'xAxisVariable'])");
-        connection.voidEval("xRange <- max(data[[x]], na.rm=T) - min(data[[x]], na.rm=T)");
-        connection.voidEval("binWidth <- xRange*1.01/" + numBins);
-        String outFile = connection.eval("histogram(data, map, binWidth, '" + spec.getValueSpec().toString().toLowerCase() + "')").asString();
+            + ", '" + facetVar1 + "'"
+            + ", '" + facetVar2 + "'), stringsAsFactors=FALSE)");
+        if (spec.getNumBins() != null) {
+          String numBins = spec.getNumBins().toString();
+          connection.voidEval("x <- emptyStringToNull(map$plotRef[map$id == 'xAxisVariable'])");
+          connection.voidEval("xRange <- max(data[[x]], na.rm=T) - min(data[[x]], na.rm=T)");
+          connection.voidEval("binWidth <- xRange*1.01/" + numBins);
+        } else {
+          connection.voidEval("binWidth <- NULL");
+        }
+        String outFile = connection.eval("histogram(data, map, binWidth, '" + spec.getValueSpec().toString().toLowerCase() + "', 'numBins')").asString();
         try (RFileInputStream response = connection.openFile(outFile)) {
           IoUtil.transferStream(out, response);
         }
