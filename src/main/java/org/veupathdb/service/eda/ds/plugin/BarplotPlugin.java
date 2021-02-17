@@ -142,7 +142,7 @@ public class BarplotPlugin extends AbstractEdadsPlugin<BarplotPostRequest, Barpl
     }
     else {
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
-        connection.voidEval("data <- fread('" + DATAFILE_NAME + "')");
+        connection.voidEval("data <- fread('" + DATAFILE_NAME + "', na.strings=c(''))");
         String facetVar1 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(0)) : "";
         String facetVar2 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(1)) : "";
         String createMapString = "map <- data.frame("
