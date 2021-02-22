@@ -1,0 +1,25 @@
+#%RAML 1.0 Library
+
+types:
+
+  DateHistogramBinWidthPostRequest:
+    type: HistogramPostRequest
+    properties:
+      config: DateHistogramBinWidthSpec
+
+  DateHistogramBinWidthSpec:
+    type: HistogramSpec
+    properties:
+      binWidth:
+        type: string
+        required: false
+      viewportMin:
+        type: string
+      viewportMax:
+        type: string
+        
+  DateHistogramBinWidthPostResponse:
+    type: HistogramPostResponse
+    properties:
+      binWidth:
+        type: string

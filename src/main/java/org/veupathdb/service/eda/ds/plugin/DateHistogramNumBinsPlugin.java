@@ -6,19 +6,19 @@ import java.io.OutputStream;
 import java.util.Map;
 import org.gusdb.fgputil.IoUtil;
 import org.rosuda.REngine.Rserve.RFileInputStream;
-import org.veupathdb.service.eda.generated.model.HistogramNumBinsPostRequest;
-import org.veupathdb.service.eda.generated.model.HistogramNumBinsSpec;
+import org.veupathdb.service.eda.generated.model.DateHistogramNumBinsPostRequest;
+import org.veupathdb.service.eda.generated.model.DateHistogramNumBinsSpec;
 
-public class HistogramNumBinsPlugin extends HistogramPlugin<HistogramNumBinsPostRequest, HistogramNumBinsSpec>{
+public class DateHistogramNumBinsPlugin extends HistogramPlugin<DateHistogramNumBinsPostRequest, DateHistogramNumBinsSpec>{
 
   @Override
-  protected Class<HistogramNumBinsSpec> getAnalysisSpecClass() {
-    return HistogramNumBinsSpec.class;
+  protected Class<DateHistogramNumBinsSpec> getAnalysisSpecClass() {
+    return DateHistogramNumBinsSpec.class;
   }
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    HistogramNumBinsSpec spec = getPluginSpec();
+    DateHistogramNumBinsSpec spec = getPluginSpec();
 /*
 //  TODO revisit simpleHistogram for numBins rather than binWidth
     EntityDef entity = new EntityDef(spec.getEntityId());
@@ -69,6 +69,11 @@ public class HistogramNumBinsPlugin extends HistogramPlugin<HistogramNumBinsPost
         connection.voidEval("data <- fread('" + DATAFILE_NAME + "', na.strings=c(''))");
         String facetVar1 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(0)) : "";
         String facetVar2 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(1)) : "";
+        // NOTE: eventually varId and entityId will be a single string delimited by '.'
+        String xAxisEntity = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
+        String overlayEntity = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
+        String facetEntity1 = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
+        String facetEntity2 = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
         connection.voidEval("map <- data.frame("
             + "'plotRef'=c('xAxisVariable', "
             + "       'overlayVariable', "
@@ -77,7 +82,16 @@ public class HistogramNumBinsPlugin extends HistogramPlugin<HistogramNumBinsPost
             + "'id'=c('" + toColNameOrEmpty(spec.getXAxisVariable()) + "'"
             + ", '" + toColNameOrEmpty(spec.getOverlayVariable()) + "'"
             + ", '" + facetVar1 + "'"
-            + ", '" + facetVar2 + "'), stringsAsFactors=FALSE)");
+            + ", '" + facetVar2 + "'), "
+            + "'entityId'=c('" + xAxisEntity + "'"
+            + ", '" + overlayEntity + "'"
+            + ", '" + facetEntity1 + "'"
+            + ", '" + facetEntity2 + "'), stringsAsFactors=FALSE)");
+        if (spec.getViewportMin() != null & spec.getViewportMax() != null) {
+          connection.voidEval("viewport <- list('min'='" + spec.getViewportMin() + "', 'max'='" + spec.getViewportMax() + "')");
+        } else {
+          connection.voidEval("viewport <- NULL");
+        }
         if (spec.getNumBins() != null) {
           String numBins = spec.getNumBins().toString();
           connection.voidEval("x <- emptyStringToNull(map$plotRef[map$id == 'xAxisVariable'])");
@@ -86,7 +100,7 @@ public class HistogramNumBinsPlugin extends HistogramPlugin<HistogramNumBinsPost
         } else {
           connection.voidEval("binWidth <- NULL");
         }
-        String outFile = connection.eval("histogram(data, map, binWidth, '" + spec.getValueSpec().toString().toLowerCase() + "', 'numBins')").asString();
+        String outFile = connection.eval("histogram(data, map, binWidth, '" + spec.getValueSpec().toString().toLowerCase() + "', 'numBins', viewport)").asString();
         try (RFileInputStream response = connection.openFile(outFile)) {
           IoUtil.transferStream(out, response);
         }
