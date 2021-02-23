@@ -94,8 +94,9 @@ public class DateHistogramNumBinsPlugin extends HistogramPlugin<DateHistogramNum
         }
         if (spec.getNumBins() != null) {
           String numBins = spec.getNumBins().toString();
-          connection.voidEval("x <- emptyStringToNull(map$plotRef[map$id == 'xAxisVariable'])");
-          connection.voidEval("xRange <- max(data[[x]], na.rm=T) - min(data[[x]], na.rm=T)");
+          // TODO figure the equivalent w strings/ dates
+          connection.voidEval("x <- emptyStringToNull(map$id[map$plotRef == 'xAxisVariable'])");
+          connection.voidEval("xRange <- ifelse(is.null(viewport), max(data[[x]], na.rm=T) - min(0,min(data[[x]], na.rm=T)), viewport$max - viewport$min)");
           connection.voidEval("binWidth <- xRange*1.01/" + numBins);
         } else {
           connection.voidEval("binWidth <- NULL");
