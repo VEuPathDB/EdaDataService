@@ -1,0 +1,25 @@
+#%RAML 1.0 Library
+
+types:
+
+  NumericHistogramNumBinsPostRequest:
+    type: HistogramPostRequest
+    properties:
+      config: NumericHistogramNumBinsSpec
+
+  NumericHistogramNumBinsSpec:
+    type: HistogramSpec
+    properties:
+      numBins:
+        type: number
+        required: false
+      viewportMin:
+        type: number
+      viewportMax:
+        type: number
+        
+  NumericHistogramNumBinsPostResponse:
+    type: HistogramPostResponse
+    properties:
+      numBins:
+        type: number

@@ -9,24 +9,24 @@ import org.gusdb.fgputil.IoUtil;
 import org.json.JSONObject;
 import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
-import org.veupathdb.service.eda.generated.model.HistogramBinWidthPostRequest;
-import org.veupathdb.service.eda.generated.model.HistogramBinWidthSpec;
+import org.veupathdb.service.eda.generated.model.NumericHistogramBinWidthPostRequest;
+import org.veupathdb.service.eda.generated.model.NumericHistogramBinWidthSpec;
 import org.veupathdb.service.eda.generated.model.ValueSpec;
 import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.model.VariableDef;
 
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class HistogramBinWidthPlugin extends HistogramPlugin<HistogramBinWidthPostRequest, HistogramBinWidthSpec>{
+public class NumericHistogramBinWidthPlugin extends HistogramPlugin<NumericHistogramBinWidthPostRequest, NumericHistogramBinWidthSpec>{
 
   @Override
-  protected Class<HistogramBinWidthSpec> getAnalysisSpecClass() {
-    return HistogramBinWidthSpec.class;
+  protected Class<NumericHistogramBinWidthSpec> getAnalysisSpecClass() {
+    return NumericHistogramBinWidthSpec.class;
   }
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    HistogramBinWidthSpec spec = getPluginSpec();
+    NumericHistogramBinWidthSpec spec = getPluginSpec();
     EntityDef entity = getReferenceMetadata().getEntity(spec.getEntityId());
     VariableDef xVar = entity.getVariable(spec.getXAxisVariable());
     APIVariableType xType = xVar.getType();
@@ -45,7 +45,7 @@ public class HistogramBinWidthPlugin extends HistogramPlugin<HistogramBinWidthPo
     simpleHistogram = false;
     // TODO revise as data will be ordered by id not by value. need min and max from steve
     if (simpleHistogram) {
-      Double binWidth = spec.getBinWidth().getNumericBinWidth().getType().doubleValue();
+      Double binWidth = spec.getBinWidth().doubleValue();
       int rowCount = 0;
       Scanner s = new Scanner(dataStreams.get(DATAFILE_NAME)).useDelimiter("\n");
       s.nextLine(); // ignore header, expecting single column representing ordered xVar values
@@ -72,9 +72,14 @@ public class HistogramBinWidthPlugin extends HistogramPlugin<HistogramBinWidthPo
     }
     else {
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
-        connection.voidEval("data <- fread('" + DATAFILE_NAME + "')");
-        String facetVar1 = spec.getFacetVariable() != null ? spec.getFacetVariable().get(0).toString() : "";
-        String facetVar2 = spec.getFacetVariable() != null ? spec.getFacetVariable().get(1).toString() : "";
+        connection.voidEval("data <- fread('" + DATAFILE_NAME + "', na.strings=c(''))");
+        String facetVar1 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(0)) : "";
+        String facetVar2 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(1)) : "";
+        // NOTE: eventually varId and entityId will be a single string delimited by '.'
+        String xAxisEntity = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
+        String overlayEntity = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
+        String facetEntity1 = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
+        String facetEntity2 = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
         connection.voidEval("map <- data.frame("
             + "'plotRef'=c('xAxisVariable', "
             + "       'overlayVariable', "
@@ -83,11 +88,20 @@ public class HistogramBinWidthPlugin extends HistogramPlugin<HistogramBinWidthPo
             + "'id'=c('" + toColNameOrEmpty(spec.getXAxisVariable()) + "'"
             + ", '" + toColNameOrEmpty(spec.getOverlayVariable()) + "'"
             + ", '" + facetVar1 + "'"
-            + ", '" + facetVar2 + "'), stringsAsFactors=FALSE)");
+            + ", '" + facetVar2 + "'), "
+            + "'entityId'=c('" + xAxisEntity + "'"
+            + ", '" + overlayEntity + "'"
+            + ", '" + facetEntity1 + "'"
+            + ", '" + facetEntity2 + "'), stringsAsFactors=FALSE)");
         String binWidth = spec.getBinWidth() == null ? "NULL" : "'" + spec.getBinWidth() + "'";
+        if (spec.getViewportMin() != null & spec.getViewportMax() != null) {
+          connection.voidEval("viewport <- list('min'='" + spec.getViewportMin() + "', 'max'='" + spec.getViewportMax() + "')");
+        } else {
+          connection.voidEval("viewport <- NULL");
+        }
         String outFile = connection.eval("histogram(data, map, " +
             binWidth + ", '" +
-            spec.getValueSpec().toString().toLowerCase() + "')").asString();
+            spec.getValueSpec().toString().toLowerCase() + "', 'binWidth', viewport)").asString();
         try (RFileInputStream response = connection.openFile(outFile)) {
           IoUtil.transferStream(out, response);
         }

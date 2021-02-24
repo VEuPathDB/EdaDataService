@@ -11,8 +11,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.functional.FunctionalInterfaces;
 import org.veupathdb.lib.container.jaxrs.server.annotations.DisableJackson;
-import org.veupathdb.service.eda.ds.plugin.HistogramBinWidthPlugin;
-import org.veupathdb.service.eda.ds.plugin.HistogramNumBinsPlugin;
+import org.veupathdb.service.eda.ds.plugin.DateHistogramBinWidthPlugin;
+import org.veupathdb.service.eda.ds.plugin.DateHistogramNumBinsPlugin;
+import org.veupathdb.service.eda.ds.plugin.NumericHistogramBinWidthPlugin;
+import org.veupathdb.service.eda.ds.plugin.NumericHistogramNumBinsPlugin;
 import org.veupathdb.service.eda.ds.plugin.RecordCountPlugin;
 import org.veupathdb.service.eda.ds.plugin.ScatterplotPlugin;
 import org.veupathdb.service.eda.generated.model.AnalysesGetResponse;
@@ -25,10 +27,14 @@ import org.veupathdb.service.eda.generated.model.BoxplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BoxplotPostResponseStream;
 import org.veupathdb.service.eda.generated.model.HeatmapPostRequest;
 import org.veupathdb.service.eda.generated.model.HeatmapPostResponseStream;
-import org.veupathdb.service.eda.generated.model.HistogramBinWidthPostRequest;
-import org.veupathdb.service.eda.generated.model.HistogramNumBinsPostRequest;
-import org.veupathdb.service.eda.generated.model.HistogramBinWidthPostResponseStream;
-import org.veupathdb.service.eda.generated.model.HistogramNumBinsPostResponseStream;
+import org.veupathdb.service.eda.generated.model.DateHistogramBinWidthPostRequest;
+import org.veupathdb.service.eda.generated.model.DateHistogramNumBinsPostRequest;
+import org.veupathdb.service.eda.generated.model.DateHistogramBinWidthPostResponseStream;
+import org.veupathdb.service.eda.generated.model.DateHistogramNumBinsPostResponseStream;
+import org.veupathdb.service.eda.generated.model.NumericHistogramBinWidthPostRequest;
+import org.veupathdb.service.eda.generated.model.NumericHistogramNumBinsPostRequest;
+import org.veupathdb.service.eda.generated.model.NumericHistogramBinWidthPostResponseStream;
+import org.veupathdb.service.eda.generated.model.NumericHistogramNumBinsPostResponseStream;
 import org.veupathdb.service.eda.generated.model.MapPostRequest;
 import org.veupathdb.service.eda.generated.model.MapPostResponseStream;
 import org.veupathdb.service.eda.generated.model.MosaicPostRequest;
@@ -54,8 +60,10 @@ public class Service implements Analyses {
     "record-count",
     "map-markers",
     "scatterplot",
-    "histogram-num-bins",
-    "histogram-bin-width",
+    "date-histogram-num-bins",
+    "date-histogram-bin-width",
+    "numeric-histogram-num-bins",
+    "numeric-histogram-bin-width",
     "barplot",
     "boxplot",
     "heatmap",
@@ -118,16 +126,30 @@ public class Service implements Analyses {
 
   @DisableJackson
   @Override
-  public PostAnalysesHistogramBinWidthResponse postAnalysesHistogramBinWidth(HistogramBinWidthPostRequest entity) {
-    return wrapPlugin(() -> PostAnalysesHistogramBinWidthResponse.respond200WithApplicationJson(
-        new HistogramBinWidthPostResponseStream(new HistogramBinWidthPlugin().processRequest(entity))));
+  public PostAnalysesDateHistogramBinWidthResponse postAnalysesDateHistogramBinWidth(DateHistogramBinWidthPostRequest entity) {
+    return wrapPlugin(() -> PostAnalysesDateHistogramBinWidthResponse.respond200WithApplicationJson(
+        new DateHistogramBinWidthPostResponseStream(new DateHistogramBinWidthPlugin().processRequest(entity))));
   }
 
   @DisableJackson
   @Override
-  public PostAnalysesHistogramNumBinsResponse postAnalysesHistogramNumBins(HistogramNumBinsPostRequest entity) {
-    return wrapPlugin(() -> PostAnalysesHistogramNumBinsResponse.respond200WithApplicationJson(
-        new HistogramNumBinsPostResponseStream(new HistogramNumBinsPlugin().processRequest(entity))));
+  public PostAnalysesDateHistogramNumBinsResponse postAnalysesDateHistogramNumBins(DateHistogramNumBinsPostRequest entity) {
+    return wrapPlugin(() -> PostAnalysesDateHistogramNumBinsResponse.respond200WithApplicationJson(
+        new DateHistogramNumBinsPostResponseStream(new DateHistogramNumBinsPlugin().processRequest(entity))));
+  }
+  
+  @DisableJackson
+  @Override
+  public PostAnalysesNumericHistogramBinWidthResponse postAnalysesNumericHistogramBinWidth(NumericHistogramBinWidthPostRequest entity) {
+    return wrapPlugin(() -> PostAnalysesNumericHistogramBinWidthResponse.respond200WithApplicationJson(
+        new NumericHistogramBinWidthPostResponseStream(new NumericHistogramBinWidthPlugin().processRequest(entity))));
+  }
+
+  @DisableJackson
+  @Override
+  public PostAnalysesNumericHistogramNumBinsResponse postAnalysesNumericHistogramNumBins(NumericHistogramNumBinsPostRequest entity) {
+    return wrapPlugin(() -> PostAnalysesNumericHistogramNumBinsResponse.respond200WithApplicationJson(
+        new NumericHistogramNumBinsPostResponseStream(new NumericHistogramNumBinsPlugin().processRequest(entity))));
   }
 
   @DisableJackson
