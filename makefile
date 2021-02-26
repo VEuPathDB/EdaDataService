@@ -6,7 +6,7 @@ TEST_DIR     := $(shell echo $(MAIN_DIR) | sed 's/main/test/')
 ALL_PACKABLE := $(shell find src/main -type f)
 BIN_DIR := .tools/bin
 
-EDA_COMMON_VERSION := $(shell ./gradlew -q print-eda-common-version)
+FETCH_EDA_COMMON_SCHEMA := $(shell ./gradlew -q "print-eda-common-schema-fetch")
 
 EXAMPLE_DIR      := src/main/java/org/veupathdb/service/demo
 EXAMPLE_TEST_DIR := src/test/java/org/veupathdb/service/demo
@@ -96,8 +96,8 @@ gen-docs: api.raml merge-raml
 
 merge-raml:
 	@echo "Downloading dependencies..."
-	curl https://raw.githubusercontent.com/VEuPathDB/EdaCommon/v$(EDA_COMMON_VERSION)/schema/library.raml > schema/url/eda-common-lib.raml
-	@$(BIN_DIR)/merge-raml schema > schema/library.raml
+	$(FETCH_EDA_COMMON_SCHEMA) > schema/url/eda-common-lib.raml
+	$(BIN_DIR)/merge-raml schema > schema/library.raml
 	rm schema/url/eda-common-lib.raml
 
 #

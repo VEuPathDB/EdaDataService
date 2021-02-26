@@ -16,8 +16,17 @@ val runtimeOnly    by configurations
 val testImplementation by configurations
 val testRuntimeOnly    by configurations
 
-// register a task that prints EDACommon version; used to pull down raml lib
-tasks.register("print-eda-common-version") { print(edaCommon) }
+// use local EdaCommon compiled schema if project exists, else use released version;
+//    this mirrors the way we use local EdaCommon code if available
+val edaCommonLocalProjectDir = findProject(":edaCommon")?.projectDir
+val edaCommonSchemaFetch =
+  if (edaCommonLocalProjectDir != null)
+    "cat ${edaCommonLocalProjectDir}/schema/library.raml"
+  else
+    "curl https://raw.githubusercontent.com/VEuPathDB/EdaCommon/v${edaCommon}/schema/library.raml"
+
+// register a task that prints the command to fetch EdaCommon schema; used to pull down raml lib
+tasks.register("print-eda-common-schema-fetch") { print(edaCommonSchemaFetch) }
 
 dependencies {
 
