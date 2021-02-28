@@ -17,6 +17,7 @@ import org.gusdb.fgputil.functional.FunctionalInterfaces.ConsumerWithException;
 import org.gusdb.fgputil.validation.ValidationBundle;
 import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
+import org.veupathdb.service.eda.common.client.AbstractTabularDataClient;
 import org.veupathdb.service.eda.common.client.ClientUtil;
 import org.veupathdb.service.eda.common.client.EdaMergingClient;
 import org.veupathdb.service.eda.common.client.EdaSubsettingClient;
@@ -41,7 +42,7 @@ abstract class AbstractPlugin<T extends AnalysisRequestBase, S> implements Consu
   protected abstract void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException;
 
   private final EdaSubsettingClient _subsettingClient = new EdaSubsettingClient(Resources.SUBSETTING_SERVICE_URL);
-  private final EdaMergingClient _mergingClient = new EdaMergingClient(Resources.MERGING_SERVICE_URL);
+  private final AbstractTabularDataClient _mergingClient = _subsettingClient; //new EdaMergingClient(Resources.MERGING_SERVICE_URL);
 
   private boolean _requestProcessed = false;
   private S _pluginSpec;
@@ -74,7 +75,8 @@ abstract class AbstractPlugin<T extends AnalysisRequestBase, S> implements Consu
     _requiredStreams = getRequestedStreams(_pluginSpec);
 
     // validate stream specs provided by the subclass
-    _mergingClient.validateStreamSpecs(_requiredStreams, _referenceMetadata).throwIfInvalid();
+    _mergingClient.getStreamSpecValidator()
+        .validateStreamSpecs(_requiredStreams, _referenceMetadata).throwIfInvalid();
 
     _requestProcessed = true;
     return this;
@@ -88,7 +90,7 @@ abstract class AbstractPlugin<T extends AnalysisRequestBase, S> implements Consu
 
     // create stream generator
     Function<StreamSpec,InputStream> streamGenerator = spec -> _mergingClient
-        .getTabularDataStream(_referenceMetadata.getStudyId(), _subset, _derivedVariables, spec);
+        .getTabularDataStream(_referenceMetadata, _subset, spec);
 
     // create stream processor
     ConsumerWithException<Map<String,InputStream>> streamProcessor = map -> writeResults(out, map);
