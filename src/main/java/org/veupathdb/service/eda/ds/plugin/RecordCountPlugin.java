@@ -13,6 +13,7 @@ import org.gusdb.fgputil.validation.ValidationBundle;
 import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
+import org.veupathdb.service.eda.common.model.VariableSource;
 import org.veupathdb.service.eda.generated.model.RecordCountPostRequest;
 import org.veupathdb.service.eda.generated.model.RecordCountSpec;
 import org.veupathdb.service.eda.common.client.StreamSpec;
@@ -39,7 +40,9 @@ public class RecordCountPlugin extends AbstractPlugin<RecordCountPostRequest, Re
     // only need one stream for the requested entity and no vars (IDs included automatically)
     StreamSpec spec = new StreamSpec(STREAM_NAME, pluginSpec.getEntityId())
         // add first var in entity to work around no-vars bug in subsetting service
-        .addVariable(getReferenceMetadata().getEntity(pluginSpec.getEntityId()).get(0));
+        .addVariable(getReferenceMetadata().getEntity(pluginSpec.getEntityId()).stream()
+            .filter(var -> VariableSource.NATIVE.equals(var.getSource()))
+            .findFirst().orElseThrow()); // should have at least one native var
     return new ListBuilder<StreamSpec>(spec).toList();
   }
 
