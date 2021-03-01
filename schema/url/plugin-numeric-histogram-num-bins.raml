@@ -20,8 +20,16 @@ types:
         type: number
         required: false
         
-  NumericHistogramNumBinsPostResponse:
-    type: HistogramPostResponse
+  NumericHistogramNumBinsConfig:
+    type: HistogramConfig
     properties:
-      numBins:
+      numBins: 
         type: number
+        
+  NumericHistogramNumBinsPostResponse:
+    additionalProperties: false
+    properties:
+      data:
+        type: HistogramData[]
+      config:
+        type: NumericHistogramNumBinsConfig

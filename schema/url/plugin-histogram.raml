@@ -25,15 +25,17 @@ types:
         type: VariableSpec[]
         maxItems: 2
         required: false
+   
 
-  HistogramPostResponse:
+  HistogramData:
     additionalProperties: false
     properties:
-      group:
-        type: string
+      overlayVariableDetails:
+        type: StrataVariableDetails
         required: false
-      panel:
-        type: string
+      facetVariableDetails:
+        type: StrataVariableDetails[]
+        maxItems: 2
         required: false
       value:
         type: number[]
@@ -47,3 +49,32 @@ types:
         type: string[]
         minItems: 1
         required: true
+        
+  BinSlider:
+    additionalProperties: false
+    properties:
+      min:
+        type: number
+      max:
+        type: number
+      step:
+        type: number
+        
+  HistogramConfig:
+    type: VisualizationConfig
+    properties:
+      binSlider:
+        type: BinSlider
+      xVariableDetails:
+        type: VariableSpec
+      
+
+  HistogramPostResponse:
+    additionalProperties: false
+    properties:
+      data:
+        type: HistogramData[]
+      config:
+        type: HistogramConfig
+        
+    

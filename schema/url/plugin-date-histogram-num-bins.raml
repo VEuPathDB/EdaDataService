@@ -20,8 +20,16 @@ types:
         type: string
         required: false
         
-  DateHistogramNumBinsPostResponse:
-    type: HistogramPostResponse
+  DateHistogramNumBinsConfig:
+    type: HistogramConfig
     properties:
-      numBins:
+      numBins: 
         type: number
+        
+  DateHistogramNumBinsPostResponse:
+    additionalProperties: false
+    properties:
+      data:
+        type: HistogramData[]
+      config:
+        type: DateHistogramNumBinsConfig

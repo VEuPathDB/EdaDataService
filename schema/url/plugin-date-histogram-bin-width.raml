@@ -19,9 +19,17 @@ types:
       viewportMax:
         type: string
         required: false
+  
+  DateHistogramBinWidthConfig:
+    type: HistogramConfig
+    properties:
+      binWidth: 
+        type: number
         
   DateHistogramBinWidthPostResponse:
-    type: HistogramPostResponse
+    additionalProperties: false
     properties:
-      binWidth:
-        type: string
+      data:
+        type: HistogramData[]
+      config:
+        type: DateHistogramBinWidthConfig

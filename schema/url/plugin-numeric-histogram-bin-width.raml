@@ -19,9 +19,17 @@ types:
       viewportMax:
         type: number
         required: false
+  
+  NumericHistogramBinWidthConfig:
+    type: HistogramConfig
+    properties:
+      binWidth: 
+        type: number
         
   NumericHistogramBinWidthPostResponse:
-    type: HistogramPostResponse
+    additionalProperties: false
     properties:
-      binWidth:
-        type: number
+      data:
+        type: HistogramData[]
+      config:
+        type: NumericHistogramBinWidthConfig
