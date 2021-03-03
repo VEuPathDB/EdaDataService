@@ -32,8 +32,6 @@ import org.veupathdb.service.eda.generated.model.VisualizationRequestBase;
 import org.veupathdb.service.eda.generated.model.DerivedVariable;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
-//TODO ask ryan about this one. does this belong to the app or vis level ?
-
 abstract class AbstractPlugin<T extends VisualizationRequestBase, S> implements Consumer<OutputStream> {
 
   private static final Logger LOG = LogManager.getLogger(AbstractPlugin.class);

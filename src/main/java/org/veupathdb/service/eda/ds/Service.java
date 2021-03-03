@@ -131,8 +131,6 @@ public class Service implements Apps {
     }
   }
 
-  //TODO these belong specifically to the pass app, not just app
-  
   @DisableJackson
   @Override
   public PostAppsPassVisualizationsRecordCountResponse postAppsPassVisualizationsRecordCount(RecordCountPostRequest entity) {
