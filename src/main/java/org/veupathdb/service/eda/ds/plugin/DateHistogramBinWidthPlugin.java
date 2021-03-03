@@ -14,7 +14,7 @@ import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithR
 public class DateHistogramBinWidthPlugin extends HistogramPlugin<DateHistogramBinWidthPostRequest, DateHistogramBinWidthSpec>{
 
   @Override
-  protected Class<DateHistogramBinWidthSpec> getAnalysisSpecClass() {
+  protected Class<DateHistogramBinWidthSpec> getVisualizationSpecClass() {
     return DateHistogramBinWidthSpec.class;
   }
 

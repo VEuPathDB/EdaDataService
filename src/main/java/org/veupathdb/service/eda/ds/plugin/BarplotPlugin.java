@@ -28,12 +28,12 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
   private static final String DATAFILE_NAME = "file1.txt";
 
   @Override
-  protected Class<BarplotSpec> getAnalysisSpecClass() {
+  protected Class<BarplotSpec> getVisualizationSpecClass() {
     return BarplotSpec.class;
   }
 
   @Override
-  protected ValidationBundle validateAnalysisSpec(BarplotSpec pluginSpec) throws ValidationException {
+  protected ValidationBundle validateVisualizationSpec(BarplotSpec pluginSpec) throws ValidationException {
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
     EntityDef entity = getValidEntity(validation, pluginSpec.getEntityId());
     validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.STRING);

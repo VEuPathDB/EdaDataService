@@ -27,188 +27,197 @@ securitySchemes:
 # Endpoints
 ####################################
 
-/analyses:
-  displayName: Available Analyses
+/apps:
+  displayName: Available Apps
   get:
     responses:
       200:
         body:
           application/json:
-            type: lib.AnalysesGetResponse
+            type: lib.AppsGetResponse
 
-  /record-count:
-    post:
-      description: Returns a count of the records in the subset
-      body:
-        application/json:
-          type: lib.RecordCountPostRequest
+  /pass/visualizations:
+    displayName: Available visualizations for the null/ pass-through app
+    get:
       responses:
         200:
           body:
             application/json:
-              type: lib.RecordCountPostResponse
-        500:
-          body:
-            application/json:
-              type: error.ServerError
+              type: lib.PassAppVisualizationsGetResponse
+
+    /record-count:
+      post:
+        description: Test endpoint returns a count of the records in the subset
+        body:
+          application/json:
+            type: lib.RecordCountPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.RecordCountPostResponse
+          500:
+            body:
+              application/json:
+                type: error.ServerError
               
-  /map-markers:
-    post:
-      description: Returns data required to make MapVeu markers <br> Java impl- working <br> R impl- NA
-      body:
-        application/json:
-          type: lib.MapPostRequest
-      responses:
-        200:
-          body:
-            application/json:
-              type: lib.MapPostResponse
-        500:
-          body:
-            application/json:
-              type: error.ServerError
+    /map-markers:
+      post:
+        description: Returns data required to make MapVeu markers <br> Java impl- working <br> R impl- NA
+        body:
+          application/json:
+            type: lib.MapPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.MapPostResponse
+          500:
+            body:
+              application/json:
+                type: error.ServerError
 
-  /scatterplot:
-    post:
-      description: Returns data required to create a scatterplot visualization <br> Java impl- NA <br> R impl- drafted, passing unit tests, not confirmed working
-      body:
-        application/json:
-          type: lib.ScatterplotPostRequest
-      responses:
-        200:
-          body:
-            application/json:
-              type: lib.ScatterplotPostResponse
-        500:
-          body:
-            application/json:
-              type: error.ServerError
-
-  /date-histogram-bin-width:
-    post:
-      description: Returns data required to create a histogram visualization of date values given a number of bins <br> Java impl- NA <br> R impl- xaxis and overlay working
-      body:
-        application/json:
-          type: lib.DateHistogramBinWidthPostRequest
-      responses:
-        200:
-          body:
-            application/json:
-              type: lib.DateHistogramBinWidthPostResponse
-        500:
-          body:
-            application/json:
-              type: error.ServerError
-
-
-  /numeric-histogram-bin-width:
-    post:
-      description: Returns data required to create a histogram visualization of numeric values given a bin width <br> Java impl- NA <br> R impl- xaxis and overlay working
-      body:
-        application/json:
-          type: lib.NumericHistogramBinWidthPostRequest
-      responses:
-        200:
-          body:
-            application/json:
-              type: lib.NumericHistogramBinWidthPostResponse
-        500:
-          body:
-            application/json:
-              type: error.ServerError
-
-  /date-histogram-num-bins:
-    post:
-      description: Returns data required to create a histogram visualization of date values given a number of bins <br> Java impl- NA <br> R impl- drafted, passing unit tests, not confirmed working
-      body:
-        application/json:
-          type: lib.DateHistogramNumBinsPostRequest
-      responses:
-        200:
-          body:
-            application/json:
-              type: lib.DateHistogramNumBinsPostResponse
-        500:
-          body:
-            application/json:
-              type: error.ServerError
-
-  /numeric-histogram-num-bins:
-    post:
-      description: Returns data required to create a histogram visualization of numeric values given a bin width <br> Java impl- NA <br> R impl- drafted, passing unit tests, not confirmed working
-      body:
-        application/json:
-          type: lib.NumericHistogramNumBinsPostRequest
-      responses:
-        200:
-          body:
-            application/json:
-              type: lib.NumericHistogramNumBinsPostResponse
-        500:
-          body:
-            application/json:
-              type: error.ServerError
-
-  /boxplot:
-    post:
-      description: Returns data required to create a boxplot visualization <br> Java impl- NA <br> R impl- drafted
-      body:
-        application/json:
-          type: lib.BoxplotPostRequest
-      responses:
-        200:
-          body:
-            application/json:
-              type: lib.BoxplotPostResponse
-        500:
-          body:
-            application/json:
-              type: error.ServerError
-              
-  /heatmap:
-    post:
-      description: Returns data required to create a heatmap visualization <br> Java impl- NA <br> R impl- drafted
-      body:
-        application/json:
-          type: lib.HeatmapPostRequest
-      responses:
-        200:
-          body:
-            application/json:
-              type: lib.HeatmapPostResponse
-        500:
-          body:
-            application/json:
-              type: error.ServerError
-              
-  /barplot:
-    post:
-      description: Returns data required to create a bar or pie plot visualization <br> Java impl- drafted, not working <br> R impl- drafted, passing unit tests, not confirmed working
-      body:
-        application/json:
-          type: lib.BarplotPostRequest
-      responses:
-        200:
-          body:
-            application/json:
-              type: lib.BarplotPostResponse
-        500:
-          body:
-            application/json:
-              type: error.ServerError
-              
-  /mosaic:
-    post:
-      description: Returns data required to create a mosaic plot visualization <br> Java impl- NA <br> R impl- drafted
-      body:
-        application/json:
-          type: lib.MosaicPostRequest
-      responses:
-        200:
-          body:
-            application/json:
-              type: lib.MosaicPostResponse
-        500:
-          body:
-            application/json:
-              type: error.ServerError
+    /scatterplot:
+      post:
+        description: Returns data required to create a scatterplot visualization <br> Java impl- NA <br> R impl- drafted, passing unit tests, not confirmed working
+        body:
+          application/json:
+            type: lib.ScatterplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.ScatterplotPostResponse
+          500:
+            body:
+              application/json:
+                type: error.ServerError
+  
+    /date-histogram-bin-width:
+      post:
+        description: Returns data required to create a histogram visualization of date values given a number of bins <br> Java impl- NA <br> R impl- drafted, passing unit tests, not confirmed working
+        body:
+          application/json:
+            type: lib.DateHistogramBinWidthPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.DateHistogramBinWidthPostResponse
+          500:
+            body:
+              application/json:
+                type: error.ServerError
+  
+  
+    /numeric-histogram-bin-width:
+      post:
+        description: Returns data required to create a histogram visualization of numeric values given a bin width <br> Java impl- NA <br> R impl- xaxis and overlay working
+        body:
+          application/json:
+            type: lib.NumericHistogramBinWidthPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.NumericHistogramBinWidthPostResponse
+          500:
+            body:
+              application/json:
+                type: error.ServerError
+  
+    /date-histogram-num-bins:
+      post:
+        description: Returns data required to create a histogram visualization of date values given a number of bins <br> Java impl- NA <br> R impl- drafted, passing unit tests, not confirmed working
+        body:
+          application/json:
+            type: lib.DateHistogramNumBinsPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.DateHistogramNumBinsPostResponse
+          500:
+            body:
+              application/json:
+                type: error.ServerError
+  
+    /numeric-histogram-num-bins:
+      post:
+        description: Returns data required to create a histogram visualization of numeric values given a bin width <br> Java impl- NA <br> R impl- drafted, passing unit tests, not confirmed working
+        body:
+          application/json:
+            type: lib.NumericHistogramNumBinsPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.NumericHistogramNumBinsPostResponse
+          500:
+            body:
+              application/json:
+                type: error.ServerError
+  
+    /boxplot:
+      post:
+        description: Returns data required to create a boxplot visualization <br> Java impl- NA <br> R impl- drafted
+        body:
+          application/json:
+            type: lib.BoxplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.BoxplotPostResponse
+          500:
+            body:
+              application/json:
+                type: error.ServerError
+                
+    /heatmap:
+      post:
+        description: Returns data required to create a heatmap visualization <br> Java impl- NA <br> R impl- drafted
+        body:
+          application/json:
+            type: lib.HeatmapPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.HeatmapPostResponse
+          500:
+            body:
+              application/json:
+                type: error.ServerError
+                
+    /barplot:
+      post:
+        description: Returns data required to create a bar or pie plot visualization <br> Java impl- drafted, not working <br> R impl- drafted, passing unit tests, not confirmed working
+        body:
+          application/json:
+            type: lib.BarplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.BarplotPostResponse
+          500:
+            body:
+              application/json:
+                type: error.ServerError
+                
+    /mosaic:
+      post:
+        description: Returns data required to create a mosaic plot visualization <br> Java impl- NA <br> R impl- drafted
+        body:
+          application/json:
+            type: lib.MosaicPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.MosaicPostResponse
+          500:
+            body:
+              application/json:
+                type: error.ServerError

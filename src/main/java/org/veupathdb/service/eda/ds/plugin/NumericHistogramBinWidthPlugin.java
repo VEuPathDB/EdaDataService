@@ -20,7 +20,7 @@ import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithR
 public class NumericHistogramBinWidthPlugin extends HistogramPlugin<NumericHistogramBinWidthPostRequest, NumericHistogramBinWidthSpec>{
 
   @Override
-  protected Class<NumericHistogramBinWidthSpec> getAnalysisSpecClass() {
+  protected Class<NumericHistogramBinWidthSpec> getVisualizationSpecClass() {
     return NumericHistogramBinWidthSpec.class;
   }
 

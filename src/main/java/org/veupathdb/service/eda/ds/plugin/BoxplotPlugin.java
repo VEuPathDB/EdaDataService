@@ -26,12 +26,12 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
   private static final String DATAFILE_NAME = "file1.txt";
 
   @Override
-  protected Class<BoxplotSpec> getAnalysisSpecClass() {
+  protected Class<BoxplotSpec> getVisualizationSpecClass() {
     return BoxplotSpec.class;
   }
 
   @Override
-  protected ValidationBundle validateAnalysisSpec(BoxplotSpec pluginSpec) throws ValidationException {
+  protected ValidationBundle validateVisualizationSpec(BoxplotSpec pluginSpec) throws ValidationException {
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
     EntityDef entity = getValidEntity(validation, pluginSpec.getEntityId());
     validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.STRING);

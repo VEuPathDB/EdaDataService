@@ -18,7 +18,7 @@ public abstract class HistogramPlugin<S extends HistogramPostRequest, T extends 
   protected static final String DATAFILE_NAME = "file1.txt";
 
   @Override
-  protected ValidationBundle validateAnalysisSpec(T pluginSpec) throws ValidationException {
+  protected ValidationBundle validateVisualizationSpec(T pluginSpec) throws ValidationException {
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
     EntityDef entity = getValidEntity(validation, pluginSpec.getEntityId());
     validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.NUMBER, APIVariableType.DATE);

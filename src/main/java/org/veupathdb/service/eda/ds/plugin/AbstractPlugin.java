@@ -28,16 +28,18 @@ import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.generated.model.APIFilter;
 import org.veupathdb.service.eda.generated.model.APIStudyDetail;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
-import org.veupathdb.service.eda.generated.model.AnalysisRequestBase;
+import org.veupathdb.service.eda.generated.model.VisualizationRequestBase;
 import org.veupathdb.service.eda.generated.model.DerivedVariable;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
-abstract class AbstractPlugin<T extends AnalysisRequestBase, S> implements Consumer<OutputStream> {
+//TODO ask ryan about this one. does this belong to the app or vis level ?
+
+abstract class AbstractPlugin<T extends VisualizationRequestBase, S> implements Consumer<OutputStream> {
 
   private static final Logger LOG = LogManager.getLogger(AbstractPlugin.class);
 
-  protected abstract Class<S> getAnalysisSpecClass();
-  protected abstract ValidationBundle validateAnalysisSpec(S pluginSpec) throws ValidationException;
+  protected abstract Class<S> getVisualizationSpecClass();
+  protected abstract ValidationBundle validateVisualizationSpec(S pluginSpec) throws ValidationException;
   protected abstract List<StreamSpec> getRequestedStreams(S pluginSpec);
   protected abstract void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException;
 
@@ -69,7 +71,7 @@ abstract class AbstractPlugin<T extends AnalysisRequestBase, S> implements Consu
     _referenceMetadata = new ReferenceMetadata(study, _derivedVariables);
 
     // ask subclass to validate the configuration
-    validateAnalysisSpec(_pluginSpec).throwIfInvalid();
+    validateVisualizationSpec(_pluginSpec).throwIfInvalid();
 
     // get list of data streams required by this subclass
     _requiredStreams = getRequestedStreams(_pluginSpec);
@@ -125,20 +127,20 @@ abstract class AbstractPlugin<T extends AnalysisRequestBase, S> implements Consu
     try {
       Method configGetter = request.getClass().getMethod("getConfig");
       Object config = configGetter.invoke(request);
-      if (getAnalysisSpecClass().isAssignableFrom(config.getClass())) {
+      if (getVisualizationSpecClass().isAssignableFrom(config.getClass())) {
         return (S)config;
       }
       throw new RuntimeException("Plugin class " + getClass().getName() +
-          " declares spec class "  + getAnalysisSpecClass().getName() +
+          " declares spec class "  + getVisualizationSpecClass().getName() +
           " but " + request.getClass().getName() + "::getConfig()" +
           " returned " + config.getClass().getName() + ". The second must be a subclass of the first.");
     }
     catch (NoSuchMethodException noSuchMethodException) {
       throw new RuntimeException("Generated class " + request.getClass().getName() +
-          " must implement a no-arg method getConfig() which returns an instance of " + getAnalysisSpecClass().getName());
+          " must implement a no-arg method getConfig() which returns an instance of " + getVisualizationSpecClass().getName());
     }
     catch (IllegalAccessException | InvocationTargetException e) {
-      throw new RuntimeException("Misconfiguration of analysis plugin: " + getClass().getName(), e);
+      throw new RuntimeException("Misconfiguration of visualization plugin: " + getClass().getName(), e);
     }
   }
 }
