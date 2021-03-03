@@ -25,6 +25,7 @@ group = buildProps["project.group"] ?: error("empty 1")
 version = buildProps["project.version"] ?: error("empty 2")
 
 repositories {
+  mavenCentral()
   jcenter()
 }
 
