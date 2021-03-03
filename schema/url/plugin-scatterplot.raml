@@ -4,7 +4,7 @@ types:
   # Type name determines the name of the Java class that will be generated.
 
   ScatterplotPostRequest:
-    type: AnalysisRequestBase
+    type: VisualizationRequestBase
     properties:
       config: ScatterplotSpec
 
@@ -28,14 +28,15 @@ types:
         maxItems: 2
         required: false
 
-  ScatterplotPostResponse:
+  ScatterplotData:
     additionalProperties: false
     properties:
-      group:
-        type: string
+      overlayVariableDetails:
+        type: StrataVariableDetails
         required: false
-      panel:
-        type: string
+      facetVariableDetails:
+        type: StrataVariableDetails[]
+        maxItems: 2
         required: false
       seriesY:
         type: number[]
@@ -58,3 +59,19 @@ types:
       densityY:
         type: number[]
         required: false
+
+  ScatterplotConfig:
+    type: VisualizationConfig
+    properties:
+      xVariableDetails:
+        type: VariableSpec
+      yVariableDetails:
+        type: VariableSpec
+
+  ScatterplotPostResponse:
+    additionalProperties: false
+    properties:
+      data:
+        type: ScatterplotData[]
+      config:
+        type: ScatterplotConfig

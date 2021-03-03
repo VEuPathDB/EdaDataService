@@ -24,12 +24,12 @@ public class RecordCountPlugin extends AbstractPlugin<RecordCountPostRequest, Re
   private static final String STREAM_NAME = "stream1";
 
   @Override
-  protected Class<RecordCountSpec> getAnalysisSpecClass() {
+  protected Class<RecordCountSpec> getVisualizationSpecClass() {
     return RecordCountSpec.class;
   }
 
   @Override
-  protected ValidationBundle validateAnalysisSpec(RecordCountSpec pluginSpec) throws ValidationException {
+  protected ValidationBundle validateVisualizationSpec(RecordCountSpec pluginSpec) throws ValidationException {
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
     getValidEntity(validation, pluginSpec.getEntityId());
     return validation.build();

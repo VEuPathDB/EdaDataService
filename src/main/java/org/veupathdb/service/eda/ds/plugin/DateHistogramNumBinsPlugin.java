@@ -14,7 +14,7 @@ import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithR
 public class DateHistogramNumBinsPlugin extends HistogramPlugin<DateHistogramNumBinsPostRequest, DateHistogramNumBinsSpec>{
 
   @Override
-  protected Class<DateHistogramNumBinsSpec> getAnalysisSpecClass() {
+  protected Class<DateHistogramNumBinsSpec> getVisualizationSpecClass() {
     return DateHistogramNumBinsSpec.class;
   }
 

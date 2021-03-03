@@ -26,12 +26,12 @@ public class HeatmapPlugin extends AbstractPlugin<HeatmapPostRequest, HeatmapSpe
   private static final String DATAFILE_NAME = "file1.txt";
 
   @Override
-  protected Class<HeatmapSpec> getAnalysisSpecClass() {
+  protected Class<HeatmapSpec> getVisualizationSpecClass() {
     return HeatmapSpec.class;
   }
 
   @Override
-  protected ValidationBundle validateAnalysisSpec(HeatmapSpec pluginSpec) throws ValidationException {
+  protected ValidationBundle validateVisualizationSpec(HeatmapSpec pluginSpec) throws ValidationException {
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
     EntityDef entity = getValidEntity(validation, pluginSpec.getEntityId());
     validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.STRING);

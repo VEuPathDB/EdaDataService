@@ -4,7 +4,7 @@ types:
   # Type name determines the name of the Java class that will be generated.
 
   BoxplotPostRequest:
-    type: AnalysisRequestBase
+    type: VisualizationRequestBase
     properties:
       config: BoxplotSpec
 
@@ -31,14 +31,15 @@ types:
         maxItems: 2
         required: false
 
-  BoxplotPostResponse:
+  BoxplotData:
     additionalProperties: false
     properties:
-      group:
-        type: string
+      overlayVariableDetails:
+        type: StrataVariableDetails
         required: false
-      panel:
-        type: string
+      facetVariableDetails:
+        type: StrataVariableDetails[]
+        maxItems: 2
         required: false
       lowerfence:
         type: number[]
@@ -69,3 +70,19 @@ types:
       mean:
         type: number[]
         required: false
+
+  BoxplotConfig:
+    type: VisualizationConfig
+    properties:
+      xVariableDetails:
+        type: VariableSpec
+      yVariableDetails:
+        type: VariableSpec
+
+  BoxplotPostResponse:
+    additionalProperties: false
+    properties:
+      data:
+        type: BoxplotData[]
+      config:
+        type: BoxplotConfig

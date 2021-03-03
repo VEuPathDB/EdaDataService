@@ -17,10 +17,14 @@ import org.veupathdb.service.eda.ds.plugin.NumericHistogramBinWidthPlugin;
 import org.veupathdb.service.eda.ds.plugin.NumericHistogramNumBinsPlugin;
 import org.veupathdb.service.eda.ds.plugin.RecordCountPlugin;
 import org.veupathdb.service.eda.ds.plugin.ScatterplotPlugin;
-import org.veupathdb.service.eda.generated.model.AnalysesGetResponse;
-import org.veupathdb.service.eda.generated.model.AnalysesGetResponseImpl;
-import org.veupathdb.service.eda.generated.model.AnalysisOverview;
-import org.veupathdb.service.eda.generated.model.AnalysisOverviewImpl;
+import org.veupathdb.service.eda.generated.model.AppsGetResponse;
+import org.veupathdb.service.eda.generated.model.AppsGetResponseImpl;
+import org.veupathdb.service.eda.generated.model.AppsOverview;
+import org.veupathdb.service.eda.generated.model.AppsOverviewImpl;
+import org.veupathdb.service.eda.generated.model.PassAppVisualizationsGetResponse;
+import org.veupathdb.service.eda.generated.model.PassAppVisualizationsGetResponseImpl;
+import org.veupathdb.service.eda.generated.model.PassAppVisualizationsOverview;
+import org.veupathdb.service.eda.generated.model.PassAppVisualizationsOverviewImpl;
 import org.veupathdb.service.eda.generated.model.BarplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BarplotPostResponseStream;
 import org.veupathdb.service.eda.generated.model.BoxplotPostRequest;
@@ -43,20 +47,23 @@ import org.veupathdb.service.eda.generated.model.RecordCountPostRequest;
 import org.veupathdb.service.eda.generated.model.RecordCountPostResponseStream;
 import org.veupathdb.service.eda.generated.model.ScatterplotPostRequest;
 import org.veupathdb.service.eda.generated.model.ScatterplotPostResponseStream;
-import org.veupathdb.service.eda.generated.resources.Analyses;
+import org.veupathdb.service.eda.generated.resources.Apps;
 import org.veupathdb.service.eda.ds.plugin.BarplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.BoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.HeatmapPlugin;
 import org.veupathdb.service.eda.ds.plugin.MapPlugin;
 import org.veupathdb.service.eda.ds.plugin.MosaicPlugin;
 
+public class AppsService implements Apps {
 
-public class AnalysisService implements Analyses {
+  private static final Logger LOG = LogManager.getLogger(AppsService.class);
 
-  private static final Logger LOG = LogManager.getLogger(AnalysisService.class);
-
+  private static final String[] APP_NAMES = {
+      "pass"
+    };
+  
   // NOTE: these names should match the url segments defined in the api.raml
-  private static final String[] ANALYSIS_NAMES = {
+  private static final String[] PASS_APP_VISUALIZATION_NAMES = {
     "record-count",
     "map-markers",
     "scatterplot",
@@ -70,24 +77,44 @@ public class AnalysisService implements Analyses {
     "mosaicplot"
   };
 
-  private static final List<AnalysisOverview> ANALYSES_LIST = Arrays.stream(ANALYSIS_NAMES).map(name ->
-    new AnalysisOverviewImpl() {
+  private static final List<AppsOverview> APPS_LIST = Arrays.stream(APP_NAMES).map(name ->
+    new AppsOverviewImpl() {
       @Override
       public String getName() {
         return name;
       }
     }).collect(Collectors.toList());
 
-  private static final AnalysesGetResponse ANALYSES_RESPONSE = new AnalysesGetResponseImpl() {
+  private static final AppsGetResponse APPS_RESPONSE = new AppsGetResponseImpl() {
     @Override
-    public List<AnalysisOverview> getAnalyses() {
-      return ANALYSES_LIST;
+    public List<AppsOverview> getApps() {
+      return APPS_LIST;
     }
   };
 
   @Override
-  public GetAnalysesResponse getAnalyses() {
-    return GetAnalysesResponse.respond200WithApplicationJson(ANALYSES_RESPONSE);
+  public GetAppsResponse getApps() {
+    return GetAppsResponse.respond200WithApplicationJson(APPS_RESPONSE);
+  }
+  
+  private static final List<PassAppVisualizationsOverview> PASS_APP_VISUALIZATIONS_LIST = Arrays.stream(PASS_APP_VISUALIZATION_NAMES).map(name ->
+    new PassAppVisualizationsOverviewImpl() {
+      @Override
+      public String getName() {
+        return name;
+      }
+    }).collect(Collectors.toList());
+
+  private static final PassAppVisualizationsGetResponse PASS_APP_VISUALIZATIONS_RESPONSE = new PassAppVisualizationsGetResponseImpl() {
+    @Override
+    public List<PassAppVisualizationsOverview> getVisualizations() {
+      return PASS_APP_VISUALIZATIONS_LIST;
+    }
+  };
+
+  @Override
+  public GetAppsPassVisualizationsResponse getAppsPassVisualizations() {
+    return GetAppsPassVisualizationsResponse.respond200WithApplicationJson(PASS_APP_VISUALIZATIONS_RESPONSE);
   }
 
   private <T> T wrapPlugin(FunctionalInterfaces.SupplierWithException<T> supplier) {
@@ -98,85 +125,85 @@ public class AnalysisService implements Analyses {
       throw new BadRequestException(e.getMessage());
     }
     catch (Exception e) {
-      LOG.error("Could not execute analysis.", e);
+      LOG.error("Could not execute app.", e);
       throw new ServerErrorException(e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
     }
   }
 
   @DisableJackson
   @Override
-  public PostAnalysesRecordCountResponse postAnalysesRecordCount(RecordCountPostRequest entity) {
-    return wrapPlugin(() -> PostAnalysesRecordCountResponse.respond200WithApplicationJson(
+  public PostAppsPassVisualizationsRecordCountResponse postAppsPassVisualizationsRecordCount(RecordCountPostRequest entity) {
+    return wrapPlugin(() -> PostAppsPassVisualizationsRecordCountResponse.respond200WithApplicationJson(
         new RecordCountPostResponseStream(new RecordCountPlugin().processRequest(entity))));
   }
 
   @DisableJackson
   @Override
-  public PostAnalysesMapMarkersResponse postAnalysesMapMarkers(MapPostRequest entity) {
-    return wrapPlugin(() -> PostAnalysesMapMarkersResponse.respond200WithApplicationJson(
+  public PostAppsPassVisualizationsMapMarkersResponse postAppsPassVisualizationsMapMarkers(MapPostRequest entity) {
+    return wrapPlugin(() -> PostAppsPassVisualizationsMapMarkersResponse.respond200WithApplicationJson(
         new MapPostResponseStream(new MapPlugin().processRequest(entity))));
   }
   
   @DisableJackson
   @Override
-  public PostAnalysesScatterplotResponse postAnalysesScatterplot(ScatterplotPostRequest entity) {
-    return wrapPlugin(() -> PostAnalysesScatterplotResponse.respond200WithApplicationJson(
+  public PostAppsPassVisualizationsScatterplotResponse postAppsPassVisualizationsScatterplot(ScatterplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsPassVisualizationsScatterplotResponse.respond200WithApplicationJson(
         new ScatterplotPostResponseStream(new ScatterplotPlugin().processRequest(entity))));
   }
 
   @DisableJackson
   @Override
-  public PostAnalysesDateHistogramBinWidthResponse postAnalysesDateHistogramBinWidth(DateHistogramBinWidthPostRequest entity) {
-    return wrapPlugin(() -> PostAnalysesDateHistogramBinWidthResponse.respond200WithApplicationJson(
+  public PostAppsPassVisualizationsDateHistogramBinWidthResponse postAppsPassVisualizationsDateHistogramBinWidth(DateHistogramBinWidthPostRequest entity) {
+    return wrapPlugin(() -> PostAppsPassVisualizationsDateHistogramBinWidthResponse.respond200WithApplicationJson(
         new DateHistogramBinWidthPostResponseStream(new DateHistogramBinWidthPlugin().processRequest(entity))));
   }
 
   @DisableJackson
   @Override
-  public PostAnalysesDateHistogramNumBinsResponse postAnalysesDateHistogramNumBins(DateHistogramNumBinsPostRequest entity) {
-    return wrapPlugin(() -> PostAnalysesDateHistogramNumBinsResponse.respond200WithApplicationJson(
+  public PostAppsPassVisualizationsDateHistogramNumBinsResponse postAppsPassVisualizationsDateHistogramNumBins(DateHistogramNumBinsPostRequest entity) {
+    return wrapPlugin(() -> PostAppsPassVisualizationsDateHistogramNumBinsResponse.respond200WithApplicationJson(
         new DateHistogramNumBinsPostResponseStream(new DateHistogramNumBinsPlugin().processRequest(entity))));
   }
   
   @DisableJackson
   @Override
-  public PostAnalysesNumericHistogramBinWidthResponse postAnalysesNumericHistogramBinWidth(NumericHistogramBinWidthPostRequest entity) {
-    return wrapPlugin(() -> PostAnalysesNumericHistogramBinWidthResponse.respond200WithApplicationJson(
+  public PostAppsPassVisualizationsNumericHistogramBinWidthResponse postAppsPassVisualizationsNumericHistogramBinWidth(NumericHistogramBinWidthPostRequest entity) {
+    return wrapPlugin(() -> PostAppsPassVisualizationsNumericHistogramBinWidthResponse.respond200WithApplicationJson(
         new NumericHistogramBinWidthPostResponseStream(new NumericHistogramBinWidthPlugin().processRequest(entity))));
   }
 
   @DisableJackson
   @Override
-  public PostAnalysesNumericHistogramNumBinsResponse postAnalysesNumericHistogramNumBins(NumericHistogramNumBinsPostRequest entity) {
-    return wrapPlugin(() -> PostAnalysesNumericHistogramNumBinsResponse.respond200WithApplicationJson(
+  public PostAppsPassVisualizationsNumericHistogramNumBinsResponse postAppsPassVisualizationsNumericHistogramNumBins(NumericHistogramNumBinsPostRequest entity) {
+    return wrapPlugin(() -> PostAppsPassVisualizationsNumericHistogramNumBinsResponse.respond200WithApplicationJson(
         new NumericHistogramNumBinsPostResponseStream(new NumericHistogramNumBinsPlugin().processRequest(entity))));
   }
 
   @DisableJackson
   @Override
-  public PostAnalysesBarplotResponse postAnalysesBarplot(BarplotPostRequest entity) {
-    return wrapPlugin(() -> PostAnalysesBarplotResponse.respond200WithApplicationJson(
+  public PostAppsPassVisualizationsBarplotResponse postAppsPassVisualizationsBarplot(BarplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsPassVisualizationsBarplotResponse.respond200WithApplicationJson(
         new BarplotPostResponseStream(new BarplotPlugin().processRequest(entity))));
   }
 
   @DisableJackson
   @Override
-  public PostAnalysesBoxplotResponse postAnalysesBoxplot(BoxplotPostRequest entity) {
-    return wrapPlugin(() -> PostAnalysesBoxplotResponse.respond200WithApplicationJson(
+  public PostAppsPassVisualizationsBoxplotResponse postAppsPassVisualizationsBoxplot(BoxplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsPassVisualizationsBoxplotResponse.respond200WithApplicationJson(
         new BoxplotPostResponseStream(new BoxplotPlugin().processRequest(entity))));
   }
 
   @DisableJackson
   @Override
-  public PostAnalysesHeatmapResponse postAnalysesHeatmap(HeatmapPostRequest entity) {
-    return wrapPlugin(() -> PostAnalysesHeatmapResponse.respond200WithApplicationJson(
+  public PostAppsPassVisualizationsHeatmapResponse postAppsPassVisualizationsHeatmap(HeatmapPostRequest entity) {
+    return wrapPlugin(() -> PostAppsPassVisualizationsHeatmapResponse.respond200WithApplicationJson(
         new HeatmapPostResponseStream(new HeatmapPlugin().processRequest(entity))));
   }
 
   @DisableJackson
   @Override
-  public PostAnalysesMosaicResponse postAnalysesMosaic(MosaicPostRequest entity) {
-    return wrapPlugin(() -> PostAnalysesMosaicResponse.respond200WithApplicationJson(
+  public PostAppsPassVisualizationsMosaicResponse postAppsPassVisualizationsMosaic(MosaicPostRequest entity) {
+    return wrapPlugin(() -> PostAppsPassVisualizationsMosaicResponse.respond200WithApplicationJson(
         new MosaicPostResponseStream(new MosaicPlugin().processRequest(entity))));
   }
 

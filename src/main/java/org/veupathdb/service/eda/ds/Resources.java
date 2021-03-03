@@ -3,7 +3,7 @@ package org.veupathdb.service.eda.ds;
 import org.veupathdb.lib.container.jaxrs.config.Options;
 import org.veupathdb.lib.container.jaxrs.server.ContainerResources;
 import org.veupathdb.service.eda.common.client.ClientUtil;
-import org.veupathdb.service.eda.ds.service.AnalysisService;
+import org.veupathdb.service.eda.ds.service.AppsService;
 import org.veupathdb.service.eda.ds.service.PassThroughService;
 
 import static org.gusdb.fgputil.runtime.Environment.getOptionalVar;
@@ -40,7 +40,7 @@ public class Resources extends ContainerResources {
   @Override
   protected Object[] resources() {
     return new Object[] {
-      AnalysisService.class,
+      AppsService.class,
       PassThroughService.class
     };
   }

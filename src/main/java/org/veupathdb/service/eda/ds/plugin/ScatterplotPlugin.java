@@ -29,12 +29,12 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
   private static final String DATAFILE_NAME = "file1.txt";
 
   @Override
-  protected Class<ScatterplotSpec> getAnalysisSpecClass() {
+  protected Class<ScatterplotSpec> getVisualizationSpecClass() {
     return ScatterplotSpec.class;
   }
 
   @Override
-  protected ValidationBundle validateAnalysisSpec(ScatterplotSpec pluginSpec) throws ValidationException {
+  protected ValidationBundle validateVisualizationSpec(ScatterplotSpec pluginSpec) throws ValidationException {
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
     EntityDef entity = getValidEntity(validation, pluginSpec.getEntityId());
     validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.NUMBER, APIVariableType.DATE);

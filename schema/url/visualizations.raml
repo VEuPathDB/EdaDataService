@@ -2,17 +2,8 @@
 
 types:
   # Type name determines the name of the Java class that will be generated.
-
-  AnalysesGetResponse:
-    additionalProperties: false
-    properties:
-      analyses: AnalysisOverview[]
-
-  AnalysisOverview:
-    properties:
-      name: string
-
-  AnalysisRequestBase:
+  
+  VisualizationRequestBase:
     additionalProperties: false
     properties:
       studyId: string
@@ -21,8 +12,8 @@ types:
         type: API_Filter[]
       derivedVariables:
         required: false
-        type: DerivedVariable[]
-        
+        type: DerivedVariable[]   
+                  
   StrataVariableDetails:
     type: VariableSpec
     properties:

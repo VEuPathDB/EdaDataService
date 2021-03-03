@@ -4,7 +4,7 @@ types:
   # Type name determines the name of the Java class that will be generated.
 
   BarplotPostRequest:
-    type: AnalysisRequestBase
+    type: VisualizationRequestBase
     properties:
       config: BarplotSpec
 
@@ -26,14 +26,15 @@ types:
         maxItems: 2
         required: false
 
-  BarplotPostResponse:
+  BarplotData:
     additionalProperties: false
     properties:
-      group:
-        type: string
+      overlayVariableDetails:
+        type: StrataVariableDetails
         required: false
-      panel:
-        type: string
+      facetVariableDetails:
+        type: StrataVariableDetails[]
+        maxItems: 2
         required: false
       value:
         type: number[]
@@ -43,3 +44,17 @@ types:
         type: string[]
         minItems: 1
         required: true
+
+  BarplotConfig:
+    type: VisualizationConfig
+    properties:
+      xVariableDetails:
+        type: VariableSpec
+
+  BarplotPostResponse:
+    additionalProperties: false
+    properties:
+      data:
+        type: BarplotData[]
+      config:
+        type: BarplotConfig

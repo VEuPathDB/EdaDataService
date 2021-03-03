@@ -26,12 +26,12 @@ public class MosaicPlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpec> 
   private static final String DATAFILE_NAME = "file1.txt";
 
   @Override
-  protected Class<MosaicSpec> getAnalysisSpecClass() {
+  protected Class<MosaicSpec> getVisualizationSpecClass() {
     return MosaicSpec.class;
   }
 
   @Override
-  protected ValidationBundle validateAnalysisSpec(MosaicSpec pluginSpec) throws ValidationException {
+  protected ValidationBundle validateVisualizationSpec(MosaicSpec pluginSpec) throws ValidationException {
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
     EntityDef entity = getValidEntity(validation, pluginSpec.getEntityId());
     validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.NUMBER, APIVariableType.DATE);

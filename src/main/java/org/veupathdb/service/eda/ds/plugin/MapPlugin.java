@@ -26,12 +26,12 @@ public class MapPlugin extends AbstractPlugin<MapPostRequest, MapSpec> {
   private static final String STREAM_NAME = "stream1";
 
   @Override
-  protected Class<MapSpec> getAnalysisSpecClass() {
+  protected Class<MapSpec> getVisualizationSpecClass() {
     return MapSpec.class;
   }
 
   @Override
-  protected ValidationBundle validateAnalysisSpec(MapSpec pluginSpec) throws ValidationException {
+  protected ValidationBundle validateVisualizationSpec(MapSpec pluginSpec) throws ValidationException {
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
     EntityDef entity = getValidEntity(validation, pluginSpec.getEntityId());
     validateVariableNameAndType(validation, entity, "geoAggregateVariable", pluginSpec.getGeoAggregateVariable(), APIVariableType.STRING);
