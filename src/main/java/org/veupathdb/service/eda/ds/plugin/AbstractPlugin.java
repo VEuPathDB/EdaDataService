@@ -21,6 +21,7 @@ import org.veupathdb.service.eda.common.client.AbstractTabularDataClient;
 import org.veupathdb.service.eda.common.client.ClientUtil;
 import org.veupathdb.service.eda.common.client.EdaMergingClient;
 import org.veupathdb.service.eda.common.client.EdaSubsettingClient;
+import org.veupathdb.service.eda.common.client.ResponseFuture;
 import org.veupathdb.service.eda.common.client.StreamSpec;
 import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.model.ReferenceMetadata;
@@ -89,7 +90,7 @@ abstract class AbstractPlugin<T extends AnalysisRequestBase, S> implements Consu
     }
 
     // create stream generator
-    Function<StreamSpec,InputStream> streamGenerator = spec -> _mergingClient
+    Function<StreamSpec,ResponseFuture> streamGenerator = spec -> _mergingClient
         .getTabularDataStream(_referenceMetadata, _subset, spec);
 
     // create stream processor

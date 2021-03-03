@@ -22,9 +22,8 @@ securitySchemes:
           description: Authorization header.
           type: string
 
-
 ####################################
-# Endpoints
+# Data Service Specific Endpoints
 ####################################
 
 /analyses:
@@ -212,3 +211,93 @@ securitySchemes:
           body:
             application/json:
               type: error.ServerError
+
+##################################################
+# Pass-Through Endpoints to Subsetting Service
+##################################################
+
+/studies:
+  displayName: Available Studies
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: lib.StudiesGetResponse
+
+  /{study-id}:
+    uriParameters:
+      study-id:
+        description: ID of the study of interest
+        type: string
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              type: lib.StudyIdGetResponse
+
+    /entities:
+
+      /{entity-id}:
+        uriParameters:
+          entity-id:
+            description: ID of the entity of interest
+            type: string
+        get:
+          description: Returns entity details, not including its children (which it may or may not have; see study endpoint)
+          responses:
+            200:
+              body:
+                application/json:
+                  type: lib.EntityIdGetResponse
+
+        /count:
+          post:
+            securedBy: header-auth
+            description: |
+              Return a count of entities in this subset.  In the request, `filters` must be a subclass of [Filter](#type:lib.Filter)
+            body:
+              application/json:
+                type: lib.EntityCountPostRequest
+            responses:
+              200:
+                body:
+                  application/json:
+                    type: lib.EntityCountPostResponse
+              401:
+                body:
+                  application/json:
+                    type: error.UnauthorizedError
+              500:
+                body:
+                  application/json:
+                    type: error.ServerError
+
+        /variables:
+
+          /{variable-id}:
+
+            /distribution:
+              post:
+                securedBy: header-auth
+                description: |
+                  Return the count of entities in the subset that have a value for this variable, and |
+                  a distribution for this variable, i.e., entity counts for each value of this |
+                  variable.  In the request, `filters` must be a subclass of [Filter](#type:lib.Filter)
+                body:
+                  application/json:
+                    type: lib.VariableDistributionPostRequest
+                responses:
+                  200:
+                    body:
+                      application/json:
+                        type: lib.VariableDistributionPostResponse
+                  401:
+                    body:
+                      application/json:
+                        type: error.UnauthorizedError
+                  500:
+                    body:
+                      application/json:
+                        type: error.ServerError

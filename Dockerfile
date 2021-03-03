@@ -5,13 +5,13 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 FROM veupathdb/alpine-dev-base:latest AS prep
 
-LABEL service="demo-service"
+LABEL service="eda-data-build"
 
 WORKDIR /workspace
 RUN jlink --compress=2 --module-path /opt/jdk/jmods \
-       --add-modules java.base,java.logging,java.xml,java.desktop,java.management,java.sql,java.naming \
+       --add-modules java.base,java.security.jgss,java.logging,java.xml,java.desktop,java.management,java.sql,java.naming \
        --output /jlinked \
-    && apk add --no-cache git sed findutils coreutils make npm \
+    && apk add --no-cache git sed findutils coreutils make npm curl \
     && git config --global advice.detachedHead false
 
 ENV DOCKER=build
@@ -32,7 +32,7 @@ RUN mkdir -p vendor \
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 FROM foxcapades/alpine-oracle:1.3
 
-LABEL service="demo-service"
+LABEL service="eda-data"
 
 ENV JAVA_HOME=/opt/jdk \
     PATH=/opt/jdk/bin:$PATH
