@@ -23,22 +23,30 @@ types:
         required: false
 
 # TODO make sure the response props have the right names, includes table values if needed etc
-# Currently, i just replicated bar plot, since they are visually similar. needs more thought
 
-  MosaicPostResponse:
+  MosaicData:
     additionalProperties: false
     properties:
-      group:
-        type: string
-        required: false
-      panel:
-        type: string
+      xVariableDetails:
+        type: VariableSpec
+      yVariableDetails:
+        type: VariableSpec
+      facetVariableDetails:
+        type: StrataVariableDetails[]
+        maxItems: 2
         required: false
       value:
         type: number[]
         minItems: 1
         required: true
-      label:
-        type: string[]
-        minItems: 1
-        required: true
+        
+  MosaicConfig:
+    type: VisualizationConfig
+
+  MosaicPostResponse:
+    additionalProperties: false
+    properties:
+      data:
+        type: MosaicData[]
+      config:
+        type: MosaicConfig

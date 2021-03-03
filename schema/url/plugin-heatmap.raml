@@ -28,11 +28,12 @@ types:
         maxItems: 2
         required: false
 
-  HeatmapPostResponse:
+  HeatmapData:
     additionalProperties: false
     properties:
-      panel:
-        type: string
+      facetVariableDetails:
+        type: StrataVariableDetails[]
+        maxItems: 2
         required: false
       value:
         type: number[][]
@@ -42,3 +43,19 @@ types:
         type: string[]
         minItems: 1
         required: true
+        
+  HeatmapConfig:
+    type: VisualizationConfig
+    properties:
+      xVariableDetails:
+        type: VariableSpec
+      yVariableDetails:
+        type: VariableSpec
+
+  HeatmapPostResponse:
+    additionalProperties: false
+    properties:
+      data:
+        type: HeatmapData[]
+      config:
+        type: HeatmapConfig
