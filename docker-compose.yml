@@ -6,7 +6,6 @@ services:
     image: veupathdb/eda-subsetting:${SUBSETTING_TAG:-latest}
     networks:
     - internal
-    - traefik
     environment:
       LDAP_SERVER:
       ORACLE_BASE_DN:
@@ -17,27 +16,16 @@ services:
       SERVER_PORT: ${SUBSETTING_SERVER_PORT:-8080}
     labels:
     - "com.centurylinklabs.watchtower.enable=${SUBSETTING_WATCHTOWER:-false}"
-    - "traefik.http.services.${TRAEFIK_SUBSETTING_ROUTER:-edasubsetting-dev}.loadbalancer.server.port=8080"
-    - "traefik.http.routers.${TRAEFIK_SUBSETTING_ROUTER:-edasubsetting-dev}.rule=Host(`${TRAEFIK_SUBSETTING_HOST:-edasubsetting-dev.local.apidb.org}`)"
-    - "traefik.http.routers.${TRAEFIK_SUBSETTING_ROUTER:-edasubsetting-dev}.tls=true"
-    - "traefik.http.routers.${TRAEFIK_SUBSETTING_ROUTER:-edasubsetting-dev}.entrypoints=${TRAEFIK_ENTRYPOINTS:-local}"
-    - "traefik.docker.network=traefik"
 
   merging:
     image: veupathdb/eda-merging:${MERGING_TAG:-latest}
     networks:
     - internal
-    - traefik
     environment:
       SUBSETTING_SERVICE_URL: ${SUBSETTING_SERVICE_URL:-http://subsetting:8080}
-      SERVER_PORT: ${MERGING_SERVER_PORT:-8081}
+      SERVER_PORT: ${MERGING_SERVER_PORT:-8080}
     labels:
     - "com.centurylinklabs.watchtower.enable=${MERGING_WATCHTOWER:-false}"
-    - "traefik.http.services.${TRAEFIK_MERGING_ROUTER:-edamerging-dev}.loadbalancer.server.port=8080"
-    - "traefik.http.routers.${TRAEFIK_MERGING_ROUTER:-edamerging-dev}.rule=Host(`${TRAEFIK_MERGING_HOST:-edamerging-dev.local.apidb.org}`)"
-    - "traefik.http.routers.${TRAEFIK_MERGING_ROUTER:-edamerging-dev}.tls=true"
-    - "traefik.http.routers.${TRAEFIK_MERGING_ROUTER:-edamerging-dev}.entrypoints=${TRAEFIK_ENTRYPOINTS:-local}"
-    - "traefik.docker.network=traefik"
 
   data:
     image: veupathdb/eda-data:${DATA_TAG:-latest}
@@ -46,8 +34,9 @@ services:
     - traefik
     environment:
       SUBSETTING_SERVICE_URL: ${SUBSETTING_SERVICE_URL:-http://subsetting:8080}
-      MERGING_SERVICE_URL: ${MERGING_SERVICE_URL:-http://merging:8081}
+      MERGING_SERVICE_URL: ${MERGING_SERVICE_URL:-http://merging:8080}
       RSERVE_URL: ${RSERVE_URL:-http://rserve:6311}
+      SERVER_PORT: ${DATA_SERVER_PORT:-8080}
     labels:
     - "com.centurylinklabs.watchtower.enable=${DATA_WATCHTOWER:-false}"
     - "traefik.http.services.${TRAEFIK_DATA_ROUTER:-edadata-dev}.loadbalancer.server.port=8080"
