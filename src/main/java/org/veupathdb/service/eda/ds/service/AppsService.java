@@ -74,7 +74,7 @@ public class AppsService implements Apps {
     "barplot",
     "boxplot",
     "heatmap",
-    "mosaicplot"
+    "mosaic"
   };
 
   private static final List<AppsOverview> APPS_LIST = Arrays.stream(APP_NAMES).map(name ->
