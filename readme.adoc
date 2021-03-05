@@ -1,4 +1,36 @@
-= Example Containerized JaxRS Service
+# EDA Data Service
+
+Public-facing service providing all EDA data to EDA client apps
+
+## docker-compose
+
+### preliminary requirements
+
+To bring up the eda project via docker-compose, you'll need a few things.
+
+* a functioning docker setup and docker-compose (https://www.docker.com/products/docker-desktop)
+* a functioning traefik setup.  clone the https://github.com/VEuPathDB/docker-traefik project, and run `docker-compose up -d` in the clone, or follow the instructions in that repo.  This will run traefik locally, which handles the container routing
+* a functioning sshuttle setup.  If you need to access databases on internal networks, you'll need to properly setup sshuttle so that your containers can reach them.  Setting this up is out of scope for this document, to not expose unnecessary internal details publicly.
+
+### bring up the eda project
+
+* clone this repo, and add any required environment variables to your `.env` file. (TODO: explain what those variables do)
+* `docker-compose up` in your clone of this repo.
+
+When everything comes up successfully, you'll be able to reach this service at:
+
+https://edadata-dev.local.apidb.org:8443/
+
+### notes
+
+* all services use https, but the certs are not valid.  You will need to accept them in a browser, or use the `-k` flag with curl
+
+
+
+## TODO: replace text below with EdaDataService-specific documentation
+
+# Example Containerized JaxRS Service
+
 :toc: left
 :source-highlighter: pygments
 :icons: font
@@ -10,10 +42,6 @@ ifdef::env-github[]
 :caution-caption: :fire:
 :warning-caption: :warning:
 endif::[]
-Elizabeth Paige Harper <epharper@upenn.edu>
-v1.0.0
-
-// TODO: Explain the raml-2-jaxrs / raml-2-json-schema / etc.. and any hacks or weirdness that people may need to know when modifying this project.
 
 == Running the Example
 
