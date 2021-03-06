@@ -8,7 +8,7 @@ Public-facing service providing all EDA data to EDA client apps
 
 To bring up the eda project via docker-compose, you'll need a few things.
 
-* a functioning docker setup, and docker-compose (TODO: links to installs)
+* a functioning docker setup and docker-compose (https://www.docker.com/products/docker-desktop)
 * a functioning traefik setup.  clone the https://github.com/VEuPathDB/docker-traefik project, and run `docker-compose up -d` in the clone, or follow the instructions in that repo.  This will run traefik locally, which handles the container routing
 * a functioning sshuttle setup.  If you need to access databases on internal networks, you'll need to properly setup sshuttle so that your containers can reach them.  Setting this up is out of scope for this document, to not expose unnecessary internal details publicly.
 

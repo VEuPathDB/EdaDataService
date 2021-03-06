@@ -23,7 +23,7 @@ public class PluginMetadata {
           viz("barplot", null, null),
           viz("boxplot", null, null),
           viz("heatmap", null, null),
-          viz("mosaicplot", null, null)
+          viz("mosaic", null, null)
       )
   );
 
