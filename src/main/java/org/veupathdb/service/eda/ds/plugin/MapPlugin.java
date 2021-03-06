@@ -15,7 +15,7 @@ import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
 import org.veupathdb.service.eda.common.model.EntityDef;
-import org.veupathdb.service.eda.common.client.StreamSpec;
+import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.MapPostRequest;
 import org.veupathdb.service.eda.generated.model.MapSpec;

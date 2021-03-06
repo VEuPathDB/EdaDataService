@@ -11,7 +11,7 @@ import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.HistogramPostRequest;
 import org.veupathdb.service.eda.generated.model.HistogramSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
-import org.veupathdb.service.eda.common.client.StreamSpec;
+import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 
 public abstract class HistogramPlugin<S extends HistogramPostRequest, T extends HistogramSpec> extends AbstractPlugin<S, T> {
 

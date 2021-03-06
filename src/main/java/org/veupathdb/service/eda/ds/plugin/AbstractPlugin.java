@@ -18,10 +18,10 @@ import org.gusdb.fgputil.functional.FunctionalInterfaces.ConsumerWithException;
 import org.gusdb.fgputil.validation.ValidationBundle;
 import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
-import org.veupathdb.service.eda.common.client.AbstractTabularDataClient;
+import org.veupathdb.service.eda.common.client.StreamingDataClient;
 import org.veupathdb.service.eda.common.client.EdaMergingClient;
 import org.veupathdb.service.eda.common.client.EdaSubsettingClient;
-import org.veupathdb.service.eda.common.client.StreamSpec;
+import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.model.ReferenceMetadata;
 import org.veupathdb.service.eda.ds.Resources;
@@ -42,7 +42,7 @@ abstract class AbstractPlugin<T extends VisualizationRequestBase, S> implements 
   protected abstract void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException;
 
   private final EdaSubsettingClient _subsettingClient = new EdaSubsettingClient(Resources.SUBSETTING_SERVICE_URL);
-  private final AbstractTabularDataClient _mergingClient = _subsettingClient; //new EdaMergingClient(Resources.MERGING_SERVICE_URL);
+  private final StreamingDataClient _mergingClient = _subsettingClient; //new EdaMergingClient(Resources.MERGING_SERVICE_URL);
 
   private boolean _requestProcessed = false;
   private S _pluginSpec;
@@ -97,7 +97,7 @@ abstract class AbstractPlugin<T extends VisualizationRequestBase, S> implements 
 
     // build and process streams
     LOG.info("Building and processing " + _requiredStreams.size() + " required data streams.");
-    AbstractTabularDataClient.buildAndProcessStreams(_requiredStreams, streamGenerator, streamProcessor);
+    StreamingDataClient.buildAndProcessStreams(_requiredStreams, streamGenerator, streamProcessor);
   }
 
   protected S getPluginSpec() {

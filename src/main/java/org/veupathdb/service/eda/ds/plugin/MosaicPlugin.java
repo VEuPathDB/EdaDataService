@@ -13,7 +13,7 @@ import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
 import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.veupathdb.service.eda.common.model.EntityDef;
-import org.veupathdb.service.eda.common.client.StreamSpec;
+import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.MosaicPostRequest;
 import org.veupathdb.service.eda.generated.model.MosaicSpec;
