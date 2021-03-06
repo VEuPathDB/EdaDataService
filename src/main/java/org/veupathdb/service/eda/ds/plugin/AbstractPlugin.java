@@ -13,15 +13,14 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.gusdb.fgputil.client.ResponseFuture;
 import org.gusdb.fgputil.functional.FunctionalInterfaces.ConsumerWithException;
 import org.gusdb.fgputil.validation.ValidationBundle;
 import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.AbstractTabularDataClient;
-import org.veupathdb.service.eda.common.client.ClientUtil;
 import org.veupathdb.service.eda.common.client.EdaMergingClient;
 import org.veupathdb.service.eda.common.client.EdaSubsettingClient;
-import org.veupathdb.service.eda.common.client.ResponseFuture;
 import org.veupathdb.service.eda.common.client.StreamSpec;
 import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.model.ReferenceMetadata;
@@ -90,7 +89,7 @@ abstract class AbstractPlugin<T extends VisualizationRequestBase, S> implements 
     }
 
     // create stream generator
-    Function<StreamSpec,ResponseFuture> streamGenerator = spec -> _mergingClient
+    Function<StreamSpec, ResponseFuture> streamGenerator = spec -> _mergingClient
         .getTabularDataStream(_referenceMetadata, _subset, spec);
 
     // create stream processor
@@ -98,7 +97,7 @@ abstract class AbstractPlugin<T extends VisualizationRequestBase, S> implements 
 
     // build and process streams
     LOG.info("Building and processing " + _requiredStreams.size() + " required data streams.");
-    ClientUtil.buildAndProcessStreams(_requiredStreams, streamGenerator, streamProcessor);
+    AbstractTabularDataClient.buildAndProcessStreams(_requiredStreams, streamGenerator, streamProcessor);
   }
 
   protected S getPluginSpec() {
