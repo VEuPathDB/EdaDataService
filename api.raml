@@ -38,22 +38,6 @@ securitySchemes:
   /pass/visualizations:
     displayName: Available visualizations for the null/ pass-through app
 
-    /record-count:
-      post:
-        description: Test endpoint returns a count of the records in the subset
-        body:
-          application/json:
-            type: lib.RecordCountPostRequest
-        responses:
-          200:
-            body:
-              application/json:
-                type: lib.RecordCountPostResponse
-          500:
-            body:
-              application/json:
-                type: error.ServerError
-
     /map-markers:
       post:
         description: Returns data required to make MapVeu markers <br> Java impl- working <br> R impl- NA
@@ -209,6 +193,38 @@ securitySchemes:
             body:
               application/json:
                 type: lib.MosaicPostResponse
+          500:
+            body:
+              application/json:
+                type: error.ServerError
+
+    /test-record-count:
+      post:
+        description: Test endpoint returns a count of the records in the subset
+        body:
+          application/json:
+            type: lib.RecordCountPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.RecordCountPostResponse
+          500:
+            body:
+              application/json:
+                type: error.ServerError
+
+    /test-multi-stream:
+      post:
+        description: Test endpoint returns a stream of records with its first two attributes (combined from parallel streams)
+        body:
+          application/json:
+            type: lib.RecordCountPostRequest
+        responses:
+          200:
+            body:
+              text/plain:
+                type: lib.EntityTabularPostResponse
           500:
             body:
               application/json:

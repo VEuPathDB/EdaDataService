@@ -1,7 +1,5 @@
 package org.veupathdb.service.eda.ds.service;
 
-import java.util.Arrays;
-import java.util.List;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.Response;
@@ -19,11 +17,10 @@ import org.veupathdb.service.eda.ds.plugin.MapPlugin;
 import org.veupathdb.service.eda.ds.plugin.MosaicPlugin;
 import org.veupathdb.service.eda.ds.plugin.NumericHistogramBinWidthPlugin;
 import org.veupathdb.service.eda.ds.plugin.NumericHistogramNumBinsPlugin;
-import org.veupathdb.service.eda.ds.plugin.PluginMetadata;
+import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
 import org.veupathdb.service.eda.ds.plugin.RecordCountPlugin;
 import org.veupathdb.service.eda.ds.plugin.ScatterplotPlugin;
-import org.veupathdb.service.eda.generated.model.AppsGetResponse;
-import org.veupathdb.service.eda.generated.model.AppsGetResponseImpl;
+import org.veupathdb.service.eda.ds.plugin.TestMultiStreamPlugin;
 import org.veupathdb.service.eda.generated.model.BarplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BarplotPostResponseStream;
 import org.veupathdb.service.eda.generated.model.BoxplotPostRequest;
@@ -32,6 +29,7 @@ import org.veupathdb.service.eda.generated.model.DateHistogramBinWidthPostReques
 import org.veupathdb.service.eda.generated.model.DateHistogramBinWidthPostResponseStream;
 import org.veupathdb.service.eda.generated.model.DateHistogramNumBinsPostRequest;
 import org.veupathdb.service.eda.generated.model.DateHistogramNumBinsPostResponseStream;
+import org.veupathdb.service.eda.generated.model.EntityTabularPostResponseStream;
 import org.veupathdb.service.eda.generated.model.HeatmapPostRequest;
 import org.veupathdb.service.eda.generated.model.HeatmapPostResponseStream;
 import org.veupathdb.service.eda.generated.model.MapPostRequest;
@@ -54,7 +52,7 @@ public class AppsService implements Apps {
 
   @Override
   public GetAppsResponse getApps() {
-    return GetAppsResponse.respond200WithApplicationJson(PluginMetadata.APPS);
+    return GetAppsResponse.respond200WithApplicationJson(AppsMetadata.APPS);
   }
 
   private <T> T wrapPlugin(FunctionalInterfaces.SupplierWithException<T> supplier) {
@@ -68,13 +66,6 @@ public class AppsService implements Apps {
       LOG.error("Could not execute app.", e);
       throw new ServerErrorException(e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
     }
-  }
-
-  @DisableJackson
-  @Override
-  public PostAppsPassVisualizationsRecordCountResponse postAppsPassVisualizationsRecordCount(RecordCountPostRequest entity) {
-    return wrapPlugin(() -> PostAppsPassVisualizationsRecordCountResponse.respond200WithApplicationJson(
-        new RecordCountPostResponseStream(new RecordCountPlugin().processRequest(entity))));
   }
 
   @DisableJackson
@@ -145,6 +136,18 @@ public class AppsService implements Apps {
   public PostAppsPassVisualizationsMosaicResponse postAppsPassVisualizationsMosaic(MosaicPostRequest entity) {
     return wrapPlugin(() -> PostAppsPassVisualizationsMosaicResponse.respond200WithApplicationJson(
         new MosaicPostResponseStream(new MosaicPlugin().processRequest(entity))));
+  }
+
+  @Override
+  public PostAppsPassVisualizationsTestRecordCountResponse postAppsPassVisualizationsTestRecordCount(RecordCountPostRequest entity) {
+    return wrapPlugin(() -> PostAppsPassVisualizationsTestRecordCountResponse.respond200WithApplicationJson(
+        new RecordCountPostResponseStream(new RecordCountPlugin().processRequest(entity))));
+  }
+
+  @Override
+  public PostAppsPassVisualizationsTestMultiStreamResponse postAppsPassVisualizationsTestMultiStream(RecordCountPostRequest entity) {
+    return wrapPlugin(() -> PostAppsPassVisualizationsTestMultiStreamResponse.respond200WithTextPlain(
+        new EntityTabularPostResponseStream(new TestMultiStreamPlugin().processRequest(entity))));
   }
 
 }

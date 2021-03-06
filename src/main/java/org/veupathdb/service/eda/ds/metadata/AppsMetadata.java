@@ -1,4 +1,4 @@
-package org.veupathdb.service.eda.ds.plugin;
+package org.veupathdb.service.eda.ds.metadata;
 
 import java.util.Arrays;
 import org.veupathdb.service.eda.generated.model.AppOverview;
@@ -8,12 +8,11 @@ import org.veupathdb.service.eda.generated.model.AppsGetResponseImpl;
 import org.veupathdb.service.eda.generated.model.VisualizationOverview;
 import org.veupathdb.service.eda.generated.model.VisualizationOverviewImpl;
 
-public class PluginMetadata {
+public class AppsMetadata {
 
   // NOTE: these names must match the url segments defined in the api.raml
   public static final AppsGetResponse APPS = apps(
       app("pass", null, null,
-          viz("record-count", null, null),
           viz("map-markers", null, null),
           viz("scatterplot", null, null),
           viz("date-histogram-num-bins", null, null),
@@ -23,7 +22,9 @@ public class PluginMetadata {
           viz("barplot", null, null),
           viz("boxplot", null, null),
           viz("heatmap", null, null),
-          viz("mosaic", null, null)
+          viz("mosaic", null, null),
+          viz("test-record-count", null, null),
+          viz("test-multi-stream", null, null)
       )
   );
 
