@@ -40,6 +40,7 @@ dependencies {
     "vendor/fgputil-core-1.0.0.jar",
     "vendor/fgputil-client-1.0.0.jar",
     "vendor/fgputil-db-1.0.0.jar",
+    "vendor/fgputil-json-1.0.0.jar",
     "vendor/fgputil-web-1.0.0.jar"
   ))
 
