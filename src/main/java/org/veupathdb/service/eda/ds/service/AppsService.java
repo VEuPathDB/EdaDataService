@@ -18,9 +18,9 @@ import org.veupathdb.service.eda.ds.plugin.MosaicPlugin;
 import org.veupathdb.service.eda.ds.plugin.NumericHistogramBinWidthPlugin;
 import org.veupathdb.service.eda.ds.plugin.NumericHistogramNumBinsPlugin;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
-import org.veupathdb.service.eda.ds.plugin.RecordCountPlugin;
+import org.veupathdb.service.eda.ds.plugin.sample.RecordCountPlugin;
 import org.veupathdb.service.eda.ds.plugin.ScatterplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.TestMultiStreamPlugin;
+import org.veupathdb.service.eda.ds.plugin.sample.MultiStreamPlugin;
 import org.veupathdb.service.eda.generated.model.BarplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BarplotPostResponseStream;
 import org.veupathdb.service.eda.generated.model.BoxplotPostRequest;
@@ -138,16 +138,18 @@ public class AppsService implements Apps {
         new MosaicPostResponseStream(new MosaicPlugin().processRequest(entity))));
   }
 
+  @DisableJackson
   @Override
-  public PostAppsPassVisualizationsTestRecordCountResponse postAppsPassVisualizationsTestRecordCount(RecordCountPostRequest entity) {
-    return wrapPlugin(() -> PostAppsPassVisualizationsTestRecordCountResponse.respond200WithApplicationJson(
+  public PostAppsSampleVisualizationsRecordCountResponse postAppsSampleVisualizationsRecordCount(RecordCountPostRequest entity) {
+    return wrapPlugin(() -> PostAppsSampleVisualizationsRecordCountResponse.respond200WithApplicationJson(
         new RecordCountPostResponseStream(new RecordCountPlugin().processRequest(entity))));
   }
 
+  @DisableJackson
   @Override
-  public PostAppsPassVisualizationsTestMultiStreamResponse postAppsPassVisualizationsTestMultiStream(RecordCountPostRequest entity) {
-    return wrapPlugin(() -> PostAppsPassVisualizationsTestMultiStreamResponse.respond200WithTextPlain(
-        new EntityTabularPostResponseStream(new TestMultiStreamPlugin().processRequest(entity))));
+  public PostAppsSampleVisualizationsMultiStreamResponse postAppsSampleVisualizationsMultiStream(RecordCountPostRequest entity) {
+    return wrapPlugin(() -> PostAppsSampleVisualizationsMultiStreamResponse.respond200WithTextPlain(
+        new EntityTabularPostResponseStream(new MultiStreamPlugin().processRequest(entity))));
   }
 
 }

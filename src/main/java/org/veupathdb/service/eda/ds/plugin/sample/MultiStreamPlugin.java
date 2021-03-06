@@ -1,4 +1,4 @@
-package org.veupathdb.service.eda.ds.plugin;
+package org.veupathdb.service.eda.ds.plugin.sample;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -21,6 +21,7 @@ import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.model.VariableDef;
 import org.veupathdb.service.eda.common.model.VariableSource;
+import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.RecordCountPostRequest;
 import org.veupathdb.service.eda.generated.model.RecordCountSpec;
 
@@ -29,7 +30,7 @@ import static org.gusdb.fgputil.FormatUtil.TAB;
 import static org.gusdb.fgputil.FormatUtil.join;
 import static org.gusdb.fgputil.functional.Functions.getMapFromKeys;
 
-public class TestMultiStreamPlugin extends AbstractPlugin<RecordCountPostRequest, RecordCountSpec> {
+public class MultiStreamPlugin extends AbstractPlugin<RecordCountPostRequest, RecordCountSpec> {
 
   @Override
   protected Class<RecordCountSpec> getVisualizationSpecClass() {
@@ -70,7 +71,7 @@ public class TestMultiStreamPlugin extends AbstractPlugin<RecordCountPostRequest
     String idColumn = entity.getIdColumnName();
     try (Writer writer = new BufferedWriter(new OutputStreamWriter(out))) {
       // write header
-      writer.write(idColumn + TAB + join(dataStreams.keySet(), TAB));
+      writer.write(idColumn + TAB + join(dataStreams.keySet(), TAB) + NL);
       Map<String, Scanner> scannerMap = getMapFromKeys(dataStreams.keySet(),
           key -> new Scanner(dataStreams.get(key)));
       Map<String, DelimitedDataParser> parserMap = getMapFromKeys(dataStreams.keySet(),

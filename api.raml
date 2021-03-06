@@ -198,9 +198,12 @@ securitySchemes:
               application/json:
                 type: error.ServerError
 
-    /test-record-count:
+  /sample/visualizations:
+    displayName: Sample visualizations demonstrating/testing service capabilities
+
+    /record-count:
       post:
-        description: Test endpoint returns a count of the records in the subset
+        description: Returns a count of the records in the subset
         body:
           application/json:
             type: lib.RecordCountPostRequest
@@ -214,9 +217,9 @@ securitySchemes:
               application/json:
                 type: error.ServerError
 
-    /test-multi-stream:
+    /multi-stream:
       post:
-        description: Test endpoint returns a stream of records with its first two attributes (combined from parallel streams)
+        description: Returns a stream of records with its first two attributes (combined from parallel streams)
         body:
           application/json:
             type: lib.RecordCountPostRequest

@@ -32,7 +32,7 @@ import org.veupathdb.service.eda.generated.model.VisualizationRequestBase;
 import org.veupathdb.service.eda.generated.model.DerivedVariable;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
-abstract class AbstractPlugin<T extends VisualizationRequestBase, S> implements Consumer<OutputStream> {
+public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> implements Consumer<OutputStream> {
 
   private static final Logger LOG = LogManager.getLogger(AbstractPlugin.class);
 
