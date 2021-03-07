@@ -42,7 +42,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   protected abstract void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException;
 
   private final EdaSubsettingClient _subsettingClient = new EdaSubsettingClient(Resources.SUBSETTING_SERVICE_URL);
-  private final StreamingDataClient _mergingClient = _subsettingClient; //new EdaMergingClient(Resources.MERGING_SERVICE_URL);
+  private final StreamingDataClient _mergingClient = new EdaMergingClient(Resources.MERGING_SERVICE_URL);
 
   private boolean _requestProcessed = false;
   private S _pluginSpec;

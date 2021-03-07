@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.DelimitedDataParser;
 import org.gusdb.fgputil.validation.ValidationBundle;
 import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
@@ -31,6 +33,8 @@ import static org.gusdb.fgputil.FormatUtil.join;
 import static org.gusdb.fgputil.functional.Functions.getMapFromKeys;
 
 public class MultiStreamPlugin extends AbstractPlugin<RecordCountPostRequest, RecordCountSpec> {
+
+  private static final Logger LOG = LogManager.getLogger(MultiStreamPlugin.class);
 
   @Override
   protected Class<RecordCountSpec> getVisualizationSpecClass() {
@@ -68,7 +72,7 @@ public class MultiStreamPlugin extends AbstractPlugin<RecordCountPostRequest, Re
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     EntityDef entity = getReferenceMetadata().getEntity(getPluginSpec().getEntityId());
-    String idColumn = entity.getIdColumnName();
+    String idColumn = toColNameOrEmpty(VariableDef.newVariableSpec(entity.getId(), entity.getIdColumnName()));
     try (Writer writer = new BufferedWriter(new OutputStreamWriter(out))) {
       // write header
       writer.write(idColumn + TAB + join(dataStreams.keySet(), TAB) + NL);
@@ -76,16 +80,18 @@ public class MultiStreamPlugin extends AbstractPlugin<RecordCountPostRequest, Re
           key -> new Scanner(dataStreams.get(key)));
       Map<String, DelimitedDataParser> parserMap = getMapFromKeys(dataStreams.keySet(),
           key -> new DelimitedDataParser(scannerMap.get(key).nextLine(), TAB, true));
-      while(scannerMap.values().iterator().next().hasNextLine()) {
+      Scanner firstScanner = scannerMap.values().iterator().next();
+      while(firstScanner.hasNextLine()) {
         boolean isFirst = true;
-        for (Entry<String,Scanner> stream : scannerMap.entrySet()) {
-          Map<String,String> row = parserMap.get(stream.getKey()).parseLine(stream.getValue().nextLine());
+        for (String streamName : scannerMap.keySet()) {
+          Map<String,String> row = parserMap.get(streamName)
+              .parseLine(scannerMap.get(streamName).nextLine());
           if (isFirst) {
             writer.write(row.get(idColumn));
             isFirst = false;
           }
           writer.write(TAB);
-          writer.write(row.get(stream.getKey()));
+          writer.write(row.get(streamName));
         }
         writer.write(NL);
       }
