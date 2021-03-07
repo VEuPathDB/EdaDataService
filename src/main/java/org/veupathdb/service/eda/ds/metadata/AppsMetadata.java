@@ -22,10 +22,12 @@ public class AppsMetadata {
           viz("barplot", null, null),
           viz("boxplot", null, null),
           viz("heatmap", null, null),
-          viz("mosaic", null, null),
-          viz("test-record-count", null, null),
-          viz("test-multi-stream", null, null)
-      )
+          viz("mosaic", null, null)),
+      app("sample", "Sample", "Wrapper app for sample/test plugins",
+          viz("record-count", "Record Count",
+              "Counts how many rows in a single stream of records"),
+          viz("multi-stream", "Multiple Stream Combiner",
+              "Merges streams for up to three vars into a single tabular output and dumps it"))
   );
 
   //******************************************
