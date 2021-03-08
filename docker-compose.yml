@@ -8,12 +8,17 @@ services:
     - internal
     - external
     environment:
+      # if ascertaining DB via LDAP
       LDAP_SERVER:
       ORACLE_BASE_DN:
       APP_DB_TNS_NAME:
-      APP_DB_USER: 
-      APP_DB_PASS: 
-      APP_DB_NAME: 
+      # if using DB name directly
+      APP_DB_NAME:
+      APP_DB_HOST:
+      # connection credentials (needed regardless of method)
+      APP_DB_USER:
+      APP_DB_PASS:
+      # port providing the service
       SERVER_PORT: ${SUBSETTING_SERVER_PORT:-8080}
     labels:
     - "com.centurylinklabs.watchtower.enable=${SUBSETTING_WATCHTOWER:-false}"
