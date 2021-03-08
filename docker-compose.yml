@@ -6,6 +6,7 @@ services:
     image: veupathdb/eda-subsetting:${SUBSETTING_TAG:-latest}
     networks:
     - internal
+    - external
     environment:
       LDAP_SERVER:
       ORACLE_BASE_DN:
@@ -53,6 +54,8 @@ services:
     - "com.centurylinklabs.watchtower.enable=${RSERVE_WATCHTOWER:-false}"
 
 networks:
+  # external network used for containers that need to reach outside
+  external:
   internal:
     internal: true
   traefik:
