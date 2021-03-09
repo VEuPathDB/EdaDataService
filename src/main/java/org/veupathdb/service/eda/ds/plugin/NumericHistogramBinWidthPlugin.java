@@ -93,14 +93,14 @@ public class NumericHistogramBinWidthPlugin extends HistogramPlugin<NumericHisto
             + ", '" + overlayEntity + "'"
             + ", '" + facetEntity1 + "'"
             + ", '" + facetEntity2 + "'), stringsAsFactors=FALSE)");
-        String binWidth = spec.getBinWidth() == null ? "NULL" : "'" + spec.getBinWidth() + "'";
+        String binWidth = spec.getBinWidth() == null ? "NULL" : "as.numeric('" + spec.getBinWidth() + "')";
         if (spec.getViewportMin() != null & spec.getViewportMax() != null) {
           connection.voidEval("viewport <- list('min'='" + spec.getViewportMin() + "', 'max'='" + spec.getViewportMax() + "')");
         } else {
           connection.voidEval("viewport <- NULL");
         }
-        String outFile = connection.eval("histogram(data, map, as.numeric(" +
-            binWidth + "), '" +
+        String outFile = connection.eval("histogram(data, map, " +
+            binWidth + ", '" +
             spec.getValueSpec().toString().toLowerCase() + "', 'binWidth', viewport)").asString();
         try (RFileInputStream response = connection.openFile(outFile)) {
           IoUtil.transferStream(out, response);
