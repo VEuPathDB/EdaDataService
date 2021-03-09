@@ -99,8 +99,8 @@ public class NumericHistogramBinWidthPlugin extends HistogramPlugin<NumericHisto
         } else {
           connection.voidEval("viewport <- NULL");
         }
-        String outFile = connection.eval("histogram(data, map, " +
-            binWidth + ", '" +
+        String outFile = connection.eval("histogram(data, map, as.numeric(" +
+            binWidth + "), '" +
             spec.getValueSpec().toString().toLowerCase() + "', 'binWidth', viewport)").asString();
         try (RFileInputStream response = connection.openFile(outFile)) {
           IoUtil.transferStream(out, response);
