@@ -9,7 +9,6 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
@@ -24,25 +23,25 @@ import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.model.VariableDef;
 import org.veupathdb.service.eda.common.model.VariableSource;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.generated.model.RecordCountPostRequest;
-import org.veupathdb.service.eda.generated.model.RecordCountSpec;
+import org.veupathdb.service.eda.generated.model.MultiStreamPostRequest;
+import org.veupathdb.service.eda.generated.model.MultiStreamSpec;
 
 import static org.gusdb.fgputil.FormatUtil.NL;
 import static org.gusdb.fgputil.FormatUtil.TAB;
 import static org.gusdb.fgputil.FormatUtil.join;
 import static org.gusdb.fgputil.functional.Functions.getMapFromKeys;
 
-public class MultiStreamPlugin extends AbstractPlugin<RecordCountPostRequest, RecordCountSpec> {
+public class MultiStreamPlugin extends AbstractPlugin<MultiStreamPostRequest, MultiStreamSpec> {
 
   private static final Logger LOG = LogManager.getLogger(MultiStreamPlugin.class);
 
   @Override
-  protected Class<RecordCountSpec> getVisualizationSpecClass() {
-    return RecordCountSpec.class;
+  protected Class<MultiStreamSpec> getVisualizationSpecClass() {
+    return MultiStreamSpec.class;
   }
 
   @Override
-  protected ValidationBundle validateVisualizationSpec(RecordCountSpec pluginSpec) throws ValidationException {
+  protected ValidationBundle validateVisualizationSpec(MultiStreamSpec pluginSpec) throws ValidationException {
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
     getValidEntity(validation, pluginSpec.getEntityId());
     return validation.build();
@@ -59,7 +58,7 @@ public class MultiStreamPlugin extends AbstractPlugin<RecordCountPostRequest, Re
    * @return list of streams this plugin needs to display its data
    */
   @Override
-  protected List<StreamSpec> getRequestedStreams(RecordCountSpec pluginSpec) {
+  protected List<StreamSpec> getRequestedStreams(MultiStreamSpec pluginSpec) {
     // get the first three native vars of this entity
     EntityDef entity = getReferenceMetadata().getEntity(pluginSpec.getEntityId());
     List<VariableDef> varsToRequest = getVars(entity);

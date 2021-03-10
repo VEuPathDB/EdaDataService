@@ -36,6 +36,7 @@ import org.veupathdb.service.eda.generated.model.MapPostRequest;
 import org.veupathdb.service.eda.generated.model.MapPostResponseStream;
 import org.veupathdb.service.eda.generated.model.MosaicPostRequest;
 import org.veupathdb.service.eda.generated.model.MosaicPostResponseStream;
+import org.veupathdb.service.eda.generated.model.MultiStreamPostRequest;
 import org.veupathdb.service.eda.generated.model.NumericHistogramBinWidthPostRequest;
 import org.veupathdb.service.eda.generated.model.NumericHistogramBinWidthPostResponseStream;
 import org.veupathdb.service.eda.generated.model.NumericHistogramNumBinsPostRequest;
@@ -147,7 +148,7 @@ public class AppsService implements Apps {
 
   @DisableJackson
   @Override
-  public PostAppsSampleVisualizationsMultiStreamResponse postAppsSampleVisualizationsMultiStream(RecordCountPostRequest entity) {
+  public PostAppsSampleVisualizationsMultiStreamResponse postAppsSampleVisualizationsMultiStream(MultiStreamPostRequest entity) {
     return wrapPlugin(() -> PostAppsSampleVisualizationsMultiStreamResponse.respond200WithTextPlain(
         new EntityTabularPostResponseStream(new MultiStreamPlugin().processRequest(entity))));
   }

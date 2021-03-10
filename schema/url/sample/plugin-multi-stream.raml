@@ -1,0 +1,14 @@
+#%RAML 1.0 Library
+
+types:
+
+  MultiStreamPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: MultiStreamSpec
+
+  MultiStreamSpec:
+    additionalProperties: false
+    type: object
+    properties:
+      entityId: string
