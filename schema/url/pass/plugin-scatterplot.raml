@@ -11,7 +11,7 @@ types:
   ScatterplotSpec:
     additionalProperties: false
     properties:
-      entityId:
+      outputEntityId:
         type: string
       valueSpec:
         type: string
@@ -28,39 +28,7 @@ types:
         maxItems: 2
         required: false
 
-  ScatterplotData:
-    additionalProperties: false
-    properties:
-      overlayVariableDetails:
-        type: StrataVariableDetails
-        required: false
-      facetVariableDetails:
-        type: StrataVariableDetails[]
-        maxItems: 2
-        required: false
-      seriesY:
-        type: number[]
-        minItems: 1
-      seriesX:
-        type: number[]
-        minItems: 1
-      intervalX:
-        type: number[]
-        required: false
-      intervalY:
-        type: number[]
-        required: false
-      intervalSE:
-        type: number[]
-        required: false
-      densityX:
-        type: number[]
-        required: false
-      densityY:
-        type: number[]
-        required: false
-
-  ScatterplotConfig:
+  ScatterplotResponseConfig:
     type: VisualizationConfig
     properties:
       xVariableDetails:
@@ -72,6 +40,6 @@ types:
     additionalProperties: false
     properties:
       data:
-        type: ScatterplotData[]
+        type: ScatterplotResponseData[]
       config:
-        type: ScatterplotConfig
+        type: ScatterplotResponseConfig

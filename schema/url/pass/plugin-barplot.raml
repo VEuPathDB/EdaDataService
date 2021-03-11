@@ -11,7 +11,7 @@ types:
   BarplotSpec:
     additionalProperties: false
     properties:
-      entityId:
+      outputEntityId:
         type: string
       valueSpec:
         type: string
@@ -26,26 +26,7 @@ types:
         maxItems: 2
         required: false
 
-  BarplotData:
-    additionalProperties: false
-    properties:
-      overlayVariableDetails:
-        type: StrataVariableDetails
-        required: false
-      facetVariableDetails:
-        type: StrataVariableDetails[]
-        maxItems: 2
-        required: false
-      value:
-        type: number[]
-        minItems: 1
-        required: true
-      label:
-        type: string[]
-        minItems: 1
-        required: true
-
-  BarplotConfig:
+  BarplotResponseConfig:
     type: VisualizationConfig
     properties:
       xVariableDetails:
@@ -55,6 +36,6 @@ types:
     additionalProperties: false
     properties:
       data:
-        type: BarplotData[]
+        type: BarplotResponseData[]
       config:
-        type: BarplotConfig
+        type: BarplotResponseConfig

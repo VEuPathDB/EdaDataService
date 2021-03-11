@@ -2,16 +2,16 @@
 
 types:
 
-  DateHistogramBinWidthPostRequest:
+  DateHistogramNumBinsPostRequest:
     type: HistogramPostRequest
     properties:
-      config: DateHistogramBinWidthSpec
+      config: DateHistogramNumBinsSpec
 
-  DateHistogramBinWidthSpec:
+  DateHistogramNumBinsSpec:
     type: HistogramSpec
     properties:
-      binWidth:
-        type: string
+      numBins:
+        type: number
         required: false
       viewportMin:
         type: string
@@ -19,17 +19,17 @@ types:
       viewportMax:
         type: string
         required: false
-  
-  DateHistogramBinWidthConfig:
-    type: HistogramConfig
+        
+  DateHistogramNumBinsConfig:
+    type: HistogramResponseConfig
     properties:
-      binWidth: 
+      numBins: 
         type: number
         
-  DateHistogramBinWidthPostResponse:
+  DateHistogramNumBinsPostResponse:
     additionalProperties: false
     properties:
       data:
-        type: HistogramData[]
+        type: HistogramResponseData[]
       config:
-        type: DateHistogramBinWidthConfig
+        type: DateHistogramNumBinsConfig

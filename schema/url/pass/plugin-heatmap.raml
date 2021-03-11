@@ -11,7 +11,7 @@ types:
   HeatmapSpec:
     additionalProperties: false
     properties:
-      entityId:
+      outputEntityId:
         type: string
       valueSpec:
         type: string
@@ -27,24 +27,8 @@ types:
         type: VariableSpec[]
         maxItems: 2
         required: false
-
-  HeatmapData:
-    additionalProperties: false
-    properties:
-      facetVariableDetails:
-        type: StrataVariableDetails[]
-        maxItems: 2
-        required: false
-      value:
-        type: number[][]
-        minItems: 1
-        required: true
-      label:
-        type: string[]
-        minItems: 1
-        required: true
         
-  HeatmapConfig:
+  HeatmapResponseConfig:
     type: VisualizationConfig
     properties:
       xVariableDetails:
@@ -56,6 +40,6 @@ types:
     additionalProperties: false
     properties:
       data:
-        type: HeatmapData[]
+        type: HeatmapResponseData[]
       config:
-        type: HeatmapConfig
+        type: HeatmapResponseConfig

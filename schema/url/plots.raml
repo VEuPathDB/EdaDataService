@@ -1,0 +1,162 @@
+#%RAML 1.0 Library
+
+types:
+  # Type name determines the name of the Java class that will be generated.
+
+  # current assumption is the data object will be consistent across all barplot (etc) vizs
+  BarplotResponseData:
+    additionalProperties: false
+    properties:
+      overlayVariableDetails:
+        type: StrataVariableDetails
+        required: false
+      facetVariableDetails:
+        type: StrataVariableDetails[]
+        maxItems: 2
+        required: false
+      value:
+        type: number[]
+        minItems: 1
+        required: true
+      label:
+        type: string[]
+        minItems: 1
+        required: true
+        
+  BoxplotResponseData:
+    additionalProperties: false
+    properties:
+      overlayVariableDetails:
+        type: StrataVariableDetails
+        required: false
+      facetVariableDetails:
+        type: StrataVariableDetails[]
+        maxItems: 2
+        required: false
+      lowerfence:
+        type: number[]
+        minItems: 1
+        required: true
+      upperfence:
+        type: number[]
+        minItems: 1
+        required: true
+      q1:
+        type: number[]
+        minItems: 1
+        required: true
+      q3:
+        type: number[]
+        minItems: 1
+        required: true
+      median:
+        type: number[]
+        minItems: 1
+        required: true
+      outliers:
+        type: number[][]
+        required: false
+      rawData:
+        type: number[][]
+        required: false
+      mean:
+        type: number[]
+        required: false
+        
+  HistogramResponseData:
+    additionalProperties: false
+    properties:
+      overlayVariableDetails:
+        type: StrataVariableDetails
+        required: false
+      facetVariableDetails:
+        type: StrataVariableDetails[]
+        maxItems: 2
+        required: false
+      value:
+        type: number[]
+        minItems: 1
+        required: true
+      binStart:
+        type: string[]
+        minItems: 1
+        required: true
+      binLabel:
+        type: string[]
+        minItems: 1
+        required: true
+        
+  BinSlider:
+    additionalProperties: false
+    properties:
+      min:
+        type: number
+      max:
+        type: number
+      step:
+        type: number
+        
+  HeatmapResponseData:
+    additionalProperties: false
+    properties:
+      facetVariableDetails:
+        type: StrataVariableDetails[]
+        maxItems: 2
+        required: false
+      value:
+        type: number[][]
+        minItems: 1
+        required: true
+      label:
+        type: string[]
+        minItems: 1
+        required: true
+        
+# TODO make sure the response props have the right names, includes table values if needed etc
+  MosaicResponseData:
+    additionalProperties: false
+    properties:
+      xVariableDetails:
+        type: VariableSpec
+      yVariableDetails:
+        type: VariableSpec
+      facetVariableDetails:
+        type: StrataVariableDetails[]
+        maxItems: 2
+        required: false
+      value:
+        type: number[]
+        minItems: 1
+        required: true
+        
+  ScatterplotResponseData:
+    additionalProperties: false
+    properties:
+      overlayVariableDetails:
+        type: StrataVariableDetails
+        required: false
+      facetVariableDetails:
+        type: StrataVariableDetails[]
+        maxItems: 2
+        required: false
+      seriesY:
+        type: number[]
+        minItems: 1
+      seriesX:
+        type: number[]
+        minItems: 1
+      intervalX:
+        type: number[]
+        required: false
+      intervalY:
+        type: number[]
+        required: false
+      intervalSE:
+        type: number[]
+        required: false
+      densityX:
+        type: number[]
+        required: false
+      densityY:
+        type: number[]
+        required: false

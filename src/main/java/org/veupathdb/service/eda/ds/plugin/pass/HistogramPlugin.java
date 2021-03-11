@@ -20,7 +20,7 @@ public abstract class HistogramPlugin<S extends HistogramPostRequest, T extends 
   @Override
   protected ValidationBundle validateVisualizationSpec(T pluginSpec) throws ValidationException {
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
-    EntityDef entity = getValidEntity(validation, pluginSpec.getEntityId());
+    EntityDef entity = getValidEntity(validation, pluginSpec.getOutputEntityId());
     validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.NUMBER, APIVariableType.DATE);
     if (pluginSpec.getOverlayVariable() != null) {
       validateVariableNameAndType(validation, entity, "overlayVariable", pluginSpec.getOverlayVariable(), APIVariableType.STRING);
@@ -35,7 +35,7 @@ public abstract class HistogramPlugin<S extends HistogramPostRequest, T extends 
 
   @Override
   protected List<StreamSpec> getRequestedStreams(T pluginSpec) {
-    StreamSpec spec = new StreamSpec(DATAFILE_NAME, pluginSpec.getEntityId());
+    StreamSpec spec = new StreamSpec(DATAFILE_NAME, pluginSpec.getOutputEntityId());
     spec.add(pluginSpec.getXAxisVariable());
     if (pluginSpec.getOverlayVariable() != null) {
       spec.add(pluginSpec.getOverlayVariable());

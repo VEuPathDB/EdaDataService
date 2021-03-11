@@ -2,34 +2,34 @@
 
 types:
 
-  DateHistogramNumBinsPostRequest:
+  NumericHistogramNumBinsPostRequest:
     type: HistogramPostRequest
     properties:
-      config: DateHistogramNumBinsSpec
+      config: NumericHistogramNumBinsSpec
 
-  DateHistogramNumBinsSpec:
+  NumericHistogramNumBinsSpec:
     type: HistogramSpec
     properties:
       numBins:
         type: number
         required: false
       viewportMin:
-        type: string
+        type: number
         required: false
       viewportMax:
-        type: string
+        type: number
         required: false
         
-  DateHistogramNumBinsConfig:
-    type: HistogramConfig
+  NumericHistogramNumBinsConfig:
+    type: HistogramResponseConfig
     properties:
       numBins: 
         type: number
         
-  DateHistogramNumBinsPostResponse:
+  NumericHistogramNumBinsPostResponse:
     additionalProperties: false
     properties:
       data:
-        type: HistogramData[]
+        type: HistogramResponseData[]
       config:
-        type: DateHistogramNumBinsConfig
+        type: NumericHistogramNumBinsConfig

@@ -35,7 +35,7 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
   @Override
   protected ValidationBundle validateVisualizationSpec(BarplotSpec pluginSpec) throws ValidationException {
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
-    EntityDef entity = getValidEntity(validation, pluginSpec.getEntityId());
+    EntityDef entity = getValidEntity(validation, pluginSpec.getOutputEntityId());
     validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.STRING);
     if (pluginSpec.getOverlayVariable() != null) {
       validateVariableNameAndType(validation, entity, "overlayVariable", pluginSpec.getOverlayVariable(), APIVariableType.STRING);
@@ -50,7 +50,7 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
 
   @Override
   protected List<StreamSpec> getRequestedStreams(BarplotSpec pluginSpec) {
-    StreamSpec spec = new StreamSpec(DATAFILE_NAME, pluginSpec.getEntityId());
+    StreamSpec spec = new StreamSpec(DATAFILE_NAME, pluginSpec.getOutputEntityId());
     spec.add(pluginSpec.getXAxisVariable());
     if (pluginSpec.getOverlayVariable() != null) {
       spec.add(pluginSpec.getOverlayVariable());
@@ -64,7 +64,7 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     BarplotSpec spec = getPluginSpec();
-    EntityDef entity = getReferenceMetadata().getEntity(spec.getEntityId());
+    EntityDef entity = getReferenceMetadata().getEntity(spec.getOutputEntityId());
     
     boolean simpleBar = true;
     // TODO consider adding facets to simpleBar ?

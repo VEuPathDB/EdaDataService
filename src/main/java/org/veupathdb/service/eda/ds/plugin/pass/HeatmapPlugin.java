@@ -33,7 +33,7 @@ public class HeatmapPlugin extends AbstractPlugin<HeatmapPostRequest, HeatmapSpe
   @Override
   protected ValidationBundle validateVisualizationSpec(HeatmapSpec pluginSpec) throws ValidationException {
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
-    EntityDef entity = getValidEntity(validation, pluginSpec.getEntityId());
+    EntityDef entity = getValidEntity(validation, pluginSpec.getOutputEntityId());
     validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.STRING);
     validateVariableNameAndType(validation, entity, "yAxisVariable", pluginSpec.getYAxisVariable(), APIVariableType.STRING);
     if (pluginSpec.getZAxisVariable() != null) {
@@ -52,7 +52,7 @@ public class HeatmapPlugin extends AbstractPlugin<HeatmapPostRequest, HeatmapSpe
 
   @Override
   protected List<StreamSpec> getRequestedStreams(HeatmapSpec pluginSpec) {
-    StreamSpec spec = new StreamSpec(DATAFILE_NAME, pluginSpec.getEntityId());
+    StreamSpec spec = new StreamSpec(DATAFILE_NAME, pluginSpec.getOutputEntityId());
     spec.add(pluginSpec.getXAxisVariable());
     spec.add(pluginSpec.getYAxisVariable());
     if (pluginSpec.getZAxisVariable() != null) {

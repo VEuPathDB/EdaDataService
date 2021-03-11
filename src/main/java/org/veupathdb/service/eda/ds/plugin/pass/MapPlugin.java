@@ -33,7 +33,7 @@ public class MapPlugin extends AbstractPlugin<MapPostRequest, MapSpec> {
   @Override
   protected ValidationBundle validateVisualizationSpec(MapSpec pluginSpec) throws ValidationException {
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
-    EntityDef entity = getValidEntity(validation, pluginSpec.getEntityId());
+    EntityDef entity = getValidEntity(validation, pluginSpec.getOutputEntityId());
     validateVariableNameAndType(validation, entity, "geoAggregateVariable", pluginSpec.getGeoAggregateVariable(), APIVariableType.STRING);
     validateVariableNameAndType(validation, entity, "latitudeVariable", pluginSpec.getLatitudeVariable(), APIVariableType.NUMBER); 
     validateVariableNameAndType(validation, entity, "longitudeVariable", pluginSpec.getLongitudeVariable(), APIVariableType.LONGITUDE);
@@ -42,7 +42,7 @@ public class MapPlugin extends AbstractPlugin<MapPostRequest, MapSpec> {
 
   @Override
   protected List<StreamSpec> getRequestedStreams(MapSpec pluginSpec) {
-    StreamSpec spec = new StreamSpec(STREAM_NAME, pluginSpec.getEntityId());
+    StreamSpec spec = new StreamSpec(STREAM_NAME, pluginSpec.getOutputEntityId());
     spec.add(pluginSpec.getGeoAggregateVariable());
     spec.add(pluginSpec.getLatitudeVariable());
     spec.add(pluginSpec.getLongitudeVariable());
@@ -58,7 +58,7 @@ public class MapPlugin extends AbstractPlugin<MapPostRequest, MapSpec> {
     Map<String, Integer> geoVarEntityCount = new HashMap<String, Integer>();
     Scanner s = new Scanner(dataStreams.get(STREAM_NAME)).useDelimiter("\n");
 
-    EntityDef entity = getReferenceMetadata().getEntity(spec.getEntityId());
+    EntityDef entity = getReferenceMetadata().getEntity(spec.getOutputEntityId());
     String entityIdCol = entity.getIdColumnName();
     String geoAggregateVar = toColNameOrEmpty(spec.getGeoAggregateVariable());
     String lonVar = toColNameOrEmpty(spec.getLongitudeVariable());

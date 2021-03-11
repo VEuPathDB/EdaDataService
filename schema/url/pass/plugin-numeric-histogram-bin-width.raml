@@ -21,7 +21,7 @@ types:
         required: false
   
   NumericHistogramBinWidthConfig:
-    type: HistogramConfig
+    type: HistogramResponseConfig
     properties:
       binWidth: 
         type: number
@@ -30,6 +30,6 @@ types:
     additionalProperties: false
     properties:
       data:
-        type: HistogramData[]
+        type: HistogramResponseData[]
       config:
         type: NumericHistogramBinWidthConfig

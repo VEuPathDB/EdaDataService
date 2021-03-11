@@ -11,7 +11,7 @@ types:
   MosaicSpec:
     additionalProperties: false
     properties:
-      entityId:
+      outputEntityId:
         type: string
       xAxisVariable: 
         type: VariableSpec
@@ -21,32 +21,14 @@ types:
         type: VariableSpec[]
         maxItems: 2
         required: false
-
-# TODO make sure the response props have the right names, includes table values if needed etc
-
-  MosaicData:
-    additionalProperties: false
-    properties:
-      xVariableDetails:
-        type: VariableSpec
-      yVariableDetails:
-        type: VariableSpec
-      facetVariableDetails:
-        type: StrataVariableDetails[]
-        maxItems: 2
-        required: false
-      value:
-        type: number[]
-        minItems: 1
-        required: true
         
-  MosaicConfig:
+  MosaicResponseConfig:
     type: VisualizationConfig
 
   MosaicPostResponse:
     additionalProperties: false
     properties:
       data:
-        type: MosaicData[]
+        type: MosaicResponseData[]
       config:
-        type: MosaicConfig
+        type: MosaicResponseConfig

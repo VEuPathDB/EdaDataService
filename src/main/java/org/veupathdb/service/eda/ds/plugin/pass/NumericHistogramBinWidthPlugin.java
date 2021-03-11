@@ -27,7 +27,7 @@ public class NumericHistogramBinWidthPlugin extends HistogramPlugin<NumericHisto
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     NumericHistogramBinWidthSpec spec = getPluginSpec();
-    EntityDef entity = getReferenceMetadata().getEntity(spec.getEntityId());
+    EntityDef entity = getReferenceMetadata().getEntity(spec.getOutputEntityId());
     VariableDef xVar = entity.getVariable(spec.getXAxisVariable());
     APIVariableType xType = xVar.getType();
 

@@ -36,7 +36,7 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
   @Override
   protected ValidationBundle validateVisualizationSpec(ScatterplotSpec pluginSpec) throws ValidationException {
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
-    EntityDef entity = getValidEntity(validation, pluginSpec.getEntityId());
+    EntityDef entity = getValidEntity(validation, pluginSpec.getOutputEntityId());
     validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.NUMBER, APIVariableType.DATE);
     validateVariableNameAndType(validation, entity, "yAxisVariable", pluginSpec.getYAxisVariable(), APIVariableType.NUMBER, APIVariableType.DATE);
     if (pluginSpec.getOverlayVariable() != null) {
@@ -52,7 +52,7 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
 
   @Override
   protected List<StreamSpec> getRequestedStreams(ScatterplotSpec pluginSpec) {
-    StreamSpec spec = new StreamSpec(DATAFILE_NAME, pluginSpec.getEntityId());
+    StreamSpec spec = new StreamSpec(DATAFILE_NAME, pluginSpec.getOutputEntityId());
     spec.add(pluginSpec.getXAxisVariable());
     spec.add(pluginSpec.getYAxisVariable());
     if (pluginSpec.getOverlayVariable() != null) {
@@ -80,7 +80,7 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
     String groupVar = toColNameOrEmpty(spec.getOverlayVariable());
 
     if (simpleScatter) {
-      EntityDef entity = getReferenceMetadata().getEntity(spec.getEntityId());
+      EntityDef entity = getReferenceMetadata().getEntity(spec.getOutputEntityId());
       Scanner s = new Scanner(dataStreams.get(DATAFILE_NAME)).useDelimiter("\n");
       String[] header = s.nextLine().split("\t");
 

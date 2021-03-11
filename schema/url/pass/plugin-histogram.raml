@@ -1,0 +1,46 @@
+#%RAML 1.0 Library
+
+types:
+
+  HistogramPostRequest:
+    type: VisualizationRequestBase
+
+  ValueSpec:
+    type: string
+    enum: ['count', 'proportion']
+
+  HistogramSpec:
+    additionalProperties: false
+    properties:
+      outputEntityId:
+        type: string
+      xAxisVariable:
+        type: VariableSpec
+      valueSpec: 
+        type: ValueSpec
+      overlayVariable: 
+        type: VariableSpec
+        required: false
+      facetVariable: 
+        type: VariableSpec[]
+        maxItems: 2
+        required: false
+        
+  HistogramResponseConfig:
+    type: VisualizationConfig
+    properties:
+      binSlider:
+        type: BinSlider
+      xVariableDetails:
+        type: VariableSpec
+      
+
+  HistogramPostResponse:
+    additionalProperties: false
+    properties:
+      data:
+        type: HistogramResponseData[]
+      config:
+        type: HistogramResponseConfig
+        
+    
