@@ -3,19 +3,16 @@
 types:
   # Type name determines the name of the Java class that will be generated.
 
-  ScatterplotPostRequest:
+  LineplotPostRequest:
     type: VisualizationRequestBase
     properties:
-      config: ScatterplotSpec
+      config: LineplotSpec
 
-  ScatterplotSpec:
+  LineplotSpec:
     additionalProperties: false
     properties:
       outputEntityId:
         type: string
-      valueSpec:
-        type: string
-        enum: ['smoothedMean', 'raw']
       xAxisVariable: 
         type: VariableSpec
       yAxisVariable: 
@@ -28,7 +25,7 @@ types:
         maxItems: 2
         required: false
 
-  ScatterplotResponseConfig:
+  LineplotResponseConfig:
     type: VisualizationConfig
     properties:
       xVariableDetails:
@@ -36,10 +33,10 @@ types:
       yVariableDetails:
         type: VariableSpec
 
-  ScatterplotPostResponse:
+  LineplotPostResponse:
     additionalProperties: false
     properties:
       data:
-        type: ScatterplotResponseData[]
+        type: LineplotResponseData[]
       config:
-        type: ScatterplotResponseConfig
+        type: LineplotResponseConfig

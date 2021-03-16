@@ -12,7 +12,9 @@ import org.veupathdb.service.eda.ds.plugin.BarplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.BoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.DateHistogramBinWidthPlugin;
 import org.veupathdb.service.eda.ds.plugin.DateHistogramNumBinsPlugin;
+import org.veupathdb.service.eda.ds.plugin.DensityplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.HeatmapPlugin;
+import org.veupathdb.service.eda.ds.plugin.LineplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.MapPlugin;
 import org.veupathdb.service.eda.ds.plugin.MosaicPlugin;
 import org.veupathdb.service.eda.ds.plugin.NumericHistogramBinWidthPlugin;
@@ -29,9 +31,13 @@ import org.veupathdb.service.eda.generated.model.DateHistogramBinWidthPostReques
 import org.veupathdb.service.eda.generated.model.DateHistogramBinWidthPostResponseStream;
 import org.veupathdb.service.eda.generated.model.DateHistogramNumBinsPostRequest;
 import org.veupathdb.service.eda.generated.model.DateHistogramNumBinsPostResponseStream;
+import org.veupathdb.service.eda.generated.model.DensityplotPostRequest;
+import org.veupathdb.service.eda.generated.model.DensityplotPostResponseStream;
 import org.veupathdb.service.eda.generated.model.EntityTabularPostResponseStream;
 import org.veupathdb.service.eda.generated.model.HeatmapPostRequest;
 import org.veupathdb.service.eda.generated.model.HeatmapPostResponseStream;
+import org.veupathdb.service.eda.generated.model.LineplotPostRequest;
+import org.veupathdb.service.eda.generated.model.LineplotPostResponseStream;
 import org.veupathdb.service.eda.generated.model.MapPostRequest;
 import org.veupathdb.service.eda.generated.model.MapPostResponseStream;
 import org.veupathdb.service.eda.generated.model.MosaicPostRequest;
@@ -81,6 +87,20 @@ public class AppsService implements Apps {
   public PostAppsPassVisualizationsScatterplotResponse postAppsPassVisualizationsScatterplot(ScatterplotPostRequest entity) {
     return wrapPlugin(() -> PostAppsPassVisualizationsScatterplotResponse.respond200WithApplicationJson(
         new ScatterplotPostResponseStream(new ScatterplotPlugin().processRequest(entity))));
+  }
+
+  @DisableJackson
+  @Override
+  public PostAppsPassVisualizationsDensityplotResponse postAppsPassVisualizationsDensityplot(DensityplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsPassVisualizationsDensityplotResponse.respond200WithApplicationJson(
+        new DensityplotPostResponseStream(new DensityplotPlugin().processRequest(entity))));
+  }
+
+  @DisableJackson
+  @Override
+  public PostAppsPassVisualizationsLineplotResponse postAppsPassVisualizationsLineplot(LineplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsPassVisualizationsLineplotResponse.respond200WithApplicationJson(
+        new LineplotPostResponseStream(new LineplotPlugin().processRequest(entity))));
   }
 
   @DisableJackson

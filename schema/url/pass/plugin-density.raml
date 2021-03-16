@@ -3,22 +3,17 @@
 types:
   # Type name determines the name of the Java class that will be generated.
 
-  ScatterplotPostRequest:
+  DensityplotPostRequest:
     type: VisualizationRequestBase
     properties:
-      config: ScatterplotSpec
+      config: DensityplotSpec
 
-  ScatterplotSpec:
+  DensityplotSpec:
     additionalProperties: false
     properties:
       outputEntityId:
         type: string
-      valueSpec:
-        type: string
-        enum: ['smoothedMean', 'raw']
       xAxisVariable: 
-        type: VariableSpec
-      yAxisVariable: 
         type: VariableSpec
       overlayVariable: 
         type: VariableSpec
@@ -28,18 +23,16 @@ types:
         maxItems: 2
         required: false
 
-  ScatterplotResponseConfig:
+  DensityplotResponseConfig:
     type: VisualizationConfig
     properties:
       xVariableDetails:
         type: VariableSpec
-      yVariableDetails:
-        type: VariableSpec
 
-  ScatterplotPostResponse:
+  DensityplotPostResponse:
     additionalProperties: false
     properties:
       data:
-        type: ScatterplotResponseData[]
+        type: DensityplotResponseData[]
       config:
-        type: ScatterplotResponseConfig
+        type: DensityplotResponseConfig

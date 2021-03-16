@@ -70,6 +70,38 @@ securitySchemes:
               application/json:
                 type: error.ServerError
 
+    /densityplot:
+      post:
+        description: Returns data required to create a densityplot visualization <br> Java impl- NA <br> R impl- drafted, passing unit tests, not confirmed working
+        body:
+          application/json:
+            type: lib.DensityplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.DensityplotPostResponse
+          500:
+            body:
+              application/json:
+                type: error.ServerError
+
+    /lineplot:
+      post:
+        description: Returns data required to create a lineplot visualization <br> Java impl- NA <br> R impl- drafted, passing unit tests, not confirmed working
+        body:
+          application/json:
+            type: lib.LineplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.LineplotPostResponse
+          500:
+            body:
+              application/json:
+                type: error.ServerError
+
     /date-histogram-bin-width:
       post:
         description: Returns data required to create a histogram visualization of date values given a number of bins <br> Java impl- NA <br> R impl- drafted, passing unit tests, not confirmed working
