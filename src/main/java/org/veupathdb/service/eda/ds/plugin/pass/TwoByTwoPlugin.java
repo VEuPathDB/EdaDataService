@@ -21,7 +21,7 @@ import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class MosaicPlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpec> {
+public class TwoByTwoPlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpec> {
 
   private static final String DATAFILE_NAME = "file1.txt";
 
@@ -69,7 +69,7 @@ public class MosaicPlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpec> 
           + ", '" + toColNameOrEmpty(spec.getYAxisVariable())  + "'"
           + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(0)) + "'"
           + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(1)) + "'), stringsAsFactors=FALSE)");
-      String outFile = connection.eval("contingencyTable(data, map)").asString();
+      String outFile = connection.eval("mosaic(data, map)").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
       }

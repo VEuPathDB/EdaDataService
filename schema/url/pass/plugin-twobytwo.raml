@@ -24,11 +24,16 @@ types:
         
   MosaicResponseConfig:
     type: VisualizationConfig
+    properties:
+      xVariableDetails:
+        type: VariableSpec
+      yVariableDetails:
+        type: VariableSpec
 
-  MosaicPostResponse:
+  TwoByTwoPostResponse:
     additionalProperties: false
     properties:
       data:
-        type: MosaicResponseData[]
+        type: TwoByTwoResponseData[]
       config:
         type: MosaicResponseConfig

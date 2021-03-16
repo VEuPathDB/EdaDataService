@@ -10,13 +10,14 @@ import org.gusdb.fgputil.functional.FunctionalInterfaces;
 import org.veupathdb.lib.container.jaxrs.server.annotations.DisableJackson;
 import org.veupathdb.service.eda.ds.plugin.BarplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.BoxplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.ContTablePlugin;
 import org.veupathdb.service.eda.ds.plugin.DateHistogramBinWidthPlugin;
 import org.veupathdb.service.eda.ds.plugin.DateHistogramNumBinsPlugin;
 import org.veupathdb.service.eda.ds.plugin.DensityplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.HeatmapPlugin;
 import org.veupathdb.service.eda.ds.plugin.LineplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.MapPlugin;
-import org.veupathdb.service.eda.ds.plugin.MosaicPlugin;
+import org.veupathdb.service.eda.ds.plugin.TwoByTwoPlugin;
 import org.veupathdb.service.eda.ds.plugin.NumericHistogramBinWidthPlugin;
 import org.veupathdb.service.eda.ds.plugin.NumericHistogramNumBinsPlugin;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
@@ -41,7 +42,8 @@ import org.veupathdb.service.eda.generated.model.LineplotPostResponseStream;
 import org.veupathdb.service.eda.generated.model.MapPostRequest;
 import org.veupathdb.service.eda.generated.model.MapPostResponseStream;
 import org.veupathdb.service.eda.generated.model.MosaicPostRequest;
-import org.veupathdb.service.eda.generated.model.MosaicPostResponseStream;
+import org.veupathdb.service.eda.generated.model.TwoByTwoPostResponseStream;
+import org.veupathdb.service.eda.generated.model.ContTablePostResponseStream;
 import org.veupathdb.service.eda.generated.model.MultiStreamPostRequest;
 import org.veupathdb.service.eda.generated.model.NumericHistogramBinWidthPostRequest;
 import org.veupathdb.service.eda.generated.model.NumericHistogramBinWidthPostResponseStream;
@@ -154,9 +156,16 @@ public class AppsService implements Apps {
 
   @DisableJackson
   @Override
-  public PostAppsPassVisualizationsMosaicResponse postAppsPassVisualizationsMosaic(MosaicPostRequest entity) {
-    return wrapPlugin(() -> PostAppsPassVisualizationsMosaicResponse.respond200WithApplicationJson(
-        new MosaicPostResponseStream(new MosaicPlugin().processRequest(entity))));
+  public PostAppsPassVisualizationsTwobytwoResponse postAppsPassVisualizationsTwobytwo(MosaicPostRequest entity) {
+    return wrapPlugin(() -> PostAppsPassVisualizationsTwobytwoResponse.respond200WithApplicationJson(
+        new TwoByTwoPostResponseStream(new TwoByTwoPlugin().processRequest(entity))));
+  }
+  
+  @DisableJackson
+  @Override
+  public PostAppsPassVisualizationsConttableResponse postAppsPassVisualizationsConttable(MosaicPostRequest entity) {
+    return wrapPlugin(() -> PostAppsPassVisualizationsConttableResponse.respond200WithApplicationJson(
+        new ContTablePostResponseStream(new ContTablePlugin().processRequest(entity))));
   }
 
   @DisableJackson

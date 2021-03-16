@@ -214,7 +214,7 @@ securitySchemes:
               application/json:
                 type: error.ServerError
 
-    /mosaic:
+    /twobytwo:
       post:
         description: Returns data required to create a mosaic plot visualization <br> Java impl- NA <br> R impl- drafted
         body:
@@ -224,7 +224,23 @@ securitySchemes:
           200:
             body:
               application/json:
-                type: lib.MosaicPostResponse
+                type: lib.TwoByTwoPostResponse
+          500:
+            body:
+              application/json:
+                type: error.ServerError
+                
+    /conttable:
+      post:
+        description: Returns data required to create a mosaic plot visualization <br> Java impl- NA <br> R impl- drafted
+        body:
+          application/json:
+            type: lib.MosaicPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.ContTablePostResponse
           500:
             body:
               application/json:
