@@ -56,7 +56,7 @@ securitySchemes:
 
     /scatterplot:
       post:
-        description: Returns data required to create a scatterplot visualization <br> Java impl- NA <br> R impl- drafted, passing unit tests, not confirmed working
+        description: Returns data required to create a scatterplot visualization <br> Java impl- NA <br> R impl- confirmed working without strata
         body:
           application/json:
             type: lib.ScatterplotPostRequest
@@ -168,7 +168,7 @@ securitySchemes:
   
     /boxplot:
       post:
-        description: Returns data required to create a boxplot visualization <br> Java impl- NA <br> R impl- drafted
+        description: Returns data required to create a boxplot visualization <br> Java impl- NA <br> R impl- confirmed working without strata
         body:
           application/json:
             type: lib.BoxplotPostRequest
@@ -200,7 +200,7 @@ securitySchemes:
 
     /barplot:
       post:
-        description: Returns data required to create a bar or pie plot visualization <br> Java impl- drafted, not working <br> R impl- drafted, passing unit tests, not confirmed working
+        description: Returns data required to create a bar or pie plot visualization <br> Java impl- drafted, not working <br> R impl- confirmed working without strata
         body:
           application/json:
             type: lib.BarplotPostRequest
@@ -216,7 +216,7 @@ securitySchemes:
 
     /twobytwo:
       post:
-        description: Returns data required to create a mosaic plot visualization <br> Java impl- NA <br> R impl- drafted
+        description: Returns data required to create a mosaic plot visualization <br> Java impl- NA <br> R impl- confirmed working without strata
         body:
           application/json:
             type: lib.MosaicPostRequest
