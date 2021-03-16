@@ -112,7 +112,6 @@ types:
         minItems: 1
         required: true
         
-# TODO make sure the response props have the right names, includes table values if needed etc
   TwoByTwoResponseData:
     additionalProperties: false
     properties:
@@ -120,11 +119,40 @@ types:
         type: StrataVariableDetails[]
         maxItems: 2
         required: false
-      value:
+      oddsratio:
         type: number[]
         minItems: 1
         required: true
+      pvalue:
+        type: number[]
+        minItems: 1
+        required: true
+      x:
+        type: number[]
+        minItems: 1
+        required: true
+      orInterval:
+        type: number[]
+        minItems: 1
+        required: true
+      yLabel:
+        type: number[]
+        minItems: 1
+        required: true
+      y:
+        type: number[][]
+        minItems: 1
+        required: true
+      relativerisk:
+        type: number[]
+        minItems: 1
+        required: true
+      rrInterval:
+        type: number[]
+        minItems: 1
+        required: true  
         
+  # TODO make sure the response props have the right names, includes table values if needed etc      
   ContTableResponseData:
     additionalProperties: false
     properties:

@@ -34,8 +34,8 @@ public class ContTablePlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpe
   protected ValidationBundle validateVisualizationSpec(MosaicSpec pluginSpec) throws ValidationException {
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
     EntityDef entity = getValidEntity(validation, pluginSpec.getOutputEntityId());
-    validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.NUMBER, APIVariableType.DATE);
-    validateVariableNameAndType(validation, entity, "yAxisVariable", pluginSpec.getYAxisVariable(), APIVariableType.NUMBER, APIVariableType.DATE);
+    validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.STRING);
+    validateVariableNameAndType(validation, entity, "yAxisVariable", pluginSpec.getYAxisVariable(), APIVariableType.STRING);
     if (pluginSpec.getFacetVariable() != null) {
       for (VariableSpec facetVar : pluginSpec.getFacetVariable()) {
         validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
@@ -57,18 +57,40 @@ public class ContTablePlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpe
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
+    MosaicSpec spec = getPluginSpec();
+    EntityDef entity = getReferenceMetadata().getEntity(spec.getOutputEntityId());
+    String xVar = toColNameOrEmpty(spec.getXAxisVariable());
+    String yVar = toColNameOrEmpty(spec.getYAxisVariable());
+    String facetVar1 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(0)) : "";
+    String facetVar2 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(1)) : "";
+    String xVarEntity = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
+    String yVarEntity = spec.getYAxisVariable() != null ? spec.getYAxisVariable().getEntityId() : "";
+    String facetEntity1 = spec.getFacetVariable() != null ? spec.getFacetVariable().get(0).getEntityId() : "";
+    String facetEntity2 = spec.getFacetVariable() != null ? spec.getFacetVariable().get(1).getEntityId() : "";
+    String xVarType = spec.getXAxisVariable() != null ? entity.getVariable(spec.getXAxisVariable()).getType().toString() : "";
+    String yVarType = spec.getYAxisVariable() != null ? entity.getVariable(spec.getYAxisVariable()).getType().toString() : "";
+    String facetType1 = spec.getFacetVariable() != null ? entity.getVariable(spec.getFacetVariable().get(0)).getType().toString() : "";
+    String facetType2 = spec.getFacetVariable() != null ? entity.getVariable(spec.getFacetVariable().get(1)).getType().toString() : "";
+    
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
-      MosaicSpec spec = getPluginSpec();
-      connection.voidEval("data <- fread('" + DATAFILE_NAME + "')");
+      connection.voidEval("data <- fread('" + DATAFILE_NAME + "', na.strings=c(''))");
       connection.voidEval("map <- data.frame("
           + "'plotRef'=c('xAxisVariable', "
           + "       'yAxisVariable', "
           + "       'facetVariable1', "
           + "       'facetVariable2'), "
-          + "'id'=c('" + toColNameOrEmpty(spec.getXAxisVariable()) + "'"
-          + ", '" + toColNameOrEmpty(spec.getYAxisVariable())  + "'"
-          + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(0)) + "'"
-          + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(1)) + "'), stringsAsFactors=FALSE)");
+          + "'id'=c('" + xVar + "'"
+          + ", '" + yVar  + "'"
+          + ", '" + facetVar1 + "'"
+          + ", '" + facetVar2 + "'), "
+          + "'entityId'=c('" + xVarEntity + "'"
+          + ", '" + yVarEntity + "'"
+          + ", '" + facetEntity1 + "'"
+          + ", '" + facetEntity2 + "'), "
+          + "'dataType'=c('" + xVarType + "'"
+          + ", '" + yVarType + "'"
+          + ", '" + facetType1 + "'"
+          + ", '" + facetType2 + "'), stringsAsFactors=FALSE)");
       String outFile = connection.eval("mosaic(data, map)").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);

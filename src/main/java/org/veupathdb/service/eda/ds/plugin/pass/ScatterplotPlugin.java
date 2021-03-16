@@ -70,14 +70,16 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
     
     boolean simpleScatter = true;
     if (spec.getFacetVariable() != null
-         || !spec.getValueSpec().equals(ScatterplotSpec.ValueSpecType.RAW)
+         || !spec.getSmoothedMean().equals(ScatterplotSpec.SmoothedMeanType.FALSE)
          || dataStreams.size() != 1) {
       simpleScatter = false;
     }
-
+    //for testing rserve
+    simpleScatter = false;
+    
     String xVar = toColNameOrEmpty(spec.getXAxisVariable());
     String yVar = toColNameOrEmpty(spec.getYAxisVariable());
-    String groupVar = toColNameOrEmpty(spec.getOverlayVariable());
+    String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());
 
     if (simpleScatter) {
       EntityDef entity = getReferenceMetadata().getEntity(spec.getOutputEntityId());
@@ -86,10 +88,10 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
 
       int xVarIndex = 0;
       int yVarIndex = 1;
-      Integer groupVarIndex = null;
+      Integer overlayVarIndex = null;
       for (int i = 0; i < header.length; i++) {
-        if (Array.get(header, i).equals(groupVar)) {
-          groupVarIndex = i;
+        if (Array.get(header, i).equals(overlayVar)) {
+          overlayVarIndex = i;
         } else if (Array.get(header, i).equals(xVar)) {
           xVarIndex = i;
         } else if (Array.get(header, i).equals(yVar)) {
@@ -102,8 +104,8 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
         JSONObject scatterRow = new JSONObject();
         String xValue = row[xVarIndex];
         String yValue = row[yVarIndex];
-        if (groupVarIndex != null) {
-          String currentGroup = row[groupVarIndex];
+        if (overlayVarIndex != null) {
+          String currentGroup = row[overlayVarIndex];
           scatterRow.put("group", currentGroup);
         }
         scatterRow.put("seriesX", xValue); 
@@ -114,8 +116,23 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
       s.close();
       out.flush();
     } else {
+      EntityDef entity = getReferenceMetadata().getEntity(spec.getOutputEntityId());
+      String facetVar1 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(0)) : "";
+      String facetVar2 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(1)) : "";
+      String xVarEntity = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
+      String yVarEntity = spec.getYAxisVariable() != null ? spec.getYAxisVariable().getEntityId() : "";
+      String overlayEntity = spec.getOverlayVariable() != null ? spec.getOverlayVariable().getEntityId() : "";
+      String facetEntity1 = spec.getFacetVariable() != null ? spec.getFacetVariable().get(0).getEntityId() : "";
+      String facetEntity2 = spec.getFacetVariable() != null ? spec.getFacetVariable().get(1).getEntityId() : "";
+      String xVarType = spec.getXAxisVariable() != null ? entity.getVariable(spec.getXAxisVariable()).getType().toString() : "";
+      String yVarType = spec.getYAxisVariable() != null ? entity.getVariable(spec.getYAxisVariable()).getType().toString() : "";
+      String overlayType = spec.getOverlayVariable() != null ? entity.getVariable(spec.getOverlayVariable()).getType().toString() : "";
+      String facetType1 = spec.getFacetVariable() != null ? entity.getVariable(spec.getFacetVariable().get(0)).getType().toString() : "";
+      String facetType2 = spec.getFacetVariable() != null ? entity.getVariable(spec.getFacetVariable().get(1)).getType().toString() : "";
+      String smoothedMean = spec.getSmoothedMean().equals(ScatterplotSpec.SmoothedMeanType.FALSE) ? "raw" : "smoothedMean";
+      
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
-        connection.voidEval("data <- fread('" + DATAFILE_NAME + "')");
+        connection.voidEval("data <- fread('" + DATAFILE_NAME + "', na.strings=c(''))");
         connection.voidEval("map <- data.frame("
             + "'plotRef'=c('xAxisVariable', "
             + "       'yAxisVariable', "
@@ -124,10 +141,20 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
             + "       'facetVariable2'), "
             + "'id'=c('" + xVar + "'"
             + ", '" + yVar + "'"
-            + ", '" + groupVar + "'"
-            + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(0)) + "'"
-            + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(1)) + "'), stringsAsFactors=FALSE)");
-        String outFile = connection.eval("scattergl(data, map, '" + spec.getValueSpec().toString().toLowerCase() + "')").asString();
+            + ", '" + overlayVar + "'"
+            + ", '" + facetVar1 + "'"
+            + ", '" + facetVar2 + "'), "
+            + "'entityId'=c('" + xVarEntity + "'"
+            + ", '" + yVarEntity + "'"
+            + ", '" + overlayEntity + "'"
+            + ", '" + facetEntity1 + "'"
+            + ", '" + facetEntity2 + "'), "
+            + "'dataType'=c('" + xVarType + "'"
+            + ", '" + yVarType + "'"
+            + ", '" + overlayType + "'"
+            + ", '" + facetType1 + "'"
+            + ", '" + facetType2 + "'), stringsAsFactors=FALSE)");
+        String outFile = connection.eval("scattergl(data, map, '" + smoothedMean + "')").asString();
         try (RFileInputStream response = connection.openFile(outFile)) {
           IoUtil.transferStream(out, response);
         }

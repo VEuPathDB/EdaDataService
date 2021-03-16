@@ -63,23 +63,50 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
+    BoxplotSpec spec = getPluginSpec();
+    EntityDef entity = getReferenceMetadata().getEntity(spec.getOutputEntityId());
+    String xVar = toColNameOrEmpty(spec.getXAxisVariable());
+    String yVar = toColNameOrEmpty(spec.getYAxisVariable());
+    String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());
+    String facetVar1 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(0)) : "";
+    String facetVar2 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(1)) : "";
+    String xVarEntity = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
+    String yVarEntity = spec.getYAxisVariable() != null ? spec.getYAxisVariable().getEntityId() : "";
+    String overlayEntity = spec.getOverlayVariable() != null ? spec.getOverlayVariable().getEntityId() : "";
+    String facetEntity1 = spec.getFacetVariable() != null ? spec.getFacetVariable().get(0).getEntityId() : "";
+    String facetEntity2 = spec.getFacetVariable() != null ? spec.getFacetVariable().get(1).getEntityId() : "";
+    String xVarType = spec.getXAxisVariable() != null ? entity.getVariable(spec.getXAxisVariable()).getType().toString() : "";
+    String yVarType = spec.getYAxisVariable() != null ? entity.getVariable(spec.getYAxisVariable()).getType().toString() : "";
+    String overlayType = spec.getOverlayVariable() != null ? entity.getVariable(spec.getOverlayVariable()).getType().toString() : "";
+    String facetType1 = spec.getFacetVariable() != null ? entity.getVariable(spec.getFacetVariable().get(0)).getType().toString() : "";
+    String facetType2 = spec.getFacetVariable() != null ? entity.getVariable(spec.getFacetVariable().get(1)).getType().toString() : "";
+    
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
-      BoxplotSpec spec = getPluginSpec();
-      connection.voidEval("data <- fread('" + DATAFILE_NAME + "')");
+      connection.voidEval("data <- fread('" + DATAFILE_NAME + "', na.strings=c(''))");
       connection.voidEval("map <- data.frame("
           + "'plotRef'=c('xAxisVariable', "
           + "       'yAxisVariable', "
           + "       'overlayVariable', "
           + "       'facetVariable1', "
           + "       'facetVariable2'), "
-          + "'id'=c('" + toColNameOrEmpty(spec.getXAxisVariable()) + "'"
-          + ", '" + toColNameOrEmpty(spec.getYAxisVariable()) + "'"
-          + ", '" + toColNameOrEmpty(spec.getOverlayVariable()) + "'"
-          + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(0)) + "'"
-          + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(1)) + "'), stringsAsFactors=FALSE)");
+          + "'id'=c('" + xVar + "'"
+          + ", '" + yVar + "'"
+          + ", '" + overlayVar + "'"
+          + ", '" + facetVar1 + "'"
+          + ", '" + facetVar2 + "'), "
+          + "'entityId'=c('" + xVarEntity + "'"
+          + ", '" + yVarEntity + "'"
+          + ", '" + overlayEntity + "'"
+          + ", '" + facetEntity1 + "'"
+          + ", '" + facetEntity2 + "'), "
+          + "'dataType'=c('" + xVarType + "'"
+          + ", '" + yVarType + "'"
+          + ", '" + overlayType + "'"
+          + ", '" + facetType1 + "'"
+          + ", '" + facetType2 + "'), stringsAsFactors=FALSE)");
       String outFile = connection.eval("box(data, map, '" +
           spec.getPoints().toString().toLowerCase() + "', '" +
-          spec.getMean().toString().toLowerCase() + "')").asString();
+          spec.getMean().toString().toUpperCase() + "')").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
       }

@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.util.Map;
 import org.gusdb.fgputil.IoUtil;
 import org.rosuda.REngine.Rserve.RFileInputStream;
+import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.generated.model.NumericHistogramNumBinsPostRequest;
 import org.veupathdb.service.eda.generated.model.NumericHistogramNumBinsSpec;
 
@@ -67,15 +68,22 @@ public class NumericHistogramNumBinsPlugin extends HistogramPlugin<NumericHistog
 	  out.flush();
     } else { 
 */  
+    EntityDef entity = getReferenceMetadata().getEntity(spec.getOutputEntityId());
+    String facetVar1 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(0)) : "";
+    String facetVar2 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(1)) : "";
+    // NOTE: eventually varId and entityId will be a single string delimited by '.'
+    String xAxisEntity = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
+    String overlayEntity = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
+    String facetEntity1 = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
+    String facetEntity2 = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
+    // TODO this only works for now bc outputEntityId must be the same as var entityId
+    String xVarType = spec.getXAxisVariable() != null ? entity.getVariable(spec.getXAxisVariable()).getType().toString() : "";
+    String overlayType = spec.getOverlayVariable() != null ? entity.getVariable(spec.getOverlayVariable()).getType().toString() : "";
+    String facetType1 = spec.getFacetVariable() != null ? entity.getVariable(spec.getFacetVariable().get(0)).getType().toString() : "";
+    String facetType2 = spec.getFacetVariable() != null ? entity.getVariable(spec.getFacetVariable().get(1)).getType().toString() : "";
+    
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
-        connection.voidEval("data <- fread('" + DATAFILE_NAME + "', na.strings=c(''))");
-        String facetVar1 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(0)) : "";
-        String facetVar2 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(1)) : "";
-        // NOTE: eventually varId and entityId will be a single string delimited by '.'
-        String xAxisEntity = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
-        String overlayEntity = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
-        String facetEntity1 = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
-        String facetEntity2 = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
+        connection.voidEval("data <- fread('" + DATAFILE_NAME + "', na.strings=c(''))");        
         connection.voidEval("map <- data.frame("
             + "'plotRef'=c('xAxisVariable', "
             + "       'overlayVariable', "
@@ -88,7 +96,11 @@ public class NumericHistogramNumBinsPlugin extends HistogramPlugin<NumericHistog
             + "'entityId'=c('" + xAxisEntity + "'"
             + ", '" + overlayEntity + "'"
             + ", '" + facetEntity1 + "'"
-            + ", '" + facetEntity2 + "'), stringsAsFactors=FALSE)");
+            + ", '" + facetEntity2 + "'), "
+            + "'dataType'=c('" + xVarType + "'"
+            + ", '" + overlayType + "'"
+            + ", '" + facetType1 + "'"
+            + ", '" + facetType2 + "'), stringsAsFactors=FALSE)");
         if (spec.getViewportMin() != null & spec.getViewportMax() != null) {
           connection.voidEval("viewport <- list('min'=" + spec.getViewportMin() + ", 'max'=" + spec.getViewportMax() + ")");
         } else {

@@ -69,7 +69,6 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
     boolean simpleBar = true;
     // TODO consider adding facets to simpleBar ?
     if (spec.getFacetVariable() != null
-         || !spec.getValueSpec().equals(BarplotSpec.ValueSpecType.COUNT)
          || dataStreams.size() != 1) {
       simpleBar = false;
     }
@@ -140,21 +139,40 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
       out.flush();
     }
     else {
+      String xVar = toColNameOrEmpty(spec.getXAxisVariable());
+      String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());
+      String facetVar1 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(0)) : "";
+      String facetVar2 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(1)) : "";
+      String xVarEntity = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
+      String overlayEntity = spec.getOverlayVariable() != null ? spec.getOverlayVariable().getEntityId() : "";
+      String facetEntity1 = spec.getFacetVariable() != null ? spec.getFacetVariable().get(0).getEntityId() : "";
+      String facetEntity2 = spec.getFacetVariable() != null ? spec.getFacetVariable().get(1).getEntityId() : "";
+      String xVarType = spec.getXAxisVariable() != null ? entity.getVariable(spec.getXAxisVariable()).getType().toString() : "";
+      String overlayType = spec.getOverlayVariable() != null ? entity.getVariable(spec.getOverlayVariable()).getType().toString() : "";
+      String facetType1 = spec.getFacetVariable() != null ? entity.getVariable(spec.getFacetVariable().get(0)).getType().toString() : "";
+      String facetType2 = spec.getFacetVariable() != null ? entity.getVariable(spec.getFacetVariable().get(1)).getType().toString() : "";
+      
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
         connection.voidEval("data <- fread('" + DATAFILE_NAME + "', na.strings=c(''))");
-        String facetVar1 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(0)) : "";
-        String facetVar2 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(1)) : "";
         String createMapString = "map <- data.frame("
             + "'plotRef'=c('xAxisVariable', "
             + "       'overlayVariable', "
             + "       'facetVariable1', "
             + "       'facetVariable2'), "
-            + "'id'=c('" + toColNameOrEmpty(spec.getXAxisVariable()) + "'"
-            + ", '" + toColNameOrEmpty(spec.getOverlayVariable()) + "'"
+            + "'id'=c('" + xVar + "'"
+            + ", '" + overlayVar + "'"
             + ", '" + facetVar1 + "'"
-            + ", '" + facetVar2 + "'), stringsAsFactors=FALSE)";
+            + ", '" + facetVar2 + "'), "
+            + "'entityId'=c('" + xVarEntity + "'"
+            + ", '" + overlayEntity + "'"
+            + ", '" + facetEntity1 + "'"
+            + ", '" + facetEntity2 + "'), "
+            + "'dataType'=c('" + xVarType + "'"
+            + ", '" + overlayType + "'"
+            + ", '" + facetType1 + "'"
+            + ", '" + facetType2 + "'), stringsAsFactors=FALSE)";
         connection.voidEval(createMapString);
-        String outFile = connection.eval("bar(data, map, '" + spec.getValueSpec().toString().toLowerCase() + "')").asString();
+        String outFile = connection.eval("bar(data, map, 'count')").asString();
         try (RFileInputStream response = connection.openFile(outFile)) {
           IoUtil.transferStream(out, response);
         }
