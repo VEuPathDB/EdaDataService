@@ -88,7 +88,7 @@ securitySchemes:
 
     /lineplot:
       post:
-        description: Returns data required to create a lineplot visualization <br> Java impl- NA <br> R impl- drafted, passing unit tests, not confirmed working
+        description: Returns data required to create a lineplot visualization <br> Java impl- NA <br> R impl- confirmed working without strata
         body:
           application/json:
             type: lib.LineplotPostRequest
@@ -152,7 +152,7 @@ securitySchemes:
   
     /numeric-histogram-num-bins:
       post:
-        description: Returns data required to create a histogram visualization of numeric values given a bin width <br> Java impl- NA <br> R impl- drafted, passing unit tests, not confirmed working
+        description: Returns data required to create a histogram visualization of numeric values given a bin width <br> Java impl- NA <br> R impl- xaxis and overlay working
         body:
           application/json:
             type: lib.NumericHistogramNumBinsPostRequest
