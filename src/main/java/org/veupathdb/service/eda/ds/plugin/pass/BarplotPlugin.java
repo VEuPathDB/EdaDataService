@@ -69,6 +69,7 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
     boolean simpleBar = true;
     // TODO consider adding facets to simpleBar ?
     if (spec.getFacetVariable() != null
+         || !spec.getValueSpec().equals(BarplotSpec.ValueSpecType.COUNT)
          || dataStreams.size() != 1) {
       simpleBar = false;
     }
@@ -172,7 +173,7 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
             + ", '" + facetType1 + "'"
             + ", '" + facetType2 + "'), stringsAsFactors=FALSE)";
         connection.voidEval(createMapString);
-        String outFile = connection.eval("bar(data, map, 'count')").asString();
+        String outFile = connection.eval("bar(data, map, '" + spec.getValueSpec().toString().toLowerCase() + "')").asString();
         try (RFileInputStream response = connection.openFile(outFile)) {
           IoUtil.transferStream(out, response);
         }

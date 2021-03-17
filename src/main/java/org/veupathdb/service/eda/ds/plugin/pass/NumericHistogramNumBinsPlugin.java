@@ -69,10 +69,12 @@ public class NumericHistogramNumBinsPlugin extends HistogramPlugin<NumericHistog
     } else { 
 */  
     EntityDef entity = getReferenceMetadata().getEntity(spec.getOutputEntityId());
+    String xVar = toColNameOrEmpty(spec.getXAxisVariable());
+    String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());
     String facetVar1 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(0)) : "";
     String facetVar2 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(1)) : "";
     // NOTE: eventually varId and entityId will be a single string delimited by '.'
-    String xAxisEntity = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
+    String xVarEntity = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
     String overlayEntity = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
     String facetEntity1 = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
     String facetEntity2 = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
@@ -89,11 +91,11 @@ public class NumericHistogramNumBinsPlugin extends HistogramPlugin<NumericHistog
             + "       'overlayVariable', "
             + "       'facetVariable1', "
             + "       'facetVariable2'), "
-            + "'id'=c('" + toColNameOrEmpty(spec.getXAxisVariable()) + "'"
-            + ", '" + toColNameOrEmpty(spec.getOverlayVariable()) + "'"
+            + "'id'=c('" + xVar + "'"
+            + ", '" + overlayVar + "'"
             + ", '" + facetVar1 + "'"
             + ", '" + facetVar2 + "'), "
-            + "'entityId'=c('" + xAxisEntity + "'"
+            + "'entityId'=c('" + xVarEntity + "'"
             + ", '" + overlayEntity + "'"
             + ", '" + facetEntity1 + "'"
             + ", '" + facetEntity2 + "'), "
