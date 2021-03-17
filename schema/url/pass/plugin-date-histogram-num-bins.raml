@@ -20,11 +20,37 @@ types:
         type: string
         required: false
         
+  DateHistogramNumBinsSummary:
+    properties:
+      min:
+        type: string
+      q1:
+        type: string
+      median:
+        type: string
+      mean:
+        type: string
+      q3:
+        type: string
+      max:
+        type: string
+                
+  DateHistogramNumBinsViewportResponse:
+    properties:
+      xMin:
+        type: string
+      xMax:
+        type: string
+        
   DateHistogramNumBinsConfig:
     type: HistogramResponseConfig
     properties:
       numBins: 
-        type: number
+        type: string
+      summary:
+        type: DateHistogramNumBinsSummary
+      viewport:
+        type: DateHistogramNumBinsViewportResponse
         
   DateHistogramNumBinsPostResponse:
     additionalProperties: false

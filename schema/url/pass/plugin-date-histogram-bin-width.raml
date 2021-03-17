@@ -20,11 +20,37 @@ types:
         type: string
         required: false
   
+  DateHistogramBinWidthSummary:
+    properties:
+      min:
+        type: string
+      q1:
+        type: string
+      median:
+        type: string
+      mean:
+        type: string
+      q3:
+        type: string
+      max:
+        type: string
+                
+  DateHistogramBinWidthViewportResponse:
+    properties:
+      xMin:
+        type: string
+      xMax:
+        type: string
+        
   DateHistogramBinWidthConfig:
     type: HistogramResponseConfig
     properties:
       binWidth: 
         type: string
+      summary:
+        type: DateHistogramBinWidthSummary
+      viewport:
+        type: DateHistogramBinWidthViewportResponse
         
   DateHistogramBinWidthPostResponse:
     additionalProperties: false

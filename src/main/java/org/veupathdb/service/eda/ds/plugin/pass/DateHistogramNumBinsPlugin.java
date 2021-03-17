@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.util.Map;
 import org.gusdb.fgputil.IoUtil;
 import org.rosuda.REngine.Rserve.RFileInputStream;
+import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.generated.model.DateHistogramNumBinsPostRequest;
 import org.veupathdb.service.eda.generated.model.DateHistogramNumBinsSpec;
 
@@ -67,28 +68,41 @@ public class DateHistogramNumBinsPlugin extends HistogramPlugin<DateHistogramNum
 	  out.flush();
     } else { 
 */  
+      EntityDef entity = getReferenceMetadata().getEntity(spec.getOutputEntityId());
+      String xVar = toColNameOrEmpty(spec.getXAxisVariable());
+      String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());
+      String facetVar1 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(0)) : "";
+      String facetVar2 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(1)) : "";
+      // TODO eventually varId and entityId will be a single string delimited by '.'
+      String xVarEntity = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
+      String overlayEntity = spec.getOverlayVariable() != null ? spec.getOverlayVariable().getEntityId() : "";
+      String facetEntity1 = spec.getFacetVariable() != null ? spec.getFacetVariable().get(0).getEntityId() : "";
+      String facetEntity2 = spec.getFacetVariable() != null ? spec.getFacetVariable().get(1).getEntityId() : "";
+      // TODO this only works for now bc outputEntityId must be the same as var entityId
+      String xVarType = spec.getXAxisVariable() != null ? entity.getVariable(spec.getXAxisVariable()).getType().toString() : "";
+      String overlayType = spec.getOverlayVariable() != null ? entity.getVariable(spec.getOverlayVariable()).getType().toString() : "";
+      String facetType1 = spec.getFacetVariable() != null ? entity.getVariable(spec.getFacetVariable().get(0)).getType().toString() : "";
+      String facetType2 = spec.getFacetVariable() != null ? entity.getVariable(spec.getFacetVariable().get(1)).getType().toString() : "";
+      
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
         connection.voidEval("data <- fread('" + DATAFILE_NAME + "', na.strings=c(''))");
-        String facetVar1 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(0)) : "";
-        String facetVar2 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(1)) : "";
-        // NOTE: eventually varId and entityId will be a single string delimited by '.'
-        String xAxisEntity = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
-        String overlayEntity = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
-        String facetEntity1 = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
-        String facetEntity2 = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
         connection.voidEval("map <- data.frame("
             + "'plotRef'=c('xAxisVariable', "
             + "       'overlayVariable', "
             + "       'facetVariable1', "
             + "       'facetVariable2'), "
-            + "'id'=c('" + toColNameOrEmpty(spec.getXAxisVariable()) + "'"
-            + ", '" + toColNameOrEmpty(spec.getOverlayVariable()) + "'"
+            + "'id'=c('" + xVar + "'"
+            + ", '" + overlayVar + "'"
             + ", '" + facetVar1 + "'"
             + ", '" + facetVar2 + "'), "
-            + "'entityId'=c('" + xAxisEntity + "'"
+            + "'entityId'=c('" + xVarEntity + "'"
             + ", '" + overlayEntity + "'"
             + ", '" + facetEntity1 + "'"
-            + ", '" + facetEntity2 + "'), stringsAsFactors=FALSE)");
+            + ", '" + facetEntity2 + "'), "
+            + "'dataType'=c('" + xVarType + "'"
+            + ", '" + overlayType + "'"
+            + ", '" + facetType1 + "'"
+            + ", '" + facetType2 + "'), stringsAsFactors=FALSE)");
         if (spec.getViewportMin() != null & spec.getViewportMax() != null) {
           connection.voidEval("viewport <- list('min'='" + spec.getViewportMin() + "', 'max'='" + spec.getViewportMax() + "')");
         } else {
@@ -96,10 +110,10 @@ public class DateHistogramNumBinsPlugin extends HistogramPlugin<DateHistogramNum
         }
         if (spec.getNumBins() != null) {
           String numBins = spec.getNumBins().toString();
-          // TODO figure the equivalent w strings/ dates
           connection.voidEval("x <- emptyStringToNull(map$id[map$plotRef == 'xAxisVariable'])");
-          connection.voidEval("xRange <- ifelse(is.null(viewport), max(data[[x]], na.rm=T) - min(0,min(data[[x]], na.rm=T)), viewport$max - viewport$min)");
+          connection.voidEval("xRange <- ifelse(is.null(viewport), as.numeric(max(data[[x]], na.rm=T) - min(0,min(data[[x]], na.rm=T))), as.numeric(viewport$max - viewport$min))");
           connection.voidEval("binWidth <- xRange*1.01/" + numBins);
+          connection.voidEval("binWidth <- paste(binWidth, ' days')");
         } else {
           connection.voidEval("binWidth <- NULL");
         }
