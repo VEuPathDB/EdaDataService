@@ -1,22 +1,20 @@
-package org.veupathdb.service.eda.ds.plugin;
+package org.veupathdb.service.eda.ds.plugin.pass;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Array;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import org.gusdb.fgputil.IoUtil;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationBundle;
 import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
-import org.json.JSONObject;
 import org.rosuda.REngine.Rserve.RFileInputStream;
-import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
+import org.veupathdb.service.eda.common.model.EntityDef;
+import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.LineplotPostRequest;
 import org.veupathdb.service.eda.generated.model.LineplotSpec;

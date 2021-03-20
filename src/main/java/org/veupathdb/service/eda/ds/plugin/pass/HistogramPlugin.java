@@ -1,4 +1,4 @@
-package org.veupathdb.service.eda.ds.plugin;
+package org.veupathdb.service.eda.ds.plugin.pass;
 
 import java.util.List;
 import org.gusdb.fgputil.ListBuilder;
@@ -7,6 +7,7 @@ import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
 import org.veupathdb.service.eda.common.model.EntityDef;
+import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.HistogramPostRequest;
 import org.veupathdb.service.eda.generated.model.HistogramSpec;

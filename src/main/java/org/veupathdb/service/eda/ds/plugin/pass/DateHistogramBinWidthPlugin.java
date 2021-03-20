@@ -1,4 +1,4 @@
-package org.veupathdb.service.eda.ds.plugin;
+package org.veupathdb.service.eda.ds.plugin.pass;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,7 +12,7 @@ import org.veupathdb.service.eda.generated.model.DateHistogramBinWidthSpec;
 
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class DateHistogramBinWidthPlugin extends HistogramPlugin<DateHistogramBinWidthPostRequest, DateHistogramBinWidthSpec>{
+public class DateHistogramBinWidthPlugin extends HistogramPlugin<DateHistogramBinWidthPostRequest, DateHistogramBinWidthSpec> {
 
   @Override
   protected Class<DateHistogramBinWidthSpec> getVisualizationSpecClass() {
@@ -21,6 +21,7 @@ public class DateHistogramBinWidthPlugin extends HistogramPlugin<DateHistogramBi
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
+    logRequestTime("Building variable definitions");
     DateHistogramBinWidthSpec spec = getPluginSpec();
     EntityDef entity = getReferenceMetadata().getEntity(spec.getOutputEntityId());
     String xVar = toColNameOrEmpty(spec.getXAxisVariable());
@@ -37,8 +38,10 @@ public class DateHistogramBinWidthPlugin extends HistogramPlugin<DateHistogramBi
     String overlayType = spec.getOverlayVariable() != null ? entity.getVariable(spec.getOverlayVariable()).getType().toString() : "";
     String facetType1 = spec.getFacetVariable() != null ? entity.getVariable(spec.getFacetVariable().get(0)).getType().toString() : "";
     String facetType2 = spec.getFacetVariable() != null ? entity.getVariable(spec.getFacetVariable().get(1)).getType().toString() : "";
-    
+
+    logRequestTime("Connecting to RServe");
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
+      logRequestTime("Passing R function config to RServe");
       connection.voidEval("data <- fread('" + DATAFILE_NAME + "', na.strings=c(''))");
       connection.voidEval("map <- data.frame("
           + "'plotRef'=c('xAxisVariable', "
@@ -63,13 +66,16 @@ public class DateHistogramBinWidthPlugin extends HistogramPlugin<DateHistogramBi
       } else {
         connection.voidEval("viewport <- NULL");
       }
+      logRequestTime("Starting histogram execution on RServe");
       String outFile = connection.eval("histogram(data, map, " +
           binWidth + ", '" +
           spec.getValueSpec().toString().toLowerCase() + "', 'binWidth', viewport)").asString();
+      logRequestTime("Response received; transferring to client");
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
       }
       out.flush();
+      logRequestTime("Response transferred");
 	 });  
   }
 }

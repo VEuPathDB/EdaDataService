@@ -13,6 +13,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.gusdb.fgputil.Timer;
 import org.gusdb.fgputil.client.ResponseFuture;
 import org.gusdb.fgputil.functional.FunctionalInterfaces.ConsumerWithException;
 import org.gusdb.fgputil.validation.ValidationBundle;
@@ -44,6 +45,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   private final EdaSubsettingClient _subsettingClient = new EdaSubsettingClient(Resources.SUBSETTING_SERVICE_URL);
   private final StreamingDataClient _mergingClient = new EdaMergingClient(Resources.MERGING_SERVICE_URL);
 
+  private Timer _timer;
   private boolean _requestProcessed = false;
   private S _pluginSpec;
   private List<APIFilter> _subset;
@@ -53,6 +55,10 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   private List<StreamSpec> _requiredStreams;
 
   public final AbstractPlugin<T,S> processRequest(T request) throws ValidationException {
+
+    // start request timer (used to profile request performance dynamics)
+    _timer = new Timer();
+    logRequestTime("Starting timer");
 
     // validate config type matches class provided by subclass
     _pluginSpec = getSpecObject(request);
@@ -79,7 +85,12 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
         .validateStreamSpecs(_requiredStreams, _referenceMetadata).throwIfInvalid();
 
     _requestProcessed = true;
+    logRequestTime("Initial request processing complete");
     return this;
+  }
+
+  protected void logRequestTime(String eventDescription) {
+    LOG.info("Request Time: " + _timer.getElapsed() + "ms, " + eventDescription);
   }
 
   @Override
@@ -96,8 +107,10 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     ConsumerWithException<Map<String,InputStream>> streamProcessor = map -> writeResults(out, map);
 
     // build and process streams
+    logRequestTime("Making requests for data streams");
     LOG.info("Building and processing " + _requiredStreams.size() + " required data streams.");
     StreamingDataClient.buildAndProcessStreams(_requiredStreams, streamGenerator, streamProcessor);
+    logRequestTime("Data streams processed; response written; request complete");
   }
 
   protected S getPluginSpec() {

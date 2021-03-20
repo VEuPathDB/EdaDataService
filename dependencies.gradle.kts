@@ -2,7 +2,7 @@
 // Version Numbers
 //
 val coreLib   = "5.1.1"  // Container core lib version
-val edaCommon = "3.1.0"  // EDA Common version
+val edaCommon = "3.1.1"  // EDA Common version
 
 val jersey    = "2.33"   // Jersey/JaxRS version
 val jackson   = "2.12.2" // FasterXML Jackson version

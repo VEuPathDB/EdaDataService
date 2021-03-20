@@ -1,4 +1,4 @@
-package org.veupathdb.service.eda.ds.plugin;
+package org.veupathdb.service.eda.ds.plugin.pass;
 
 import java.io.IOException;
 import java.io.InputStream;
