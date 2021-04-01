@@ -27,6 +27,16 @@ public class MapPlugin extends AbstractPlugin<MapPostRequest, MapSpec> {
   private static final String STREAM_NAME = "stream1";
 
   @Override
+  public String getDisplayName() {
+    return "Record Count";
+  }
+
+  @Override
+  public String getDescription() {
+    return "Counts how many rows in a single stream of records";
+  }
+
+  @Override
   protected Class<MapSpec> getVisualizationSpecClass() {
     return MapSpec.class;
   }

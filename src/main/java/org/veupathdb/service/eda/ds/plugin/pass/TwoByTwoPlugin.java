@@ -27,6 +27,16 @@ public class TwoByTwoPlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpec
   private static final String DATAFILE_NAME = "file1.txt";
 
   @Override
+  public String getDisplayName() {
+    return "2x2 Contingency Table";
+  }
+
+  @Override
+  public String getDescription() {
+    return "Visualize the frequency distribution, relative risk and odds ratio for two dichotomous variables";
+  }
+
+  @Override
   protected Class<MosaicSpec> getVisualizationSpecClass() {
     return MosaicSpec.class;
   }

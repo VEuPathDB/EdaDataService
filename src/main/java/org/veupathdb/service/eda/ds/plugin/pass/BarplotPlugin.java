@@ -16,7 +16,9 @@ import org.json.JSONObject;
 import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
+import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.BarplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BarplotSpec;
@@ -29,8 +31,40 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
   private static final String DATAFILE_NAME = "file1.txt";
 
   @Override
+  public String getDisplayName() {
+    return "Bar plot";
+  }
+
+  @Override
+  public String getDescription() {
+    return "Visualize the distribution of a categorical variable";
+  }
+
+  @Override
   protected Class<BarplotSpec> getVisualizationSpecClass() {
     return BarplotSpec.class;
+  }
+
+  @Override
+  public ConstraintSpec getConstraintSpec() {
+    return new ConstraintSpec()
+      .ordering("xAxisVariable", "overlayVariable", "facetVariable")
+      .pattern()
+        .element("xAxisVariable")
+          .types(APIVariableType.STRING)
+          .shapes(APIVariableDataShape.BINARY)
+        .element("overlayVariable")
+          .types(APIVariableType.STRING)
+        .element("facetVariable")
+          .required(false)
+          .max(2)
+          .types(APIVariableType.NUMBER, APIVariableType.DATE)
+          .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.CONTINUOUS)
+      .pattern()
+        .element("xAxisVariable")
+          .required(false)
+          .types(APIVariableType.NUMBER)
+      .done();
   }
 
   @Override

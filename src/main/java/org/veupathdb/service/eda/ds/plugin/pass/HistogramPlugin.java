@@ -19,6 +19,16 @@ public abstract class HistogramPlugin<S extends HistogramPostRequest, T extends 
   protected static final String DATAFILE_NAME = "file1.txt";
 
   @Override
+  public String getDisplayName() {
+    return "Histogram";
+  }
+
+  @Override
+  public String getDescription() {
+    return "Visualize the distribution of a continuous variable";
+  }
+
+  @Override
   protected ValidationBundle validateVisualizationSpec(T pluginSpec) throws ValidationException {
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
     EntityDef entity = getValidEntity(validation, pluginSpec.getOutputEntityId());

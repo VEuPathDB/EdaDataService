@@ -22,6 +22,16 @@ import org.veupathdb.service.eda.generated.model.RecordCountSpec;
 public class RecordCountPlugin extends AbstractPlugin<RecordCountPostRequest, RecordCountSpec> {
 
   @Override
+  public String getDisplayName() {
+    return "Record Count";
+  }
+
+  @Override
+  public String getDescription() {
+    return "Counts how many rows in a single stream of records";
+  }
+
+  @Override
   protected Class<RecordCountSpec> getVisualizationSpecClass() {
     return RecordCountSpec.class;
   }

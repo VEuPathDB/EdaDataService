@@ -27,6 +27,16 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
   private static final String DATAFILE_NAME = "file1.txt";
 
   @Override
+  public String getDisplayName() {
+    return "Box plot";
+  }
+
+  @Override
+  public String getDescription() {
+    return "Visualize summary values for a continuous variable";
+  }
+
+  @Override
   protected Class<BoxplotSpec> getVisualizationSpecClass() {
     return BoxplotSpec.class;
   }

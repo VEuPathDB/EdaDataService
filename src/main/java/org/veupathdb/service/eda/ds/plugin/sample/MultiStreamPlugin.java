@@ -36,6 +36,16 @@ public class MultiStreamPlugin extends AbstractPlugin<MultiStreamPostRequest, Mu
   private static final Logger LOG = LogManager.getLogger(MultiStreamPlugin.class);
 
   @Override
+  public String getDisplayName() {
+    return "Multiple Stream Combiner";
+  }
+
+  @Override
+  public String getDescription() {
+    return "Merges streams for up to three vars into a single tabular output and dumps it";
+  }
+
+  @Override
   protected Class<MultiStreamSpec> getVisualizationSpecClass() {
     return MultiStreamSpec.class;
   }

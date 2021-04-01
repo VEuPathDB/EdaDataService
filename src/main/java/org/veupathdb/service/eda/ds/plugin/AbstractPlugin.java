@@ -26,6 +26,7 @@ import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.model.ReferenceMetadata;
 import org.veupathdb.service.eda.ds.Resources;
+import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.generated.model.APIFilter;
 import org.veupathdb.service.eda.generated.model.APIStudyDetail;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
@@ -37,10 +38,16 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
 
   private static final Logger LOG = LogManager.getLogger(AbstractPlugin.class);
 
+  // methods that need to be implemented
   protected abstract Class<S> getVisualizationSpecClass();
   protected abstract ValidationBundle validateVisualizationSpec(S pluginSpec) throws ValidationException;
   protected abstract List<StreamSpec> getRequestedStreams(S pluginSpec);
   protected abstract void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException;
+
+  // methods that should probably be overridden
+  public String getDisplayName() { return getClass().getName(); }
+  public String getDescription() { return ""; }
+  public ConstraintSpec getConstraintSpec() { return new ConstraintSpec(); }
 
   private final EdaSubsettingClient _subsettingClient = new EdaSubsettingClient(Resources.SUBSETTING_SERVICE_URL);
   private final StreamingDataClient _mergingClient = new EdaMergingClient(Resources.MERGING_SERVICE_URL);
@@ -129,6 +136,9 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     return getReferenceMetadata().getValidEntity(validation, entityId);
   }
 
+  protected void validateVariableInputs(Map<String,List<VariableSpec>> values, ConstraintSpec constraints) {
+
+  }
   protected void validateVariableNameAndType(ValidationBundleBuilder validation, EntityDef entity, String variableUse, VariableSpec varSpec, APIVariableType... allowedTypes) {
     getReferenceMetadata().validateVariableNameAndType(validation, entity, variableUse, varSpec, allowedTypes);
   }

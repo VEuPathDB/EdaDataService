@@ -27,6 +27,16 @@ public class HeatmapPlugin extends AbstractPlugin<HeatmapPostRequest, HeatmapSpe
   private static final String DATAFILE_NAME = "file1.txt";
 
   @Override
+  public String getDisplayName() {
+    return "Heatmap";
+  }
+
+  @Override
+  public String getDescription() {
+    return "Visualize the magnitude of a continuous numeric variable";
+  }
+
+  @Override
   protected Class<HeatmapSpec> getVisualizationSpecClass() {
     return HeatmapSpec.class;
   }

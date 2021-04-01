@@ -14,11 +14,37 @@ types:
       description: string
       visualizations: VisualizationOverview[]
 
+  VisualizationDataElementConstraint:
+    additionalProperties: false
+    properties:
+      isRequired:
+        type: boolean
+      minNumVars:
+        type: number
+      maxNumVars:
+        type: number
+      allowedTypes:
+        type: API_VariableType[]
+        required: false
+      allowedShapes:
+        type: API_VariableDataShape[]
+        required: false
+
+  VisualizationDataElementConstraintPattern:
+    properties:
+      //: VisualizationDataElementConstraint
+
   VisualizationOverview:
     additionalProperties: false
     properties:
       name: string
       displayName: string
       description: string
+      dataElementConstraints:
+        type: VisualizationDataElementConstraintPattern[]
+        required: false
+      dataElementDependencyOrder:
+        type: string[]
+        required: false
       # inputSchema: object  (TBD)
       # outputSchema: object (TBD)

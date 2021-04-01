@@ -30,6 +30,16 @@ public class DensityplotPlugin extends AbstractPlugin<DensityplotPostRequest, De
   private static final String DATAFILE_NAME = "file1.txt";
 
   @Override
+  public String getDisplayName() {
+    return "Density plot";
+  }
+
+  @Override
+  public String getDescription() {
+    return "Visualize kernel density estimates for a continuous variable";
+  }
+
+  @Override
   protected Class<DensityplotSpec> getVisualizationSpecClass() {
     return DensityplotSpec.class;
   }

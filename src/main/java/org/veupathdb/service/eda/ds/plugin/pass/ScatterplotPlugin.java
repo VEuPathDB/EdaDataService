@@ -30,6 +30,16 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
   private static final String DATAFILE_NAME = "file1.txt";
 
   @Override
+  public String getDisplayName() {
+    return "Scatter plot";
+  }
+
+  @Override
+  public String getDescription() {
+    return "Visualize the relationship between two continuous variables";
+  }
+
+  @Override
   protected Class<ScatterplotSpec> getVisualizationSpecClass() {
     return ScatterplotSpec.class;
   }

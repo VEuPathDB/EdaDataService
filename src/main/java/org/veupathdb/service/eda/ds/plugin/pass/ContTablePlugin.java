@@ -27,6 +27,16 @@ public class ContTablePlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpe
   private static final String DATAFILE_NAME = "file1.txt";
 
   @Override
+  public String getDisplayName() {
+    return "RxC Contingency Table";
+  }
+
+  @Override
+  public String getDescription() {
+    return "Visualize the frequency distribution and chi sq test results for two categorical variables";
+  }
+
+  @Override
   protected Class<MosaicSpec> getVisualizationSpecClass() {
     return MosaicSpec.class;
   }

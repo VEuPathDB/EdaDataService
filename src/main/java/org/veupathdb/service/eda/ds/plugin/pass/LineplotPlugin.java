@@ -27,6 +27,16 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
   private static final String DATAFILE_NAME = "file1.txt";
 
   @Override
+  public String getDisplayName() {
+    return "Line plot";
+  }
+
+  @Override
+  public String getDescription() {
+    return "Visualize the relationship between two continuous variables";
+  }
+
+  @Override
   protected Class<LineplotSpec> getVisualizationSpecClass() {
     return LineplotSpec.class;
   }
