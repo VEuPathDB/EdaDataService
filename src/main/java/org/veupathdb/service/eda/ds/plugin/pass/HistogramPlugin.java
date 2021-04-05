@@ -7,7 +7,9 @@ import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
 import org.veupathdb.service.eda.common.model.EntityDef;
+import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.HistogramPostRequest;
 import org.veupathdb.service.eda.generated.model.HistogramSpec;
@@ -28,6 +30,22 @@ public abstract class HistogramPlugin<S extends HistogramPostRequest, T extends 
     return "Visualize the distribution of a continuous variable";
   }
 
+  @Override
+  public ConstraintSpec getConstraintSpec() {
+    return new ConstraintSpec()
+      .ordering("xAxisVariable", "overlayVariable", "facetVariable")
+      .pattern()
+        .element("xAxisVariable")
+          .shapes(APIVariableDataShape.CONTINUOUS)
+        .element("overlayVariable")
+          .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
+        .element("facetVariable")
+          .required(false)
+          .max(2)
+          .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
+      .done();
+  }
+  
   @Override
   protected ValidationBundle validateVisualizationSpec(T pluginSpec) throws ValidationException {
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
