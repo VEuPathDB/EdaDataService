@@ -72,7 +72,7 @@ public class MultiStreamPlugin extends AbstractPlugin<MultiStreamPostRequest, Mu
     List<VariableDef> varsToRequest = getVars(entity);
     // ask for up to three streams, named for the vars they will provide
     return varsToRequest.stream()
-      .map(var -> new StreamSpec(toColNameOrEmpty(var), entity.getId()).addVariable(var))
+      .map(var -> new StreamSpec(toColNameOrEmpty(var), entity.getId()).addVar(var))
       .collect(Collectors.toList());
   }
 

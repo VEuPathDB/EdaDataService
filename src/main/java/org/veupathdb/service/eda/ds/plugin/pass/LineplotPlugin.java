@@ -16,6 +16,7 @@ import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.model.ReferenceMetadata;
 import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
+import org.veupathdb.service.eda.ds.constraints.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
@@ -26,8 +27,6 @@ import org.veupathdb.service.eda.generated.model.VariableSpec;
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
 public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, LineplotSpec> {
-
-  private static final String DATAFILE_NAME = "file1.txt";
 
   @Override
   public String getDisplayName() {
@@ -64,34 +63,22 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
 
   @Override
   protected void validateVisualizationSpec(LineplotSpec pluginSpec) throws ValidationException {
-    ReferenceMetadata md = getReferenceMetadata();
-    ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
-    EntityDef entity = md.validateEntityAndGet(pluginSpec.getOutputEntityId());
-    md.validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.NUMBER, APIVariableType.DATE);
-    md.validateVariableNameAndType(validation, entity, "yAxisVariable", pluginSpec.getYAxisVariable(), APIVariableType.NUMBER, APIVariableType.DATE);
-    if (pluginSpec.getOverlayVariable() != null) {
-      md.validateVariableNameAndType(validation, entity, "overlayVariable", pluginSpec.getOverlayVariable(), APIVariableType.STRING);
-    }
-    if (pluginSpec.getFacetVariable() != null) {
-      for (VariableSpec facetVar : pluginSpec.getFacetVariable()) {
-        md.validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
-      }
-    }
-    validation.build().throwIfInvalid();
+    validateInputs(new DataElementSet()
+      .entity(pluginSpec.getOutputEntityId())
+      .var("xAxisVariable", pluginSpec.getXAxisVariable())
+      .var("yAxisVariable", pluginSpec.getYAxisVariable())
+      .var("overlayVariable", pluginSpec.getOverlayVariable())
+      .var("facetVariable", pluginSpec.getFacetVariable()));
   }
 
   @Override
   protected List<StreamSpec> getRequestedStreams(LineplotSpec pluginSpec) {
-    StreamSpec spec = new StreamSpec(DATAFILE_NAME, pluginSpec.getOutputEntityId());
-    spec.add(pluginSpec.getXAxisVariable());
-    spec.add(pluginSpec.getYAxisVariable());
-    if (pluginSpec.getOverlayVariable() != null) {
-      spec.add(pluginSpec.getOverlayVariable());
-    }
-    if (pluginSpec.getFacetVariable() != null) {
-      spec.addAll(pluginSpec.getFacetVariable());
-    }
-    return new ListBuilder<StreamSpec>(spec).toList();
+    return ListBuilder.asList(
+      new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
+        .addVar(pluginSpec.getXAxisVariable())
+        .addVar(pluginSpec.getYAxisVariable())
+        .addVar(pluginSpec.getOverlayVariable())
+        .addVars(pluginSpec.getFacetVariable()));
   }
 
   @Override
@@ -115,7 +102,7 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
     String facetType2 = spec.getFacetVariable() != null ? entity.getVariable(spec.getFacetVariable().get(1)).getType().toString() : "";
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
-      connection.voidEval("data <- fread('" + DATAFILE_NAME + "', na.strings=c(''))");
+      connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
       connection.voidEval("map <- data.frame("
             + "'plotRef'=c('xAxisVariable', "
             + "       'yAxisVariable', "

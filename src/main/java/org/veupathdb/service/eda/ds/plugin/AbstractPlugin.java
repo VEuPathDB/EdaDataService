@@ -36,6 +36,9 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
 
   private static final Logger LOG = LogManager.getLogger(AbstractPlugin.class);
 
+  // shared stream name for plugins that need request only a single stream
+  protected static final String DEFAULT_SINGLE_STREAM_NAME = "single-tabular-dataset.txt";
+
   // methods that need to be implemented
   protected abstract Class<S> getVisualizationSpecClass();
   protected abstract void validateVisualizationSpec(S pluginSpec) throws ValidationException;

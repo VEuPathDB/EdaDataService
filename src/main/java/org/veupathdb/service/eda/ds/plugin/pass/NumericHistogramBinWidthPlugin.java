@@ -82,7 +82,7 @@ public class NumericHistogramBinWidthPlugin extends HistogramPlugin<NumericHisto
       String facetType2 = spec.getFacetVariable() != null ? entity.getVariable(spec.getFacetVariable().get(1)).getType().toString() : "";
       
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
-        connection.voidEval("data <- fread('" + DATAFILE_NAME + "', na.strings=c(''))");
+        connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
         connection.voidEval("map <- data.frame("
             + "'plotRef'=c('xAxisVariable', "
             + "       'overlayVariable', "

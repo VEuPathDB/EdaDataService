@@ -42,7 +42,7 @@ public class DateHistogramBinWidthPlugin extends HistogramPlugin<DateHistogramBi
     logRequestTime("Connecting to RServe");
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       logRequestTime("Passing R function config to RServe");
-      connection.voidEval("data <- fread('" + DATAFILE_NAME + "', na.strings=c(''))");
+      connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
       connection.voidEval("map <- data.frame("
           + "'plotRef'=c('xAxisVariable', "
           + "       'overlayVariable', "

@@ -24,8 +24,6 @@ import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithR
 
 public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpec> {
 
-  private static final String DATAFILE_NAME = "file1.txt";
-
   @Override
   public String getDisplayName() {
     return "Bar plot";
@@ -68,15 +66,11 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
 
   @Override
   protected List<StreamSpec> getRequestedStreams(BarplotSpec pluginSpec) {
-    StreamSpec spec = new StreamSpec(DATAFILE_NAME, pluginSpec.getOutputEntityId());
-    spec.add(pluginSpec.getXAxisVariable());
-    if (pluginSpec.getOverlayVariable() != null) {
-      spec.add(pluginSpec.getOverlayVariable());
-    }
-    if (pluginSpec.getFacetVariable() != null) {
-      spec.addAll(pluginSpec.getFacetVariable());  
-    }
-    return new ListBuilder<StreamSpec>(spec).toList();
+    return ListBuilder.asList(
+      new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
+        .addVar(pluginSpec.getXAxisVariable())
+        .addVar(pluginSpec.getOverlayVariable())
+        .addVars(pluginSpec.getFacetVariable()));
   }
 
   @Override
@@ -96,7 +90,7 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
     simpleBar = false;
     if (simpleBar) {
       int rowCount = 0;
-      Scanner s = new Scanner(dataStreams.get(DATAFILE_NAME)).useDelimiter("\n");
+      Scanner s = new Scanner(dataStreams.get(DEFAULT_SINGLE_STREAM_NAME)).useDelimiter("\n");
       
       Integer groupVarIndex = null;
       int xVarIndex = 0;
@@ -172,7 +166,7 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
       String facetType2 = spec.getFacetVariable() != null ? entity.getVariable(spec.getFacetVariable().get(1)).getType().toString() : "";
       
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
-        connection.voidEval("data <- fread('" + DATAFILE_NAME + "', na.strings=c(''))");
+        connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
         String createMapString = "map <- data.frame("
             + "'plotRef'=c('xAxisVariable', "
             + "       'overlayVariable', "

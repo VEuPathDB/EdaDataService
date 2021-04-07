@@ -17,15 +17,16 @@ import org.gusdb.fgputil.validation.ValidationLevel;
 import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.model.ReferenceMetadata;
+import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
+import org.veupathdb.service.eda.ds.constraints.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.MapPostRequest;
 import org.veupathdb.service.eda.generated.model.MapSpec;
 import org.json.JSONObject;
 
 public class MapPlugin extends AbstractPlugin<MapPostRequest, MapSpec> {
-
-  private static final String STREAM_NAME = "stream1";
 
   @Override
   public String getDisplayName() {
@@ -43,23 +44,34 @@ public class MapPlugin extends AbstractPlugin<MapPostRequest, MapSpec> {
   }
 
   @Override
+  public ConstraintSpec getConstraintSpec() {
+    return new ConstraintSpec()
+      .pattern()
+        .element("geoAggregateVariable")
+          .types(APIVariableType.STRING)
+        .element("latitudeVariable")
+          .types(APIVariableType.NUMBER)
+        .element("longitudeVariable")
+          .types(APIVariableType.LONGITUDE)
+      .done();
+  }
+
+  @Override
   protected void validateVisualizationSpec(MapSpec pluginSpec) throws ValidationException {
-    ReferenceMetadata md = getReferenceMetadata();
-    ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
-    EntityDef entity = md.validateEntityAndGet(pluginSpec.getOutputEntityId());
-    md.validateVariableNameAndType(validation, entity, "geoAggregateVariable", pluginSpec.getGeoAggregateVariable(), APIVariableType.STRING);
-    md.validateVariableNameAndType(validation, entity, "latitudeVariable", pluginSpec.getLatitudeVariable(), APIVariableType.NUMBER);
-    md.validateVariableNameAndType(validation, entity, "longitudeVariable", pluginSpec.getLongitudeVariable(), APIVariableType.LONGITUDE);
-    validation.build().throwIfInvalid();
+    validateInputs(new DataElementSet()
+      .entity(pluginSpec.getOutputEntityId())
+      .var("geoAggregateVariable", pluginSpec.getGeoAggregateVariable())
+      .var("latitudeVariable", pluginSpec.getLatitudeVariable())
+      .var("longitudeVariable", pluginSpec.getLongitudeVariable()));
   }
 
   @Override
   protected List<StreamSpec> getRequestedStreams(MapSpec pluginSpec) {
-    StreamSpec spec = new StreamSpec(STREAM_NAME, pluginSpec.getOutputEntityId());
-    spec.add(pluginSpec.getGeoAggregateVariable());
-    spec.add(pluginSpec.getLatitudeVariable());
-    spec.add(pluginSpec.getLongitudeVariable());
-    return new ListBuilder<StreamSpec>(spec).toList();
+    return ListBuilder.asList(
+      new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
+        .addVar(pluginSpec.getGeoAggregateVariable())
+        .addVar(pluginSpec.getLatitudeVariable())
+        .addVar(pluginSpec.getLongitudeVariable()));
   }
 
   @Override
@@ -69,7 +81,7 @@ public class MapPlugin extends AbstractPlugin<MapPostRequest, MapSpec> {
     Map<String, List<Double>> geoVarLatMap = new HashMap<String, List<Double>>();
     Map<String, List<Double>> geoVarLonMap = new HashMap<String, List<Double>>();
     Map<String, Integer> geoVarEntityCount = new HashMap<String, Integer>();
-    Scanner s = new Scanner(dataStreams.get(STREAM_NAME)).useDelimiter("\n");
+    Scanner s = new Scanner(dataStreams.get(DEFAULT_SINGLE_STREAM_NAME)).useDelimiter("\n");
 
     EntityDef entity = getReferenceMetadata().getEntity(spec.getOutputEntityId());
     String entityIdCol = entity.getIdColumnName();

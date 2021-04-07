@@ -44,12 +44,12 @@ public class RecordCountPlugin extends AbstractPlugin<RecordCountPostRequest, Re
   @Override
   protected List<StreamSpec> getRequestedStreams(RecordCountSpec pluginSpec) {
     // only need one stream for the requested entity and no vars (IDs included automatically)
-    StreamSpec spec = new StreamSpec(pluginSpec.getEntityId(), pluginSpec.getEntityId())
+    return ListBuilder.asList(
+      new StreamSpec(pluginSpec.getEntityId(), pluginSpec.getEntityId())
         // add first var in entity to work around no-vars bug in subsetting service
-        .addVariable(getReferenceMetadata().getEntity(pluginSpec.getEntityId()).stream()
+        .addVar(getReferenceMetadata().getEntity(pluginSpec.getEntityId()).stream()
             .filter(var -> VariableSource.NATIVE.equals(var.getSource()))
-            .findFirst().orElseThrow()); // should have at least one native var
-    return new ListBuilder<StreamSpec>(spec).toList();
+            .findFirst().orElseThrow())); // should have at least one native var
   }
 
   @Override
