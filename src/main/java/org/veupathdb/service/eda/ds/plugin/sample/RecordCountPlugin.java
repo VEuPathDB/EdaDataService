@@ -37,10 +37,8 @@ public class RecordCountPlugin extends AbstractPlugin<RecordCountPostRequest, Re
   }
 
   @Override
-  protected ValidationBundle validateVisualizationSpec(RecordCountSpec pluginSpec) throws ValidationException {
-    ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
-    getValidEntity(validation, pluginSpec.getEntityId());
-    return validation.build();
+  protected void validateVisualizationSpec(RecordCountSpec pluginSpec) throws ValidationException {
+    getReferenceMetadata().validateEntityAndGet(pluginSpec.getEntityId());
   }
 
   @Override

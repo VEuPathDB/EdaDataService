@@ -8,21 +8,17 @@ import java.util.Map;
 import java.util.Scanner;
 import org.gusdb.fgputil.IoUtil;
 import org.gusdb.fgputil.ListBuilder;
-import org.gusdb.fgputil.validation.ValidationBundle;
-import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
-import org.gusdb.fgputil.validation.ValidationLevel;
 import org.json.JSONObject;
 import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
+import org.veupathdb.service.eda.ds.constraints.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.BarplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BarplotSpec;
-import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
@@ -48,39 +44,27 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .ordering("xAxisVariable", "overlayVariable", "facetVariable")
+      .dependencyOrder("xAxisVariable", "over")
       .pattern()
         .element("xAxisVariable")
           .types(APIVariableType.STRING)
-          .shapes(APIVariableDataShape.BINARY)
         .element("overlayVariable")
+          .required(false)
           .types(APIVariableType.STRING)
         .element("facetVariable")
           .required(false)
           .max(2)
-          .types(APIVariableType.NUMBER, APIVariableType.DATE)
-          .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.CONTINUOUS)
-      .pattern()
-        .element("xAxisVariable")
-          .required(false)
-          .types(APIVariableType.NUMBER)
+          .types(APIVariableType.STRING)
       .done();
   }
 
   @Override
-  protected ValidationBundle validateVisualizationSpec(BarplotSpec pluginSpec) throws ValidationException {
-    ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
-    EntityDef entity = getValidEntity(validation, pluginSpec.getOutputEntityId());
-    validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.STRING);
-    if (pluginSpec.getOverlayVariable() != null) {
-      validateVariableNameAndType(validation, entity, "overlayVariable", pluginSpec.getOverlayVariable(), APIVariableType.STRING);
-    }
-    if (pluginSpec.getFacetVariable() != null) {
-      for (VariableSpec facetVar : pluginSpec.getFacetVariable()) {
-        validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
-      }
-    }
-    return validation.build();
+  protected void validateVisualizationSpec(BarplotSpec pluginSpec) throws ValidationException {
+    validateInputs(new DataElementSet()
+      .entity(pluginSpec.getOutputEntityId())
+      .var("xAxisVariable", pluginSpec.getXAxisVariable())
+      .var("overlayVariable", pluginSpec.getOverlayVariable())
+      .var("facetVariable", pluginSpec.getFacetVariable()));
   }
 
   @Override

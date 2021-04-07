@@ -51,10 +51,8 @@ public class MultiStreamPlugin extends AbstractPlugin<MultiStreamPostRequest, Mu
   }
 
   @Override
-  protected ValidationBundle validateVisualizationSpec(MultiStreamSpec pluginSpec) throws ValidationException {
-    ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
-    getValidEntity(validation, pluginSpec.getEntityId());
-    return validation.build();
+  protected void validateVisualizationSpec(MultiStreamSpec pluginSpec) throws ValidationException {
+    getReferenceMetadata().validateEntityAndGet(pluginSpec.getEntityId());
   }
 
   /**

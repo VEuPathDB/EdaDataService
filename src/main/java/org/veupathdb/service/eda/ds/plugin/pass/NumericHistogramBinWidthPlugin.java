@@ -4,16 +4,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
-import java.util.Scanner;
 import org.gusdb.fgputil.IoUtil;
-import org.json.JSONObject;
 import org.rosuda.REngine.Rserve.RFileInputStream;
-import org.veupathdb.service.eda.generated.model.APIVariableType;
+import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.generated.model.NumericHistogramBinWidthPostRequest;
 import org.veupathdb.service.eda.generated.model.NumericHistogramBinWidthSpec;
-import org.veupathdb.service.eda.generated.model.ValueSpec;
-import org.veupathdb.service.eda.common.model.EntityDef;
-import org.veupathdb.service.eda.common.model.VariableDef;
 
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 

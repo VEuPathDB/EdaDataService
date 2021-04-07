@@ -7,6 +7,7 @@ import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
 import org.veupathdb.service.eda.common.model.EntityDef;
+import org.veupathdb.service.eda.common.model.ReferenceMetadata;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.HistogramPostRequest;
@@ -29,19 +30,20 @@ public abstract class HistogramPlugin<S extends HistogramPostRequest, T extends 
   }
 
   @Override
-  protected ValidationBundle validateVisualizationSpec(T pluginSpec) throws ValidationException {
+  protected void validateVisualizationSpec(T pluginSpec) throws ValidationException {
+    ReferenceMetadata md = getReferenceMetadata();
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
-    EntityDef entity = getValidEntity(validation, pluginSpec.getOutputEntityId());
-    validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.NUMBER, APIVariableType.DATE);
+    EntityDef entity = md.validateEntityAndGet(pluginSpec.getOutputEntityId());
+    md.validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.NUMBER, APIVariableType.DATE);
     if (pluginSpec.getOverlayVariable() != null) {
-      validateVariableNameAndType(validation, entity, "overlayVariable", pluginSpec.getOverlayVariable(), APIVariableType.STRING);
+      md.validateVariableNameAndType(validation, entity, "overlayVariable", pluginSpec.getOverlayVariable(), APIVariableType.STRING);
     }
     if (pluginSpec.getFacetVariable() != null) {
       for (VariableSpec facetVar : pluginSpec.getFacetVariable()) {
-        validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
+        md.validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
       }
     }
-    return validation.build();
+    validation.build().throwIfInvalid();
   }
 
   @Override

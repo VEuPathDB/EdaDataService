@@ -14,6 +14,7 @@ import org.gusdb.fgputil.validation.ValidationLevel;
 import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
+import org.veupathdb.service.eda.common.model.ReferenceMetadata;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.HeatmapPostRequest;
@@ -42,23 +43,24 @@ public class HeatmapPlugin extends AbstractPlugin<HeatmapPostRequest, HeatmapSpe
   }
 
   @Override
-  protected ValidationBundle validateVisualizationSpec(HeatmapSpec pluginSpec) throws ValidationException {
+  protected void validateVisualizationSpec(HeatmapSpec pluginSpec) throws ValidationException {
+    ReferenceMetadata md = getReferenceMetadata();
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
-    EntityDef entity = getValidEntity(validation, pluginSpec.getOutputEntityId());
-    validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.STRING);
-    validateVariableNameAndType(validation, entity, "yAxisVariable", pluginSpec.getYAxisVariable(), APIVariableType.STRING);
+    EntityDef entity = md.validateEntityAndGet(pluginSpec.getOutputEntityId());
+    md.validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.STRING);
+    md.validateVariableNameAndType(validation, entity, "yAxisVariable", pluginSpec.getYAxisVariable(), APIVariableType.STRING);
     if (pluginSpec.getZAxisVariable() != null) {
-      validateVariableNameAndType(validation, entity, "zAxisVariable", pluginSpec.getYAxisVariable(), APIVariableType.NUMBER);
+      md.validateVariableNameAndType(validation, entity, "zAxisVariable", pluginSpec.getYAxisVariable(), APIVariableType.NUMBER);
     }
     if (pluginSpec.getFacetVariable() != null) {
       for (VariableSpec facetVar : pluginSpec.getFacetVariable()) {
-        validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
+        md.validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
       }
     }
     if (pluginSpec.getValueSpec().equals(HeatmapSpec.ValueSpecType.SERIES) && pluginSpec.getZAxisVariable() == null) {
     	validation.addError("zAxisVariable required for heatmap of type 'series'.");
     }
-    return validation.build();
+    validation.build().throwIfInvalid();
   }
 
   @Override

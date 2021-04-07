@@ -7,337 +7,6 @@
 ################################################################################
 
 types:
-  NumericHistogramBinWidthPostRequest:
-    type: HistogramPostRequest
-    properties:
-      config: NumericHistogramBinWidthSpec
-  NumericHistogramBinWidthSpec:
-    type: HistogramSpec
-    properties:
-      binWidth:
-        type: number
-        required: false
-      viewportMin:
-        type: number
-        required: false
-      viewportMax:
-        type: number
-        required: false
-  NumericHistogramBinWidthSummary:
-    type: object
-    properties:
-      min: number
-      q1: number
-      median: number
-      mean: number
-      q3: number
-      max: number
-  NumericHistogramBinWidthViewportResponse:
-    type: object
-    properties:
-      xMin: number
-      xMax: number
-  NumericHistogramBinWidthConfig:
-    type: HistogramResponseConfig
-    properties:
-      binWidth:
-        type: number
-      summary:
-        type: NumericHistogramBinWidthSummary
-      viewport:
-        type: NumericHistogramBinWidthViewportResponse
-  NumericHistogramBinWidthPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      data: HistogramResponseData[]
-      config: NumericHistogramBinWidthConfig
-  MultiStreamPostRequest:
-    type: VisualizationRequestBase
-    properties:
-      config: MultiStreamSpec
-  MultiStreamSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      entityId: string
-  BarplotPostRequest:
-    type: VisualizationRequestBase
-    properties:
-      config: BarplotSpec
-  BarplotSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      outputEntityId: string
-      valueSpec:
-        type: string
-        enum:
-          - count
-      xAxisVariable: VariableSpec
-      overlayVariable:
-        type: VariableSpec
-        required: false
-      facetVariable:
-        type: VariableSpec[]
-        maxItems: 2
-        required: false
-  BarplotResponseConfig:
-    type: VisualizationConfig
-    properties:
-      xVariableDetails:
-        type: VariableSpec
-  BarplotPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      data: BarplotResponseData[]
-      config: BarplotResponseConfig
-  DensityplotPostRequest:
-    type: VisualizationRequestBase
-    properties:
-      config: DensityplotSpec
-  DensityplotSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      outputEntityId: string
-      xAxisVariable: VariableSpec
-      overlayVariable:
-        type: VariableSpec
-        required: false
-      facetVariable:
-        type: VariableSpec[]
-        maxItems: 2
-        required: false
-  DensityplotResponseConfig:
-    type: VisualizationConfig
-    properties:
-      xVariableDetails:
-        type: VariableSpec
-  DensityplotPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      data: DensityplotResponseData[]
-      config: DensityplotResponseConfig
-  ScatterplotPostRequest:
-    type: VisualizationRequestBase
-    properties:
-      config: ScatterplotSpec
-  ScatterplotSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      outputEntityId: string
-      smoothedMean:
-        type: string
-        enum:
-          - "true"
-          - "false"
-      xAxisVariable: VariableSpec
-      yAxisVariable: VariableSpec
-      overlayVariable:
-        type: VariableSpec
-        required: false
-      facetVariable:
-        type: VariableSpec[]
-        maxItems: 2
-        required: false
-  ScatterplotResponseConfig:
-    type: VisualizationConfig
-    properties:
-      xVariableDetails:
-        type: VariableSpec
-      yVariableDetails:
-        type: VariableSpec
-  ScatterplotPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      data: ScatterplotResponseData[]
-      config: ScatterplotResponseConfig
-  MapPostRequest:
-    type: VisualizationRequestBase
-    properties:
-      config: MapSpec
-  MapSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      outputEntityId: string
-      geoAggregateVariable: VariableSpec
-      longitudeVariable: VariableSpec
-      latitudeVariable: VariableSpec
-  MapPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      geoAggregateValue: VariableSpec
-      entityCount: number
-      avgLat: number
-      avgLon: number
-      minLat: number
-      minLon: number
-      maxLat: number
-      maxLon: number
-  DateHistogramNumBinsPostRequest:
-    type: HistogramPostRequest
-    properties:
-      config: DateHistogramNumBinsSpec
-  DateHistogramNumBinsSpec:
-    type: HistogramSpec
-    properties:
-      numBins:
-        type: number
-        required: false
-      viewportMin:
-        type: string
-        required: false
-      viewportMax:
-        type: string
-        required: false
-  DateHistogramNumBinsSummary:
-    type: object
-    properties:
-      min: string
-      q1: string
-      median: string
-      mean: string
-      q3: string
-      max: string
-  DateHistogramNumBinsViewportResponse:
-    type: object
-    properties:
-      xMin: string
-      xMax: string
-  DateHistogramNumBinsConfig:
-    type: HistogramResponseConfig
-    properties:
-      numBins:
-        type: string
-      summary:
-        type: DateHistogramNumBinsSummary
-      viewport:
-        type: DateHistogramNumBinsViewportResponse
-  DateHistogramNumBinsPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      data: HistogramResponseData[]
-      config: DateHistogramNumBinsConfig
-  HeatmapPostRequest:
-    type: VisualizationRequestBase
-    properties:
-      config: HeatmapSpec
-  HeatmapSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      outputEntityId: string
-      valueSpec:
-        type: string
-        enum:
-          - collection
-          - series
-      xAxisVariable: VariableSpec
-      yAxisVariable: VariableSpec
-      zAxisVariable:
-        type: VariableSpec
-        required: false
-      facetVariable:
-        type: VariableSpec[]
-        maxItems: 2
-        required: false
-  HeatmapResponseConfig:
-    type: VisualizationConfig
-    properties:
-      xVariableDetails:
-        type: VariableSpec
-      yVariableDetails:
-        type: VariableSpec
-  HeatmapPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      data: HeatmapResponseData[]
-      config: HeatmapResponseConfig
-  LineplotPostRequest:
-    type: VisualizationRequestBase
-    properties:
-      config: LineplotSpec
-  LineplotSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      outputEntityId: string
-      xAxisVariable: VariableSpec
-      yAxisVariable: VariableSpec
-      overlayVariable:
-        type: VariableSpec
-        required: false
-      facetVariable:
-        type: VariableSpec[]
-        maxItems: 2
-        required: false
-  LineplotResponseConfig:
-    type: VisualizationConfig
-    properties:
-      xVariableDetails:
-        type: VariableSpec
-      yVariableDetails:
-        type: VariableSpec
-  LineplotPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      data: LineplotResponseData[]
-      config: LineplotResponseConfig
-  NumericHistogramNumBinsPostRequest:
-    type: HistogramPostRequest
-    properties:
-      config: NumericHistogramNumBinsSpec
-  NumericHistogramNumBinsSpec:
-    type: HistogramSpec
-    properties:
-      numBins:
-        type: number
-        required: false
-      viewportMin:
-        type: number
-        required: false
-      viewportMax:
-        type: number
-        required: false
-  NumericHistogramNumBinsSummary:
-    type: object
-    properties:
-      min: number
-      q1: number
-      median: number
-      mean: number
-      q3: number
-      max: number
-  NumericHistogramNumBinsViewportResponse:
-    type: object
-    properties:
-      xMin: number
-      xMax: number
-  NumericHistogramNumBinsConfig:
-    type: HistogramResponseConfig
-    properties:
-      numBins:
-        type: number
-      summary:
-        type: NumericHistogramNumBinsSummary
-      viewport:
-        type: NumericHistogramNumBinsViewportResponse
-  NumericHistogramNumBinsPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      data: HistogramResponseData[]
-      config: NumericHistogramNumBinsConfig
   API_Filter:
     type: object
     discriminator: type
@@ -533,6 +202,171 @@ types:
   API_LongitudeVariable:
     type: API_Variable
     discriminatorValue: longitude
+  ContTablePostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      data: ContTableResponseData[]
+      config: MosaicResponseConfig
+  RecordCountPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: RecordCountSpec
+  RecordCountSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      entityId: string
+  RecordCountPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      recordCount: number
+  BoxplotPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: BoxplotSpec
+  BoxplotSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      points:
+        type: string
+        enum:
+          - outliers
+          - all
+      mean:
+        type: string
+        enum:
+          - "true"
+          - "false"
+      xAxisVariable: VariableSpec
+      yAxisVariable: VariableSpec
+      overlayVariable:
+        type: VariableSpec
+        required: false
+      facetVariable:
+        type: VariableSpec[]
+        maxItems: 2
+        required: false
+  BoxplotResponseConfig:
+    type: VisualizationConfig
+    properties:
+      xVariableDetails:
+        type: VariableSpec
+      yVariableDetails:
+        type: VariableSpec
+  BoxplotPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      data: BoxplotResponseData[]
+      config: BoxplotResponseConfig
+  DateHistogramNumBinsPostRequest:
+    type: HistogramPostRequest
+    properties:
+      config: DateHistogramNumBinsSpec
+  DateHistogramNumBinsSpec:
+    type: HistogramSpec
+    properties:
+      numBins:
+        type: number
+        required: false
+      viewportMin:
+        type: string
+        required: false
+      viewportMax:
+        type: string
+        required: false
+  DateHistogramNumBinsSummary:
+    type: object
+    properties:
+      min: string
+      q1: string
+      median: string
+      mean: string
+      q3: string
+      max: string
+  DateHistogramNumBinsViewportResponse:
+    type: object
+    properties:
+      xMin: string
+      xMax: string
+  DateHistogramNumBinsConfig:
+    type: HistogramResponseConfig
+    properties:
+      numBins:
+        type: string
+      summary:
+        type: DateHistogramNumBinsSummary
+      viewport:
+        type: DateHistogramNumBinsViewportResponse
+  DateHistogramNumBinsPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      data: HistogramResponseData[]
+      config: DateHistogramNumBinsConfig
+  LineplotPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: LineplotSpec
+  LineplotSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      xAxisVariable: VariableSpec
+      yAxisVariable: VariableSpec
+      overlayVariable:
+        type: VariableSpec
+        required: false
+      facetVariable:
+        type: VariableSpec[]
+        maxItems: 2
+        required: false
+  LineplotResponseConfig:
+    type: VisualizationConfig
+    properties:
+      xVariableDetails:
+        type: VariableSpec
+      yVariableDetails:
+        type: VariableSpec
+  LineplotPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      data: LineplotResponseData[]
+      config: LineplotResponseConfig
+  MosaicPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: MosaicSpec
+  MosaicSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      xAxisVariable: VariableSpec
+      yAxisVariable: VariableSpec
+      facetVariable:
+        type: VariableSpec[]
+        maxItems: 2
+        required: false
+  MosaicResponseConfig:
+    type: VisualizationConfig
+    properties:
+      xVariableDetails:
+        type: VariableSpec
+      yVariableDetails:
+        type: VariableSpec
+  TwoByTwoPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      data: TwoByTwoResponseData[]
+      config: MosaicResponseConfig
   DateHistogramBinWidthPostRequest:
     type: HistogramPostRequest
     properties:
@@ -578,19 +412,20 @@ types:
     properties:
       data: HistogramResponseData[]
       config: DateHistogramBinWidthConfig
-  HistogramPostRequest: VisualizationRequestBase
-  ValueSpec:
-    type: string
-    enum:
-      - count
-      - proportion
-  HistogramSpec:
+  BarplotPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: BarplotSpec
+  BarplotSpec:
     type: object
     additionalProperties: false
     properties:
       outputEntityId: string
+      valueSpec:
+        type: string
+        enum:
+          - count
       xAxisVariable: VariableSpec
-      valueSpec: ValueSpec
       overlayVariable:
         type: VariableSpec
         required: false
@@ -598,136 +433,17 @@ types:
         type: VariableSpec[]
         maxItems: 2
         required: false
-  HistogramResponseConfig:
-    type: VisualizationConfig
-    properties:
-      binSlider:
-        type: BinSlider
-      xVariableDetails:
-        type: VariableSpec
-  HistogramPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      data: HistogramResponseData[]
-      config: HistogramResponseConfig
-  AppsGetResponse:
-    type: object
-    properties:
-      apps: AppOverview[]
-  AppOverview:
-    type: object
-    additionalProperties: false
-    properties:
-      name: string
-      displayName: string
-      description: string
-      visualizations: VisualizationOverview[]
-  VisualizationDataElementConstraint:
-    type: object
-    additionalProperties: false
-    properties:
-      isRequired: boolean
-      minNumVars: number
-      maxNumVars: number
-      allowedTypes:
-        type: API_VariableType[]
-        required: false
-      allowedShapes:
-        type: API_VariableDataShape[]
-        required: false
-  VisualizationDataElementConstraintPattern:
-    type: object
-    properties:
-      //: VisualizationDataElementConstraint
-  VisualizationOverview:
-    type: object
-    additionalProperties: false
-    properties:
-      name: string
-      displayName: string
-      description: string
-      dataElementConstraints:
-        type: VisualizationDataElementConstraintPattern[]
-        required: false
-      dataElementDependencyOrder:
-        type: string[]
-        required: false
-  MosaicPostRequest:
-    type: VisualizationRequestBase
-    properties:
-      config: MosaicSpec
-  MosaicSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      outputEntityId: string
-      xAxisVariable: VariableSpec
-      yAxisVariable: VariableSpec
-      facetVariable:
-        type: VariableSpec[]
-        maxItems: 2
-        required: false
-  MosaicResponseConfig:
+  BarplotResponseConfig:
     type: VisualizationConfig
     properties:
       xVariableDetails:
         type: VariableSpec
-      yVariableDetails:
-        type: VariableSpec
-  TwoByTwoPostResponse:
+  BarplotPostResponse:
     type: object
     additionalProperties: false
     properties:
-      data: TwoByTwoResponseData[]
-      config: MosaicResponseConfig
-  ContTablePostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      data: ContTableResponseData[]
-      config: MosaicResponseConfig
-  BoxplotPostRequest:
-    type: VisualizationRequestBase
-    properties:
-      config: BoxplotSpec
-  BoxplotSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      outputEntityId: string
-      points:
-        type: string
-        enum:
-          - outliers
-          - all
-      mean:
-        type: string
-        enum:
-          - "true"
-          - "false"
-      xAxisVariable: VariableSpec
-      yAxisVariable: VariableSpec
-      overlayVariable:
-        type: VariableSpec
-        required: false
-      facetVariable:
-        type: VariableSpec[]
-        maxItems: 2
-        required: false
-  BoxplotResponseConfig:
-    type: VisualizationConfig
-    properties:
-      xVariableDetails:
-        type: VariableSpec
-      yVariableDetails:
-        type: VariableSpec
-  BoxplotPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      data: BoxplotResponseData[]
-      config: BoxplotResponseConfig
+      data: BarplotResponseData[]
+      config: BarplotResponseConfig
   BarplotResponseData:
     type: object
     additionalProperties: false
@@ -924,6 +640,15 @@ types:
       seriesX:
         type: number[]
         minItems: 1
+  MultiStreamPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: MultiStreamSpec
+  MultiStreamSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      entityId: string
   VisualizationRequestBase:
     type: object
     additionalProperties: false
@@ -944,18 +669,293 @@ types:
     additionalProperties: false
     properties:
       incompleteCases: number
-  RecordCountPostRequest:
+  NumericHistogramNumBinsPostRequest:
+    type: HistogramPostRequest
+    properties:
+      config: NumericHistogramNumBinsSpec
+  NumericHistogramNumBinsSpec:
+    type: HistogramSpec
+    properties:
+      numBins:
+        type: number
+        required: false
+      viewportMin:
+        type: number
+        required: false
+      viewportMax:
+        type: number
+        required: false
+  NumericHistogramNumBinsSummary:
+    type: object
+    properties:
+      min: number
+      q1: number
+      median: number
+      mean: number
+      q3: number
+      max: number
+  NumericHistogramNumBinsViewportResponse:
+    type: object
+    properties:
+      xMin: number
+      xMax: number
+  NumericHistogramNumBinsConfig:
+    type: HistogramResponseConfig
+    properties:
+      numBins:
+        type: number
+      summary:
+        type: NumericHistogramNumBinsSummary
+      viewport:
+        type: NumericHistogramNumBinsViewportResponse
+  NumericHistogramNumBinsPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      data: HistogramResponseData[]
+      config: NumericHistogramNumBinsConfig
+  ScatterplotPostRequest:
     type: VisualizationRequestBase
     properties:
-      config: RecordCountSpec
-  RecordCountSpec:
+      config: ScatterplotSpec
+  ScatterplotSpec:
     type: object
     additionalProperties: false
     properties:
-      entityId: string
-  RecordCountPostResponse:
+      outputEntityId: string
+      smoothedMean:
+        type: string
+        enum:
+          - "true"
+          - "false"
+      xAxisVariable: VariableSpec
+      yAxisVariable: VariableSpec
+      overlayVariable:
+        type: VariableSpec
+        required: false
+      facetVariable:
+        type: VariableSpec[]
+        maxItems: 2
+        required: false
+  ScatterplotResponseConfig:
+    type: VisualizationConfig
+    properties:
+      xVariableDetails:
+        type: VariableSpec
+      yVariableDetails:
+        type: VariableSpec
+  ScatterplotPostResponse:
     type: object
     additionalProperties: false
     properties:
-      recordCount: number
+      data: ScatterplotResponseData[]
+      config: ScatterplotResponseConfig
+  HeatmapPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: HeatmapSpec
+  HeatmapSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      valueSpec:
+        type: string
+        enum:
+          - collection
+          - series
+      xAxisVariable: VariableSpec
+      yAxisVariable: VariableSpec
+      zAxisVariable:
+        type: VariableSpec
+        required: false
+      facetVariable:
+        type: VariableSpec[]
+        maxItems: 2
+        required: false
+  HeatmapResponseConfig:
+    type: VisualizationConfig
+    properties:
+      xVariableDetails:
+        type: VariableSpec
+      yVariableDetails:
+        type: VariableSpec
+  HeatmapPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      data: HeatmapResponseData[]
+      config: HeatmapResponseConfig
+  DensityplotPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: DensityplotSpec
+  DensityplotSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      xAxisVariable: VariableSpec
+      overlayVariable:
+        type: VariableSpec
+        required: false
+      facetVariable:
+        type: VariableSpec[]
+        maxItems: 2
+        required: false
+  DensityplotResponseConfig:
+    type: VisualizationConfig
+    properties:
+      xVariableDetails:
+        type: VariableSpec
+  DensityplotPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      data: DensityplotResponseData[]
+      config: DensityplotResponseConfig
+  AppsGetResponse:
+    type: object
+    properties:
+      apps: AppOverview[]
+  AppOverview:
+    type: object
+    additionalProperties: false
+    properties:
+      name: string
+      displayName: string
+      description: string
+      visualizations: VisualizationOverview[]
+  VisualizationDataElementConstraint:
+    type: object
+    additionalProperties: false
+    properties:
+      isRequired: boolean
+      minNumVars: number
+      maxNumVars: number
+      allowedTypes:
+        type: API_VariableType[]
+        required: false
+      allowedShapes:
+        type: API_VariableDataShape[]
+        required: false
+  VisualizationDataElementConstraintPattern:
+    type: object
+    properties:
+      //: VisualizationDataElementConstraint
+  VisualizationOverview:
+    type: object
+    additionalProperties: false
+    properties:
+      name: string
+      displayName: string
+      description: string
+      dataElementConstraints:
+        type: VisualizationDataElementConstraintPattern[]
+        required: false
+      dataElementDependencyOrder:
+        type: string[]
+        required: false
+  MapPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: MapSpec
+  MapSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      geoAggregateVariable: VariableSpec
+      longitudeVariable: VariableSpec
+      latitudeVariable: VariableSpec
+  MapPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      geoAggregateValue: VariableSpec
+      entityCount: number
+      avgLat: number
+      avgLon: number
+      minLat: number
+      minLon: number
+      maxLat: number
+      maxLon: number
+  NumericHistogramBinWidthPostRequest:
+    type: HistogramPostRequest
+    properties:
+      config: NumericHistogramBinWidthSpec
+  NumericHistogramBinWidthSpec:
+    type: HistogramSpec
+    properties:
+      binWidth:
+        type: number
+        required: false
+      viewportMin:
+        type: number
+        required: false
+      viewportMax:
+        type: number
+        required: false
+  NumericHistogramBinWidthSummary:
+    type: object
+    properties:
+      min: number
+      q1: number
+      median: number
+      mean: number
+      q3: number
+      max: number
+  NumericHistogramBinWidthViewportResponse:
+    type: object
+    properties:
+      xMin: number
+      xMax: number
+  NumericHistogramBinWidthConfig:
+    type: HistogramResponseConfig
+    properties:
+      binWidth:
+        type: number
+      summary:
+        type: NumericHistogramBinWidthSummary
+      viewport:
+        type: NumericHistogramBinWidthViewportResponse
+  NumericHistogramBinWidthPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      data: HistogramResponseData[]
+      config: NumericHistogramBinWidthConfig
+  HistogramPostRequest: VisualizationRequestBase
+  ValueSpec:
+    type: string
+    enum:
+      - count
+      - proportion
+  HistogramSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      xAxisVariable: VariableSpec
+      valueSpec: ValueSpec
+      overlayVariable:
+        type: VariableSpec
+        required: false
+      facetVariable:
+        type: VariableSpec[]
+        maxItems: 2
+        required: false
+  HistogramResponseConfig:
+    type: VisualizationConfig
+    properties:
+      binSlider:
+        type: BinSlider
+      xVariableDetails:
+        type: VariableSpec
+  HistogramPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      data: HistogramResponseData[]
+      config: HistogramResponseConfig
 

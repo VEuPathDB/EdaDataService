@@ -16,6 +16,7 @@ import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
 import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
+import org.veupathdb.service.eda.common.model.ReferenceMetadata;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.MapPostRequest;
@@ -42,13 +43,14 @@ public class MapPlugin extends AbstractPlugin<MapPostRequest, MapSpec> {
   }
 
   @Override
-  protected ValidationBundle validateVisualizationSpec(MapSpec pluginSpec) throws ValidationException {
+  protected void validateVisualizationSpec(MapSpec pluginSpec) throws ValidationException {
+    ReferenceMetadata md = getReferenceMetadata();
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
-    EntityDef entity = getValidEntity(validation, pluginSpec.getOutputEntityId());
-    validateVariableNameAndType(validation, entity, "geoAggregateVariable", pluginSpec.getGeoAggregateVariable(), APIVariableType.STRING);
-    validateVariableNameAndType(validation, entity, "latitudeVariable", pluginSpec.getLatitudeVariable(), APIVariableType.NUMBER); 
-    validateVariableNameAndType(validation, entity, "longitudeVariable", pluginSpec.getLongitudeVariable(), APIVariableType.LONGITUDE);
-    return validation.build();
+    EntityDef entity = md.validateEntityAndGet(pluginSpec.getOutputEntityId());
+    md.validateVariableNameAndType(validation, entity, "geoAggregateVariable", pluginSpec.getGeoAggregateVariable(), APIVariableType.STRING);
+    md.validateVariableNameAndType(validation, entity, "latitudeVariable", pluginSpec.getLatitudeVariable(), APIVariableType.NUMBER);
+    md.validateVariableNameAndType(validation, entity, "longitudeVariable", pluginSpec.getLongitudeVariable(), APIVariableType.LONGITUDE);
+    validation.build().throwIfInvalid();
   }
 
   @Override

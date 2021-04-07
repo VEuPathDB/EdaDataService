@@ -16,23 +16,21 @@ import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.Timer;
 import org.gusdb.fgputil.client.ResponseFuture;
 import org.gusdb.fgputil.functional.FunctionalInterfaces.ConsumerWithException;
-import org.gusdb.fgputil.validation.ValidationBundle;
-import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
-import org.veupathdb.service.eda.common.client.StreamingDataClient;
 import org.veupathdb.service.eda.common.client.EdaMergingClient;
 import org.veupathdb.service.eda.common.client.EdaSubsettingClient;
+import org.veupathdb.service.eda.common.client.StreamingDataClient;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
-import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.model.ReferenceMetadata;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
+import org.veupathdb.service.eda.ds.constraints.DataElementSet;
+import org.veupathdb.service.eda.ds.constraints.DataElementValidator;
 import org.veupathdb.service.eda.generated.model.APIFilter;
 import org.veupathdb.service.eda.generated.model.APIStudyDetail;
-import org.veupathdb.service.eda.generated.model.APIVariableType;
-import org.veupathdb.service.eda.generated.model.VisualizationRequestBase;
 import org.veupathdb.service.eda.generated.model.DerivedVariable;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
+import org.veupathdb.service.eda.generated.model.VisualizationRequestBase;
 
 public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> implements Consumer<OutputStream> {
 
@@ -40,7 +38,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
 
   // methods that need to be implemented
   protected abstract Class<S> getVisualizationSpecClass();
-  protected abstract ValidationBundle validateVisualizationSpec(S pluginSpec) throws ValidationException;
+  protected abstract void validateVisualizationSpec(S pluginSpec) throws ValidationException;
   protected abstract List<StreamSpec> getRequestedStreams(S pluginSpec);
   protected abstract void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException;
 
@@ -82,7 +80,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     _referenceMetadata = new ReferenceMetadata(study, _derivedVariables);
 
     // ask subclass to validate the configuration
-    validateVisualizationSpec(_pluginSpec).throwIfInvalid();
+    validateVisualizationSpec(_pluginSpec);
 
     // get list of data streams required by this subclass
     _requiredStreams = getRequestedStreams(_pluginSpec);
@@ -132,15 +130,8 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     return var == null ? "" : _mergingClient.varToColumnHeader(var);
   }
 
-  protected EntityDef getValidEntity(ValidationBundleBuilder validation, String entityId) throws ValidationException {
-    return getReferenceMetadata().getValidEntity(validation, entityId);
-  }
-
-  protected void validateVariableInputs(Map<String,List<VariableSpec>> values, ConstraintSpec constraints) {
-
-  }
-  protected void validateVariableNameAndType(ValidationBundleBuilder validation, EntityDef entity, String variableUse, VariableSpec varSpec, APIVariableType... allowedTypes) {
-    getReferenceMetadata().validateVariableNameAndType(validation, entity, variableUse, varSpec, allowedTypes);
+  protected void validateInputs(DataElementSet values) throws ValidationException {
+    new DataElementValidator(getReferenceMetadata(), getConstraintSpec()).validate(values);
   }
 
   @SuppressWarnings("unchecked")

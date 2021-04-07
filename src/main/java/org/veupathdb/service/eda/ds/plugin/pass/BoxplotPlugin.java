@@ -14,6 +14,7 @@ import org.gusdb.fgputil.validation.ValidationLevel;
 import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.model.EntityDef;
+import org.veupathdb.service.eda.common.model.ReferenceMetadata;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.BoxplotPostRequest;
@@ -42,20 +43,21 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
   }
 
   @Override
-  protected ValidationBundle validateVisualizationSpec(BoxplotSpec pluginSpec) throws ValidationException {
+  protected void validateVisualizationSpec(BoxplotSpec pluginSpec) throws ValidationException {
+    ReferenceMetadata md = getReferenceMetadata();
     ValidationBundleBuilder validation = ValidationBundle.builder(ValidationLevel.RUNNABLE);
-    EntityDef entity = getValidEntity(validation, pluginSpec.getOutputEntityId());
-    validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.STRING);
-    validateVariableNameAndType(validation, entity, "yAxisVariable", pluginSpec.getYAxisVariable(), APIVariableType.NUMBER);
+    EntityDef entity = md.validateEntityAndGet(pluginSpec.getOutputEntityId());
+    md.validateVariableNameAndType(validation, entity, "xAxisVariable", pluginSpec.getXAxisVariable(), APIVariableType.STRING);
+    md.validateVariableNameAndType(validation, entity, "yAxisVariable", pluginSpec.getYAxisVariable(), APIVariableType.NUMBER);
     if (pluginSpec.getOverlayVariable() != null) {
-      validateVariableNameAndType(validation, entity, "overlayVariable", pluginSpec.getOverlayVariable(), APIVariableType.STRING);
+      md.validateVariableNameAndType(validation, entity, "overlayVariable", pluginSpec.getOverlayVariable(), APIVariableType.STRING);
     }
     if (pluginSpec.getFacetVariable() != null) {
       for (VariableSpec facetVar : pluginSpec.getFacetVariable()) {
-        validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
+        md.validateVariableNameAndType(validation, entity, "facetVariable", facetVar, APIVariableType.STRING);
       }
     }
-    return validation.build();
+    validation.build().throwIfInvalid();
   }
 
   @Override
