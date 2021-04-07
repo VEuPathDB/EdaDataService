@@ -18,7 +18,9 @@ import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.model.ReferenceMetadata;
+import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.ScatterplotPostRequest;
 import org.veupathdb.service.eda.generated.model.ScatterplotSpec;
@@ -45,6 +47,24 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
     return ScatterplotSpec.class;
   }
 
+  @Override
+  public ConstraintSpec getConstraintSpec() {
+    return new ConstraintSpec()
+      .dependencyOrder("yAxisVariable", "xAxisVariable", "overlayVariable", "facetVariable")
+      .pattern()
+        .element("yAxisVariable")
+          .shapes(APIVariableDataShape.CONTINUOUS)
+        .element("xAxisVariable")
+          .shapes(APIVariableDataShape.CONTINUOUS, APIVariableDataShape.ORDINAL)
+        .element("overlayVariable")
+          .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
+        .element("facetVariable")
+          .required(false)
+          .max(2)
+          .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
+      .done();
+  }
+  
   @Override
   protected void validateVisualizationSpec(ScatterplotSpec pluginSpec) throws ValidationException {
     ReferenceMetadata md = getReferenceMetadata();
