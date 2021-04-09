@@ -29,7 +29,7 @@ public class AppsMetadata {
 
   // NOTE: these names must match the url segments defined in the api.raml
   public static final AppsGetResponse APPS = apps(
-      app("pass", null, null,
+      app("pass", "Pass-Through", "A set of visualizations that do not require any up-front computation",
           viz("map-markers", new MapPlugin()),
           viz("scatterplot", new ScatterplotPlugin()),
           viz("densityplot", new DensityplotPlugin()),
