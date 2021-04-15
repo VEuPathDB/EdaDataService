@@ -1,11 +1,17 @@
 package org.veupathdb.service.eda.ds.plugin.pass;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
+import java.util.Map;
+import org.gusdb.fgputil.IoUtil;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationBundle;
 import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
+import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.model.ReferenceMetadata;
 import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
@@ -13,12 +19,15 @@ import org.veupathdb.service.eda.ds.constraints.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
+import org.veupathdb.service.eda.generated.model.BinSpec;
 import org.veupathdb.service.eda.generated.model.HistogramPostRequest;
 import org.veupathdb.service.eda.generated.model.HistogramSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 
-public abstract class HistogramPlugin<S extends HistogramPostRequest, T extends HistogramSpec> extends AbstractPlugin<S, T> {
+import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
+
+public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, HistogramSpec> {
 
   @Override
   public String getDisplayName() {
@@ -30,6 +39,11 @@ public abstract class HistogramPlugin<S extends HistogramPostRequest, T extends 
     return "Visualize the distribution of a continuous variable";
   }
 
+  @Override
+  protected Class<HistogramSpec> getVisualizationSpecClass() {
+    return HistogramSpec.class;
+  }
+  
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
@@ -47,7 +61,7 @@ public abstract class HistogramPlugin<S extends HistogramPostRequest, T extends 
   }
   
   @Override
-  protected void validateVisualizationSpec(T pluginSpec) throws ValidationException {
+  protected void validateVisualizationSpec(HistogramSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
       .var("xAxisVariable", pluginSpec.getXAxisVariable())
@@ -56,11 +70,89 @@ public abstract class HistogramPlugin<S extends HistogramPostRequest, T extends 
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(T pluginSpec) {
+  protected List<StreamSpec> getRequestedStreams(HistogramSpec pluginSpec) {
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
         .addVar(pluginSpec.getOverlayVariable())
         .addVars(pluginSpec.getFacetVariable()));
+  }
+  
+  @Override
+  protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
+    HistogramSpec spec = getPluginSpec(); 
+    String xVar = toColNameOrEmpty(spec.getXAxisVariable());
+    String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());
+    String facetVar1 = toColNameOrEmpty(spec.getFacetVariable(), 0);
+    String facetVar2 = toColNameOrEmpty(spec.getFacetVariable(), 1);
+    String xVarEntity = getVariableEntityId(spec.getXAxisVariable());
+    String overlayEntity = getVariableEntityId(spec.getOverlayVariable());
+    String facetEntity1 = getVariableEntityId(spec.getFacetVariable(), 0);
+    String facetEntity2 = getVariableEntityId(spec.getFacetVariable(), 1);
+    String xVarType = getVariableType(spec.getXAxisVariable());
+    String overlayType = getVariableType(spec.getOverlayVariable());
+    String facetType1 = getVariableType(spec.getFacetVariable(), 0);
+    String facetType2 = getVariableType(spec.getFacetVariable(), 1);
+    
+    useRConnectionWithRemoteFiles(dataStreams, connection -> {
+      connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
+      connection.voidEval("map <- data.frame("
+            + "'plotRef'=c('xAxisVariable', "
+            + "       'overlayVariable', "
+            + "       'facetVariable1', "
+            + "       'facetVariable2'), "
+            + "'id'=c('" + xVar + "'"
+            + ", '" + overlayVar + "'"
+            + ", '" + facetVar1 + "'"
+            + ", '" + facetVar2 + "'), "
+            + "'entityId'=c('" + xVarEntity + "'"
+            + ", '" + overlayEntity + "'"
+            + ", '" + facetEntity1 + "'"
+            + ", '" + facetEntity2 + "'), "
+            + "'dataType'=c('" + xVarType + "'"
+            + ", '" + overlayType + "'"
+            + ", '" + facetType1 + "'"
+            + ", '" + facetType2 + "'), stringsAsFactors=FALSE)");
+      
+      if (spec.getViewportMin() != null & spec.getViewportMax() != null) {
+        connection.voidEval("viewport <- list('xMin'=" + spec.getViewportMin() + ", 'xMax'=" + spec.getViewportMax() + ")");
+      } else {
+        connection.voidEval("viewport <- NULL");
+      }
+      
+      BinSpec binSpec = spec.getBinSpec();
+      String binReportValue = binSpec.getType().toString();
+      
+      //consider reorganizing conditions, move check for null value up a level ?
+      if (binReportValue.equals("NUMBINS")) {
+        if (binSpec.getValue() != null) {
+          String numBins = binSpec.getValue().toString();
+          connection.voidEval("xVP <- adjustToViewport(data[[" + xVar + "]], viewport)");
+          if (xVarType.equals("NUMBER")) {
+            connection.voidEval("xRange <- diff(range(xVP))");
+            connection.voidEval("binWidth <- xRange/" + numBins);
+          } else {
+            connection.voidEval("binWidth <- ceiling(as.numeric(diff(range(as.Date(xVP)))/" + numBins + "))");
+            connection.voidEval("binWidth <- paste0(binWidth, ' days')");
+          }
+        } else {
+          connection.voidEval("binWidth <- NULL");
+        }
+      } else {
+        String binWidth = "NULL";
+        if (xVarType.equals("NUMBER")) {
+          binWidth = binSpec.getValue() == null ? "NULL" : "as.numeric('" + binSpec.getValue() + "')";
+        } else {
+          binWidth = binSpec.getValue() == null ? "NULL" : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString() + "'";
+        }
+        connection.voidEval("binWidth <- " + binWidth);
+      }
+      
+      String outFile = connection.eval("histogram(data, map, binWidth, '" + spec.getValueSpec().toString().toLowerCase() + "', " + binReportValue + ", viewport)").asString();
+      try (RFileInputStream response = connection.openFile(outFile)) {
+        IoUtil.transferStream(out, response);
+      }
+      out.flush();
+    });
   }
 }

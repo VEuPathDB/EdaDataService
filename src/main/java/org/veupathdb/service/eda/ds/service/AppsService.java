@@ -11,15 +11,12 @@ import org.veupathdb.lib.container.jaxrs.server.annotations.DisableJackson;
 import org.veupathdb.service.eda.ds.plugin.pass.BarplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.BoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ContTablePlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.DateHistogramBinWidthPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.DateHistogramNumBinsPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.DensityplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.HeatmapPlugin;
+import org.veupathdb.service.eda.ds.plugin.pass.HistogramPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.LineplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.MapPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.NumericHistogramBinWidthPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.NumericHistogramNumBinsPlugin;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
 import org.veupathdb.service.eda.ds.plugin.sample.RecordCountPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ScatterplotPlugin;
@@ -28,15 +25,13 @@ import org.veupathdb.service.eda.generated.model.BarplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BarplotPostResponseStream;
 import org.veupathdb.service.eda.generated.model.BoxplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BoxplotPostResponseStream;
-import org.veupathdb.service.eda.generated.model.DateHistogramBinWidthPostRequest;
-import org.veupathdb.service.eda.generated.model.DateHistogramBinWidthPostResponseStream;
-import org.veupathdb.service.eda.generated.model.DateHistogramNumBinsPostRequest;
-import org.veupathdb.service.eda.generated.model.DateHistogramNumBinsPostResponseStream;
 import org.veupathdb.service.eda.generated.model.DensityplotPostRequest;
 import org.veupathdb.service.eda.generated.model.DensityplotPostResponseStream;
 import org.veupathdb.service.eda.generated.model.EntityTabularPostResponseStream;
 import org.veupathdb.service.eda.generated.model.HeatmapPostRequest;
 import org.veupathdb.service.eda.generated.model.HeatmapPostResponseStream;
+import org.veupathdb.service.eda.generated.model.HistogramPostRequest;
+import org.veupathdb.service.eda.generated.model.HistogramPostResponseStream;
 import org.veupathdb.service.eda.generated.model.LineplotPostRequest;
 import org.veupathdb.service.eda.generated.model.LineplotPostResponseStream;
 import org.veupathdb.service.eda.generated.model.MapPostRequest;
@@ -45,10 +40,6 @@ import org.veupathdb.service.eda.generated.model.MosaicPostRequest;
 import org.veupathdb.service.eda.generated.model.TwoByTwoPostResponseStream;
 import org.veupathdb.service.eda.generated.model.ContTablePostResponseStream;
 import org.veupathdb.service.eda.generated.model.MultiStreamPostRequest;
-import org.veupathdb.service.eda.generated.model.NumericHistogramBinWidthPostRequest;
-import org.veupathdb.service.eda.generated.model.NumericHistogramBinWidthPostResponseStream;
-import org.veupathdb.service.eda.generated.model.NumericHistogramNumBinsPostRequest;
-import org.veupathdb.service.eda.generated.model.NumericHistogramNumBinsPostResponseStream;
 import org.veupathdb.service.eda.generated.model.RecordCountPostRequest;
 import org.veupathdb.service.eda.generated.model.RecordCountPostResponseStream;
 import org.veupathdb.service.eda.generated.model.ScatterplotPostRequest;
@@ -107,30 +98,9 @@ public class AppsService implements Apps {
 
   @DisableJackson
   @Override
-  public PostAppsPassVisualizationsDateHistogramBinWidthResponse postAppsPassVisualizationsDateHistogramBinWidth(DateHistogramBinWidthPostRequest entity) {
-    return wrapPlugin(() -> PostAppsPassVisualizationsDateHistogramBinWidthResponse.respond200WithApplicationJson(
-        new DateHistogramBinWidthPostResponseStream(new DateHistogramBinWidthPlugin().processRequest(entity))));
-  }
-
-  @DisableJackson
-  @Override
-  public PostAppsPassVisualizationsDateHistogramNumBinsResponse postAppsPassVisualizationsDateHistogramNumBins(DateHistogramNumBinsPostRequest entity) {
-    return wrapPlugin(() -> PostAppsPassVisualizationsDateHistogramNumBinsResponse.respond200WithApplicationJson(
-        new DateHistogramNumBinsPostResponseStream(new DateHistogramNumBinsPlugin().processRequest(entity))));
-  }
-  
-  @DisableJackson
-  @Override
-  public PostAppsPassVisualizationsNumericHistogramBinWidthResponse postAppsPassVisualizationsNumericHistogramBinWidth(NumericHistogramBinWidthPostRequest entity) {
-    return wrapPlugin(() -> PostAppsPassVisualizationsNumericHistogramBinWidthResponse.respond200WithApplicationJson(
-        new NumericHistogramBinWidthPostResponseStream(new NumericHistogramBinWidthPlugin().processRequest(entity))));
-  }
-
-  @DisableJackson
-  @Override
-  public PostAppsPassVisualizationsNumericHistogramNumBinsResponse postAppsPassVisualizationsNumericHistogramNumBins(NumericHistogramNumBinsPostRequest entity) {
-    return wrapPlugin(() -> PostAppsPassVisualizationsNumericHistogramNumBinsResponse.respond200WithApplicationJson(
-        new NumericHistogramNumBinsPostResponseStream(new NumericHistogramNumBinsPlugin().processRequest(entity))));
+  public PostAppsPassVisualizationsHistogramResponse postAppsPassVisualizationsHistogram(HistogramPostRequest entity) {
+    return wrapPlugin(() -> PostAppsPassVisualizationsHistogramResponse.respond200WithApplicationJson(
+        new HistogramPostResponseStream(new HistogramPlugin().processRequest(entity))));
   }
 
   @DisableJackson

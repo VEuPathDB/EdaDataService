@@ -9,6 +9,28 @@ types:
     type: string
     enum: ['count', 'proportion']
 
+  HistogramViewport:
+    additionalProperties: false
+    properties:
+      xMin:
+        type: string
+      xMax:
+        type: string      
+
+  BinSpec:
+    additionalProperties: false
+    properties:
+      type:
+        type: string
+        enum: ['binWidth','numBins']
+      value:
+        type: number
+        required: false
+      units:
+        type: string
+        enum: ['day','week','month','year']
+        required: false
+
   HistogramSpec:
     additionalProperties: false
     properties:
@@ -25,6 +47,29 @@ types:
         type: VariableSpec[]
         maxItems: 2
         required: false
+      binSpec:
+        type: BinSpec
+      viewportMin:
+        type: string
+        required: false
+      viewportMax:
+        type: string
+        required: false
+        
+  HistogramSummary:
+    properties:
+      min:
+        type: string
+      q1:
+        type: string
+      median:
+        type: string
+      mean:
+        type: string
+      q3:
+        type: string
+      max:
+        type: string  
         
   HistogramResponseConfig:
     type: VisualizationConfig
@@ -32,8 +77,13 @@ types:
       binSlider:
         type: BinSlider
       xVariableDetails:
-        type: VariableSpec
-      
+        type: VariableSpec    
+      binSpec:
+        type: BinSpec
+      summary:
+        type: HistogramSummary
+      viewport:
+        type: HistogramViewport
 
   HistogramPostResponse:
     additionalProperties: false

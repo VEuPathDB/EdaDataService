@@ -6,14 +6,11 @@ import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.BarplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.BoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ContTablePlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.DateHistogramBinWidthPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.DateHistogramNumBinsPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.DensityplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.HeatmapPlugin;
+import org.veupathdb.service.eda.ds.plugin.pass.HistogramPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.LineplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.MapPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.NumericHistogramBinWidthPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.NumericHistogramNumBinsPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.MultiStreamPlugin;
@@ -34,10 +31,7 @@ public class AppsMetadata {
           viz("scatterplot", new ScatterplotPlugin()),
           viz("densityplot", new DensityplotPlugin()),
           viz("lineplot", new LineplotPlugin()),
-          viz("date-histogram-num-bins", new DateHistogramNumBinsPlugin()),
-          viz("date-histogram-bin-width", new DateHistogramBinWidthPlugin()),
-          viz("numeric-histogram-num-bins", new NumericHistogramNumBinsPlugin()),
-          viz("numeric-histogram-bin-width", new NumericHistogramBinWidthPlugin()),
+          viz("histogram", new HistogramPlugin()),
           viz("barplot", new BarplotPlugin()),
           viz("boxplot", new BoxplotPlugin()),
           viz("heatmap", new HeatmapPlugin()),

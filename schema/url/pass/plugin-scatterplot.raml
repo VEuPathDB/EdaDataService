@@ -13,9 +13,9 @@ types:
     properties:
       outputEntityId:
         type: string
-      smoothedMean:
+      valueSpec:
         type: string
-        enum: ['true', 'false']
+        enum: ['raw', 'smoothedMean', 'smoothedMeanWithRaw']
       xAxisVariable: 
         type: VariableSpec
       yAxisVariable: 

@@ -21,6 +21,7 @@ import org.veupathdb.service.eda.common.client.EdaMergingClient;
 import org.veupathdb.service.eda.common.client.EdaSubsettingClient;
 import org.veupathdb.service.eda.common.client.StreamingDataClient;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
+import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.model.ReferenceMetadata;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
@@ -129,10 +130,53 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     return _referenceMetadata;
   }
 
+  protected VariableSpec getVariableSpecFromList(List<VariableSpec> vars, int index) {
+    VariableSpec var = null;
+    if (vars != null) {
+      var = vars.size() > index ? vars.get(index) : null;
+    }
+    
+    return var;
+  }
+  
   protected String toColNameOrEmpty(VariableSpec var) {
     return var == null ? "" : _mergingClient.varToColumnHeader(var);
   }
 
+  protected String toColNameOrEmpty(List<VariableSpec> vars, int index) {
+    VariableSpec var = getVariableSpecFromList(vars, index);
+    String colName = toColNameOrEmpty(var);
+    
+    return colName;
+  }
+  
+  protected String getVariableType(VariableSpec var) {
+    EntityDef entity = getReferenceMetadata().getEntity(var.getEntityId());
+    String varType = var != null ? entity.getVariable(var).getType().toString() : "";
+    
+    return varType;
+  }
+  
+  protected String getVariableType(List<VariableSpec> vars, int index) {
+    VariableSpec var = getVariableSpecFromList(vars, index);
+    String varType = getVariableType(var);
+    
+    return varType;
+  }
+  
+  protected String getVariableEntityId(VariableSpec var) {
+    String varEntityId = var != null ? var.getEntityId() : "";
+    
+    return varEntityId;
+  }
+  
+  protected String getVariableEntityId(List<VariableSpec> vars, int index) {
+    VariableSpec var = getVariableSpecFromList(vars, index);
+    String varEntityId = getVariableEntityId(var);
+    
+    return varEntityId;
+  }
+  
   protected void validateInputs(DataElementSet values) throws ValidationException {
     new DataElementValidator(getReferenceMetadata(), getConstraintSpec()).validate(values);
   }
