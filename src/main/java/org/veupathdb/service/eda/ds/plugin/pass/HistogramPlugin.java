@@ -121,19 +121,19 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
       }
       
       BinSpec binSpec = spec.getBinSpec();
-      String binReportValue = binSpec.getType().toString();
+      String binReportValue = getCamelCaseEnum(binSpec.getType().toString());
       
       //consider reorganizing conditions, move check for null value up a level ?
-      if (binReportValue.equals("NUMBINS")) {
+      if (binReportValue.equals("numBins")) {
         if (binSpec.getValue() != null) {
           String numBins = binSpec.getValue().toString();
-          connection.voidEval("xVP <- adjustToViewport(data[[" + xVar + "]], viewport)");
+          connection.voidEval("xVP <- adjustToViewport(data$" + xVar + ", viewport)");
           if (xVarType.equals("NUMBER")) {
             connection.voidEval("xRange <- diff(range(xVP))");
             connection.voidEval("binWidth <- xRange/" + numBins);
           } else {
             connection.voidEval("binWidth <- ceiling(as.numeric(diff(range(as.Date(xVP)))/" + numBins + "))");
-            connection.voidEval("binWidth <- paste0(binWidth, ' days')");
+            connection.voidEval("binWidth <- paste(binWidth, 'day')");
           }
         } else {
           connection.voidEval("binWidth <- NULL");
@@ -143,12 +143,12 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
         if (xVarType.equals("NUMBER")) {
           binWidth = binSpec.getValue() == null ? "NULL" : "as.numeric('" + binSpec.getValue() + "')";
         } else {
-          binWidth = binSpec.getValue() == null ? "NULL" : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString() + "'";
+          binWidth = binSpec.getValue() == null ? "NULL" : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
         }
         connection.voidEval("binWidth <- " + binWidth);
       }
       
-      String outFile = connection.eval("histogram(data, map, binWidth, '" + spec.getValueSpec().toString().toLowerCase() + "', " + binReportValue + ", viewport)").asString();
+      String outFile = connection.eval("histogram(data, map, binWidth, '" + spec.getValueSpec().toString().toLowerCase() + "', '" + binReportValue + "', viewport)").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
       }
