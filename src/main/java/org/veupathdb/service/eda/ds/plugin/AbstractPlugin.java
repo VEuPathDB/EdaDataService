@@ -178,24 +178,6 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     return varEntityId;
   }
   
-  //temp helper
-  protected String getCamelCaseEnum(String caps) {
-    String str = null;
-    if (caps.equals("BINWIDTH")) {
-      str = "binWidth";
-    } else if (caps.equals("NUMBINS")) {
-      str = "numBins";
-    } else if (caps.equals("RAW")) {
-      str = "raw";
-    } else if (caps.equals("SMOOTHEDMEAN")) {
-      str = "smoothedMean";
-    } else if (caps.equals("SMOOTHEDMEANWITHRAW")) {
-      str = "smoothedMeanWithRaw";
-    }
-    
-    return str;
-  }
-  
   protected void validateInputs(DataElementSet values) throws ValidationException {
     new DataElementValidator(getReferenceMetadata(), getConstraintSpec()).validate(values);
   }

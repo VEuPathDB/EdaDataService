@@ -121,7 +121,7 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
       }
       
       BinSpec binSpec = spec.getBinSpec();
-      String binReportValue = getCamelCaseEnum(binSpec.getType().toString());
+      String binReportValue = binSpec.getType().getValue();
       
       //consider reorganizing conditions, move check for null value up a level ?
       if (binReportValue.equals("numBins")) {
