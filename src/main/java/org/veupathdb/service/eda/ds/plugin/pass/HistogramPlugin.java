@@ -114,7 +114,7 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
             + ", '" + facetType1 + "'"
             + ", '" + facetType2 + "'), stringsAsFactors=FALSE)");
       
-      if (spec.getViewport().getXMin() != null & spec.getViewport().getXMax() != null) {
+      if (spec.getViewport() != null) {
         connection.voidEval("viewport <- list('xMin'=" + spec.getViewport().getXMin() + ", 'xMax'=" + spec.getViewport().getXMax() + ")");
       } else {
         connection.voidEval("viewport <- NULL");
