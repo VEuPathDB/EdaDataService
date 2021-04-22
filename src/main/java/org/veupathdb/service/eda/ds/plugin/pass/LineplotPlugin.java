@@ -13,7 +13,6 @@ import org.gusdb.fgputil.validation.ValidationException;
 import org.gusdb.fgputil.validation.ValidationLevel;
 import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
-import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.model.ReferenceMetadata;
 import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.ds.constraints.DataElementSet;
@@ -84,22 +83,21 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     LineplotSpec spec = getPluginSpec();
-    EntityDef entity = getReferenceMetadata().getEntity(spec.getOutputEntityId());
     String xVar = toColNameOrEmpty(spec.getXAxisVariable());
     String yVar = toColNameOrEmpty(spec.getYAxisVariable());
     String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());
-    String facetVar1 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(0)) : "";
-    String facetVar2 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(1)) : "";
-    String xVarEntity = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
-    String yVarEntity = spec.getYAxisVariable() != null ? spec.getYAxisVariable().getEntityId() : "";
-    String overlayEntity = spec.getOverlayVariable() != null ? spec.getOverlayVariable().getEntityId() : "";
-    String facetEntity1 = spec.getFacetVariable() != null ? spec.getFacetVariable().get(0).getEntityId() : "";
-    String facetEntity2 = spec.getFacetVariable() != null ? spec.getFacetVariable().get(1).getEntityId() : "";
-    String xVarType = spec.getXAxisVariable() != null ? entity.getVariable(spec.getXAxisVariable()).getType().toString() : "";
-    String yVarType = spec.getYAxisVariable() != null ? entity.getVariable(spec.getYAxisVariable()).getType().toString() : "";
-    String overlayType = spec.getOverlayVariable() != null ? entity.getVariable(spec.getOverlayVariable()).getType().toString() : "";
-    String facetType1 = spec.getFacetVariable() != null ? entity.getVariable(spec.getFacetVariable().get(0)).getType().toString() : "";
-    String facetType2 = spec.getFacetVariable() != null ? entity.getVariable(spec.getFacetVariable().get(1)).getType().toString() : "";
+    String facetVar1 = toColNameOrEmpty(spec.getFacetVariable(), 0);
+    String facetVar2 = toColNameOrEmpty(spec.getFacetVariable(), 1);
+    String xVarEntity = getVariableEntityId(spec.getXAxisVariable());
+    String yVarEntity = getVariableEntityId(spec.getYAxisVariable());
+    String overlayEntity = getVariableEntityId(spec.getOverlayVariable());
+    String facetEntity1 = getVariableEntityId(spec.getFacetVariable(), 0);
+    String facetEntity2 = getVariableEntityId(spec.getFacetVariable(), 1);
+    String xVarType = getVariableType(spec.getXAxisVariable());
+    String yVarType = getVariableType(spec.getYAxisVariable());
+    String overlayType = getVariableType(spec.getOverlayVariable());
+    String facetType1 = getVariableType(spec.getFacetVariable(), 0);
+    String facetType2 = getVariableType(spec.getFacetVariable(), 1);
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");

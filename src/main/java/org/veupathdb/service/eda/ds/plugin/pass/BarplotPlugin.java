@@ -154,16 +154,16 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
     else {
       String xVar = toColNameOrEmpty(spec.getXAxisVariable());
       String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());
-      String facetVar1 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(0)) : "";
-      String facetVar2 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(1)) : "";
-      String xVarEntity = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
-      String overlayEntity = spec.getOverlayVariable() != null ? spec.getOverlayVariable().getEntityId() : "";
-      String facetEntity1 = spec.getFacetVariable() != null ? spec.getFacetVariable().get(0).getEntityId() : "";
-      String facetEntity2 = spec.getFacetVariable() != null ? spec.getFacetVariable().get(1).getEntityId() : "";
-      String xVarType = spec.getXAxisVariable() != null ? entity.getVariable(spec.getXAxisVariable()).getType().toString() : "";
-      String overlayType = spec.getOverlayVariable() != null ? entity.getVariable(spec.getOverlayVariable()).getType().toString() : "";
-      String facetType1 = spec.getFacetVariable() != null ? entity.getVariable(spec.getFacetVariable().get(0)).getType().toString() : "";
-      String facetType2 = spec.getFacetVariable() != null ? entity.getVariable(spec.getFacetVariable().get(1)).getType().toString() : "";
+      String facetVar1 = toColNameOrEmpty(spec.getFacetVariable(), 0);
+      String facetVar2 = toColNameOrEmpty(spec.getFacetVariable(), 1);
+      String xVarEntity = getVariableEntityId(spec.getXAxisVariable());
+      String overlayEntity = getVariableEntityId(spec.getOverlayVariable());
+      String facetEntity1 = getVariableEntityId(spec.getFacetVariable(), 0);
+      String facetEntity2 = getVariableEntityId(spec.getFacetVariable(), 1);
+      String xVarType = getVariableType(spec.getXAxisVariable());
+      String overlayType = getVariableType(spec.getOverlayVariable());
+      String facetType1 = getVariableType(spec.getFacetVariable(), 0);
+      String facetType2 = getVariableType(spec.getFacetVariable(), 1);
       
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
         connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");

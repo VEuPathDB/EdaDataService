@@ -102,70 +102,22 @@ securitySchemes:
               application/json:
                 type: error.ServerError
 
-    /date-histogram-bin-width:
+    /histogram:
       post:
-        description: Returns data required to create a histogram visualization of date values given a number of bins <br> Java impl- NA <br> R impl- drafted, passing unit tests, not confirmed working
+        description: Returns data required to create a histogram visualization. <br> Java impl- NA <br> R impl- confirmed working
         body:
           application/json:
-            type: lib.DateHistogramBinWidthPostRequest
+            type: lib.HistogramPostRequest
         responses:
           200:
             body:
               application/json:
-                type: lib.DateHistogramBinWidthPostResponse
+                type: lib.HistogramPostResponse
           500:
             body:
               application/json:
                 type: error.ServerError
 
-    /numeric-histogram-bin-width:
-      post:
-        description: Returns data required to create a histogram visualization of numeric values given a bin width <br> Java impl- NA <br> R impl- xaxis and overlay working
-        body:
-          application/json:
-            type: lib.NumericHistogramBinWidthPostRequest
-        responses:
-          200:
-            body:
-              application/json:
-                type: lib.NumericHistogramBinWidthPostResponse
-          500:
-            body:
-              application/json:
-                type: error.ServerError
-  
-    /date-histogram-num-bins:
-      post:
-        description: Returns data required to create a histogram visualization of date values given a number of bins <br> Java impl- NA <br> R impl- drafted, passing unit tests, not confirmed working
-        body:
-          application/json:
-            type: lib.DateHistogramNumBinsPostRequest
-        responses:
-          200:
-            body:
-              application/json:
-                type: lib.DateHistogramNumBinsPostResponse
-          500:
-            body:
-              application/json:
-                type: error.ServerError
-  
-    /numeric-histogram-num-bins:
-      post:
-        description: Returns data required to create a histogram visualization of numeric values given a bin width <br> Java impl- NA <br> R impl- xaxis and overlay working
-        body:
-          application/json:
-            type: lib.NumericHistogramNumBinsPostRequest
-        responses:
-          200:
-            body:
-              application/json:
-                type: lib.NumericHistogramNumBinsPostResponse
-          500:
-            body:
-              application/json:
-                type: error.ServerError
-  
     /boxplot:
       post:
         description: Returns data required to create a boxplot visualization <br> Java impl- NA <br> R impl- confirmed working without strata

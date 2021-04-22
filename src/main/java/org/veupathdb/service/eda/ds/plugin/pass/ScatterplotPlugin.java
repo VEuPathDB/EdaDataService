@@ -90,7 +90,7 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
     
     boolean simpleScatter = true;
     if (spec.getFacetVariable() != null
-         || !spec.getSmoothedMean().equals(ScatterplotSpec.SmoothedMeanType.FALSE)
+         || !spec.getValueSpec().equals(ScatterplotSpec.ValueSpecType.RAW)
          || dataStreams.size() != 1) {
       simpleScatter = false;
     }
@@ -149,7 +149,7 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
       String overlayType = spec.getOverlayVariable() != null ? entity.getVariable(spec.getOverlayVariable()).getType().toString() : "";
       String facetType1 = spec.getFacetVariable() != null ? entity.getVariable(spec.getFacetVariable().get(0)).getType().toString() : "";
       String facetType2 = spec.getFacetVariable() != null ? entity.getVariable(spec.getFacetVariable().get(1)).getType().toString() : "";
-      String smoothedMean = spec.getSmoothedMean().equals(ScatterplotSpec.SmoothedMeanType.FALSE) ? "raw" : "smoothedMean";
+      String valueSpec = spec.getValueSpec().getValue();
       
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
         connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
@@ -174,7 +174,7 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
             + ", '" + overlayType + "'"
             + ", '" + facetType1 + "'"
             + ", '" + facetType2 + "'), stringsAsFactors=FALSE)");
-        String outFile = connection.eval("scattergl(data, map, '" + smoothedMean + "')").asString();
+        String outFile = connection.eval("scattergl(data, map, '" + valueSpec + "')").asString();
         try (RFileInputStream response = connection.openFile(outFile)) {
           IoUtil.transferStream(out, response);
         }
