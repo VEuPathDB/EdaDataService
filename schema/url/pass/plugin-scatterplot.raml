@@ -28,18 +28,26 @@ types:
         maxItems: 2
         required: false
 
-  ScatterplotResponseConfig:
-    type: VisualizationConfig
+  ScatterplotConfig:
+    type: PlotConfig
     properties:
       xVariableDetails:
         type: VariableSpec
       yVariableDetails:
         type: VariableSpec
 
-  ScatterplotPostResponse:
+  Scatterplot:
     additionalProperties: false
     properties:
       data:
-        type: ScatterplotResponseData[]
+        type: ScatterplotData[]
       config:
-        type: ScatterplotResponseConfig
+        type: ScatterplotConfig
+
+  ScatterplotPostResponse:
+    additionalProperties: false
+    properties:
+      scatterplot:
+        type: Scatterplot
+      sampleSizeTable:
+        type: SampleSizeTable[]

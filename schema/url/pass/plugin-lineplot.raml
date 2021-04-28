@@ -25,18 +25,26 @@ types:
         maxItems: 2
         required: false
 
-  LineplotResponseConfig:
-    type: VisualizationConfig
+  LineplotConfig:
+    type: PlotConfig
     properties:
       xVariableDetails:
         type: VariableSpec
       yVariableDetails:
         type: VariableSpec
 
-  LineplotPostResponse:
+  Lineplot:
     additionalProperties: false
     properties:
       data:
-        type: LineplotResponseData[]
+        type: LineplotData[]
       config:
-        type: LineplotResponseConfig
+        type: LineplotConfig
+
+  LineplotPostResponse:
+    additionalProperties: false
+    properties:
+      lineplot:
+        type: Lineplot
+      sampleSizeTable:
+        type: SampleSizeTable[]

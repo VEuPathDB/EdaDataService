@@ -26,16 +26,24 @@ types:
         maxItems: 2
         required: false
 
-  BarplotResponseConfig:
-    type: VisualizationConfig
+  BarplotConfig:
+    type: PlotConfig
     properties:
       xVariableDetails:
         type: VariableSpec
 
-  BarplotPostResponse:
+  Barplot:
     additionalProperties: false
     properties:
       data:
-        type: BarplotResponseData[]
+        type: BarplotData[]
       config:
-        type: BarplotResponseConfig
+        type: BarplotConfig
+
+  BarplotPostResponse:
+    additionalProperties: false
+    properties:
+      barplot:
+        type: Barplot
+      sampleSizeTable:
+        type: SampleSizeTable[]

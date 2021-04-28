@@ -28,18 +28,27 @@ types:
         maxItems: 2
         required: false
         
-  HeatmapResponseConfig:
-    type: VisualizationConfig
+  HeatmapConfig:
+    type: PlotConfig
     properties:
       xVariableDetails:
         type: VariableSpec
       yVariableDetails:
         type: VariableSpec
 
-  HeatmapPostResponse:
+  Heatmap:
     additionalProperties: false
     properties:
       data:
-        type: HeatmapResponseData[]
+        type: HeatmapData[]
       config:
-        type: HeatmapResponseConfig
+        type: HeatmapConfig
+
+  HeatmapPostResponse:
+    additionalProperties: false
+    properties:
+      heatmap:
+        type: Heatmap
+      sampleSizeTable:
+        type: SampleSizeTable[]
+      

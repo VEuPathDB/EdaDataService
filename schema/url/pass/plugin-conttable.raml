@@ -3,10 +3,30 @@
 types:
   # Type name determines the name of the Java class that will be generated.
 
+  # TODO make sure the response props have the right names, includes table values if needed etc      
+  ContTableStatsTable:
+    additionalProperties: false
+    properties:
+      facetVariableDetails:
+        type: StrataVariableDetails[]
+        maxItems: 2
+        required: false
+      pvalue:
+        type: number[]
+        minItems: 1
+      degreesFreedom:
+        type: number[]
+        minItems: 1
+      chisq:
+        type: number[]
+        minItems: 1
+
   ContTablePostResponse:
     additionalProperties: false
     properties:
-      data:
-        type: ContTableResponseData[]
-      config:
-        type: MosaicResponseConfig
+      mosaic:
+        type: Mosaic
+      sampleSizeTable:
+        type: SampleSizeTable[]
+      statsTable:
+        type: ContTableStatsTable[]

@@ -70,8 +70,8 @@ types:
       max:
         type: string  
         
-  HistogramResponseConfig:
-    type: VisualizationConfig
+  HistogramConfig:
+    type: PlotConfig
     properties:
       binSlider:
         type: BinSlider
@@ -84,12 +84,18 @@ types:
       viewport:
         type: HistogramViewport
 
-  HistogramPostResponse:
+  Histogram:
     additionalProperties: false
     properties:
       data:
-        type: HistogramResponseData[]
+        type: HistogramData[]
       config:
-        type: HistogramResponseConfig
-        
-    
+        type: HistogramConfig
+
+  HistogramPostResponse:
+    additionalProperties: false
+    properties:
+      histogram:
+        type: Histogram
+      sampleSizeTable:
+        type: SampleSizeTable[]

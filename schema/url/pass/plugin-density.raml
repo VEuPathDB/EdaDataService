@@ -23,16 +23,24 @@ types:
         maxItems: 2
         required: false
 
-  DensityplotResponseConfig:
-    type: VisualizationConfig
+  DensityplotConfig:
+    type: PlotConfig
     properties:
       xVariableDetails:
         type: VariableSpec
 
-  DensityplotPostResponse:
+  Densityplot:
     additionalProperties: false
     properties:
       data:
-        type: DensityplotResponseData[]
+        type: DensityplotData[]
       config:
-        type: DensityplotResponseConfig
+        type: DensityplotConfig
+
+  DensityplotPostResponse:
+    additionalProperties: false
+    properties:
+      densityplot:
+        type: Densityplot
+      sampleSizeTable:
+        type: SampleSizeTable[]

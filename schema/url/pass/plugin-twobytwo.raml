@@ -3,37 +3,35 @@
 types:
   # Type name determines the name of the Java class that will be generated.
 
-  MosaicPostRequest:
-    type: VisualizationRequestBase
-    properties:
-      config: MosaicSpec
-
-  MosaicSpec:
+  TwoByTwoStatsTable:
     additionalProperties: false
     properties:
-      outputEntityId:
-        type: string
-      xAxisVariable: 
-        type: VariableSpec
-      yAxisVariable: 
-        type: VariableSpec
-      facetVariable: 
-        type: VariableSpec[]
+      facetVariableDetails:
+        type: StrataVariableDetails[]
         maxItems: 2
         required: false
+      oddsratio:
+        type: number[]
+        minItems: 1
+      pvalue:
+        type: number[]
+        minItems: 1
+      orInterval:
+        type: number[]
+        minItems: 1
+      relativerisk:
+        type: number[]
+        minItems: 1
+      rrInterval:
+        type: number[]
+        minItems: 1
         
-  MosaicResponseConfig:
-    type: VisualizationConfig
-    properties:
-      xVariableDetails:
-        type: VariableSpec
-      yVariableDetails:
-        type: VariableSpec
-
   TwoByTwoPostResponse:
     additionalProperties: false
     properties:
-      data:
-        type: TwoByTwoResponseData[]
-      config:
-        type: MosaicResponseConfig
+      mosaic:
+        type: Mosaic
+      sampleSizeTable:
+        type: SampleSizeTable[]
+      statsTable:
+        type: TwoByTwoStatsTable[]

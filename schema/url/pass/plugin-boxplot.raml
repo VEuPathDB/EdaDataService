@@ -31,18 +31,26 @@ types:
         maxItems: 2
         required: false
 
-  BoxplotResponseConfig:
-    type: VisualizationConfig
+  BoxplotConfig:
+    type: PlotConfig
     properties:
       xVariableDetails:
         type: VariableSpec
       yVariableDetails:
         type: VariableSpec
 
-  BoxplotPostResponse:
+  Boxplot:
     additionalProperties: false
     properties:
       data:
-        type: BoxplotResponseData[]
+        type: BoxplotData[]
       config:
-        type: BoxplotResponseConfig
+        type: BoxplotConfig
+
+  BoxplotPostResponse:
+    additionalProperties: false
+    properties:
+      boxplot:
+        type: Boxplot
+      sampleSizeTable:
+        type: SampleSizeTable[]
