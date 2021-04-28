@@ -22,6 +22,7 @@ import org.veupathdb.service.eda.common.client.EdaSubsettingClient;
 import org.veupathdb.service.eda.common.client.StreamingDataClient;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.model.ReferenceMetadata;
+import org.veupathdb.service.eda.common.model.VariableDef;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.ds.constraints.DataElementSet;
@@ -174,20 +175,32 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     return vars == null || vars.size() <= index ? null : vars.get(index);
   }
 
-  protected String getVariableType(VariableSpec var) {
-    return var == null ? "" : getReferenceMetadata().getVariable(var).orElseThrow().getType().toString();
-  }
-  
-  protected String getVariableType(List<VariableSpec> vars, int index) {
-    return getVariableType(getVariableSpecFromList(vars, index));
-  }
-  
   protected String getVariableEntityId(VariableSpec var) {
     return var == null ? null : var.getEntityId();
   }
-  
+
   protected String getVariableEntityId(List<VariableSpec> vars, int index) {
     return getVariableEntityId(getVariableSpecFromList(vars, index));
+  }
+
+  private String getVariableAttribute(Function<VariableDef, ?> getter, VariableSpec var) {
+    return var == null ? "" : getter.apply(getReferenceMetadata().getVariable(var).orElseThrow()).toString();
+  }
+
+  protected String getVariableType(VariableSpec var) {
+    return getVariableAttribute(VariableDef::getType, var);
+  }
+
+  protected String getVariableType(List<VariableSpec> vars, int index) {
+    return getVariableType(getVariableSpecFromList(vars, index));
+  }
+
+  protected String getVariableDataShape(VariableSpec var) {
+    return getVariableAttribute(VariableDef::getDataShape, var);
+  }
+
+  protected String getVariableDataShape(List<VariableSpec> vars, int index) {
+    return getVariableDataShape(getVariableSpecFromList(vars, index));
   }
 
 }
