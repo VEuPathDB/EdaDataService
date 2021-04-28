@@ -8,23 +8,28 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
+import java.util.function.Function;
+import org.gusdb.fgputil.DelimitedDataParser;
+import org.gusdb.fgputil.FormatUtil;
 import org.gusdb.fgputil.ListBuilder;
-import org.gusdb.fgputil.validation.ValidationBundle;
-import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
+import org.gusdb.fgputil.geo.GeographyUtil;
+import org.gusdb.fgputil.geo.GeographyUtil.GeographicPoint;
+import org.gusdb.fgputil.geo.LatLonAverager;
 import org.gusdb.fgputil.validation.ValidationException;
-import org.gusdb.fgputil.validation.ValidationLevel;
-import org.veupathdb.service.eda.common.model.EntityDef;
+import org.json.JSONObject;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
-import org.veupathdb.service.eda.common.model.ReferenceMetadata;
 import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.ds.constraints.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.MapPostRequest;
 import org.veupathdb.service.eda.generated.model.MapSpec;
-import org.json.JSONObject;
+import org.veupathdb.service.eda.generated.model.VariableSpec;
+
+import static org.gusdb.fgputil.FormatUtil.NL;
+import static org.gusdb.fgputil.FormatUtil.TAB;
 
 public class MapPlugin extends AbstractPlugin<MapPostRequest, MapSpec> {
 
@@ -74,79 +79,70 @@ public class MapPlugin extends AbstractPlugin<MapPostRequest, MapSpec> {
         .addVar(pluginSpec.getLongitudeVariable()));
   }
 
+  private static class GeoVarData {
+
+    long count = 0;
+    LatLonAverager latLonAvg = new LatLonAverager();
+    double minLat = 90;
+    double maxLat = -90;
+    double minLon = 180;
+    double maxLon = -180;
+
+    void addRow(double lat, double lon) {
+      count++;
+      latLonAvg.addDataPoint(lat, lon);
+      minLat = Math.min(minLat, lat);
+      minLon = Math.min(minLon, lon);
+      maxLat = Math.max(maxLat, lat);
+      maxLon = Math.max(maxLon, lon);
+    }
+  }
+
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
+
+    // create scanner and line parser
+    Scanner s = new Scanner(dataStreams.get(DEFAULT_SINGLE_STREAM_NAME)).useDelimiter(NL);
+    DelimitedDataParser parser = new DelimitedDataParser(s.nextLine(), TAB, true);
+
+    // establish column header indexes
     MapSpec spec = getPluginSpec();
-    
-    Map<String, List<Double>> geoVarLatMap = new HashMap<String, List<Double>>();
-    Map<String, List<Double>> geoVarLonMap = new HashMap<String, List<Double>>();
-    Map<String, Integer> geoVarEntityCount = new HashMap<String, Integer>();
-    Scanner s = new Scanner(dataStreams.get(DEFAULT_SINGLE_STREAM_NAME)).useDelimiter("\n");
+    Function<VariableSpec,Integer> indexOf = var -> parser.indexOfColumn(toColNameOrEmpty(var)).orElseThrow();
+    int geoVarIndex = indexOf.apply(spec.getGeoAggregateVariable());
+    int latIndex    = indexOf.apply(spec.getLatitudeVariable());
+    int lonIndex    = indexOf.apply(spec.getLongitudeVariable());
 
-    EntityDef entity = getReferenceMetadata().getEntity(spec.getOutputEntityId());
-    String entityIdCol = entity.getIdColumnName();
-    String geoAggregateVar = toColNameOrEmpty(spec.getGeoAggregateVariable());
-    String lonVar = toColNameOrEmpty(spec.getLongitudeVariable());
-    String latVar = toColNameOrEmpty(spec.getLatitudeVariable());
-    String[] header = s.nextLine().split("\t");
-    
-    int idIndex = 0;
-    int geoVarIndex = 1;
-    int latIndex = 2;
-    int lonIndex = 3;
-    for (int i = 0; i < header.length; i++) {
-      if (header[i].equals(entityIdCol)) {
-        idIndex = i;
-      } else if (header[i].equals(geoAggregateVar)) {
-        geoVarIndex = i;
-      } else if (header[i].equals(latVar)) {
-        latIndex = i;
-      } else if (header[i].equals(lonVar)) {
-        lonIndex = i;
-      }
+    // loop through rows of data stream, aggregating stats into a map from aggregate value to stats object
+    Map<String, GeoVarData> aggregator = new HashMap<>();
+    while (s.hasNextLine()) {
+      String[] row = parser.parseLineToArray(s.nextLine());
+      aggregator.putIfAbsent(row[geoVarIndex], new GeoVarData());
+      aggregator.get(row[geoVarIndex]).addRow(Double.valueOf(row[latIndex]), Double.valueOf(row[lonIndex]));
     }
 
-    // FIXME: lat/lon cannot be simply averaged, right?  Don't we need to take into account N/S, E/W?
-    while(s.hasNextLine()) {
-      String[] row = s.nextLine().split("\t");
-      geoVarLatMap.putIfAbsent(row[geoVarIndex], new ArrayList<Double>());
-      geoVarLatMap.get(row[geoVarIndex]).add(Double.valueOf(row[latIndex]));
-      geoVarLonMap.putIfAbsent(row[geoVarIndex], new ArrayList<Double>());
-      geoVarLonMap.get(row[geoVarIndex]).add(Double.valueOf(row[lonIndex]));
-      geoVarEntityCount.putIfAbsent(row[geoVarIndex], 0);
-      geoVarEntityCount.put(row[geoVarIndex], geoVarEntityCount.get(row[geoVarIndex])+1);
+    // begin output object and single property containing array of map elements
+    out.write("{\"mapElements\":[".getBytes());
+    boolean first = true;
+    for (String key : aggregator.keySet()) {
+      // write commas between elements
+      if (first) first = false; else out.write(",".getBytes());
+      GeoVarData data = aggregator.get(key);
+      GeographicPoint avgLatLon = data.latLonAvg.getCurrentAverage();
+      out.write(new JSONObject()
+        .put("geoAggregateValue", key)
+        .put("entityCount", data.count)
+        .put("avgLat", avgLatLon.getLatitude())
+        .put("avgLon", avgLatLon.getLongitude())
+        .put("minLat", data.minLat)
+        .put("minLon", data.minLon)
+        .put("maxLat", data.maxLat)
+        .put("maxLon", data.maxLon)
+        .toString()
+        .getBytes()
+      );
     }
-
-    for (Map.Entry mapElement : geoVarEntityCount.entrySet()) { 
-      String key = (String)mapElement.getKey();
-      Double latMin = Collections.min(geoVarLatMap.get(key));
-      Double latMax = Collections.max(geoVarLatMap.get(key));
-      Double latAvg = findAverage(geoVarLatMap.get(key));
-      Double lonMin = Collections.min(geoVarLonMap.get(key));
-      Double lonMax = Collections.max(geoVarLonMap.get(key));
-      Double lonAvg = findAverage(geoVarLonMap.get(key));
-      int entityCount = ((int)mapElement.getValue()); 
-      out.write(new JSONObject().put("geoAggregateValue", key)
-                                .put("entityCount", entityCount)
-                                .put("avgLat", latAvg)
-                                .put("avgLon", lonAvg)
-                                .put("maxLat", latMax)
-                                .put("maxLon", lonMax)
-                                .put("minLat", latMin)
-                                .put("minLon", lonMin)
-                                .toString().getBytes()); 
-    }  
+    // close array and enclosing object
+    out.write("]}".getBytes());
     out.flush();
-  }
-  
-  private double findAverage(List <Double> values) {
-    Double sum = 0.0;
-    if(!values.isEmpty()) {
-      for (Double value : values) {
-          sum += value;
-      }
-      return sum / values.size();
-    }
-    return sum;
   }
 }

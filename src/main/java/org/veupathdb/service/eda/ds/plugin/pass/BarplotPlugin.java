@@ -76,7 +76,6 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     BarplotSpec spec = getPluginSpec();
-    EntityDef entity = getReferenceMetadata().getEntity(spec.getOutputEntityId());
     
     boolean simpleBar = true;
     // TODO consider adding facets to simpleBar ?
@@ -94,7 +93,8 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
       
       Integer groupVarIndex = null;
       int xVarIndex = 0;
-      String xVar = toColNameOrEmpty(entity.getVariable(spec.getXAxisVariable()));
+      String xVar = toColNameOrEmpty(getReferenceMetadata()
+          .getVariable(spec.getXAxisVariable()).orElseThrow());
       if (spec.getOverlayVariable() != null) {
         String groupVar = toColNameOrEmpty(spec.getOverlayVariable());
         // expect two cols ordered by overlayVar and then xAxisVar

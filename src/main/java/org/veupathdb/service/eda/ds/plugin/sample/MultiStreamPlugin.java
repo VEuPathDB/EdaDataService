@@ -14,10 +14,7 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.DelimitedDataParser;
-import org.gusdb.fgputil.validation.ValidationBundle;
-import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
-import org.gusdb.fgputil.validation.ValidationLevel;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.model.VariableDef;
@@ -52,7 +49,8 @@ public class MultiStreamPlugin extends AbstractPlugin<MultiStreamPostRequest, Mu
 
   @Override
   protected void validateVisualizationSpec(MultiStreamSpec pluginSpec) throws ValidationException {
-    getReferenceMetadata().validateEntityAndGet(pluginSpec.getEntityId());
+    getReferenceMetadata().getEntity(pluginSpec.getEntityId())
+        .orElseThrow(() -> new ValidationException("Invalid entity ID: " + pluginSpec.getEntityId()));
   }
 
   /**
@@ -68,7 +66,7 @@ public class MultiStreamPlugin extends AbstractPlugin<MultiStreamPostRequest, Mu
   @Override
   protected List<StreamSpec> getRequestedStreams(MultiStreamSpec pluginSpec) {
     // get the first three native vars of this entity
-    EntityDef entity = getReferenceMetadata().getEntity(pluginSpec.getEntityId());
+    EntityDef entity = getReferenceMetadata().getEntity(pluginSpec.getEntityId()).orElseThrow();
     List<VariableDef> varsToRequest = getVars(entity);
     // ask for up to three streams, named for the vars they will provide
     return varsToRequest.stream()
@@ -78,8 +76,8 @@ public class MultiStreamPlugin extends AbstractPlugin<MultiStreamPostRequest, Mu
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    EntityDef entity = getReferenceMetadata().getEntity(getPluginSpec().getEntityId());
-    String idColumn = toColNameOrEmpty(VariableDef.newVariableSpec(entity.getId(), entity.getIdColumnName()));
+    EntityDef entity = getReferenceMetadata().getEntity(getPluginSpec().getEntityId()).orElseThrow();
+    String idColumn = toColNameOrEmpty(entity.getIdColumnDef());
     try (Writer writer = new BufferedWriter(new OutputStreamWriter(out))) {
       // write header
       writer.write(idColumn + TAB + join(dataStreams.keySet(), TAB) + NL);

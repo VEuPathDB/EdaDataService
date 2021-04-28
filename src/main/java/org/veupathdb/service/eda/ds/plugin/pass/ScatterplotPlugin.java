@@ -9,23 +9,16 @@ import java.util.Map;
 import java.util.Scanner;
 import org.gusdb.fgputil.IoUtil;
 import org.gusdb.fgputil.ListBuilder;
-import org.gusdb.fgputil.validation.ValidationBundle;
-import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
-import org.gusdb.fgputil.validation.ValidationLevel;
 import org.json.JSONObject;
 import org.rosuda.REngine.Rserve.RFileInputStream;
-import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
-import org.veupathdb.service.eda.common.model.ReferenceMetadata;
 import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.ds.constraints.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
-import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.ScatterplotPostRequest;
 import org.veupathdb.service.eda.generated.model.ScatterplotSpec;
-import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
@@ -102,7 +95,6 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
     String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());
 
     if (simpleScatter) {
-      EntityDef entity = getReferenceMetadata().getEntity(spec.getOutputEntityId());
       Scanner s = new Scanner(dataStreams.get(DEFAULT_SINGLE_STREAM_NAME)).useDelimiter("\n");
       String[] header = s.nextLine().split("\t");
 
@@ -136,19 +128,18 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
       s.close();
       out.flush();
     } else {
-      EntityDef entity = getReferenceMetadata().getEntity(spec.getOutputEntityId());
-      String facetVar1 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(0)) : "";
-      String facetVar2 = spec.getFacetVariable() != null ? toColNameOrEmpty(spec.getFacetVariable().get(1)) : "";
-      String xVarEntity = spec.getXAxisVariable() != null ? spec.getXAxisVariable().getEntityId() : "";
-      String yVarEntity = spec.getYAxisVariable() != null ? spec.getYAxisVariable().getEntityId() : "";
-      String overlayEntity = spec.getOverlayVariable() != null ? spec.getOverlayVariable().getEntityId() : "";
-      String facetEntity1 = spec.getFacetVariable() != null ? spec.getFacetVariable().get(0).getEntityId() : "";
-      String facetEntity2 = spec.getFacetVariable() != null ? spec.getFacetVariable().get(1).getEntityId() : "";
-      String xVarType = spec.getXAxisVariable() != null ? entity.getVariable(spec.getXAxisVariable()).getType().toString() : "";
-      String yVarType = spec.getYAxisVariable() != null ? entity.getVariable(spec.getYAxisVariable()).getType().toString() : "";
-      String overlayType = spec.getOverlayVariable() != null ? entity.getVariable(spec.getOverlayVariable()).getType().toString() : "";
-      String facetType1 = spec.getFacetVariable() != null ? entity.getVariable(spec.getFacetVariable().get(0)).getType().toString() : "";
-      String facetType2 = spec.getFacetVariable() != null ? entity.getVariable(spec.getFacetVariable().get(1)).getType().toString() : "";
+      String facetVar1 = toColNameOrEmpty(spec.getFacetVariable(), 0);
+      String facetVar2 = toColNameOrEmpty(spec.getFacetVariable(), 1);
+      String xVarEntity = getVariableEntityId(spec.getXAxisVariable());
+      String yVarEntity = getVariableEntityId(spec.getYAxisVariable());
+      String overlayEntity = getVariableEntityId(spec.getOverlayVariable());
+      String facetEntity1 = getVariableEntityId(spec.getFacetVariable(), 0);
+      String facetEntity2 = getVariableEntityId(spec.getFacetVariable(), 1);
+      String xVarType = getVariableType(spec.getXAxisVariable());
+      String yVarType = getVariableType(spec.getYAxisVariable());
+      String overlayType = getVariableType(spec.getOverlayVariable());
+      String facetType1 = getVariableType(spec.getFacetVariable(), 0);
+      String facetType2 = getVariableType(spec.getFacetVariable(), 1);
       String valueSpec = spec.getValueSpec().getValue();
       
       useRConnectionWithRemoteFiles(dataStreams, connection -> {

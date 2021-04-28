@@ -9,7 +9,6 @@ types:
 
   MapSpec:
     additionalProperties: false
-    type: object
     properties:
       outputEntityId: 
         type: string
@@ -23,8 +22,13 @@ types:
   MapPostResponse:
     additionalProperties: false
     properties:
+      mapElements: MapElementInfo[]
+
+  MapElementInfo:
+    additionalProperties: false
+    properties:
       geoAggregateValue:
-        type: VariableSpec
+        type: string
       entityCount:
         type: number
       avgLat:

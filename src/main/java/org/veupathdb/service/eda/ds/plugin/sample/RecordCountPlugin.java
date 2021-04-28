@@ -8,10 +8,7 @@ import java.util.Map;
 import java.util.Scanner;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.Wrapper;
-import org.gusdb.fgputil.validation.ValidationBundle;
-import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
-import org.gusdb.fgputil.validation.ValidationLevel;
 import org.json.JSONObject;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.model.VariableSource;
@@ -38,7 +35,8 @@ public class RecordCountPlugin extends AbstractPlugin<RecordCountPostRequest, Re
 
   @Override
   protected void validateVisualizationSpec(RecordCountSpec pluginSpec) throws ValidationException {
-    getReferenceMetadata().validateEntityAndGet(pluginSpec.getEntityId());
+    getReferenceMetadata().getEntity(pluginSpec.getEntityId())
+        .orElseThrow(() -> new ValidationException("Invalid entity ID: " + pluginSpec.getEntityId()));
   }
 
   @Override
@@ -47,7 +45,7 @@ public class RecordCountPlugin extends AbstractPlugin<RecordCountPostRequest, Re
     return ListBuilder.asList(
       new StreamSpec(pluginSpec.getEntityId(), pluginSpec.getEntityId())
         // add first var in entity to work around no-vars bug in subsetting service
-        .addVar(getReferenceMetadata().getEntity(pluginSpec.getEntityId()).stream()
+        .addVar(getReferenceMetadata().getEntity(pluginSpec.getEntityId()).orElseThrow().stream()
             .filter(var -> VariableSource.NATIVE.equals(var.getSource()))
             .findFirst().orElseThrow())); // should have at least one native var
   }
