@@ -117,7 +117,7 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
           + ", '" + overlayType + "'"
           + ", '" + facetType1 + "'"
           + ", '" + facetType2 + "'), stringsAsFactors=FALSE)");
-      String outFile = connection.eval("box(data, map, '" +
+      String outFile = connection.eval("plot.data::box(data, map, '" +
           spec.getPoints().toString().toLowerCase() + "', '" +
           spec.getMean().toString().toUpperCase() + "')").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {

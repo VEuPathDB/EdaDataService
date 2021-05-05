@@ -112,7 +112,7 @@ public class ContTablePlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpe
           + ", '" + yVarType + "'"
           + ", '" + facetType1 + "'"
           + ", '" + facetType2 + "'), stringsAsFactors=FALSE)");
-      String outFile = connection.eval("mosaic(data, map)").asString();
+      String outFile = connection.eval("plot.data::mosaic(data, map)").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
       }

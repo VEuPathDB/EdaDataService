@@ -111,7 +111,7 @@ public class TwoByTwoPlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpec
           + ", '" + yVarType + "'"
           + ", '" + facetType1 + "'"
           + ", '" + facetType2 + "'), stringsAsFactors=FALSE)");
-      String outFile = connection.eval("mosaic(data, map)").asString();
+      String outFile = connection.eval("plot.data::mosaic(data, map)").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
       }

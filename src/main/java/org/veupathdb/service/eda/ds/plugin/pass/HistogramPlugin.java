@@ -148,7 +148,7 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
         connection.voidEval("binWidth <- " + binWidth);
       }
       
-      String outFile = connection.eval("histogram(data, map, binWidth, '" + spec.getValueSpec().toString().toLowerCase() + "', '" + binReportValue + "', viewport)").asString();
+      String outFile = connection.eval("plot.data::histogram(data, map, binWidth, '" + spec.getValueSpec().toString().toLowerCase() + "', '" + binReportValue + "', viewport)").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
       }

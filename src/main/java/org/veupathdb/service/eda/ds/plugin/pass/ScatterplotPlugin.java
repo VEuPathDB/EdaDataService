@@ -165,7 +165,7 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
             + ", '" + overlayType + "'"
             + ", '" + facetType1 + "'"
             + ", '" + facetType2 + "'), stringsAsFactors=FALSE)");
-        String outFile = connection.eval("scattergl(data, map, '" + valueSpec + "')").asString();
+        String outFile = connection.eval("plot.data::scattergl(data, map, '" + valueSpec + "')").asString();
         try (RFileInputStream response = connection.openFile(outFile)) {
           IoUtil.transferStream(out, response);
         }

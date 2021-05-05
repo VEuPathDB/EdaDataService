@@ -185,7 +185,7 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
             + ", '" + facetType1 + "'"
             + ", '" + facetType2 + "'), stringsAsFactors=FALSE)";
         connection.voidEval(createMapString);
-        String outFile = connection.eval("bar(data, map, '" + spec.getValueSpec().toString().toLowerCase() + "')").asString();
+        String outFile = connection.eval("plot.data::bar(data, map, '" + spec.getValueSpec().toString().toLowerCase() + "')").asString();
         try (RFileInputStream response = connection.openFile(outFile)) {
           IoUtil.transferStream(out, response);
         }

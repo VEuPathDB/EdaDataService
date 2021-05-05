@@ -102,7 +102,7 @@ public class HeatmapPlugin extends AbstractPlugin<HeatmapPostRequest, HeatmapSpe
           + ", '" + toColNameOrEmpty(spec.getZAxisVariable()) + "'"
           + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(0)) + "'"
           + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(1)) + "'), stringsAsFactors=FALSE)");
-      String outFile = connection.eval("heatmap(data, map, '" + spec.getValueSpec().toString().toLowerCase() + "')").asString();
+      String outFile = connection.eval("plot.data::heatmap(data, map, '" + spec.getValueSpec().toString().toLowerCase() + "')").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
       }

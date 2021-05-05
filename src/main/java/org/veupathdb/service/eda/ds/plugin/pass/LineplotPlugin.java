@@ -122,7 +122,7 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
             + ", '" + overlayType + "'"
             + ", '" + facetType1 + "'"
             + ", '" + facetType2 + "'), stringsAsFactors=FALSE)");
-      String outFile = connection.eval("scattergl(data, map, 'raw')").asString();
+      String outFile = connection.eval("plot.data::scattergl(data, map, 'raw')").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
       }

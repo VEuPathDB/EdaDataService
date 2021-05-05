@@ -113,7 +113,7 @@ public class DensityplotPlugin extends AbstractPlugin<DensityplotPostRequest, De
             + ", '" + overlayType + "'"
             + ", '" + facetType1 + "'"
             + ", '" + facetType2 + "'), stringsAsFactors=FALSE)");
-      String outFile = connection.eval("scattergl(data, map, 'density')").asString();
+      String outFile = connection.eval("plot.data::scattergl(data, map, 'density')").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
       }
