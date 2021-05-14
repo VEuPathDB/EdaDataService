@@ -59,7 +59,7 @@ jar: install-dev-env build/libs/service.jar
 
 .PHONY: docker
 docker:
-	@docker build -t $(shell ./gradlew -q print-container-name) \
+	@docker build --no-cache -t $(shell ./gradlew -q print-container-name) \
 		--build-arg=GITHUB_USERNAME=$(GITHUB_USERNAME) \
 		--build-arg=GITHUB_TOKEN=$(GITHUB_TOKEN) .
 
