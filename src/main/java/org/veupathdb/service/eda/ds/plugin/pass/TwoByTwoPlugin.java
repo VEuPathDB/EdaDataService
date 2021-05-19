@@ -91,6 +91,10 @@ public class TwoByTwoPlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpec
     String yVarType = getVariableType(spec.getYAxisVariable());
     String facetType1 = getVariableType(spec.getFacetVariable(), 0);
     String facetType2 = getVariableType(spec.getFacetVariable(), 1);
+    String xVarShape = getVariableDataShape(spec.getXAxisVariable());
+    String yVarShape = getVariableDataShape(spec.getYAxisVariable());
+    String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
+    String facetShape2 = getVariableDataShape(spec.getFacetVariable(), 1);
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
@@ -110,7 +114,11 @@ public class TwoByTwoPlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpec
           + "'dataType'=c('" + xVarType + "'"
           + ", '" + yVarType + "'"
           + ", '" + facetType1 + "'"
-          + ", '" + facetType2 + "'), stringsAsFactors=FALSE)");
+          + ", '" + facetType2 + "'), "
+          + "'dataShape'=c('" + xVarShape + "'"
+          + ", '" + yVarShape + "'"
+          + ", '" + facetShape1 + "'"
+          + ", '" + facetShape2 + "'), stringsAsFactors=FALSE)");
       String outFile = connection.eval("plot.data::mosaic(data, map)").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
