@@ -80,71 +80,31 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     ScatterplotSpec spec = getPluginSpec();
-    
-    boolean simpleScatter = true;
-    if (spec.getFacetVariable() != null
-         || !spec.getValueSpec().equals(ScatterplotSpec.ValueSpecType.RAW)
-         || dataStreams.size() != 1) {
-      simpleScatter = false;
-    }
-    //for testing rserve
-    simpleScatter = false;
-    
     String xVar = toColNameOrEmpty(spec.getXAxisVariable());
     String yVar = toColNameOrEmpty(spec.getYAxisVariable());
     String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());
-
-    if (simpleScatter) {
-      Scanner s = new Scanner(dataStreams.get(DEFAULT_SINGLE_STREAM_NAME)).useDelimiter("\n");
-      String[] header = s.nextLine().split("\t");
-
-      int xVarIndex = 0;
-      int yVarIndex = 1;
-      Integer overlayVarIndex = null;
-      for (int i = 0; i < header.length; i++) {
-        if (Array.get(header, i).equals(overlayVar)) {
-          overlayVarIndex = i;
-        } else if (Array.get(header, i).equals(xVar)) {
-          xVarIndex = i;
-        } else if (Array.get(header, i).equals(yVar)) {
-          yVarIndex = i;
-        }
-      }
+    String facetVar1 = toColNameOrEmpty(spec.getFacetVariable(), 0);
+    String facetVar2 = toColNameOrEmpty(spec.getFacetVariable(), 1);
+    String xVarEntity = getVariableEntityId(spec.getXAxisVariable());
+    String yVarEntity = getVariableEntityId(spec.getYAxisVariable());
+    String overlayEntity = getVariableEntityId(spec.getOverlayVariable());
+    String facetEntity1 = getVariableEntityId(spec.getFacetVariable(), 0);
+    String facetEntity2 = getVariableEntityId(spec.getFacetVariable(), 1);
+    String xVarType = getVariableType(spec.getXAxisVariable());
+    String yVarType = getVariableType(spec.getYAxisVariable());
+    String overlayType = getVariableType(spec.getOverlayVariable());
+    String facetType1 = getVariableType(spec.getFacetVariable(), 0);
+    String facetType2 = getVariableType(spec.getFacetVariable(), 1);
+    String xVarShape = getVariableDataShape(spec.getXAxisVariable());
+    String yVarShape = getVariableDataShape(spec.getYAxisVariable());
+    String overlayShape = getVariableDataShape(spec.getOverlayVariable());
+    String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
+    String facetShape2 = getVariableDataShape(spec.getFacetVariable(), 1);
+    String valueSpec = spec.getValueSpec().getValue();
       
-      while(s.hasNextLine()) {
-        String[] row = s.nextLine().split("\t");
-        JSONObject scatterRow = new JSONObject();
-        String xValue = row[xVarIndex];
-        String yValue = row[yVarIndex];
-        if (overlayVarIndex != null) {
-          String currentGroup = row[overlayVarIndex];
-          scatterRow.put("group", currentGroup);
-        }
-        scatterRow.put("seriesX", xValue); 
-        scatterRow.put("seriesY", yValue);
-        out.write(scatterRow.toString().getBytes());
-      }
-      
-      s.close();
-      out.flush();
-    } else {
-      String facetVar1 = toColNameOrEmpty(spec.getFacetVariable(), 0);
-      String facetVar2 = toColNameOrEmpty(spec.getFacetVariable(), 1);
-      String xVarEntity = getVariableEntityId(spec.getXAxisVariable());
-      String yVarEntity = getVariableEntityId(spec.getYAxisVariable());
-      String overlayEntity = getVariableEntityId(spec.getOverlayVariable());
-      String facetEntity1 = getVariableEntityId(spec.getFacetVariable(), 0);
-      String facetEntity2 = getVariableEntityId(spec.getFacetVariable(), 1);
-      String xVarType = getVariableType(spec.getXAxisVariable());
-      String yVarType = getVariableType(spec.getYAxisVariable());
-      String overlayType = getVariableType(spec.getOverlayVariable());
-      String facetType1 = getVariableType(spec.getFacetVariable(), 0);
-      String facetType2 = getVariableType(spec.getFacetVariable(), 1);
-      String valueSpec = spec.getValueSpec().getValue();
-      
-      useRConnectionWithRemoteFiles(dataStreams, connection -> {
-        connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
-        connection.voidEval("map <- data.frame("
+    useRConnectionWithRemoteFiles(dataStreams, connection -> {
+      connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
+      connection.voidEval("map <- data.frame("
             + "'plotRef'=c('xAxisVariable', "
             + "       'yAxisVariable', "
             + "       'overlayVariable', "
@@ -164,13 +124,17 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
             + ", '" + yVarType + "'"
             + ", '" + overlayType + "'"
             + ", '" + facetType1 + "'"
-            + ", '" + facetType2 + "'), stringsAsFactors=FALSE)");
-        String outFile = connection.eval("plot.data::scattergl(data, map, '" + valueSpec + "')").asString();
-        try (RFileInputStream response = connection.openFile(outFile)) {
-          IoUtil.transferStream(out, response);
-        }
-        out.flush();
-      }); 
-    }
+            + ", '" + facetType2 + "'), "
+            + "'dataShape'=c('" + xVarShape + "'"
+            + ", '" + yVarShape + "'"
+            + ", '" + overlayShape + "'"
+            + ", '" + facetShape1 + "'"
+            + ", '" + facetShape2 + "'), stringsAsFactors=FALSE)");
+      String outFile = connection.eval("plot.data::scattergl(data, map, '" + valueSpec + "')").asString();
+      try (RFileInputStream response = connection.openFile(outFile)) {
+        IoUtil.transferStream(out, response);
+      }
+      out.flush();
+    }); 
   }
 }

@@ -98,6 +98,11 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
     String overlayType = getVariableType(spec.getOverlayVariable());
     String facetType1 = getVariableType(spec.getFacetVariable(), 0);
     String facetType2 = getVariableType(spec.getFacetVariable(), 1);
+    String xVarShape = getVariableDataShape(spec.getXAxisVariable());
+    String yVarShape = getVariableDataShape(spec.getYAxisVariable());
+    String overlayShape = getVariableDataShape(spec.getOverlayVariable());
+    String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
+    String facetShape2 = getVariableDataShape(spec.getFacetVariable(), 1);
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
@@ -121,7 +126,12 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
             + ", '" + yVarType + "'"
             + ", '" + overlayType + "'"
             + ", '" + facetType1 + "'"
-            + ", '" + facetType2 + "'), stringsAsFactors=FALSE)");
+            + ", '" + facetType2 + "'), "
+            + "'dataShape'=c('" + xVarShape + "'"
+            + ", '" + yVarShape + "'"
+            + ", '" + overlayShape + "'"
+            + ", '" + facetShape1 + "'"
+            + ", '" + facetShape2 + "'), stringsAsFactors=FALSE)");
       String outFile = connection.eval("plot.data::scattergl(data, map, 'raw')").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);

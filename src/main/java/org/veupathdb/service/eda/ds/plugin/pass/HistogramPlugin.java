@@ -93,6 +93,10 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
     String overlayType = getVariableType(spec.getOverlayVariable());
     String facetType1 = getVariableType(spec.getFacetVariable(), 0);
     String facetType2 = getVariableType(spec.getFacetVariable(), 1);
+    String xVarShape = getVariableDataShape(spec.getXAxisVariable());
+    String overlayShape = getVariableDataShape(spec.getOverlayVariable());
+    String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
+    String facetShape2 = getVariableDataShape(spec.getFacetVariable(), 1);
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
@@ -112,10 +116,19 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
             + "'dataType'=c('" + xVarType + "'"
             + ", '" + overlayType + "'"
             + ", '" + facetType1 + "'"
-            + ", '" + facetType2 + "'), stringsAsFactors=FALSE)");
+            + ", '" + facetType2 + "'), "
+            + "'dataShape'=c('" + xVarShape + "'"
+            + ", '" + overlayShape + "'"
+            + ", '" + facetShape1 + "'"
+            + ", '" + facetShape2 + "'), stringsAsFactors=FALSE)");
       
       if (spec.getViewport() != null) {
-        connection.voidEval("viewport <- list('xMin'=" + spec.getViewport().getXMin() + ", 'xMax'=" + spec.getViewport().getXMax() + ")");
+        // think if we just pass the string plot.data will convert it to the claimed type
+        if (xVarType.equals("NUMBER")) {
+          connection.voidEval("viewport <- list('xMin'=" + spec.getViewport().getXMin() + ", 'xMax'=" + spec.getViewport().getXMax() + ")");
+        } else {
+          connection.voidEval("viewport <- list('xMin'='" + spec.getViewport().getXMin() + "', 'xMax'='" + spec.getViewport().getXMax() + "')");
+        }
       } else {
         connection.voidEval("viewport <- NULL");
       }
