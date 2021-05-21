@@ -106,7 +106,7 @@ public class MultiStreamPlugin extends AbstractPlugin<MultiStreamPostRequest, Mu
 
   private static List<VariableDef> getVars(EntityDef entity) {
     List<VariableDef> varsToRequest = new ArrayList<>();
-    for (VariableDef var : entity) {
+    for (VariableDef var : entity.getVariablesWithDefaultUnitsAndScale()) {
       if (VariableSource.NATIVE.equals(var.getSource())) {
         varsToRequest.add(var);
       }

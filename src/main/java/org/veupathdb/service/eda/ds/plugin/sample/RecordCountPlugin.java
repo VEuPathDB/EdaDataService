@@ -45,7 +45,8 @@ public class RecordCountPlugin extends AbstractPlugin<RecordCountPostRequest, Re
     return ListBuilder.asList(
       new StreamSpec(pluginSpec.getEntityId(), pluginSpec.getEntityId())
         // add first var in entity to work around no-vars bug in subsetting service
-        .addVar(getReferenceMetadata().getEntity(pluginSpec.getEntityId()).orElseThrow().stream()
+        .addVar(getReferenceMetadata().getEntity(pluginSpec.getEntityId()).orElseThrow()
+            .getVariablesWithDefaultUnitsAndScale().stream()
             .filter(var -> VariableSource.NATIVE.equals(var.getSource()))
             .findFirst().orElseThrow())); // should have at least one native var
   }
