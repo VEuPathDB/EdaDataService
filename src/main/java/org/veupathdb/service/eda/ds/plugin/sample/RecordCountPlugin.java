@@ -11,6 +11,7 @@ import org.gusdb.fgputil.Wrapper;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.json.JSONObject;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
+import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.model.VariableSource;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.RecordCountPostRequest;
@@ -42,13 +43,11 @@ public class RecordCountPlugin extends AbstractPlugin<RecordCountPostRequest, Re
   @Override
   protected List<StreamSpec> getRequestedStreams(RecordCountSpec pluginSpec) {
     // only need one stream for the requested entity and no vars (IDs included automatically)
+    EntityDef entity = getReferenceMetadata().getEntity(pluginSpec.getEntityId()).orElseThrow();
     return ListBuilder.asList(
-      new StreamSpec(pluginSpec.getEntityId(), pluginSpec.getEntityId())
+      new StreamSpec(entity.getId(), entity.getId())
         // add first var in entity to work around no-vars bug in subsetting service
-        .addVar(getReferenceMetadata().getEntity(pluginSpec.getEntityId()).orElseThrow()
-            .getVariablesWithDefaultUnitsAndScale().stream()
-            .filter(var -> VariableSource.NATIVE.equals(var.getSource()))
-            .findFirst().orElseThrow())); // should have at least one native var
+        .addVar(entity.findFirstNativeVar()));
   }
 
   @Override
