@@ -52,9 +52,11 @@ public class DensityplotPlugin extends AbstractPlugin<DensityplotPostRequest, De
           .shapes(APIVariableDataShape.CONTINUOUS)
         .element("overlayVariable")
           .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
+          .maxValues(8)  
         .element("facetVariable")
           .required(false)
-          .max(2)
+          .maxVars(2)
+          .maxValues(5)
           .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
       .done();
   }

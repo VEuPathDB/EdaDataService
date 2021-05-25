@@ -54,6 +54,22 @@ securitySchemes:
               application/json:
                 type: error.ServerError
 
+    /table:
+      post:
+        description: Return a tabular report of one or more variables. In the request, `filters` must be a subclass of [Filter](#type:lib.Filter)
+        body:
+          application/json:
+            type: lib.TablePostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.TablePostResponse
+          500:
+            body:
+              application/json:
+                type: error.ServerError
+
     /scatterplot:
       post:
         description: Returns data required to create a scatterplot visualization <br> Java impl- NA <br> R impl- working

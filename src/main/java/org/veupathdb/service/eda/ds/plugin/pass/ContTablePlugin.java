@@ -50,11 +50,14 @@ public class ContTablePlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpe
       .pattern()
         .element("yAxisVariable")
           .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
+          .maxValues(10)
         .element("xAxisVariable")
           .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
+          .maxValues(10)
         .element("facetVariable")
           .required(false)
-          .max(2)
+          .maxVars(2)
+          .maxValues(5)
           .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
       .done();
   }
