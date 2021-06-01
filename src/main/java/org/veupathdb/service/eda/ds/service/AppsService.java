@@ -16,6 +16,7 @@ import org.veupathdb.service.eda.ds.plugin.pass.HeatmapPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.HistogramPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.LineplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.MapPlugin;
+import org.veupathdb.service.eda.ds.plugin.pass.TablePlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
 import org.veupathdb.service.eda.ds.plugin.sample.RecordCountPlugin;
@@ -37,6 +38,8 @@ import org.veupathdb.service.eda.generated.model.LineplotPostResponseStream;
 import org.veupathdb.service.eda.generated.model.MapPostRequest;
 import org.veupathdb.service.eda.generated.model.MapPostResponseStream;
 import org.veupathdb.service.eda.generated.model.MosaicPostRequest;
+import org.veupathdb.service.eda.generated.model.TablePostRequest;
+import org.veupathdb.service.eda.generated.model.TablePostResponseStream;
 import org.veupathdb.service.eda.generated.model.TwoByTwoPostResponseStream;
 import org.veupathdb.service.eda.generated.model.ContTablePostResponseStream;
 import org.veupathdb.service.eda.generated.model.MultiStreamPostRequest;
@@ -73,6 +76,13 @@ public class AppsService implements Apps {
   public PostAppsPassVisualizationsMapMarkersResponse postAppsPassVisualizationsMapMarkers(MapPostRequest entity) {
     return wrapPlugin(() -> PostAppsPassVisualizationsMapMarkersResponse.respond200WithApplicationJson(
         new MapPostResponseStream(new MapPlugin().processRequest(entity))));
+  }
+  
+  @DisableJackson
+  @Override
+  public PostAppsPassVisualizationsTableResponse postAppsPassVisualizationsTable(TablePostRequest entity) {
+    return wrapPlugin(() -> PostAppsPassVisualizationsTableResponse.respond200WithApplicationJson(
+        new TablePostResponseStream(new TablePlugin().processRequest(entity))));
   }
   
   @DisableJackson

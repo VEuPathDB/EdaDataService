@@ -11,15 +11,15 @@ types:
         maxItems: 2
         required: false
       oddsratio:
-        type: number[]
+        type: number
       pvalue:
-        type: number[]
+        type: number
       orInterval:
-        type: string[]
+        type: string
       relativerisk:
-        type: number[]
+        type: number
       rrInterval:
-        type: string[]
+        type: string
         
   TwoByTwoPostResponse:
     additionalProperties: false
@@ -30,3 +30,5 @@ types:
         type: SampleSizeTable[]
       statsTable:
         type: TwoByTwoStatsTable[]
+      completeCasesTable:
+        type: VariableCompleteCases[]

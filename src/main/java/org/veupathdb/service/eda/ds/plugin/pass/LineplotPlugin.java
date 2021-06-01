@@ -53,9 +53,11 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
           .shapes(APIVariableDataShape.CONTINUOUS, APIVariableDataShape.ORDINAL)
         .element("overlayVariable")
           .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
+          .maxValues(8)  
         .element("facetVariable")
           .required(false)
-          .max(2)
+          .maxVars(2)
+          .maxValues(5)
           .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
       .done();
   }

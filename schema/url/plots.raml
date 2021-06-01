@@ -183,13 +183,13 @@ types:
         maxItems: 2
         required: false
       seriesY:
-        type: number[]
+        type: string[]
         minItems: 1
       seriesX:
-        type: number[]
+        type: string[]
         minItems: 1
       smoothedMeanX:
-        type: number[]
+        type: string[]
         required: false
       smoothedMeanY:
         type: number[]
@@ -198,7 +198,7 @@ types:
         type: number[]
         required: false
       bestFitLineX:
-        type: number[]
+        type: string[]
         required: false
       bestFitLineY:
         type: number[]
@@ -235,10 +235,10 @@ types:
         maxItems: 2
         required: false
       seriesY:
-        type: number[]
+        type: string[]
         minItems: 1
       seriesX:
-        type: number[]
+        type: string[]
         minItems: 1
         
   PlotConfig:
@@ -262,3 +262,11 @@ types:
       size:
         type: number[]
         minItems: 1
+
+  VariableCompleteCases:
+    additionalProperties: false
+    properties:
+      variableDetails:
+        type: VariableSpec
+      completeCases:
+        type: number

@@ -46,11 +46,14 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
       .pattern()
         .element("xAxisVariable")
           .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
+          .maxValues(10)
         .element("overlayVariable")
           .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
+          .maxValues(8)
         .element("facetVariable")
           .required(false)
-          .max(2)
+          .maxVars(2)
+          .maxValues(5)
           .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
       .done();
   }

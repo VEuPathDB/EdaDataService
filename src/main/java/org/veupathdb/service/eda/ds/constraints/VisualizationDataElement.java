@@ -18,6 +18,7 @@ public class VisualizationDataElement extends VisualizationDataElementConstraint
     setAllowedShapes(null);
     setMinNumVars(1);
     setMaxNumVars(1);
+    setMaxNumValues(null);
   }
 
   public VisualizationDataElement required(boolean isRequired) {
@@ -35,13 +36,18 @@ public class VisualizationDataElement extends VisualizationDataElementConstraint
     return this;
   }
 
-  public VisualizationDataElement min(int minNumVars) {
+  public VisualizationDataElement minVars(int minNumVars) {
     setMinNumVars(minNumVars);
     return this;
   }
 
-  public VisualizationDataElement max(int maxNumVars) {
+  public VisualizationDataElement maxVars(int maxNumVars) {
     setMaxNumVars(maxNumVars);
+    return this;
+  }
+  
+  public VisualizationDataElement maxValues(int maxNumValues) {
+    setMaxNumValues(maxNumValues);
     return this;
   }
 
