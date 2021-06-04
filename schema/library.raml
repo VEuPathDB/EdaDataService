@@ -7,240 +7,6 @@
 ################################################################################
 
 types:
-  BarplotPostRequest:
-    type: VisualizationRequestBase
-    properties:
-      config: BarplotSpec
-  BarplotSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      outputEntityId: string
-      valueSpec:
-        type: string
-        enum:
-          - count
-          - proportion
-      xAxisVariable: VariableSpec
-      overlayVariable:
-        type: VariableSpec
-        required: false
-      facetVariable:
-        type: VariableSpec[]
-        maxItems: 2
-        required: false
-  BarplotConfig:
-    type: PlotConfig
-    properties:
-      xVariableDetails:
-        type: VariableSpec
-  Barplot:
-    type: object
-    additionalProperties: false
-    properties:
-      data: BarplotData[]
-      config: BarplotConfig
-  BarplotPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      barplot: Barplot
-      sampleSizeTable: SampleSizeTable[]
-      completeCasesTable: VariableCompleteCases[]
-  LineplotPostRequest:
-    type: VisualizationRequestBase
-    properties:
-      config: LineplotSpec
-  LineplotSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      outputEntityId: string
-      xAxisVariable: VariableSpec
-      yAxisVariable: VariableSpec
-      overlayVariable:
-        type: VariableSpec
-        required: false
-      facetVariable:
-        type: VariableSpec[]
-        maxItems: 2
-        required: false
-  LineplotConfig:
-    type: PlotConfig
-    properties:
-      xVariableDetails:
-        type: VariableSpec
-      yVariableDetails:
-        type: VariableSpec
-  Lineplot:
-    type: object
-    additionalProperties: false
-    properties:
-      data: LineplotData[]
-      config: LineplotConfig
-  LineplotPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      lineplot: Lineplot
-      sampleSizeTable: SampleSizeTable[]
-      completeCasesTable: VariableCompleteCases[]
-  TablePostRequest:
-    type: VisualizationRequestBase
-    properties:
-      config: TableSpec
-  TableSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      outputEntityId: string
-      outputVariable: VariableSpec[]
-  TablePostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      columns: VariableSpec[]
-      rows: string[][]
-  VisualizationRequestBase:
-    type: object
-    additionalProperties: false
-    properties:
-      studyId: string
-      filters:
-        type: API_Filter[]
-        required: false
-      derivedVariables:
-        type: DerivedVariable[]
-        required: false
-  StrataVariableDetails:
-    type: VariableSpec
-    properties:
-      value: string
-  ContTableStatsTable:
-    type: object
-    additionalProperties: false
-    properties:
-      facetVariableDetails:
-        type: StrataVariableDetails[]
-        maxItems: 2
-        required: false
-      pvalue:
-        type: number[]
-        minItems: 1
-      degreesFreedom:
-        type: number[]
-        minItems: 1
-      chisq:
-        type: number[]
-        minItems: 1
-  ContTablePostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      mosaic: Mosaic
-      sampleSizeTable: SampleSizeTable[]
-      statsTable: ContTableStatsTable[]
-      completeCasesTable: VariableCompleteCases[]
-  BoxplotPostRequest:
-    type: VisualizationRequestBase
-    properties:
-      config: BoxplotSpec
-  BoxplotSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      outputEntityId: string
-      points:
-        type: string
-        enum:
-          - outliers
-          - all
-      mean:
-        type: string
-        enum:
-          - "true"
-          - "false"
-      xAxisVariable: VariableSpec
-      yAxisVariable: VariableSpec
-      overlayVariable:
-        type: VariableSpec
-        required: false
-      facetVariable:
-        type: VariableSpec[]
-        maxItems: 2
-        required: false
-  BoxplotConfig:
-    type: PlotConfig
-    properties:
-      xVariableDetails:
-        type: VariableSpec
-      yVariableDetails:
-        type: VariableSpec
-  Boxplot:
-    type: object
-    additionalProperties: false
-    properties:
-      data: BoxplotData[]
-      config: BoxplotConfig
-  BoxplotPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      boxplot: Boxplot
-      sampleSizeTable: SampleSizeTable[]
-      completeCasesTable: VariableCompleteCases[]
-  MultiStreamPostRequest:
-    type: VisualizationRequestBase
-    properties:
-      config: MultiStreamSpec
-  MultiStreamSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      entityId: string
-  AppsGetResponse:
-    type: object
-    properties:
-      apps: AppOverview[]
-  AppOverview:
-    type: object
-    additionalProperties: false
-    properties:
-      name: string
-      displayName: string
-      description: string
-      visualizations: VisualizationOverview[]
-  VisualizationDataElementConstraint:
-    type: object
-    additionalProperties: false
-    properties:
-      isRequired: boolean
-      minNumVars: number
-      maxNumVars: number
-      maxNumValues: number
-      allowedTypes:
-        type: API_VariableType[]
-        required: false
-      allowedShapes:
-        type: API_VariableDataShape[]
-        required: false
-  VisualizationDataElementConstraintPattern:
-    type: object
-    properties:
-      //: VisualizationDataElementConstraint
-  VisualizationOverview:
-    type: object
-    additionalProperties: false
-    properties:
-      name: string
-      displayName: string
-      description: string
-      dataElementConstraints:
-        type: VisualizationDataElementConstraintPattern[]
-        required: false
-      dataElementDependencyOrder:
-        type: string[]
-        required: false
   MapPostRequest:
     type: VisualizationRequestBase
     properties:
@@ -270,24 +36,48 @@ types:
       minLon: number
       maxLat: number
       maxLon: number
-  ScatterplotPostRequest:
+  HistogramPostRequest:
     type: VisualizationRequestBase
     properties:
-      config: ScatterplotSpec
-  ScatterplotSpec:
+      config: HistogramSpec
+  ValueSpec:
+    type: string
+    enum:
+      - count
+      - proportion
+  HistogramViewport:
+    type: object
+    additionalProperties: false
+    properties:
+      xMin: string
+      xMax: string
+  BinSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      type:
+        type: string
+        enum:
+          - binWidth
+          - numBins
+      value:
+        type: number
+        required: false
+      units:
+        type: string
+        required: false
+        enum:
+          - day
+          - week
+          - month
+          - year
+  HistogramSpec:
     type: object
     additionalProperties: false
     properties:
       outputEntityId: string
-      valueSpec:
-        type: string
-        enum:
-          - raw
-          - smoothedMean
-          - smoothedMeanWithRaw
-          - bestFitLineWithRaw
       xAxisVariable: VariableSpec
-      yAxisVariable: VariableSpec
+      valueSpec: ValueSpec
       overlayVariable:
         type: VariableSpec
         required: false
@@ -295,24 +85,43 @@ types:
         type: VariableSpec[]
         maxItems: 2
         required: false
-  ScatterplotConfig:
+      binSpec: BinSpec
+      viewport:
+        type: HistogramViewport
+        required: false
+  HistogramSummary:
+    type: object
+    properties:
+      min: string
+      q1: string
+      median: string
+      mean: string
+      q3: string
+      max: string
+  HistogramConfig:
     type: PlotConfig
     properties:
+      binSlider:
+        type: BinSlider
       xVariableDetails:
         type: VariableSpec
-      yVariableDetails:
-        type: VariableSpec
-  Scatterplot:
+      binSpec:
+        type: BinSpec
+      summary:
+        type: HistogramSummary
+      viewport:
+        type: HistogramViewport
+  Histogram:
     type: object
     additionalProperties: false
     properties:
-      data: ScatterplotData[]
-      config: ScatterplotConfig
-  ScatterplotPostResponse:
+      data: HistogramData[]
+      config: HistogramConfig
+  HistogramPostResponse:
     type: object
     additionalProperties: false
     properties:
-      scatterplot: Scatterplot
+      histogram: Histogram
       sampleSizeTable: SampleSizeTable[]
       completeCasesTable: VariableCompleteCases[]
   BarplotData:
@@ -553,207 +362,140 @@ types:
     properties:
       variableDetails: VariableSpec
       completeCases: number
-  DensityplotPostRequest:
+  MultiStreamPostRequest:
     type: VisualizationRequestBase
     properties:
-      config: DensityplotSpec
-  DensityplotSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      outputEntityId: string
-      xAxisVariable: VariableSpec
-      overlayVariable:
-        type: VariableSpec
-        required: false
-      facetVariable:
-        type: VariableSpec[]
-        maxItems: 2
-        required: false
-  DensityplotConfig:
-    type: PlotConfig
-    properties:
-      xVariableDetails:
-        type: VariableSpec
-  Densityplot:
-    type: object
-    additionalProperties: false
-    properties:
-      data: DensityplotData[]
-      config: DensityplotConfig
-  DensityplotPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      densityplot: Densityplot
-      sampleSizeTable: SampleSizeTable[]
-      completeCasesTable: VariableCompleteCases[]
-  HistogramPostRequest:
-    type: VisualizationRequestBase
-    properties:
-      config: HistogramSpec
-  ValueSpec:
-    type: string
-    enum:
-      - count
-      - proportion
-  HistogramViewport:
-    type: object
-    additionalProperties: false
-    properties:
-      xMin: string
-      xMax: string
-  BinSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      type:
-        type: string
-        enum:
-          - binWidth
-          - numBins
-      value:
-        type: number
-        required: false
-      units:
-        type: string
-        required: false
-        enum:
-          - day
-          - week
-          - month
-          - year
-  HistogramSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      outputEntityId: string
-      xAxisVariable: VariableSpec
-      valueSpec: ValueSpec
-      overlayVariable:
-        type: VariableSpec
-        required: false
-      facetVariable:
-        type: VariableSpec[]
-        maxItems: 2
-        required: false
-      binSpec: BinSpec
-      viewport:
-        type: HistogramViewport
-        required: false
-  HistogramSummary:
-    type: object
-    properties:
-      min: string
-      q1: string
-      median: string
-      mean: string
-      q3: string
-      max: string
-  HistogramConfig:
-    type: PlotConfig
-    properties:
-      binSlider:
-        type: BinSlider
-      xVariableDetails:
-        type: VariableSpec
-      binSpec:
-        type: BinSpec
-      summary:
-        type: HistogramSummary
-      viewport:
-        type: HistogramViewport
-  Histogram:
-    type: object
-    additionalProperties: false
-    properties:
-      data: HistogramData[]
-      config: HistogramConfig
-  HistogramPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      histogram: Histogram
-      sampleSizeTable: SampleSizeTable[]
-      completeCasesTable: VariableCompleteCases[]
-  RecordCountPostRequest:
-    type: VisualizationRequestBase
-    properties:
-      config: RecordCountSpec
-  RecordCountSpec:
+      config: MultiStreamSpec
+  MultiStreamSpec:
     type: object
     additionalProperties: false
     properties:
       entityId: string
-  RecordCountPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      recordCount: number
-  HeatmapPostRequest:
+  TablePostRequest:
     type: VisualizationRequestBase
     properties:
-      config: HeatmapSpec
-  HeatmapSpec:
+      config: TableSpec
+  TableSpec:
     type: object
     additionalProperties: false
     properties:
       outputEntityId: string
-      valueSpec:
-        type: string
-        enum:
-          - collection
-          - series
-      xAxisVariable: VariableSpec
-      yAxisVariable: VariableSpec
-      zAxisVariable:
-        type: VariableSpec
-        required: false
-      facetVariable:
-        type: VariableSpec[]
-        maxItems: 2
-        required: false
-  HeatmapConfig:
-    type: PlotConfig
-    properties:
-      xVariableDetails:
-        type: VariableSpec
-      yVariableDetails:
-        type: VariableSpec
-  Heatmap:
+      outputVariable: VariableSpec[]
+  TablePostResponse:
     type: object
     additionalProperties: false
     properties:
-      data: HeatmapData[]
-      config: HeatmapConfig
-  HeatmapPostResponse:
+      columns: VariableSpec[]
+      rows: string[][]
+  StudiesGetResponse:
     type: object
     additionalProperties: false
     properties:
-      heatmap: Heatmap
-      sampleSizeTable: SampleSizeTable[]
-      completeCasesTable: VariableCompleteCases[]
-  TwoByTwoStatsTable:
+      studies: API_StudyOverview[]
+  StudyIdGetResponse:
     type: object
     additionalProperties: false
     properties:
-      facetVariableDetails:
-        type: StrataVariableDetails[]
-        maxItems: 2
-        required: false
-      oddsratio: number
-      pvalue: number
-      orInterval: string
-      relativerisk: number
-      rrInterval: string
-  TwoByTwoPostResponse:
+      study: API_StudyDetail
+  API_StudyOverview:
     type: object
-    additionalProperties: false
     properties:
-      mosaic: Mosaic
-      sampleSizeTable: SampleSizeTable[]
-      statsTable: TwoByTwoStatsTable[]
-      completeCasesTable: VariableCompleteCases[]
+      id: string
+      datasetId: string
+  EntityIdGetResponse: API_Entity
+  API_StudyDetail:
+    type: API_StudyOverview
+    properties:
+      rootEntity: API_Entity
+      units: UnitsGroup[]
+      scale: ScaleOption[]
+  UnitsGroup:
+    type: object
+    properties:
+      unitsGroupId: string
+      displayName: string
+      members: UnitOption[]
+  UnitOption:
+    type: object
+    properties:
+      unitsId: string
+      displayName: string
+  ScaleOption:
+    type: object
+    properties:
+      scaleId: string
+      displayName: string
+  VariableAspect:
+    type: object
+    properties:
+      id: string
+      display: string
+  API_Entity:
+    type: object
+    properties:
+      id: string
+      idColumnName: string
+      displayName: string
+      displayNamePlural: string
+      description: string
+      children?: API_Entity[]
+      variables: API_Variable[]
+  API_Variable:
+    type: object
+    discriminator: type
+    properties:
+      id: string
+      providerLabel: string
+      displayName: string
+      parentId?: string
+      type: API_VariableType
+      isMultiValued: boolean
+      displayType: API_VariableDisplayType
+      dataShape: API_VariableDataShape
+      isFeatured: boolean
+      isTemporal: boolean
+      unitsGroupId: string
+      defaultUnitsId: string
+      defaultScaleId: string
+  API_VariableType:
+    type: string
+    enum:
+      - category
+      - string
+      - number
+      - date
+      - longitude
+  API_VariableDataShape:
+    type: string
+    enum:
+      - continuous
+      - categorical
+      - ordinal
+      - binary
+  API_VariableDisplayType:
+    type: string
+    enum:
+      - default
+      - multifilter
+      - hidden
+  API_VariablesCategory:
+    type: API_Variable
+    discriminatorValue: category
+  API_StringVariable:
+    type: API_Variable
+    discriminatorValue: string
+  API_NumberVariable:
+    type: API_Variable
+    discriminatorValue: number
+    properties:
+      precision: integer
+      defaultScaleId: string
+  API_DateVariable:
+    type: API_Variable
+    discriminatorValue: date
+  API_LongitudeVariable:
+    type: API_Variable
+    discriminatorValue: longitude
   API_Filter:
     type: object
     discriminator: type
@@ -875,113 +617,371 @@ types:
     additionalProperties: false
     properties:
       counts: string[][]
-  StudiesGetResponse:
+  BoxplotPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: BoxplotSpec
+  BoxplotSpec:
     type: object
     additionalProperties: false
     properties:
-      studies: API_StudyOverview[]
-  StudyIdGetResponse:
+      outputEntityId: string
+      points:
+        type: string
+        enum:
+          - outliers
+          - all
+      mean:
+        type: string
+        enum:
+          - "true"
+          - "false"
+      xAxisVariable: VariableSpec
+      yAxisVariable: VariableSpec
+      overlayVariable:
+        type: VariableSpec
+        required: false
+      facetVariable:
+        type: VariableSpec[]
+        maxItems: 2
+        required: false
+  BoxplotConfig:
+    type: PlotConfig
+    properties:
+      xVariableDetails:
+        type: VariableSpec
+      yVariableDetails:
+        type: VariableSpec
+  Boxplot:
     type: object
     additionalProperties: false
     properties:
-      study: API_StudyDetail
-  API_StudyOverview:
+      data: BoxplotData[]
+      config: BoxplotConfig
+  BoxplotPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      boxplot: Boxplot
+      sampleSizeTable: SampleSizeTable[]
+      completeCasesTable: VariableCompleteCases[]
+  ScatterplotPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: ScatterplotSpec
+  ScatterplotSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      valueSpec:
+        type: string
+        enum:
+          - raw
+          - smoothedMean
+          - smoothedMeanWithRaw
+          - bestFitLineWithRaw
+      xAxisVariable: VariableSpec
+      yAxisVariable: VariableSpec
+      overlayVariable:
+        type: VariableSpec
+        required: false
+      facetVariable:
+        type: VariableSpec[]
+        maxItems: 2
+        required: false
+  ScatterplotConfig:
+    type: PlotConfig
+    properties:
+      xVariableDetails:
+        type: VariableSpec
+      yVariableDetails:
+        type: VariableSpec
+  Scatterplot:
+    type: object
+    additionalProperties: false
+    properties:
+      data: ScatterplotData[]
+      config: ScatterplotConfig
+  ScatterplotPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      scatterplot: Scatterplot
+      sampleSizeTable: SampleSizeTable[]
+      completeCasesTable: VariableCompleteCases[]
+  DensityplotPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: DensityplotSpec
+  DensityplotSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      xAxisVariable: VariableSpec
+      overlayVariable:
+        type: VariableSpec
+        required: false
+      facetVariable:
+        type: VariableSpec[]
+        maxItems: 2
+        required: false
+  DensityplotConfig:
+    type: PlotConfig
+    properties:
+      xVariableDetails:
+        type: VariableSpec
+  Densityplot:
+    type: object
+    additionalProperties: false
+    properties:
+      data: DensityplotData[]
+      config: DensityplotConfig
+  DensityplotPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      densityplot: Densityplot
+      sampleSizeTable: SampleSizeTable[]
+      completeCasesTable: VariableCompleteCases[]
+  TwoByTwoStatsTable:
+    type: object
+    additionalProperties: false
+    properties:
+      facetVariableDetails:
+        type: StrataVariableDetails[]
+        maxItems: 2
+        required: false
+      oddsratio: number
+      pvalue: number
+      orInterval: string
+      relativerisk: number
+      rrInterval: string
+  TwoByTwoPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      mosaic: Mosaic
+      sampleSizeTable: SampleSizeTable[]
+      statsTable: TwoByTwoStatsTable[]
+      completeCasesTable: VariableCompleteCases[]
+  VisualizationRequestBase:
+    type: object
+    additionalProperties: false
+    properties:
+      studyId: string
+      filters:
+        type: API_Filter[]
+        required: false
+      derivedVariables:
+        type: DerivedVariable[]
+        required: false
+  StrataVariableDetails:
+    type: VariableSpec
+    properties:
+      value: string
+  RecordCountPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: RecordCountSpec
+  RecordCountSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      entityId: string
+  RecordCountPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      recordCount: number
+  AppsGetResponse:
     type: object
     properties:
-      id: string
-      datasetId: string
-  EntityIdGetResponse: API_Entity
-  API_StudyDetail:
-    type: API_StudyOverview
-    properties:
-      rootEntity: API_Entity
-      units: UnitsGroup[]
-      scale: ScaleOption[]
-  UnitsGroup:
+      apps: AppOverview[]
+  AppOverview:
     type: object
+    additionalProperties: false
     properties:
-      unitsGroupId: string
+      name: string
       displayName: string
-      members: UnitOption[]
-  UnitOption:
-    type: object
-    properties:
-      unitsId: string
-      displayName: string
-  ScaleOption:
-    type: object
-    properties:
-      scaleId: string
-      displayName: string
-  VariableAspect:
-    type: object
-    properties:
-      id: string
-      display: string
-  API_Entity:
-    type: object
-    properties:
-      id: string
-      idColumnName: string
-      displayName: string
-      displayNamePlural: string
       description: string
-      children?: API_Entity[]
-      variables: API_Variable[]
-  API_Variable:
+      visualizations: VisualizationOverview[]
+  VisualizationDataElementConstraint:
     type: object
-    discriminator: type
+    additionalProperties: false
     properties:
-      id: string
-      providerLabel: string
+      isRequired: boolean
+      minNumVars: number
+      maxNumVars: number
+      maxNumValues: number
+      allowedTypes:
+        type: API_VariableType[]
+        required: false
+      allowedShapes:
+        type: API_VariableDataShape[]
+        required: false
+  VisualizationDataElementConstraintPattern:
+    type: object
+    properties:
+      //: VisualizationDataElementConstraint
+  VisualizationOverview:
+    type: object
+    additionalProperties: false
+    properties:
+      name: string
       displayName: string
-      parentId?: string
-      type: API_VariableType
-      isMultiValued: boolean
-      displayType: API_VariableDisplayType
-      dataShape: API_VariableDataShape
-      isFeatured: boolean
-      isTemporal: boolean
-      unitsGroupId: string
-      defaultUnitsId: string
-      defaultScaleId: string
-  API_VariableType:
-    type: string
-    enum:
-      - category
-      - string
-      - number
-      - date
-      - longitude
-  API_VariableDataShape:
-    type: string
-    enum:
-      - continuous
-      - categorical
-      - ordinal
-      - binary
-  API_VariableDisplayType:
-    type: string
-    enum:
-      - default
-      - multifilter
-      - hidden
-  API_VariablesCategory:
-    type: API_Variable
-    discriminatorValue: category
-  API_StringVariable:
-    type: API_Variable
-    discriminatorValue: string
-  API_NumberVariable:
-    type: API_Variable
-    discriminatorValue: number
+      description: string
+      dataElementConstraints:
+        type: VisualizationDataElementConstraintPattern[]
+        required: false
+      dataElementDependencyOrder:
+        type: string[]
+        required: false
+  LineplotPostRequest:
+    type: VisualizationRequestBase
     properties:
-      precision: integer
-      defaultScaleId: string
-  API_DateVariable:
-    type: API_Variable
-    discriminatorValue: date
-  API_LongitudeVariable:
-    type: API_Variable
-    discriminatorValue: longitude
+      config: LineplotSpec
+  LineplotSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      xAxisVariable: VariableSpec
+      yAxisVariable: VariableSpec
+      overlayVariable:
+        type: VariableSpec
+        required: false
+      facetVariable:
+        type: VariableSpec[]
+        maxItems: 2
+        required: false
+  LineplotConfig:
+    type: PlotConfig
+    properties:
+      xVariableDetails:
+        type: VariableSpec
+      yVariableDetails:
+        type: VariableSpec
+  Lineplot:
+    type: object
+    additionalProperties: false
+    properties:
+      data: LineplotData[]
+      config: LineplotConfig
+  LineplotPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      lineplot: Lineplot
+      sampleSizeTable: SampleSizeTable[]
+      completeCasesTable: VariableCompleteCases[]
+  BarplotPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: BarplotSpec
+  BarplotSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      valueSpec:
+        type: string
+        enum:
+          - count
+          - proportion
+      xAxisVariable: VariableSpec
+      overlayVariable:
+        type: VariableSpec
+        required: false
+      facetVariable:
+        type: VariableSpec[]
+        maxItems: 2
+        required: false
+  BarplotConfig:
+    type: PlotConfig
+    properties:
+      xVariableDetails:
+        type: VariableSpec
+  Barplot:
+    type: object
+    additionalProperties: false
+    properties:
+      data: BarplotData[]
+      config: BarplotConfig
+  BarplotPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      barplot: Barplot
+      sampleSizeTable: SampleSizeTable[]
+      completeCasesTable: VariableCompleteCases[]
+  HeatmapPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: HeatmapSpec
+  HeatmapSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      valueSpec:
+        type: string
+        enum:
+          - collection
+          - series
+      xAxisVariable: VariableSpec
+      yAxisVariable: VariableSpec
+      zAxisVariable:
+        type: VariableSpec
+        required: false
+      facetVariable:
+        type: VariableSpec[]
+        maxItems: 2
+        required: false
+  HeatmapConfig:
+    type: PlotConfig
+    properties:
+      xVariableDetails:
+        type: VariableSpec
+      yVariableDetails:
+        type: VariableSpec
+  Heatmap:
+    type: object
+    additionalProperties: false
+    properties:
+      data: HeatmapData[]
+      config: HeatmapConfig
+  HeatmapPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      heatmap: Heatmap
+      sampleSizeTable: SampleSizeTable[]
+      completeCasesTable: VariableCompleteCases[]
+  ContTableStatsTable:
+    type: object
+    additionalProperties: false
+    properties:
+      facetVariableDetails:
+        type: StrataVariableDetails[]
+        maxItems: 2
+        required: false
+      pvalue:
+        type: number[]
+        minItems: 1
+      degreesFreedom:
+        type: number[]
+        minItems: 1
+      chisq:
+        type: number[]
+        minItems: 1
+  ContTablePostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      mosaic: Mosaic
+      sampleSizeTable: SampleSizeTable[]
+      statsTable: ContTableStatsTable[]
+      completeCasesTable: VariableCompleteCases[]
 
