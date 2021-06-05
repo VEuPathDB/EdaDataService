@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +44,11 @@ public class MapPlugin extends AbstractPlugin<MapPostRequest, MapSpec> {
     return "Counts how many rows in a single stream of records";
   }
 
+  @Override
+  public List<String> getProjects() {
+    return Arrays.asList("ClinEpiDB");
+  }
+  
   @Override
   protected Class<MapSpec> getVisualizationSpecClass() {
     return MapSpec.class;

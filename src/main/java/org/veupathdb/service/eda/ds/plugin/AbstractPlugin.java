@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -49,6 +50,9 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   // methods that should probably be overridden
   public String getDisplayName() { return getClass().getName(); }
   public String getDescription() { return ""; }
+  public List<String> getProjects() { return Arrays.asList(""); }
+  // have to decide if default is 1 and 25 override or vice versa. to facet or not, that is the question...
+  public Integer getMaxPanels() { return 1; }
   public ConstraintSpec getConstraintSpec() { return new ConstraintSpec(); }
 
   private final EdaSubsettingClient _subsettingClient = new EdaSubsettingClient(Resources.SUBSETTING_SERVICE_URL);

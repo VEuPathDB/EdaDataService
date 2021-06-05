@@ -1,6 +1,7 @@
 package org.veupathdb.service.eda.ds.metadata;
 
 import java.util.Arrays;
+import java.util.List;
 import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.BarplotPlugin;
@@ -26,7 +27,9 @@ public class AppsMetadata {
 
   // NOTE: these names must match the url segments defined in the api.raml
   public static final AppsGetResponse APPS = apps(
-      app("pass", "Pass-Through", "A set of visualizations that do not require any up-front computation",
+      app("pass", "Pass-Through", 
+          "A collection of visualizations designed to support the unbiased exploration of relationships between variables",
+          Arrays.asList("ClinEpiDB", "MicrobiomeDB"),
           viz("map-markers", new MapPlugin()),
           viz("scatterplot", new ScatterplotPlugin()),
           viz("densityplot", new DensityplotPlugin()),
@@ -38,6 +41,7 @@ public class AppsMetadata {
           viz("conttable", new ContTablePlugin()),
           viz("twobytwo", new TwoByTwoPlugin())),
       app("sample", "Sample", "Wrapper app for sample/test plugins",
+          Arrays.asList(""),
           viz("record-count", new RecordCountPlugin()),
           viz("multi-stream", new MultiStreamPlugin()))
   );
@@ -52,11 +56,12 @@ public class AppsMetadata {
     return responseObj;
   }
 
-  private static AppOverview app(String name, String displayName, String description, VisualizationOverview... visualizations) {
+  private static AppOverview app(String name, String displayName, String description, List<String> projects, VisualizationOverview... visualizations) {
     AppOverviewImpl app = new AppOverviewImpl();
     app.setName(name);
     app.setDisplayName(displayName);
     app.setDescription(description);
+    app.setProjects(projects);
     app.setVisualizations(Arrays.asList(visualizations));
     return app;
   }
@@ -67,6 +72,8 @@ public class AppsMetadata {
     viz.setName(urlSegment);
     viz.setDisplayName(visualizationPlugin.getDisplayName());
     viz.setDescription(visualizationPlugin.getDescription());
+    viz.setProjects(visualizationPlugin.getProjects());
+    viz.setMaxPanels(visualizationPlugin.getMaxPanels());
     viz.setDataElementConstraints(constraints.isEmpty() ? null : constraints);
     viz.setDataElementDependencyOrder(constraints.getDependencyOrder());
     return viz;

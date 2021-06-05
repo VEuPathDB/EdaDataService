@@ -12,6 +12,7 @@ types:
       name: string
       displayName: string
       description: string
+      projects: string[]
       visualizations: VisualizationOverview[]
 
   VisualizationDataElementConstraint:
@@ -42,6 +43,8 @@ types:
       name: string
       displayName: string
       description: string
+      projects: string[]
+      maxPanels: number
       dataElementConstraints:
         type: VisualizationDataElementConstraintPattern[]
         required: false
