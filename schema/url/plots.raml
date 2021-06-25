@@ -64,6 +64,30 @@ types:
         type: number[]
         required: false
         
+  BoxplotStat:
+    additionalProperties: false
+    properties:
+      statistic:
+        type: string
+      pvalue:
+        type: number
+      parameter:
+        type: number
+      method:
+        type: string
+      statsError:
+        type: string
+
+  BoxplotStatsTable:
+    additionalProperties: false
+    properties:
+      facetVariableDetails:
+        type: StrataVariableDetails[]
+        maxItems: 2
+        required: false
+      statistics:
+        type: BoxplotStat      
+        
   HistogramData:
     additionalProperties: false
     properties:
@@ -156,7 +180,7 @@ types:
         minItems: 1
         required: true
       yLabel:
-        type: string[]
+        type: string[][]
         minItems: 1
         required: true
       value:
