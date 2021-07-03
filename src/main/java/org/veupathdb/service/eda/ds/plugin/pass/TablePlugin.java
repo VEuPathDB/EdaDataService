@@ -76,7 +76,11 @@ public class TablePlugin extends AbstractPlugin<TablePostRequest, TableSpec> {
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-
+    //get paging config
+    TableSpec spec = getPluginSpec();
+    Integer numRows = spec.getPagingConfig().getNumRows();
+    Integer offset = spec.getPagingConfig().getOffset();
+    
     // create scanner and line parser
     Scanner s = new Scanner(dataStreams.get(DEFAULT_SINGLE_STREAM_NAME)).useDelimiter(NL);
     DelimitedDataParser parser = new DelimitedDataParser(s.nextLine(), TAB, true);
@@ -101,10 +105,30 @@ public class TablePlugin extends AbstractPlugin<TablePostRequest, TableSpec> {
     
     //loop through and print data
     first = true;
+    int offsetCount = 0;
+    int rowCount = 0;
     while (s.hasNextLine()) {
-      String[] row = parser.parseLineToArray(s.nextLine());
-      if (first) first = false; else out.write(",".getBytes());
-      out.write(new JSONArray(row).toString().getBytes());
+      if (offset != null) {
+        if (offsetCount < offset) {
+          offsetCount++;
+          s.nextLine();
+        } else {
+          if (numRows != null) {
+            if (rowCount < numRows) {
+              rowCount++;
+              String[] row = parser.parseLineToArray(s.nextLine());
+              if (first) first = false; else out.write(",".getBytes());
+              out.write(new JSONArray(row).toString().getBytes());
+            } else {
+              break;
+            }
+          } else {
+            String[] row = parser.parseLineToArray(s.nextLine());
+            if (first) first = false; else out.write(",".getBytes());
+            out.write(new JSONArray(row).toString().getBytes());
+          }
+        }
+      }
     }
     
     // close array and enclosing object
