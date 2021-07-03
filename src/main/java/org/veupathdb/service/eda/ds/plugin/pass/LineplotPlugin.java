@@ -3,6 +3,7 @@ package org.veupathdb.service.eda.ds.plugin.pass;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.gusdb.fgputil.IoUtil;
@@ -38,6 +39,16 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
   }
 
   @Override
+  public List<String> getProjects() {
+    return Arrays.asList("ClinEpiDB", "MicrobiomeDB");
+  }
+  
+  @Override
+  public Integer getMaxPanels() {
+    return 25;
+  }
+  
+  @Override
   protected Class<LineplotSpec> getVisualizationSpecClass() {
     return LineplotSpec.class;
   }
@@ -57,7 +68,6 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
         .element("facetVariable")
           .required(false)
           .maxVars(2)
-          .maxValues(5)
           .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
       .done();
   }

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -35,6 +36,16 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
   }
 
   @Override
+  public List<String> getProjects() {
+    return Arrays.asList("ClinEpiDB", "MicrobiomeDB");
+  }
+  
+  @Override
+  public Integer getMaxPanels() {
+    return 25;
+  }
+  
+  @Override
   protected Class<ScatterplotSpec> getVisualizationSpecClass() {
     return ScatterplotSpec.class;
   }
@@ -54,7 +65,6 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
         .element("facetVariable")
           .required(false)
           .maxVars(2)
-          .maxValues(5)
           .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
       .done();
   }

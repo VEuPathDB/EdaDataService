@@ -3,6 +3,7 @@ package org.veupathdb.service.eda.ds.plugin.pass;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.gusdb.fgputil.IoUtil;
@@ -36,7 +37,17 @@ public class DensityplotPlugin extends AbstractPlugin<DensityplotPostRequest, De
   public String getDescription() {
     return "Visualize kernel density estimates for a continuous variable";
   }
+  
+  @Override
+  public List<String> getProjects() {
+    return Arrays.asList("ClinEpiDB", "MicrobiomeDB");
+  }
 
+  @Override
+  public Integer getMaxPanels() {
+    return 25;
+  }
+  
   @Override
   protected Class<DensityplotSpec> getVisualizationSpecClass() {
     return DensityplotSpec.class;
@@ -56,7 +67,6 @@ public class DensityplotPlugin extends AbstractPlugin<DensityplotPostRequest, De
         .element("facetVariable")
           .required(false)
           .maxVars(2)
-          .maxValues(5)
           .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
       .done();
   }

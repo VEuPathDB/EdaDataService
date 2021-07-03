@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +40,11 @@ public class TablePlugin extends AbstractPlugin<TablePostRequest, TableSpec> {
   @Override
   public String getDescription() {
     return "Returns a table of requested variables.";
+  }
+  
+  @Override
+  public List<String> getProjects() {
+    return Arrays.asList("ClinEpiDB", "MicrobiomeDB");
   }
 
   @Override

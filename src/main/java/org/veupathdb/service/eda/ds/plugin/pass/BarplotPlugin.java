@@ -3,6 +3,7 @@ package org.veupathdb.service.eda.ds.plugin.pass;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -33,7 +34,17 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
   public String getDescription() {
     return "Visualize the distribution of a categorical variable";
   }
+  
+  @Override
+  public List<String> getProjects() {
+    return Arrays.asList("ClinEpiDB", "MicrobiomeDB");
+  }
 
+  @Override
+  public Integer getMaxPanels() {
+    return 25;
+  }
+  
   @Override
   protected Class<BarplotSpec> getVisualizationSpecClass() {
     return BarplotSpec.class;
@@ -53,7 +64,6 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
         .element("facetVariable")
           .required(false)
           .maxVars(2)
-          .maxValues(5)
           .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
       .done();
   }

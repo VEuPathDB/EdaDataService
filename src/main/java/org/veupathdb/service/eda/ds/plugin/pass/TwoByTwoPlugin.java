@@ -3,6 +3,7 @@ package org.veupathdb.service.eda.ds.plugin.pass;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.gusdb.fgputil.IoUtil;
@@ -36,6 +37,16 @@ public class TwoByTwoPlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpec
   public String getDescription() {
     return "Visualize the frequency distribution, relative risk and odds ratio for two dichotomous variables";
   }
+  
+  @Override
+  public List<String> getProjects() {
+    return Arrays.asList("ClinEpiDB");
+  }
+  
+  @Override
+  public Integer getMaxPanels() {
+    return 25;
+  }
 
   @Override
   protected Class<MosaicSpec> getVisualizationSpecClass() {
@@ -54,7 +65,6 @@ public class TwoByTwoPlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpec
         .element("facetVariable")
           .required(false)
           .maxVars(2)
-          .maxValues(5)
           .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
       .done();
   }
