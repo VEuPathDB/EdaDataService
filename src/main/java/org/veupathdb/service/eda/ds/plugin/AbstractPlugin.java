@@ -34,6 +34,15 @@ import org.veupathdb.service.eda.generated.model.DerivedVariable;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 import org.veupathdb.service.eda.generated.model.VisualizationRequestBase;
 
+/**
+ * Base vizualization plugin for all other plugins.  Provides access to parts of
+ * the request object, manages logic flow over the course of the request, and
+ * provides streaming merged data to subclasses for processing per specs provided
+ * by those subclasses.
+ *
+ * @param <T> type of request (must extend VisualizationRequestBase)
+ * @param <S> plugin's spec class (must be or extend the generated spec class for this plugin)
+ */
 public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> implements Consumer<OutputStream> {
 
   private static final Logger LOG = LogManager.getLogger(AbstractPlugin.class);
