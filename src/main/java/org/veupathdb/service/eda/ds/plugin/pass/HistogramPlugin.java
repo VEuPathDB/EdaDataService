@@ -6,6 +6,8 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.IoUtil;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationBundle;
@@ -29,6 +31,8 @@ import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
 public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, HistogramSpec> {
+  
+  private static final Logger LOG = LogManager.getLogger(HistogramPlugin.class);
 
   @Override
   public String getDisplayName() {
@@ -159,6 +163,9 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
         String binWidth = "NULL";
         if (xVarType.equals("NUMBER")) {
           binWidth = binSpec.getValue() == null ? "NULL" : "as.numeric('" + binSpec.getValue() + "')";
+          if (binSpec.getUnits() != null) {
+            LOG.warn("The `units` property of the `BinSpec` class is only used for DATE x-axis variables. It will be ignored.");
+          }
         } else {
           binWidth = binSpec.getValue() == null ? "NULL" : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
         }
