@@ -39,7 +39,7 @@ public class TablePlugin extends AbstractPlugin<TablePostRequest, TableSpec> {
 
   @Override
   public String getDescription() {
-    return "Returns a table of requested variables.";
+    return "Visualize a table of requested variables";
   }
   
   @Override

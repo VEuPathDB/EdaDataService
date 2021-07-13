@@ -35,7 +35,7 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
 
   @Override
   public String getDescription() {
-    return "Visualize the relationship between two continuous variables";
+    return "Visualize aggregate values of one variable across the sequential values of another variable";
   }
 
   @Override
