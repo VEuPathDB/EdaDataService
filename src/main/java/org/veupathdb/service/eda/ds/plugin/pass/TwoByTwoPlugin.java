@@ -94,10 +94,6 @@ public class TwoByTwoPlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpec
     String yVar = toColNameOrEmpty(spec.getYAxisVariable());
     String facetVar1 = toColNameOrEmpty(spec.getFacetVariable(), 0);
     String facetVar2 = toColNameOrEmpty(spec.getFacetVariable(), 1);
-    String xVarEntity = getVariableEntityId(spec.getXAxisVariable());
-    String yVarEntity = getVariableEntityId(spec.getYAxisVariable());
-    String facetEntity1 = getVariableEntityId(spec.getFacetVariable(), 0);
-    String facetEntity2 = getVariableEntityId(spec.getFacetVariable(), 1);
     String xVarType = getVariableType(spec.getXAxisVariable());
     String yVarType = getVariableType(spec.getYAxisVariable());
     String facetType1 = getVariableType(spec.getFacetVariable(), 0);
@@ -118,10 +114,6 @@ public class TwoByTwoPlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpec
           + ", '" + yVar  + "'"
           + ", '" + facetVar1 + "'"
           + ", '" + facetVar2 + "'), "
-          + "'entityId'=c('" + xVarEntity + "'"
-          + ", '" + yVarEntity + "'"
-          + ", '" + facetEntity1 + "'"
-          + ", '" + facetEntity2 + "'), "
           + "'dataType'=c('" + xVarType + "'"
           + ", '" + yVarType + "'"
           + ", '" + facetType1 + "'"

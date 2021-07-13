@@ -35,7 +35,7 @@ public class DensityplotPlugin extends AbstractPlugin<DensityplotPostRequest, De
 
   @Override
   public String getDescription() {
-    return "Visualize kernel density estimates for a continuous variable";
+    return "Visualize the smoothed distribution (using a kernel density estimate) of a continuous variable";
   }
   
   @Override
@@ -96,10 +96,6 @@ public class DensityplotPlugin extends AbstractPlugin<DensityplotPostRequest, De
     String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());
     String facetVar1 = toColNameOrEmpty(spec.getFacetVariable(), 0);
     String facetVar2 = toColNameOrEmpty(spec.getFacetVariable(), 1);
-    String xVarEntity = getVariableEntityId(spec.getXAxisVariable());
-    String overlayEntity = getVariableEntityId(spec.getOverlayVariable());
-    String facetEntity1 = getVariableEntityId(spec.getFacetVariable(), 0);
-    String facetEntity2 = getVariableEntityId(spec.getFacetVariable(), 1);
     String xVarType = getVariableType(spec.getXAxisVariable());
     String overlayType = getVariableType(spec.getOverlayVariable());
     String facetType1 = getVariableType(spec.getFacetVariable(), 0);
@@ -121,10 +117,6 @@ public class DensityplotPlugin extends AbstractPlugin<DensityplotPostRequest, De
             + ", '" + overlayVar + "'"
             + ", '" + facetVar1 + "'"
             + ", '" + facetVar2 + "'), "
-            + "'entityId'=c('" + xVarEntity + "'"
-            + ", '" + overlayEntity + "'"
-            + ", '" + facetEntity1 + "'"
-            + ", '" + facetEntity2 + "'), "
             + "'dataType'=c('" + xVarType + "'"
             + ", '" + overlayType + "'"
             + ", '" + facetType1 + "'"
