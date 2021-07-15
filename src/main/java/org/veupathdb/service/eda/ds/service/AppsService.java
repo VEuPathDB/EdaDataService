@@ -8,6 +8,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.functional.FunctionalInterfaces;
 import org.veupathdb.lib.container.jaxrs.server.annotations.DisableJackson;
+import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivBoxplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.BarplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.BoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ContTablePlugin;
@@ -22,6 +24,10 @@ import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
 import org.veupathdb.service.eda.ds.plugin.sample.RecordCountPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.MultiStreamPlugin;
+import org.veupathdb.service.eda.generated.model.AlphaDivBoxplotPostRequest;
+import org.veupathdb.service.eda.generated.model.AlphaDivBoxplotPostResponseStream;
+import org.veupathdb.service.eda.generated.model.AlphaDivScatterplotPostRequest;
+import org.veupathdb.service.eda.generated.model.AlphaDivScatterplotResponseStream;
 import org.veupathdb.service.eda.generated.model.BarplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BarplotPostResponseStream;
 import org.veupathdb.service.eda.generated.model.BoxplotPostRequest;
@@ -160,6 +166,21 @@ public class AppsService implements Apps {
   public PostAppsSampleVisualizationsMultiStreamResponse postAppsSampleVisualizationsMultiStream(MultiStreamPostRequest entity) {
     return wrapPlugin(() -> PostAppsSampleVisualizationsMultiStreamResponse.respond200WithTextPlain(
         new EntityTabularPostResponseStream(new MultiStreamPlugin().processRequest(entity))));
+  }
+
+  // Alpha div
+  @DisableJackson
+  @Override
+  public PostAppsAlphaDivVisualizationsBoxplotResponse postAppsAlphaDivVisualizationsBoxplot(AlphaDivBoxplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsAlphaDivVisualizationsBoxplotResponse.respond200WithApplicationJson(
+            new AlphaDivBoxplotPostResponseStream(new AlphaDivBoxplotPlugin().processRequest(entity))));
+  }
+
+  @DisableJackson
+  @Override
+  public PostAppsAlphaDivVisualizationsScatterplotResponse postAppsAlphaDivVisualizationsScatterplot(AlphaDivScatterplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsAlphaDivVisualizationsScatterplotResponse.respond200WithApplicationJson(
+            new AlphaDivScatterplotPostResponseStream(new AlphaDivScatterplotPlugin().processRequest(entity))));
   }
 
 }

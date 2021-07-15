@@ -1,0 +1,30 @@
+#%RAML 1.0 Library
+
+types:
+  # Type name determines the name of the Java class that will be generated.
+
+  BetaDivScatterplotPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: BetaDivScatterplotSpec
+
+  # No valueSpec - raw only. No x, y. No faceting
+  BetaDivScatterplotSpec:
+    additionalProperties: false
+    properties:
+      outputEntityId:
+        type: string
+      overlayVariable: 
+        type: VariableSpec
+        required: false
+
+# Copied scatterplot
+  BetaDivScatterplotPostResponse:
+    additionalProperties: false
+    properties:
+      scatterplot:
+        type: Scatterplot
+      sampleSizeTable:
+        type: SampleSizeTable[]
+      completeCasesTable:
+        type: VariableCompleteCases[]

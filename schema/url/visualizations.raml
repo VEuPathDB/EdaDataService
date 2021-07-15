@@ -12,9 +12,21 @@ types:
         type: API_Filter[]
       derivedVariables:
         required: false
-        type: DerivedVariable[]   
+        type: DerivedVariable[]
+      computeConfig:
+        required: false
+        type: ComputeConfig
                   
   StrataVariableDetails:
     type: VariableSpec
     properties:
       value: string
+
+  ComputeConfig:
+        type: object
+        additionalProperties: false
+        properties:
+          name: string
+          parameters:
+            required: false
+            type: string[]

@@ -214,6 +214,95 @@ securitySchemes:
               application/json:
                 type: error.ServerError
 
+  /alphadiv/visualizations:
+    displayName: Visualizations for assessing internal sample diversity (alpha diversity).
+
+    /boxplot:
+      post:
+        description: Returns data required to create a box plot with alpha diversity as dependent axis <br> Java impl- NA <br> R impl- NA
+        body:
+          application/json:
+            type: lib.AlphaDivBoxplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.AlphaDivBoxplotPostResponse
+          500:
+            body:
+              application/json:
+                type: error.ServerError
+
+    /scatterplot:
+          post:
+            description: Returns data required to create a scatterplot that explores the relationship between a continuous variable and alpha diversity <br> Java impl- NA <br> R impl- NA
+            body:
+              application/json:
+                type: lib.AlphaDivScatterplotPostRequest
+            responses:
+              200:
+                body:
+                  application/json:
+                    type: lib.AlphaDivScatterplotPostResponse
+              500:
+                body:
+                  application/json:
+                    type: error.ServerError
+
+  /abundance/visualizations:
+      displayName: Visualizations for assessing the abundance of OTUs in a collection of samples.
+
+      /boxplot:
+        post:
+          description: Returns data required to create a box plot with abundance of OTUs as dependent axis <br> Java impl- NA <br> R impl- NA
+          body:
+            application/json:
+              type: lib.AbundanceBoxplotPostRequest
+          responses:
+            200:
+              body:
+                application/json:
+                  type: lib.AbundanceBoxplotPostResponse
+            500:
+              body:
+                application/json:
+                  type: error.ServerError
+
+      /scatterplot:
+            post:
+              description: Returns data required to create a scatterplot that explores the relationship between a continuous variable and alpha diversity <br> Java impl- NA <br> R impl- NA
+              body:
+                application/json:
+                  type: lib.AbundanceScatterplotPostRequest
+              responses:
+                200:
+                  body:
+                    application/json:
+                      type: lib.AbundanceScatterplotPostResponse
+                500:
+                  body:
+                    application/json:
+                      type: error.ServerError
+
+  /betadiv/visualizations:
+        displayName: Visualizations for exploring the diversity between samples (beta diversity).
+
+        /scatterplot:
+              post:
+                description: Returns data required to create a scatterplot that explores the differences between samples in a dataset as described by beta diversity <br> Java impl- NA <br> R impl- NA
+                body:
+                  application/json:
+                    type: lib.BetaDivScatterplotPostRequest
+                responses:
+                  200:
+                    body:
+                      application/json:
+                        type: lib.BetaDivScatterplotPostResponse
+                  500:
+                    body:
+                      application/json:
+                        type: error.ServerError
+
   /sample/visualizations:
     displayName: Sample visualizations demonstrating/testing service capabilities
 

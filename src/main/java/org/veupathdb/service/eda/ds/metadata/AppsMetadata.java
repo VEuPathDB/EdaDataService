@@ -4,6 +4,11 @@ import java.util.Arrays;
 import java.util.List;
 import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivBoxplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivScatterplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.abundance.AbundanceBoxplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.abundance.AbundanceScatterplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.betadiv.BetaDivScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.BarplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.BoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ContTablePlugin;
@@ -40,6 +45,20 @@ public class AppsMetadata {
           viz("heatmap", new HeatmapPlugin()),
           viz("conttable", new ContTablePlugin()),
           viz("twobytwo", new TwoByTwoPlugin())),
+      app("alphadiv", "Alpha Diversity",
+              "A collection of visualizations designed to support the unbiased exploration of relationships between variables and Alpha Diversity.",
+              Arrays.asList("MicrobiomeDB"),
+              viz("boxplot", new AlphaDivBoxplotPlugin()),
+              viz("scatterplot", new AlphaDivScatterplotPlugin())),
+      app("abundance", "Relative Abundance",
+              "A collection of visualizations designed to support the unbiased exploration of relationships between variables and OTU abundance.",
+              Arrays.asList("MicrobiomeDB"),
+              viz("boxplot", new AbundanceBoxplotPlugin()),
+              viz("scatterplot", new AbundanceScatterplotPlugin())),
+      app("betadiv", "Beta Diversity",
+              "A collection of visualizations designed to support the unbiased exploration of relationships between variables and Beta Diversity.",
+              Arrays.asList("MicrobiomeDB"),
+              viz("scatterplot", new BetaDivScatterplotPlugin())),
       app("sample", "Sample", "Wrapper app for sample/test plugins",
           Arrays.asList(""),
           viz("record-count", new RecordCountPlugin()),
