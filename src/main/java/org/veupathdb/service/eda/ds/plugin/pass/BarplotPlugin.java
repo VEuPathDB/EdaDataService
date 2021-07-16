@@ -53,7 +53,7 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder("xAxisVariable", "over")
+      .dependencyOrder("xAxisVariable", "overlayVariable")
       .pattern()
         .element("xAxisVariable")
           .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
