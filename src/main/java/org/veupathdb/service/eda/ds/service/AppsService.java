@@ -183,4 +183,27 @@ public class AppsService implements Apps {
             new AlphaDivScatterplotPostResponseStream(new AlphaDivScatterplotPlugin().processRequest(entity))));
   }
 
+  // Abundance
+  @DisableJackson
+  @Override
+  public PostAppsAbundanceVisualizationsBoxplotResponse postAppsAbundanceVisualizationsBoxplot(AbundanceBoxplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsAbundanceVisualizationsBoxplotResponse.respond200WithApplicationJson(
+            new AbundanceBoxplotPostResponseStream(new AbundanceBoxplotPlugin().processRequest(entity))));
+  }
+
+  @DisableJackson
+  @Override
+  public PostAppsAbundanceVisualizationsScatterplotResponse postAppsAbundanceVisualizationsScatterplot(AbundanceScatterplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsAbundanceVisualizationsScatterplotResponse.respond200WithApplicationJson(
+            new AbundanceScatterplotPostResponseStream(new AbundanceScatterplotPlugin().processRequest(entity))));
+  }
+
+  // Beta div
+  @DisableJackson
+  @Override
+  public PostAppsBetaDivVisualizationsScatterplotResponse postAppsBetaDivVisualizationsScatterplot(BetaDivScatterplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsBetaDivVisualizationsScatterplotResponse.respond200WithApplicationJson(
+            new BetaDivScatterplotPostResponseStream(new BetaDivScatterplotPlugin().processRequest(entity))));
+  }
+
 }
