@@ -93,7 +93,7 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
     boolean simpleBar = true;
     // TODO consider adding facets to simpleBar ?
     if (spec.getFacetVariable() != null
-         || !spec.getValueSpec().equals(BarplotSpec.ValueSpecType.COUNT)
+         || !spec.getValueSpec().getValue().equals("count")
          || dataStreams.size() != 1) {
       simpleBar = false;
     }
@@ -178,6 +178,7 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
       String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
       String facetShape2 = getVariableDataShape(spec.getFacetVariable(), 1);
       String showMissingness = spec.getShowMissingness().getValue();
+      String barmode = spec.getBarmode().getValue();
       
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
         connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
@@ -199,7 +200,10 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
             + ", '" + facetShape1 + "'"
             + ", '" + facetShape2 + "'), stringsAsFactors=FALSE)";
         connection.voidEval(createMapString);
-        String outFile = connection.eval("plot.data::bar(data, map, '" + spec.getValueSpec().getValue() + "', " + showMissingness + ")").asString();
+        String outFile = connection.eval("plot.data::bar(data, map, '" + 
+                                                         spec.getValueSpec().getValue() + "', '" + 
+                                                         barmode + "', " + 
+                                                         showMissingness + ")").asString();
         try (RFileInputStream response = connection.openFile(outFile)) {
           IoUtil.transferStream(out, response);
         }
