@@ -151,6 +151,9 @@ types:
     properties:
       outputEntityId:
         type: string
+      showMissingness:
+        type: string
+        enum: ['TRUE', 'FALSE']
       xAxisVariable: 
         type: VariableSpec
       yAxisVariable: 
@@ -272,6 +275,7 @@ types:
     additionalProperties: false
     properties:
       completeCases: number
+      plottedIncompleteCases: number
       
   SampleSizeTable:
     additionalProperties: false

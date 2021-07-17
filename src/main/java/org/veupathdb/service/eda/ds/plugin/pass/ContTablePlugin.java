@@ -105,6 +105,7 @@ public class ContTablePlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpe
     String yVarShape = getVariableDataShape(spec.getYAxisVariable());
     String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
     String facetShape2 = getVariableDataShape(spec.getFacetVariable(), 1);
+    String showMissingness = spec.getShowMissingness().getValue();
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
@@ -125,7 +126,7 @@ public class ContTablePlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpe
           + ", '" + yVarShape + "'"
           + ", '" + facetShape1 + "'"
           + ", '" + facetShape2 + "'), stringsAsFactors=FALSE)");
-      String outFile = connection.eval("plot.data::mosaic(data, map)").asString();
+      String outFile = connection.eval("plot.data::mosaic(data, map, " + showMissingness + ")").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
       }

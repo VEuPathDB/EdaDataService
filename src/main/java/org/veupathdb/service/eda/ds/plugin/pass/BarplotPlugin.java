@@ -177,6 +177,7 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
       String overlayShape = getVariableDataShape(spec.getOverlayVariable());
       String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
       String facetShape2 = getVariableDataShape(spec.getFacetVariable(), 1);
+      String showMissingness = spec.getShowMissingness().getValue();
       
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
         connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
@@ -198,7 +199,7 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
             + ", '" + facetShape1 + "'"
             + ", '" + facetShape2 + "'), stringsAsFactors=FALSE)";
         connection.voidEval(createMapString);
-        String outFile = connection.eval("plot.data::bar(data, map, '" + spec.getValueSpec().toString().toLowerCase() + "')").asString();
+        String outFile = connection.eval("plot.data::bar(data, map, '" + spec.getValueSpec().getValue() + "', " + showMissingness + ")").asString();
         try (RFileInputStream response = connection.openFile(outFile)) {
           IoUtil.transferStream(out, response);
         }

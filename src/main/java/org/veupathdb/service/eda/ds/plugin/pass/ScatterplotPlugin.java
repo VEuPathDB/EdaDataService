@@ -112,6 +112,7 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
     String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
     String facetShape2 = getVariableDataShape(spec.getFacetVariable(), 1);
     String valueSpec = spec.getValueSpec().getValue();
+    String showMissingness = spec.getShowMissingness().getValue();
       
     if (yVarType.equals("DATE") && !valueSpec.equals("raw")) {
       LOG.error("Cannot calculate trend lines for y-axis date variables. The `valueSpec` property must be set to `raw`.");
@@ -140,7 +141,7 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
             + ", '" + overlayShape + "'"
             + ", '" + facetShape1 + "'"
             + ", '" + facetShape2 + "'), stringsAsFactors=FALSE)");
-      String outFile = connection.eval("plot.data::scattergl(data, map, '" + valueSpec + "')").asString();
+      String outFile = connection.eval("plot.data::scattergl(data, map, '" + valueSpec + "', " + showMissingness + ")").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
       }
