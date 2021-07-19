@@ -112,57 +112,23 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
     String overlayShape = getVariableDataShape(spec.getOverlayVariable());
     String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
     String facetShape2 = getVariableDataShape(spec.getFacetVariable(), 1);
-    // Proposed solution for listvars, assuming simple case where we know it will be on the x axis
-    // String[] xVars = toColsNamesOrEmpty(sepc.getListVariable());
-    // String[] xVarEntities = getListVarEntityIds(spec.getListVariable());
-    // String[] xVarTypes = getListVarType(spec.getListVariable());
-    // String[] xVarShapes = getListVarShape(spec.getListVariable());
 
-    // Loop through strings and create large string
-    // String xVar = "";
-    // String xPlotRef = ""
-    // etc
-    // for (int i = 0; i <xVar.length, i++) {
-    //   xPlotRef += " 'xAxisVariable', " (or w/o comma if last one)
-    //   xVar += "'" + xVars[i] + "', " (or w/o comma if last)
-    //   etc
-    // }
+    // Proposed solution for listvars, using x var as example (see toCommaSeparated in AbstractPlugin.java)
+    // String xVars = toCommaSeparated(toColsNamesOrEmpty(sepc.getListVariable()));
+    // String xVarEntities = toCommaSeparated(getListVarEntityIds(spec.getListVariable()));
+    // String xVarTypes = toCommaSeparated(getListVarType(spec.getListVariable()));
+    // String xVarShapes = toCommaSeparated(getListVarShape(spec.getListVariable()));
+    // String[] xVarPlotRefs = new boolean[5];
+    // Arrays.fill(array, "xAxisVariable");
+    // String xVarPlotRef = toCommaSeparated(xVarPlotRefs);
+
+    // repeat above for all variables. 
 
 
-    // Then we define plotRef below with
-    // + "'plotRef'=c(" + xPlotRef + ", "
-    // and similar for others
-
-
-    // Fine, but doesn't account for not knowing all the places the list var will play.
-    // More complete solution:
-    // - getVariableEntityId and similar all return arrays (most often of length 1). Or we could make a new one that handles lists.
-    // - create stringArrayToCommaSeparated helper method that we can run on each var which will create xVar, etc as seen below
-    // - Add these into below as before, but also need ones for plotRef.
-    //
-    // So then above it'd be String xVarShape = arrayToCommaSeparated(getVariableDataShape(spec.getXAxisVariable()));
-    // And then xVarShape is like "'CONTINUOUS', 'CONTINUOUS', ..."
-
-    // toCommaSeparated might be something like (maybe could use switch?)
-    // public String toCommaSeparated(String[] stringArray) {
-    //   if (stringArray.length == 1) {
-    //     return stringArray[1];
-    //   } else if (stringArray.length > 1) {
-    //     (make into "'stringArray[1]', 'stringArray[2]', ... , 'stringArray[n]'")
-    //     return ^^
-    //   } else {
-    //     return null
-    //   }
-    // }
-    // and then also send array that is just repeating "xAxisVariable" n times to that function, too. Call it xPlotRef or similar.
-
-
-
-    // Need to add logic for listvar case
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
       connection.voidEval("map <- data.frame("
-          + "'plotRef'=c('xAxisVariable', "
+//          + "'plotRef'=c(" + xVarPlotRef + ", "
           + "       'yAxisVariable', "
           + "       'overlayVariable', "
           + "       'facetVariable1', "

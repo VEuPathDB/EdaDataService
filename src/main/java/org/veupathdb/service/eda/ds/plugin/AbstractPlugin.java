@@ -216,4 +216,18 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     return getVariableDataShape(getVariableSpecFromList(vars, index));
   }
 
+  // Suggested helper to take array of var names, entities, types, or shapes, and rewrite them into one comma separated string.
+  //  public static String toCommaSeparated(String[] stringArray) {
+  //    String commaString = "";
+  //    for (int i = 0; i < stringArray.length; i++) {
+  //      //Do your stuff here
+  //      if (i < stringArray.length - 1){
+  //        commaString += ("'" + stringArray[i] + "', ");
+  //      } else {
+  //        commaString += ("'" + stringArray[i] + "'");
+  //      }
+  //    }
+  //    return commaString;
+  //  }
+
 }
