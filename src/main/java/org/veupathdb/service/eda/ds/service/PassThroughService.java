@@ -1,5 +1,6 @@
 package org.veupathdb.service.eda.ds.service;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.function.Consumer;
@@ -58,6 +59,13 @@ public class PassThroughService implements Studies {
   public GetStudiesResponse getStudies() {
     return GetStudiesResponse.respond200WithApplicationJson(
         new StudiesGetResponseStream(buildStreamer(c -> c.getStudiesStream())));
+  }
+
+  @Override
+  public GetStudiesClearMetadataCacheResponse getStudiesClearMetadataCache() {
+    // make the request but discard all bytes (don't expect to receive any)
+    buildStreamer(c -> c.clearMetadataCache()).accept(OutputStream.nullOutputStream());
+    return GetStudiesClearMetadataCacheResponse.respond202();
   }
 
   @Override
