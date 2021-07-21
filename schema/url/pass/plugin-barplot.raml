@@ -7,7 +7,7 @@ types:
     type: VisualizationRequestBase
     properties:
       config: BarplotSpec
-
+  
   BarplotSpec:
     additionalProperties: false
     properties:
@@ -16,6 +16,7 @@ types:
       showMissingness:
         type: string
         enum: ['TRUE', 'FALSE']
+        required: false
       barmode:
         type: string
         enum: ['group', 'stack']

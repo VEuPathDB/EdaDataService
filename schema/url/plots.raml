@@ -63,6 +63,8 @@ types:
       mean:
         type: number[]
         required: false
+      label:
+        type: string[]
         
   BoxplotStat:
     additionalProperties: false
@@ -154,6 +156,7 @@ types:
       showMissingness:
         type: string
         enum: ['TRUE', 'FALSE']
+        required: false
       xAxisVariable: 
         type: VariableSpec
       yAxisVariable: 
@@ -270,7 +273,7 @@ types:
       seriesX:
         type: string[]
         minItems: 1
-        
+
   PlotConfig:
     additionalProperties: false
     properties:

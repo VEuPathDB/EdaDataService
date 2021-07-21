@@ -107,8 +107,10 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
     String overlayShape = getVariableDataShape(spec.getOverlayVariable());
     String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
     String facetShape2 = getVariableDataShape(spec.getFacetVariable(), 1);
-    String showMissingness = spec.getShowMissingness().getValue();
-  
+    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
+    String computeStats = spec.getComputeStats() != null ? spec.getComputeStats().getValue() : "FALSE";
+    String showMean = spec.getMean() != null ? spec.getMean().getValue() : "FALSE";
+    
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
       connection.voidEval("map <- data.frame("
@@ -132,10 +134,16 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
           + ", '" + overlayShape + "'"
           + ", '" + facetShape1 + "'"
           + ", '" + facetShape2 + "'), stringsAsFactors=FALSE)");
+      connection.voidEval("head(data)");
+      System.err.println("plot.data::box(data, map, '" +
+          spec.getPoints().getValue() + "', " +
+          showMean + ", " + 
+          computeStats + ", " + 
+          showMissingness + ")");
       String outFile = connection.eval("plot.data::box(data, map, '" +
-          spec.getPoints().getValue() + "', '" +
-          spec.getMean().getValue() + "', " + 
-          spec.getComputeStats().getValue() + ", " + 
+          spec.getPoints().getValue() + "', " +
+          showMean + ", " + 
+          computeStats + ", " + 
           showMissingness + ")").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
