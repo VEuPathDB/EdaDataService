@@ -10,7 +10,8 @@ import javax.ws.rs.BadRequestException;
  * set of records, including a header row.  This stream will transfer all
  * the passed input stream's data through its read() methods, with one
  * addition: after reading the header row (and optional newline), if no
- * more data is
+ * more data is present, a JAX-RS BadRequestException will be thrown,
+ * ending processing.
  */
 public class NonEmptyResultStream extends BufferedInputStream {
 
