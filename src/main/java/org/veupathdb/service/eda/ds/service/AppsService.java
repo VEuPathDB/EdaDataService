@@ -2,6 +2,7 @@ package org.veupathdb.service.eda.ds.service;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ServerErrorException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.ValidationException;
 import org.apache.logging.log4j.LogManager;
@@ -22,6 +23,8 @@ import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
 import org.veupathdb.service.eda.ds.plugin.sample.RecordCountPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.MultiStreamPlugin;
+import org.veupathdb.service.eda.ds.util.NonEmptyResultStream;
+import org.veupathdb.service.eda.ds.util.NonEmptyResultStream.EmptyResultException;
 import org.veupathdb.service.eda.generated.model.BarplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BarplotPostResponseStream;
 import org.veupathdb.service.eda.generated.model.BoxplotPostRequest;
@@ -64,6 +67,9 @@ public class AppsService implements Apps {
     }
     catch (ValidationException e) {
       throw new BadRequestException(e.getMessage());
+    }
+    catch (EmptyResultException e) {
+      throw new WebApplicationException(e.getMessage(), 204);
     }
     catch (Exception e) {
       LOG.error("Could not execute app.", e);

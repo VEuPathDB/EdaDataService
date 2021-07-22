@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Scanner;
 import org.gusdb.fgputil.IoUtil;
 import org.gusdb.fgputil.ListBuilder;
+import org.gusdb.fgputil.validation.ValidationBundle;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.json.JSONObject;
 import org.rosuda.REngine.Rserve.RFileInputStream;
@@ -75,6 +76,9 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
       .var("xAxisVariable", pluginSpec.getXAxisVariable())
       .var("overlayVariable", pluginSpec.getOverlayVariable())
       .var("facetVariable", pluginSpec.getFacetVariable()));
+    if (pluginSpec.getBarmode() == null) {
+      throw new ValidationException("barmode is a required property");
+    }
   }
 
   @Override
