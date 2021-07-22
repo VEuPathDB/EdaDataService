@@ -13,12 +13,19 @@ types:
     properties:
       outputEntityId:
         type: string
+      showMissingness:
+        type: string
+        enum: ['TRUE', 'FALSE']
+        required: false
       points:
         type: string
         enum: ['outliers', 'all']
       mean:
         type: string
-        enum: ['true', 'false']
+        enum: ['TRUE', 'FALSE']
+      computeStats:
+        type: string
+        enum: ['TRUE', 'FALSE']
       xAxisVariable: 
         type: VariableSpec
       yAxisVariable: 
@@ -58,3 +65,4 @@ types:
         type: VariableCompleteCases[]
       statsTable:
         type: BoxplotStatsTable[]
+        required: false

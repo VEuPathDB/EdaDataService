@@ -53,7 +53,7 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder("xAxisVariable", "over")
+      .dependencyOrder("xAxisVariable", "overlayVariable")
       .pattern()
         .element("xAxisVariable")
           .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
@@ -93,7 +93,7 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
     boolean simpleBar = true;
     // TODO consider adding facets to simpleBar ?
     if (spec.getFacetVariable() != null
-         || !spec.getValueSpec().equals(BarplotSpec.ValueSpecType.COUNT)
+         || !spec.getValueSpec().getValue().equals("count")
          || dataStreams.size() != 1) {
       simpleBar = false;
     }
@@ -169,10 +169,6 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
       String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());
       String facetVar1 = toColNameOrEmpty(spec.getFacetVariable(), 0);
       String facetVar2 = toColNameOrEmpty(spec.getFacetVariable(), 1);
-      String xVarEntity = getVariableEntityId(spec.getXAxisVariable());
-      String overlayEntity = getVariableEntityId(spec.getOverlayVariable());
-      String facetEntity1 = getVariableEntityId(spec.getFacetVariable(), 0);
-      String facetEntity2 = getVariableEntityId(spec.getFacetVariable(), 1);
       String xVarType = getVariableType(spec.getXAxisVariable());
       String overlayType = getVariableType(spec.getOverlayVariable());
       String facetType1 = getVariableType(spec.getFacetVariable(), 0);
@@ -181,6 +177,8 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
       String overlayShape = getVariableDataShape(spec.getOverlayVariable());
       String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
       String facetShape2 = getVariableDataShape(spec.getFacetVariable(), 1);
+      String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
+      String barmode = spec.getBarmode().getValue();
       
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
         connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
@@ -193,10 +191,6 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
             + ", '" + overlayVar + "'"
             + ", '" + facetVar1 + "'"
             + ", '" + facetVar2 + "'), "
-            + "'entityId'=c('" + xVarEntity + "'"
-            + ", '" + overlayEntity + "'"
-            + ", '" + facetEntity1 + "'"
-            + ", '" + facetEntity2 + "'), "
             + "'dataType'=c('" + xVarType + "'"
             + ", '" + overlayType + "'"
             + ", '" + facetType1 + "'"
@@ -206,7 +200,10 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
             + ", '" + facetShape1 + "'"
             + ", '" + facetShape2 + "'), stringsAsFactors=FALSE)";
         connection.voidEval(createMapString);
-        String outFile = connection.eval("plot.data::bar(data, map, '" + spec.getValueSpec().toString().toLowerCase() + "')").asString();
+        String outFile = connection.eval("plot.data::bar(data, map, '" + 
+                                                         spec.getValueSpec().getValue() + "', '" + 
+                                                         barmode + "', " + 
+                                                         showMissingness + ")").asString();
         try (RFileInputStream response = connection.openFile(outFile)) {
           IoUtil.transferStream(out, response);
         }

@@ -35,7 +35,7 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
 
   @Override
   public String getDescription() {
-    return "Visualize the relationship between two continuous variables";
+    return "Visualize aggregate values of one variable across the sequential values of another variable";
   }
 
   @Override
@@ -100,11 +100,6 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
     String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());
     String facetVar1 = toColNameOrEmpty(spec.getFacetVariable(), 0);
     String facetVar2 = toColNameOrEmpty(spec.getFacetVariable(), 1);
-    String xVarEntity = getVariableEntityId(spec.getXAxisVariable());
-    String yVarEntity = getVariableEntityId(spec.getYAxisVariable());
-    String overlayEntity = getVariableEntityId(spec.getOverlayVariable());
-    String facetEntity1 = getVariableEntityId(spec.getFacetVariable(), 0);
-    String facetEntity2 = getVariableEntityId(spec.getFacetVariable(), 1);
     String xVarType = getVariableType(spec.getXAxisVariable());
     String yVarType = getVariableType(spec.getYAxisVariable());
     String overlayType = getVariableType(spec.getOverlayVariable());
@@ -115,6 +110,7 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
     String overlayShape = getVariableDataShape(spec.getOverlayVariable());
     String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
     String facetShape2 = getVariableDataShape(spec.getFacetVariable(), 1);
+    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
@@ -129,11 +125,6 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
             + ", '" + overlayVar + "'"
             + ", '" + facetVar1 + "'"
             + ", '" + facetVar2 + "'), "
-            + "'entityId'=c('" + xVarEntity + "'"
-            + ", '" + yVarEntity + "'"
-            + ", '" + overlayEntity + "'"
-            + ", '" + facetEntity1 + "'"
-            + ", '" + facetEntity2 + "'), "
             + "'dataType'=c('" + xVarType + "'"
             + ", '" + yVarType + "'"
             + ", '" + overlayType + "'"
@@ -144,7 +135,7 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
             + ", '" + overlayShape + "'"
             + ", '" + facetShape1 + "'"
             + ", '" + facetShape2 + "'), stringsAsFactors=FALSE)");
-      String outFile = connection.eval("plot.data::scattergl(data, map, 'raw')").asString();
+      String outFile = connection.eval("plot.data::scattergl(data, map, 'raw'," + showMissingness + ")").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
       }

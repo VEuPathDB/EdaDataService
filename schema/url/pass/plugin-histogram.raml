@@ -7,10 +7,6 @@ types:
     properties:
       config: HistogramSpec
 
-  ValueSpec:
-    type: string
-    enum: ['count', 'proportion']
-
   HistogramViewport:
     additionalProperties: false
     properties:
@@ -25,21 +21,23 @@ types:
       type:
         type: string
         enum: ['binWidth','numBins']
-      value:
-        type: number
-        required: false
-      units:
-        type: string
-        enum: ['day','week','month','year']
-        required: false
+      value?: number
+      units?: BinUnits
 
   HistogramSpec:
     additionalProperties: false
     properties:
       outputEntityId:
         type: string
+      showMissingness:
+        type: string
+        enum: ['TRUE', 'FALSE']
+        required: false
       xAxisVariable:
         type: VariableSpec
+      barmode:
+        type: string
+        enum: ['overlay', 'stack']
       valueSpec: 
         type: ValueSpec
       overlayVariable: 

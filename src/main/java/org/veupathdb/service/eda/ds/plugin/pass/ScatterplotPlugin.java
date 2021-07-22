@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.IoUtil;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
@@ -25,6 +27,8 @@ import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithR
 
 public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, ScatterplotSpec> {
 
+  private static final Logger LOG = LogManager.getLogger(ScatterplotPlugin.class);
+  
   @Override
   public String getDisplayName() {
     return "Scatter plot";
@@ -97,11 +101,6 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
     String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());
     String facetVar1 = toColNameOrEmpty(spec.getFacetVariable(), 0);
     String facetVar2 = toColNameOrEmpty(spec.getFacetVariable(), 1);
-    String xVarEntity = getVariableEntityId(spec.getXAxisVariable());
-    String yVarEntity = getVariableEntityId(spec.getYAxisVariable());
-    String overlayEntity = getVariableEntityId(spec.getOverlayVariable());
-    String facetEntity1 = getVariableEntityId(spec.getFacetVariable(), 0);
-    String facetEntity2 = getVariableEntityId(spec.getFacetVariable(), 1);
     String xVarType = getVariableType(spec.getXAxisVariable());
     String yVarType = getVariableType(spec.getYAxisVariable());
     String overlayType = getVariableType(spec.getOverlayVariable());
@@ -113,7 +112,12 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
     String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
     String facetShape2 = getVariableDataShape(spec.getFacetVariable(), 1);
     String valueSpec = spec.getValueSpec().getValue();
+    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
       
+    if (yVarType.equals("DATE") && !valueSpec.equals("raw")) {
+      LOG.error("Cannot calculate trend lines for y-axis date variables. The `valueSpec` property must be set to `raw`.");
+    }
+    
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
       connection.voidEval("map <- data.frame("
@@ -127,11 +131,6 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
             + ", '" + overlayVar + "'"
             + ", '" + facetVar1 + "'"
             + ", '" + facetVar2 + "'), "
-            + "'entityId'=c('" + xVarEntity + "'"
-            + ", '" + yVarEntity + "'"
-            + ", '" + overlayEntity + "'"
-            + ", '" + facetEntity1 + "'"
-            + ", '" + facetEntity2 + "'), "
             + "'dataType'=c('" + xVarType + "'"
             + ", '" + yVarType + "'"
             + ", '" + overlayType + "'"
@@ -142,7 +141,7 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
             + ", '" + overlayShape + "'"
             + ", '" + facetShape1 + "'"
             + ", '" + facetShape2 + "'), stringsAsFactors=FALSE)");
-      String outFile = connection.eval("plot.data::scattergl(data, map, '" + valueSpec + "')").asString();
+      String outFile = connection.eval("plot.data::scattergl(data, map, '" + valueSpec + "', " + showMissingness + ")").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
       }
