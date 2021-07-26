@@ -1,5 +1,6 @@
 package org.veupathdb.service.eda.ds.plugin.pass;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -76,6 +77,7 @@ public class TablePlugin extends AbstractPlugin<TablePostRequest, TableSpec> {
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
+    BufferedWriter bufOut = new BufferedWriter(new OutputStreamWriter(out));
     //get paging config
     TableSpec spec = getPluginSpec();
     Integer numRows = spec.getPagingConfig().getNumRows();
@@ -87,21 +89,20 @@ public class TablePlugin extends AbstractPlugin<TablePostRequest, TableSpec> {
 
     //print header
     List<String> header = parser.getColumnNames();
-    out.write("{\"columns\":[".getBytes());
+    bufOut.write("{\"columns\":[");
     boolean first = true;
     for (String colName : header) {
-      if (first) first = false; else out.write(",".getBytes());
+      if (first) first = false; else bufOut.write(",");
       System.err.println("col name: " + colName);
       String varSpec[] = colName.split("\\.");
       System.err.println(varSpec.toString());
-      out.write(new JSONObject()
+      bufOut.write(new JSONObject()
           .put("entityId", varSpec[0])
           .put("variableId", varSpec[1])
           .toString()
-          .getBytes()
         );
     }
-    out.write("],{\"rows\":[".getBytes());
+    bufOut.write("],{\"rows\":[");
     
     //loop through and print data
     first = true;
@@ -117,22 +118,22 @@ public class TablePlugin extends AbstractPlugin<TablePostRequest, TableSpec> {
             if (rowCount < numRows) {
               rowCount++;
               String[] row = parser.parseLineToArray(s.nextLine());
-              if (first) first = false; else out.write(",".getBytes());
-              out.write(new JSONArray(row).toString().getBytes());
+              if (first) first = false; else bufOut.write(",");
+              bufOut.write(new JSONArray(row).toString());
             } else {
               break;
             }
           } else {
             String[] row = parser.parseLineToArray(s.nextLine());
-            if (first) first = false; else out.write(",".getBytes());
-            out.write(new JSONArray(row).toString().getBytes());
+            if (first) first = false; else bufOut.write(",");
+            bufOut.write(new JSONArray(row).toString());
           }
         }
       }
     }
     
     // close array and enclosing object
-    out.write("]}".getBytes());
-    out.flush();
+    bufOut.write("]}");
+    bufOut.flush();
   }
 }
