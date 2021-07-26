@@ -83,6 +83,9 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
       .var("xAxisVariable", pluginSpec.getXAxisVariable())
       .var("overlayVariable", pluginSpec.getOverlayVariable())
       .var("facetVariable", pluginSpec.getFacetVariable()));
+    if (pluginSpec.getBarmode() == null) {
+      throw new ValidationException("Property 'barMode' is required.");
+    }
   }
 
   @Override
