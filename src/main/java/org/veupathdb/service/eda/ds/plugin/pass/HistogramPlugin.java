@@ -83,7 +83,7 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
       .var("xAxisVariable", pluginSpec.getXAxisVariable())
       .var("overlayVariable", pluginSpec.getOverlayVariable())
       .var("facetVariable", pluginSpec.getFacetVariable()));
-    if (pluginSpec.getBarmode() == null) {
+    if (pluginSpec.getBarMode() == null) {
       throw new ValidationException("Property 'barMode' is required.");
     }
   }
@@ -113,7 +113,7 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
     String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
     String facetShape2 = getVariableDataShape(spec.getFacetVariable(), 1);
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
-    String barmode = spec.getBarmode().getValue();
+    String barmode = spec.getBarMode().getValue();
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
