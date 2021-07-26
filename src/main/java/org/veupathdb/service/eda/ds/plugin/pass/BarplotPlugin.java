@@ -76,8 +76,8 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
       .var("xAxisVariable", pluginSpec.getXAxisVariable())
       .var("overlayVariable", pluginSpec.getOverlayVariable())
       .var("facetVariable", pluginSpec.getFacetVariable()));
-    if (pluginSpec.getBarmode() == null) {
-      throw new ValidationException("barmode is a required property");
+    if (pluginSpec.getBarMode() == null) {
+      throw new ValidationException("Property 'barMode' is required.");
     }
   }
 
@@ -182,7 +182,7 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
       String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
       String facetShape2 = getVariableDataShape(spec.getFacetVariable(), 1);
       String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
-      String barmode = spec.getBarmode().getValue();
+      String barMode = spec.getBarMode().getValue();
       
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
         connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
@@ -206,7 +206,7 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
         connection.voidEval(createMapString);
         String outFile = connection.eval("plot.data::bar(data, map, '" + 
                                                          spec.getValueSpec().getValue() + "', '" + 
-                                                         barmode + "', " + 
+                                                         barMode + "', " +
                                                          showMissingness + ")").asString();
         try (RFileInputStream response = connection.openFile(outFile)) {
           IoUtil.transferStream(out, response);

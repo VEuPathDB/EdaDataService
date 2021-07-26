@@ -113,7 +113,7 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
     String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
     String facetShape2 = getVariableDataShape(spec.getFacetVariable(), 1);
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
-    String barmode = spec.getBarMode().getValue();
+    String barMode = spec.getBarMode().getValue();
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
@@ -180,7 +180,7 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
       String outFile = connection.eval("plot.data::histogram(data, map, binWidth, '" + 
                                                              spec.getValueSpec().getValue() + "', '" + 
                                                              binReportValue + "', '" + 
-                                                             barmode + "', viewport, " +
+                                                             barMode + "', viewport, " +
                                                              showMissingness + ")").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
