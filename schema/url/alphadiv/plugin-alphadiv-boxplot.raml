@@ -29,33 +29,3 @@ types:
         type: VariableSpec[]
         maxItems: 2
         required: false
-
-# Do we need anything from the alpha div computation sent back? Like the name or similar?
-#  BoxplotConfig:
-#    type: PlotConfig
-#    properties:
-#      xVariableDetails:
-#        type: VariableSpec
-#      yVariableDetails:
-#        type: VariableSpec
-#
-#  Boxplot:
-#    additionalProperties: false
-#    properties:
-#      data:
-#        type: BoxplotData[]
-#      config:
-#        type: BoxplotConfig
-
-# Currently just a copy of boxplotpostresponse.
-  AlphaDivBoxplotPostResponse:
-    additionalProperties: false
-    properties:
-      boxplot:
-        type: Boxplot
-      sampleSizeTable:
-        type: SampleSizeTable[]
-      completeCasesTable:
-        type: VariableCompleteCases[]
-      statsTable:
-        type: BoxplotStatsTable[]

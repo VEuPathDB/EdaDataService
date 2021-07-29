@@ -25,30 +25,3 @@ types:
         type: VariableSpec[]
         maxItems: 2
         required: false
-
-#  ScatterplotConfig:
-#    type: PlotConfig
-#    properties:
-#      xVariableDetails:
-#        type: VariableSpec
-#      yVariableDetails:
-#        type: VariableSpec
-#
-#  Scatterplot:
-#    additionalProperties: false
-#    properties:
-#      data:
-#        type: ScatterplotData[]
-#      config:
-#        type: ScatterplotConfig
-
-# Only copied right now.
-  AlphaDivScatterplotPostResponse:
-    additionalProperties: false
-    properties:
-      scatterplot:
-        type: Scatterplot
-      sampleSizeTable:
-        type: SampleSizeTable[]
-      completeCasesTable:
-        type: VariableCompleteCases[]
