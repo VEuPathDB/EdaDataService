@@ -29,17 +29,3 @@ types:
         type: VariableSpec[]
         maxItems: 2
         required: false
-
-
-# Currently just a copy of boxplotpostresponse.
-  AbundanceBoxplotPostResponse:
-    additionalProperties: false
-    properties:
-      boxplot:
-        type: Boxplot
-      sampleSizeTable:
-        type: SampleSizeTable[]
-      completeCasesTable:
-        type: VariableCompleteCases[]
-      statsTable:
-        type: BoxplotStatsTable[]

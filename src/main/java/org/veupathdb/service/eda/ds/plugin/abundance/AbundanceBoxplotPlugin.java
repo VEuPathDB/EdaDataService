@@ -122,7 +122,7 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
     // Arrays.fill(array, "xAxisVariable");
     // String xVarPlotRef = toCommaSeparated(xVarPlotRefs);
 
-    // repeat above for all variables. 
+    // repeat above for all variables.
 
 
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
