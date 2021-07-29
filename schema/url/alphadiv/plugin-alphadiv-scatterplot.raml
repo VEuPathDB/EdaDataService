@@ -8,20 +8,25 @@ types:
     properties:
       config: AlphaDivScatterplotSpec
 
+# Assume y-axis is always alpha diversity
   AlphaDivScatterplotSpec:
     additionalProperties: false
     properties:
       outputEntityId:
         type: string
+      showMissingness:
+        type: string
+        enum: ['TRUE', 'FALSE']
+        required: false
       valueSpec:
         type: string
         enum: ['raw', 'smoothedMeanWithRaw', 'bestFitLineWithRaw']
-      xAxisVariable: 
+      xAxisVariable:
         type: VariableSpec
-      overlayVariable: 
+      overlayVariable:
         type: VariableSpec
         required: false
-      facetVariable: 
+      facetVariable:
         type: VariableSpec[]
         maxItems: 2
         required: false
