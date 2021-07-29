@@ -222,7 +222,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   }
 
   // Suggested helper to take array of var names, entities, types, or shapes, and rewrite them into one comma separated string.
-  //  public static String toCommaSeparated(String[] stringArray) {
+  //  public static String toCommaSepString(String[] stringArray) {
   //    String commaString = "";
   //    for (int i = 0; i < stringArray.length; i++) {
   //      //Do your stuff here

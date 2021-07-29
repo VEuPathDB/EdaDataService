@@ -107,14 +107,14 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
     String computeStats = spec.getComputeStats() != null ? spec.getComputeStats().getValue() : "TRUE";
     String showMean = spec.getMean() != null ? spec.getMean().getValue() : "FALSE";
 
-    // Proposed solution for listvars, using x var as example (see toCommaSeparated in AbstractPlugin.java)
-    // String xVars = toCommaSeparated(toColsNamesOrEmpty(sepc.getListVariable()));
-    // String xVarEntities = toCommaSeparated(getListVarEntityIds(spec.getListVariable()));
-    // String xVarTypes = toCommaSeparated(getListVarType(spec.getListVariable()));
-    // String xVarShapes = toCommaSeparated(getListVarShape(spec.getListVariable()));
+    // Proposed solution for listvars, using x var as example (see toCommaSepString in AbstractPlugin.java)
+    // String xVars = toCommaSepString(toColsNamesOrEmpty(sepc.getListVariable()));
+    // String xVarEntities = toCommaSepString(getListVarEntityIds(spec.getListVariable()));
+    // String xVarTypes = toCommaSepString(getListVarType(spec.getListVariable()));
+    // String xVarShapes = toCommaSepString(getListVarShape(spec.getListVariable()));
     // String[] xVarPlotRefs = new boolean[5];
     // Arrays.fill(array, "xAxisVariable");
-    // String xVarPlotRef = toCommaSeparated(xVarPlotRefs);
+    // String xVarPlotRef = toCommaSepString(xVarPlotRefs);
 
     // repeat above for all variables.
 
