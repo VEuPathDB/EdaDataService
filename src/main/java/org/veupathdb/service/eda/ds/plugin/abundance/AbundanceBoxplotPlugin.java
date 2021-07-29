@@ -30,7 +30,7 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
 
   @Override
   public String getDescription() {
-    return "Visualize summary values for OTU abundance";
+    return "Visualize summary values for abundance data";
   }
 
   @Override

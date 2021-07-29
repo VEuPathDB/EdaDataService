@@ -250,11 +250,11 @@ securitySchemes:
                     type: error.ServerError
 
   /abundance/visualizations:
-      displayName: Visualizations for assessing the abundance of OTUs in a collection of samples.
+      displayName: Visualizations for assessing abundance data in a collection of samples.
 
       /boxplot:
         post:
-          description: Returns data required to create a box plot with abundance of OTUs as dependent axis <br> Java impl- NA <br> R impl- NA
+          description: Returns data required to create a box plot with abundance as dependent axis <br> Java impl- NA <br> R impl- NA
           body:
             application/json:
               type: lib.AbundanceBoxplotPostRequest

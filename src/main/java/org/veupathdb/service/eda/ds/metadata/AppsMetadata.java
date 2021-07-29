@@ -51,7 +51,7 @@ public class AppsMetadata {
               viz("boxplot", new AlphaDivBoxplotPlugin()),
               viz("scatterplot", new AlphaDivScatterplotPlugin())),
       app("abundance", "Relative Abundance",
-              "A collection of visualizations designed to support the unbiased exploration of relationships between variables and OTU abundance.",
+              "A collection of visualizations designed to support the unbiased exploration of relationships between variables and abundance data.",
               Arrays.asList("MicrobiomeDB"),
               viz("boxplot", new AbundanceBoxplotPlugin()),
               viz("scatterplot", new AbundanceScatterplotPlugin())),
