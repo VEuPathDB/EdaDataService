@@ -87,7 +87,7 @@ public class AlphaDivBoxplotPlugin extends AbstractPlugin<AlphaDivBoxplotPostReq
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    BoxplotSpec spec = getPluginSpec();
+    AlphaDivBoxplotSpec spec = getPluginSpec();
     String xVar = toColNameOrEmpty(spec.getXAxisVariable());
     String yVar = "Alpha diversity";
     String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());

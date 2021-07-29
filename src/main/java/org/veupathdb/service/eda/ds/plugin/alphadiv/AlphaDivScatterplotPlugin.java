@@ -96,7 +96,7 @@ public class AlphaDivScatterplotPlugin extends AbstractPlugin<AlphaDivScatterplo
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    ScatterplotSpec spec = getPluginSpec();
+    AlphaDivScatterplotSpec spec = getPluginSpec();
     String xVar = toColNameOrEmpty(spec.getXAxisVariable());
     String yVar = "Alpha Diversity";
     String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());

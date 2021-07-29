@@ -97,7 +97,7 @@ public class AbundanceScatterplotPlugin extends AbstractPlugin<AbundanceScatterp
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    ScatterplotSpec spec = getPluginSpec();
+    AbundanceScatterplotSpec spec = getPluginSpec();
     String xVar = toColNameOrEmpty(spec.getXAxisVariable());
     String yVar = "Abundance";
     String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());

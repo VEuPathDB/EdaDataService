@@ -92,7 +92,7 @@ public class BetaDivScatterplotPlugin extends AbstractPlugin<BetaDivScatterplotP
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    ScatterplotSpec spec = getPluginSpec();
+    BetaDivScatterplotSpec spec = getPluginSpec();
     String xVar = "Axis 1"; // Will need different solution later. For now hard coding.
     String yVar = "Axis 2";  // Will need different solution later. For now hard coding.
     String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());

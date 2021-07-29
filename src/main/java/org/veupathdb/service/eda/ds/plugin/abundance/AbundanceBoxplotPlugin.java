@@ -93,6 +93,11 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
     String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());
     String facetVar1 = toColNameOrEmpty(spec.getFacetVariable(), 0);
     String facetVar2 = toColNameOrEmpty(spec.getFacetVariable(), 1);
+    // String xVarDisplayName = getVariableDisplayName(spec.getXAxisVariable());
+    // String yVarDisplayName = getVariableDisplayName(spec.getYAxisVariable());
+    // String overlayVarDisplayName = getVariableDisplayName(spec.getOverlayVariable());
+    // String facet1VarDisplayName = getVariableDisplayName(spec.getFacetVariable(), 0);
+    // String facet2VarDisplayName = getVariableDisplayName(spec.getFacetVariable(), 1);
     String xVarType = getVariableType(spec.getXAxisVariable());
     String yVarType = "NUMBER";
     String overlayType = getVariableType(spec.getOverlayVariable());
@@ -109,7 +114,7 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
 
     // Proposed solution for listvars, using x var as example (see toCommaSepString in AbstractPlugin.java)
     // String xVars = toCommaSepString(toColsNamesOrEmpty(sepc.getListVariable()));
-    // String xVarEntities = toCommaSepString(getListVarEntityIds(spec.getListVariable()));
+    // String xVarDisplayNames = toCommaSepString(getVariableDisplayName(spec.getXAxisVariable()));
     // String xVarTypes = toCommaSepString(getListVarType(spec.getListVariable()));
     // String xVarShapes = toCommaSepString(getListVarShape(spec.getListVariable()));
     // String[] xVarPlotRefs = new boolean[5];
@@ -131,7 +136,11 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
               + ", '" + yVar + "'"
               + ", '" + overlayVar + "'"
               + ", '" + facetVar1 + "'"
-              + ", '" + facetVar2 + "'), "
+//              + "'displayName'=c('" + xVarDisplayName + "'"
+//              + ", '" + yVarDisplayName + "'"
+//              + ", '" + overlayVarDisplayName + "'"
+//              + ", '" + facetVar1DisplayName + "'"
+//              + ", '" + facetVar2DisplayName + "'), "
               + "'dataType'=c('" + xVarType + "'"
               + ", '" + yVarType + "'"
               + ", '" + overlayType + "'"
