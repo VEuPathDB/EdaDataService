@@ -7,15 +7,21 @@ types:
     type: VisualizationRequestBase
     properties:
       config: BarplotSpec
-
+  
   BarplotSpec:
     additionalProperties: false
     properties:
       outputEntityId:
         type: string
-      valueSpec:
+      showMissingness:
         type: string
-        enum: ['count', 'proportion']      
+        enum: ['TRUE', 'FALSE']
+        required: false
+      barMode:
+        type: string
+        enum: ['group', 'stack']
+      valueSpec:
+        type: ValueSpec
       xAxisVariable: 
         type: VariableSpec
       overlayVariable: 

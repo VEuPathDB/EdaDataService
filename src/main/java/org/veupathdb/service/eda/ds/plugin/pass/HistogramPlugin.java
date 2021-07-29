@@ -6,6 +6,8 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.IoUtil;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationBundle;
@@ -29,6 +31,8 @@ import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
 public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, HistogramSpec> {
+  
+  private static final Logger LOG = LogManager.getLogger(HistogramPlugin.class);
 
   @Override
   public String getDisplayName() {
@@ -79,6 +83,9 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
       .var("xAxisVariable", pluginSpec.getXAxisVariable())
       .var("overlayVariable", pluginSpec.getOverlayVariable())
       .var("facetVariable", pluginSpec.getFacetVariable()));
+    if (pluginSpec.getBarMode() == null) {
+      throw new ValidationException("Property 'barMode' is required.");
+    }
   }
 
   @Override
@@ -97,10 +104,6 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
     String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());
     String facetVar1 = toColNameOrEmpty(spec.getFacetVariable(), 0);
     String facetVar2 = toColNameOrEmpty(spec.getFacetVariable(), 1);
-    String xVarEntity = getVariableEntityId(spec.getXAxisVariable());
-    String overlayEntity = getVariableEntityId(spec.getOverlayVariable());
-    String facetEntity1 = getVariableEntityId(spec.getFacetVariable(), 0);
-    String facetEntity2 = getVariableEntityId(spec.getFacetVariable(), 1);
     String xVarType = getVariableType(spec.getXAxisVariable());
     String overlayType = getVariableType(spec.getOverlayVariable());
     String facetType1 = getVariableType(spec.getFacetVariable(), 0);
@@ -109,6 +112,8 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
     String overlayShape = getVariableDataShape(spec.getOverlayVariable());
     String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
     String facetShape2 = getVariableDataShape(spec.getFacetVariable(), 1);
+    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
+    String barMode = spec.getBarMode().getValue();
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
@@ -121,10 +126,6 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
             + ", '" + overlayVar + "'"
             + ", '" + facetVar1 + "'"
             + ", '" + facetVar2 + "'), "
-            + "'entityId'=c('" + xVarEntity + "'"
-            + ", '" + overlayEntity + "'"
-            + ", '" + facetEntity1 + "'"
-            + ", '" + facetEntity2 + "'), "
             + "'dataType'=c('" + xVarType + "'"
             + ", '" + overlayType + "'"
             + ", '" + facetType1 + "'"
@@ -167,13 +168,20 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
         String binWidth = "NULL";
         if (xVarType.equals("NUMBER")) {
           binWidth = binSpec.getValue() == null ? "NULL" : "as.numeric('" + binSpec.getValue() + "')";
+          if (binSpec.getUnits() != null) {
+            LOG.warn("The `units` property of the `BinSpec` class is only used for DATE x-axis variables. It will be ignored.");
+          }
         } else {
           binWidth = binSpec.getValue() == null ? "NULL" : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
         }
         connection.voidEval("binWidth <- " + binWidth);
       }
       
-      String outFile = connection.eval("plot.data::histogram(data, map, binWidth, '" + spec.getValueSpec().toString().toLowerCase() + "', '" + binReportValue + "', viewport)").asString();
+      String outFile = connection.eval("plot.data::histogram(data, map, binWidth, '" + 
+                                                             spec.getValueSpec().getValue() + "', '" + 
+                                                             binReportValue + "', '" + 
+                                                             barMode + "', viewport, " +
+                                                             showMissingness + ")").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
       }

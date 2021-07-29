@@ -351,6 +351,12 @@ securitySchemes:
           application/json:
             type: lib.StudiesGetResponse
 
+  /clear-metadata-cache:
+    displayName: Clears the metadata cache; useful if new data has been loaded into the database
+    get:
+      responses:
+        202:
+
   /{study-id}:
     uriParameters:
       study-id:

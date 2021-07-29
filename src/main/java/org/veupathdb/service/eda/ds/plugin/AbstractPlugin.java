@@ -17,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.Timer;
 import org.gusdb.fgputil.client.ResponseFuture;
 import org.gusdb.fgputil.functional.FunctionalInterfaces.ConsumerWithException;
+import org.gusdb.fgputil.functional.Functions;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.EdaMergingClient;
 import org.veupathdb.service.eda.common.client.EdaSubsettingClient;
@@ -28,6 +29,7 @@ import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.ds.constraints.DataElementSet;
 import org.veupathdb.service.eda.ds.constraints.DataElementValidator;
+import org.veupathdb.service.eda.ds.util.NonEmptyResultStream;
 import org.veupathdb.service.eda.generated.model.APIFilter;
 import org.veupathdb.service.eda.generated.model.APIStudyDetail;
 import org.veupathdb.service.eda.generated.model.DerivedVariable;
@@ -126,7 +128,10 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
         .getTabularDataStream(_referenceMetadata, _subset, spec);
 
     // create stream processor
-    ConsumerWithException<Map<String,InputStream>> streamProcessor = map -> writeResults(out, map);
+    // TODO: might make disallowing empty results optional in the future; this is the original implementation
+    //ConsumerWithException<Map<String,InputStream>> streamProcessor = map -> writeResults(out, map);
+    ConsumerWithException<Map<String,InputStream>> streamProcessor = map -> writeResults(out,
+        Functions.mapValues(map, entry -> new NonEmptyResultStream(entry.getKey(), entry.getValue())));
 
     // build and process streams
     logRequestTime("Making requests for data streams");

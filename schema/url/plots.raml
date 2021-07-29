@@ -63,6 +63,8 @@ types:
       mean:
         type: number[]
         required: false
+      label:
+        type: string[]
         
   BoxplotStat:
     additionalProperties: false
@@ -151,6 +153,10 @@ types:
     properties:
       outputEntityId:
         type: string
+      showMissingness:
+        type: string
+        enum: ['TRUE', 'FALSE']
+        required: false
       xAxisVariable: 
         type: VariableSpec
       yAxisVariable: 
@@ -267,11 +273,12 @@ types:
       seriesX:
         type: string[]
         minItems: 1
-        
+
   PlotConfig:
     additionalProperties: false
     properties:
       completeCases: number
+      plottedIncompleteCases: number
       
   SampleSizeTable:
     additionalProperties: false

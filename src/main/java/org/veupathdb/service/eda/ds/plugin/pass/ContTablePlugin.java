@@ -36,7 +36,7 @@ public class ContTablePlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpe
 
   @Override
   public String getDescription() {
-    return "Visualize the frequency distribution and chi sq test results for two categorical variables";
+    return "Visualize the frequency distribution and chi-squared test results for two categorical variables";
   }
 
   @Override
@@ -97,10 +97,6 @@ public class ContTablePlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpe
     String yVar = toColNameOrEmpty(spec.getYAxisVariable());
     String facetVar1 = toColNameOrEmpty(spec.getFacetVariable(), 0);
     String facetVar2 = toColNameOrEmpty(spec.getFacetVariable(), 1);
-    String xVarEntity = getVariableEntityId(spec.getXAxisVariable());
-    String yVarEntity = getVariableEntityId(spec.getYAxisVariable());
-    String facetEntity1 = getVariableEntityId(spec.getFacetVariable(), 0);
-    String facetEntity2 = getVariableEntityId(spec.getFacetVariable(), 1);
     String xVarType = getVariableType(spec.getXAxisVariable());
     String yVarType = getVariableType(spec.getYAxisVariable());
     String facetType1 = getVariableType(spec.getFacetVariable(), 0);
@@ -109,6 +105,7 @@ public class ContTablePlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpe
     String yVarShape = getVariableDataShape(spec.getYAxisVariable());
     String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
     String facetShape2 = getVariableDataShape(spec.getFacetVariable(), 1);
+    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
@@ -121,10 +118,6 @@ public class ContTablePlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpe
           + ", '" + yVar  + "'"
           + ", '" + facetVar1 + "'"
           + ", '" + facetVar2 + "'), "
-          + "'entityId'=c('" + xVarEntity + "'"
-          + ", '" + yVarEntity + "'"
-          + ", '" + facetEntity1 + "'"
-          + ", '" + facetEntity2 + "'), "
           + "'dataType'=c('" + xVarType + "'"
           + ", '" + yVarType + "'"
           + ", '" + facetType1 + "'"
@@ -133,7 +126,7 @@ public class ContTablePlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpe
           + ", '" + yVarShape + "'"
           + ", '" + facetShape1 + "'"
           + ", '" + facetShape2 + "'), stringsAsFactors=FALSE)");
-      String outFile = connection.eval("plot.data::mosaic(data, map)").asString();
+      String outFile = connection.eval("plot.data::mosaic(data, map, NULL, " + showMissingness + ")").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
       }

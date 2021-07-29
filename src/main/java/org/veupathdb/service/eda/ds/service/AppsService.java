@@ -2,11 +2,12 @@ package org.veupathdb.service.eda.ds.service;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ServerErrorException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.ValidationException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.functional.FunctionalInterfaces;
+import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.lib.container.jaxrs.server.annotations.DisableJackson;
 import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivBoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivScatterplotPlugin;
@@ -28,6 +29,8 @@ import org.veupathdb.service.eda.generated.model.AlphaDivBoxplotPostRequest;
 import org.veupathdb.service.eda.generated.model.AlphaDivBoxplotPostResponseStream;
 import org.veupathdb.service.eda.generated.model.AlphaDivScatterplotPostRequest;
 import org.veupathdb.service.eda.generated.model.AlphaDivScatterplotResponseStream;
+import org.veupathdb.service.eda.ds.util.NonEmptyResultStream;
+import org.veupathdb.service.eda.ds.util.NonEmptyResultStream.EmptyResultException;
 import org.veupathdb.service.eda.generated.model.BarplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BarplotPostResponseStream;
 import org.veupathdb.service.eda.generated.model.BoxplotPostRequest;
@@ -70,6 +73,9 @@ public class AppsService implements Apps {
     }
     catch (ValidationException e) {
       throw new BadRequestException(e.getMessage());
+    }
+    catch (EmptyResultException e) {
+      throw new WebApplicationException(e.getMessage(), 204);
     }
     catch (Exception e) {
       LOG.error("Could not execute app.", e);

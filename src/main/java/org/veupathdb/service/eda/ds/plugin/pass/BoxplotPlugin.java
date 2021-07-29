@@ -55,6 +55,7 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
       .pattern()
         .element("yAxisVariable")
           .types(APIVariableType.NUMBER)
+          .shapes(APIVariableDataShape.CONTINUOUS)
         .element("xAxisVariable")
           .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
           .maxValues(10)
@@ -96,11 +97,6 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
     String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());
     String facetVar1 = toColNameOrEmpty(spec.getFacetVariable(), 0);
     String facetVar2 = toColNameOrEmpty(spec.getFacetVariable(), 1);
-    String xVarEntity = getVariableEntityId(spec.getXAxisVariable());
-    String yVarEntity = getVariableEntityId(spec.getYAxisVariable());
-    String overlayEntity = getVariableEntityId(spec.getOverlayVariable());
-    String facetEntity1 = getVariableEntityId(spec.getFacetVariable(), 0);
-    String facetEntity2 = getVariableEntityId(spec.getFacetVariable(), 1);
     String xVarType = getVariableType(spec.getXAxisVariable());
     String yVarType = getVariableType(spec.getYAxisVariable());
     String overlayType = getVariableType(spec.getOverlayVariable());
@@ -111,7 +107,10 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
     String overlayShape = getVariableDataShape(spec.getOverlayVariable());
     String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
     String facetShape2 = getVariableDataShape(spec.getFacetVariable(), 1);
-  
+    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
+    String computeStats = spec.getComputeStats() != null ? spec.getComputeStats().getValue() : "FALSE";
+    String showMean = spec.getMean() != null ? spec.getMean().getValue() : "FALSE";
+    
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
       connection.voidEval("map <- data.frame("
@@ -125,11 +124,6 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
           + ", '" + overlayVar + "'"
           + ", '" + facetVar1 + "'"
           + ", '" + facetVar2 + "'), "
-          + "'entityId'=c('" + xVarEntity + "'"
-          + ", '" + yVarEntity + "'"
-          + ", '" + overlayEntity + "'"
-          + ", '" + facetEntity1 + "'"
-          + ", '" + facetEntity2 + "'), "
           + "'dataType'=c('" + xVarType + "'"
           + ", '" + yVarType + "'"
           + ", '" + overlayType + "'"
@@ -140,9 +134,17 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
           + ", '" + overlayShape + "'"
           + ", '" + facetShape1 + "'"
           + ", '" + facetShape2 + "'), stringsAsFactors=FALSE)");
+      connection.voidEval("head(data)");
+      System.err.println("plot.data::box(data, map, '" +
+          spec.getPoints().getValue() + "', " +
+          showMean + ", " + 
+          computeStats + ", " + 
+          showMissingness + ")");
       String outFile = connection.eval("plot.data::box(data, map, '" +
-          spec.getPoints().toString().toLowerCase() + "', '" +
-          spec.getMean().toString().toUpperCase() + "')").asString();
+          spec.getPoints().getValue() + "', " +
+          showMean + ", " + 
+          computeStats + ", " + 
+          showMissingness + ")").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
       }

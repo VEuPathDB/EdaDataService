@@ -35,7 +35,7 @@ public class DensityplotPlugin extends AbstractPlugin<DensityplotPostRequest, De
 
   @Override
   public String getDescription() {
-    return "Visualize kernel density estimates for a continuous variable";
+    return "Visualize the smoothed distribution (using a kernel density estimate) of a continuous variable";
   }
   
   @Override
@@ -96,10 +96,6 @@ public class DensityplotPlugin extends AbstractPlugin<DensityplotPostRequest, De
     String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());
     String facetVar1 = toColNameOrEmpty(spec.getFacetVariable(), 0);
     String facetVar2 = toColNameOrEmpty(spec.getFacetVariable(), 1);
-    String xVarEntity = getVariableEntityId(spec.getXAxisVariable());
-    String overlayEntity = getVariableEntityId(spec.getOverlayVariable());
-    String facetEntity1 = getVariableEntityId(spec.getFacetVariable(), 0);
-    String facetEntity2 = getVariableEntityId(spec.getFacetVariable(), 1);
     String xVarType = getVariableType(spec.getXAxisVariable());
     String overlayType = getVariableType(spec.getOverlayVariable());
     String facetType1 = getVariableType(spec.getFacetVariable(), 0);
@@ -108,6 +104,7 @@ public class DensityplotPlugin extends AbstractPlugin<DensityplotPostRequest, De
     String overlayShape = getVariableDataShape(spec.getOverlayVariable());
     String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
     String facetShape2 = getVariableDataShape(spec.getFacetVariable(), 1);
+    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
@@ -121,10 +118,6 @@ public class DensityplotPlugin extends AbstractPlugin<DensityplotPostRequest, De
             + ", '" + overlayVar + "'"
             + ", '" + facetVar1 + "'"
             + ", '" + facetVar2 + "'), "
-            + "'entityId'=c('" + xVarEntity + "'"
-            + ", '" + overlayEntity + "'"
-            + ", '" + facetEntity1 + "'"
-            + ", '" + facetEntity2 + "'), "
             + "'dataType'=c('" + xVarType + "'"
             + ", '" + overlayType + "'"
             + ", '" + facetType1 + "'"
@@ -133,7 +126,7 @@ public class DensityplotPlugin extends AbstractPlugin<DensityplotPostRequest, De
             + ", '" + overlayShape + "'"
             + ", '" + facetShape1 + "'"
             + ", '" + facetShape2 + "'), stringsAsFactors=FALSE)");
-      String outFile = connection.eval("plot.data::scattergl(data, map, 'density')").asString();
+      String outFile = connection.eval("plot.data::scattergl(data, map, 'density'," + showMissingness + ")").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
       }
