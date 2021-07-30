@@ -100,47 +100,28 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     HistogramSpec spec = getPluginSpec(); 
-    String xVar = toColNameOrEmpty(spec.getXAxisVariable());
-    String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());
-    String facetVar1 = toColNameOrEmpty(spec.getFacetVariable(), 0);
-    String facetVar2 = toColNameOrEmpty(spec.getFacetVariable(), 1);
-    String xVarType = getVariableType(spec.getXAxisVariable());
-    String overlayType = getVariableType(spec.getOverlayVariable());
-    String facetType1 = getVariableType(spec.getFacetVariable(), 0);
-    String facetType2 = getVariableType(spec.getFacetVariable(), 1);
-    String xVarShape = getVariableDataShape(spec.getXAxisVariable());
-    String overlayShape = getVariableDataShape(spec.getOverlayVariable());
-    String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
-    String facetShape2 = getVariableDataShape(spec.getFacetVariable(), 1);
+    Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
+    varMap.put("xAxisVariable", spec.getXAxisVariable());
+    varMap.put("overlayVariable", spec.getOverlayVariable());
+    varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
+    varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
-    String barmode = spec.getBarMode().getValue();
+    String barMode = spec.getBarMode().getValue();
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
-      connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
-      connection.voidEval("map <- data.frame("
-            + "'plotRef'=c('xAxisVariable', "
-            + "       'overlayVariable', "
-            + "       'facetVariable1', "
-            + "       'facetVariable2'), "
-            + "'id'=c('" + xVar + "'"
-            + ", '" + overlayVar + "'"
-            + ", '" + facetVar1 + "'"
-            + ", '" + facetVar2 + "'), "
-            + "'dataType'=c('" + xVarType + "'"
-            + ", '" + overlayType + "'"
-            + ", '" + facetType1 + "'"
-            + ", '" + facetType2 + "'), "
-            + "'dataShape'=c('" + xVarShape + "'"
-            + ", '" + overlayShape + "'"
-            + ", '" + facetShape1 + "'"
-            + ", '" + facetShape2 + "'), stringsAsFactors=FALSE)");
+      connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
+          spec.getXAxisVariable(),
+          spec.getOverlayVariable(),
+          getVariableSpecFromList(spec.getFacetVariable(), 0),
+          getVariableSpecFromList(spec.getFacetVariable(), 1)));
+      connection.voidEval(getVoidEvalVarMetadataMap(varMap));
       
       if (spec.getViewport() != null) {
         // think if we just pass the string plot.data will convert it to the claimed type
         if (xVarType.equals("NUMBER")) {
           connection.voidEval("viewport <- list('xMin'=" + spec.getViewport().getXMin() + ", 'xMax'=" + spec.getViewport().getXMax() + ")");
         } else {
-          connection.voidEval("viewport <- list('xMin'='" + spec.getViewport().getXMin() + "', 'xMax'='" + spec.getViewport().getXMax() + "')");
+          connection.voidEval("viewport <- list('xMin'=" + singleQuote(spec.getViewport().getXMin()) + ", 'xMax'=" + singleQuote(spec.getViewport().getXMax()) + ")");
         }
       } else {
         connection.voidEval("viewport <- NULL");
@@ -180,7 +161,7 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
       String outFile = connection.eval("plot.data::histogram(data, map, binWidth, '" + 
                                                              spec.getValueSpec().getValue() + "', '" + 
                                                              binReportValue + "', '" + 
-                                                             barmode + "', viewport, " +
+                                                             barMode + "', viewport, " +
                                                              showMissingness + ")").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);

@@ -101,18 +101,21 @@ public class HeatmapPlugin extends AbstractPlugin<HeatmapPostRequest, HeatmapSpe
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       HeatmapSpec spec = getPluginSpec();
-      connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "')");
-      connection.voidEval("map <- data.frame("
-          + "'plotRef'=c('xAxisVariable', "
-          + "       'yAxisVariable', "
-          + "       'zAxisVariable', "
-          + "       'facetVariable1', "
-          + "       'facetVariable2'), "
-          + "'id'=c('" + toColNameOrEmpty(spec.getXAxisVariable()) + "'"
-          + ", '" + toColNameOrEmpty(spec.getYAxisVariable()) + "'"
-          + ", '" + toColNameOrEmpty(spec.getZAxisVariable()) + "'"
-          + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(0)) + "'"
-          + ", '" + toColNameOrEmpty(spec.getFacetVariable().get(1)) + "'), stringsAsFactors=FALSE)");
+      Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
+      varMap.put("xAxisVariable", spec.getXAxisVariable());
+      varMap.put("yAxisVariable", spec.getYAxisVariable());
+      varMap.put("zAxisVariable", spec.getZAxisVariable());
+      varMap.put("overlayVariable", spec.getOverlayVariable());
+      varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
+      varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
+      connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
+          spec.getXAxisVariable(),
+          spec.getYAxisVariable(),
+          spec.getZAxisVariable(),
+          spec.getOverlayVariable(),
+          getVariableSpecFromList(spec.getFacetVariable(), 0),
+          getVariableSpecFromList(spec.getFacetVariable(), 1)));
+      connection.voidEval(getVoidEvalVarMetadataMap(varMap));
       String outFile = connection.eval("plot.data::heatmap(data, map, '" + spec.getValueSpec().toString().toLowerCase() + "')").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);

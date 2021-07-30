@@ -96,21 +96,12 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     ScatterplotSpec spec = getPluginSpec();
-    String xVar = toColNameOrEmpty(spec.getXAxisVariable());
-    String yVar = toColNameOrEmpty(spec.getYAxisVariable());
-    String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());
-    String facetVar1 = toColNameOrEmpty(spec.getFacetVariable(), 0);
-    String facetVar2 = toColNameOrEmpty(spec.getFacetVariable(), 1);
-    String xVarType = getVariableType(spec.getXAxisVariable());
-    String yVarType = getVariableType(spec.getYAxisVariable());
-    String overlayType = getVariableType(spec.getOverlayVariable());
-    String facetType1 = getVariableType(spec.getFacetVariable(), 0);
-    String facetType2 = getVariableType(spec.getFacetVariable(), 1);
-    String xVarShape = getVariableDataShape(spec.getXAxisVariable());
-    String yVarShape = getVariableDataShape(spec.getYAxisVariable());
-    String overlayShape = getVariableDataShape(spec.getOverlayVariable());
-    String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
-    String facetShape2 = getVariableDataShape(spec.getFacetVariable(), 1);
+    Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
+    varMap.put("xAxisVariable", spec.getXAxisVariable());
+    varMap.put("yAxisVariable", spec.getYAxisVariable());
+    varMap.put("overlayVariable", spec.getOverlayVariable());
+    varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
+    varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
     String valueSpec = spec.getValueSpec().getValue();
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
       
@@ -119,28 +110,13 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
     }
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
-      connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
-      connection.voidEval("map <- data.frame("
-            + "'plotRef'=c('xAxisVariable', "
-            + "       'yAxisVariable', "
-            + "       'overlayVariable', "
-            + "       'facetVariable1', "
-            + "       'facetVariable2'), "
-            + "'id'=c('" + xVar + "'"
-            + ", '" + yVar + "'"
-            + ", '" + overlayVar + "'"
-            + ", '" + facetVar1 + "'"
-            + ", '" + facetVar2 + "'), "
-            + "'dataType'=c('" + xVarType + "'"
-            + ", '" + yVarType + "'"
-            + ", '" + overlayType + "'"
-            + ", '" + facetType1 + "'"
-            + ", '" + facetType2 + "'), "
-            + "'dataShape'=c('" + xVarShape + "'"
-            + ", '" + yVarShape + "'"
-            + ", '" + overlayShape + "'"
-            + ", '" + facetShape1 + "'"
-            + ", '" + facetShape2 + "'), stringsAsFactors=FALSE)");
+      connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
+          spec.getXAxisVariable(),
+          spec.getYAxisVariable(),
+          spec.getOverlayVariable(),
+          getVariableSpecFromList(spec.getFacetVariable(), 0),
+          getVariableSpecFromList(spec.getFacetVariable(), 1)));
+      connection.voidEval(getVoidEvalVarMetadataMap(varMap));
       String outFile = connection.eval("plot.data::scattergl(data, map, '" + valueSpec + "', " + showMissingness + ")").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
