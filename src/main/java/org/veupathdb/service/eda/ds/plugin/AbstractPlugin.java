@@ -249,14 +249,14 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
         
     String freadCommand = "data <- fread(" + singleQuote(fileName) + 
                                          ", select=c(" + namedTypes + ")" +
-                                         ", na.strings=c(''))");
+                                         ", na.strings=c(''))";
     
     return freadCommand;
   }
   
   protected String getVoidEvalVarMetadataMap(Map<String, VariableSpec> vars) {
     boolean first = true;
-    String plotRefVecotr = new String();
+    String plotRefVector = new String();
     String varColNameVector = new String();
     String varTypeVector = new String();
     String varShapeVector = new String();

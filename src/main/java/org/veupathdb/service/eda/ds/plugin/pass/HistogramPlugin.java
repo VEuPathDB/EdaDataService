@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -107,6 +108,8 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
     varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
     String barMode = spec.getBarMode().getValue();
+    String xVar = toColNameOrEmpty(spec.getXAxisVariable());
+    String xVarType = getVariableType(spec.getXAxisVariable());
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 

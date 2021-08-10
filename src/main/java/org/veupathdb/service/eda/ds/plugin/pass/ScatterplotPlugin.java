@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import org.apache.logging.log4j.LogManager;
@@ -22,6 +23,7 @@ import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
 import org.veupathdb.service.eda.generated.model.ScatterplotPostRequest;
 import org.veupathdb.service.eda.generated.model.ScatterplotSpec;
+import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
@@ -104,7 +106,8 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
     varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
     String valueSpec = spec.getValueSpec().getValue();
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
-      
+    String yVarType = getVariableType(spec.getYAxisVariable());
+    
     if (yVarType.equals("DATE") && !valueSpec.equals("raw")) {
       LOG.error("Cannot calculate trend lines for y-axis date variables. The `valueSpec` property must be set to `raw`.");
     }

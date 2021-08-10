@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import org.gusdb.fgputil.IoUtil;
 import org.gusdb.fgputil.ListBuilder;
@@ -18,6 +19,7 @@ import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.BoxplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BoxplotSpec;
+import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 

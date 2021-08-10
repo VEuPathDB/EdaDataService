@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import org.gusdb.fgputil.IoUtil;
 import org.gusdb.fgputil.ListBuilder;
@@ -93,7 +94,6 @@ public class TwoByTwoPlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpec
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
     varMap.put("xAxisVariable", spec.getXAxisVariable());
     varMap.put("yAxisVariable", spec.getYAxisVariable());
-    varMap.put("overlayVariable", spec.getOverlayVariable());
     varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
     varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";

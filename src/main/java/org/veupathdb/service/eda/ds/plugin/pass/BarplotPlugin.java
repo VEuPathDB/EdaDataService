@@ -22,6 +22,7 @@ import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
 import org.veupathdb.service.eda.generated.model.BarplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BarplotSpec;
+import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
@@ -171,7 +172,7 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
     }
     else {
       String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
-      String barmode = spec.getBarmode().getValue();
+      String barMode = spec.getBarMode().getValue();
       Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
       varMap.put("xAxisVariable", spec.getXAxisVariable());
       varMap.put("overlayVariable", spec.getOverlayVariable());

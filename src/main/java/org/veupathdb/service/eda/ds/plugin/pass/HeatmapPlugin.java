@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import org.gusdb.fgputil.IoUtil;
 import org.gusdb.fgputil.ListBuilder;
@@ -105,14 +106,12 @@ public class HeatmapPlugin extends AbstractPlugin<HeatmapPostRequest, HeatmapSpe
       varMap.put("xAxisVariable", spec.getXAxisVariable());
       varMap.put("yAxisVariable", spec.getYAxisVariable());
       varMap.put("zAxisVariable", spec.getZAxisVariable());
-      varMap.put("overlayVariable", spec.getOverlayVariable());
       varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
       varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
           spec.getXAxisVariable(),
           spec.getYAxisVariable(),
           spec.getZAxisVariable(),
-          spec.getOverlayVariable(),
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
       connection.voidEval(getVoidEvalVarMetadataMap(varMap));
