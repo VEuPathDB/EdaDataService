@@ -110,6 +110,16 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
     String barMode = spec.getBarMode().getValue();
     String xVar = toColNameOrEmpty(spec.getXAxisVariable());
     String xVarType = getVariableType(spec.getXAxisVariable());
+
+    String overlayType = getVariableType(spec.getOverlayVariable());
+    String facetType1 = getVariableType(spec.getFacetVariable(), 0);
+    String facetType2 = getVariableType(spec.getFacetVariable(), 1);
+    String xVarShape = getVariableDataShape(spec.getXAxisVariable());
+    String overlayShape = getVariableDataShape(spec.getOverlayVariable());
+    String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
+    String facetShape2 = getVariableDataShape(spec.getFacetVariable(), 1);
+    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
+    String barMode = spec.getBarMode().getValue();
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 

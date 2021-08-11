@@ -173,6 +173,7 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
     else {
       String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
       String barMode = spec.getBarMode().getValue();
+
       Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
       varMap.put("xAxisVariable", spec.getXAxisVariable());
       varMap.put("overlayVariable", spec.getOverlayVariable());
