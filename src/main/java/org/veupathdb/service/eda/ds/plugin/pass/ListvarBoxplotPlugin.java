@@ -16,12 +16,12 @@ import org.veupathdb.service.eda.ds.constraints.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
-import org.veupathdb.service.eda.generated.model.BoxplotPostRequest;
-import org.veupathdb.service.eda.generated.model.BoxplotSpec;
+import org.veupathdb.service.eda.generated.model.ListvarBoxplotPostRequest;
+import org.veupathdb.service.eda.generated.model.ListvarBoxplotSpec;
 
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpec> {
+public class ListvarBoxplotPlugin extends AbstractPlugin<ListvarBoxplotPostRequest, ListvarBoxplotSpec> {
 
   @Override
   public String getDisplayName() {
@@ -35,7 +35,7 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
 
   @Override
   public List<String> getProjects() {
-    return Arrays.asList("ClinEpiDB");
+    return Arrays.asList("MicrobiomeDB");
   }
   
   @Override
@@ -44,10 +44,11 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
   }
   
   @Override
-  protected Class<BoxplotSpec> getVisualizationSpecClass() {
-    return BoxplotSpec.class;
+  protected Class<ListvarBoxplotSpec> getVisualizationSpecClass() {
+    return ListvarBoxplotSpec.class;
   }
 
+  // may need to revisit constraints with listvars
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
@@ -70,7 +71,7 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
   }
   
   @Override
-  protected void validateVisualizationSpec(BoxplotSpec pluginSpec) throws ValidationException {
+  protected void validateVisualizationSpec(ListvarBoxplotSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
       .var("xAxisVariable", pluginSpec.getXAxisVariable())
@@ -80,7 +81,7 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(BoxplotSpec pluginSpec) {
+  protected List<StreamSpec> getRequestedStreams(ListvarBoxplotSpec pluginSpec) {
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
@@ -89,6 +90,7 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
         .addVars(pluginSpec.getFacetVariable()));
   }
 
+  // need to update when we decide how to handle listvars here
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     BoxplotSpec spec = getPluginSpec();

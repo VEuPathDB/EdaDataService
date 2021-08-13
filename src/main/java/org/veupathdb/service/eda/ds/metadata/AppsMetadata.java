@@ -16,6 +16,8 @@ import org.veupathdb.service.eda.ds.plugin.pass.DensityplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.HeatmapPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.HistogramPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.LineplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.pass.ListvarBoxplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.pass.ListvarScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.MapPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
@@ -31,6 +33,7 @@ import org.veupathdb.service.eda.generated.model.VisualizationOverviewImpl;
 public class AppsMetadata {
 
   // NOTE: these names must match the url segments defined in the api.raml
+  // Pass vizs are now different based on mbio vs clinepi so we need to adjust the below array?
   public static final AppsGetResponse APPS = apps(
       app("pass", "Pass-Through", 
           "A collection of visualizations designed to support the unbiased exploration of relationships between variables",

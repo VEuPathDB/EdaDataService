@@ -3,39 +3,45 @@ package org.veupathdb.service.eda.ds.plugin.pass;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.IoUtil;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
+import org.json.JSONObject;
 import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.ds.constraints.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
-import org.veupathdb.service.eda.generated.model.APIVariableType;
-import org.veupathdb.service.eda.generated.model.BoxplotPostRequest;
-import org.veupathdb.service.eda.generated.model.BoxplotSpec;
+import org.veupathdb.service.eda.generated.model.ListvarScatterplotPostRequest;
+import org.veupathdb.service.eda.generated.model.ListvarScatterplotSpec;
 
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpec> {
+public class ListvarScatterplotPlugin extends AbstractPlugin<ListvarScatterplotPostRequest, ListvarScatterplotSpec> {
 
+  private static final Logger LOG = LogManager.getLogger(ListvarScatterplotPlugin.class);
+  
   @Override
   public String getDisplayName() {
-    return "Box plot";
+    return "Scatter plot";
   }
 
   @Override
   public String getDescription() {
-    return "Visualize summary values for a continuous variable";
+    return "Visualize the relationship between two continuous variables";
   }
 
   @Override
   public List<String> getProjects() {
-    return Arrays.asList("ClinEpiDB");
+    return Arrays.asList("MicrobiomeDB");
   }
   
   @Override
@@ -44,8 +50,8 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
   }
   
   @Override
-  protected Class<BoxplotSpec> getVisualizationSpecClass() {
-    return BoxplotSpec.class;
+  protected Class<ListvarScatterplotSpec> getVisualizationSpecClass() {
+    return ListvarScatterplotSpec.class;
   }
 
   @Override
@@ -54,14 +60,12 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
       .dependencyOrder("yAxisVariable", "xAxisVariable", "overlayVariable", "facetVariable")
       .pattern()
         .element("yAxisVariable")
-          .types(APIVariableType.NUMBER)
           .shapes(APIVariableDataShape.CONTINUOUS)
         .element("xAxisVariable")
-          .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
-          .maxValues(10)
+          .shapes(APIVariableDataShape.CONTINUOUS)
         .element("overlayVariable")
           .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
-          .maxValues(8)  
+          .maxValues(8)
         .element("facetVariable")
           .required(false)
           .maxVars(2)
@@ -70,7 +74,7 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
   }
   
   @Override
-  protected void validateVisualizationSpec(BoxplotSpec pluginSpec) throws ValidationException {
+  protected void validateVisualizationSpec(ListvarScatterplotSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
       .var("xAxisVariable", pluginSpec.getXAxisVariable())
@@ -80,7 +84,7 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(BoxplotSpec pluginSpec) {
+  protected List<StreamSpec> getRequestedStreams(ListvarScatterplotSpec pluginSpec) {
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
@@ -89,9 +93,10 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
         .addVars(pluginSpec.getFacetVariable()));
   }
 
+  // Update with listvar handling strategy
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    BoxplotSpec spec = getPluginSpec();
+    ScatterplotSpec spec = getPluginSpec();
     String xVar = toColNameOrEmpty(spec.getXAxisVariable());
     String yVar = toColNameOrEmpty(spec.getYAxisVariable());
     String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());
@@ -107,48 +112,41 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
     String overlayShape = getVariableDataShape(spec.getOverlayVariable());
     String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
     String facetShape2 = getVariableDataShape(spec.getFacetVariable(), 1);
+    String valueSpec = spec.getValueSpec().getValue();
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
-    String computeStats = spec.getComputeStats() != null ? spec.getComputeStats().getValue() : "FALSE";
-    String showMean = spec.getMean() != null ? spec.getMean().getValue() : "FALSE";
+      
+    if (yVarType.equals("DATE") && !valueSpec.equals("raw")) {
+      LOG.error("Cannot calculate trend lines for y-axis date variables. The `valueSpec` property must be set to `raw`.");
+    }
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
       connection.voidEval("map <- data.frame("
-          + "'plotRef'=c('xAxisVariable', "
-          + "       'yAxisVariable', "
-          + "       'overlayVariable', "
-          + "       'facetVariable1', "
-          + "       'facetVariable2'), "
-          + "'id'=c('" + xVar + "'"
-          + ", '" + yVar + "'"
-          + ", '" + overlayVar + "'"
-          + ", '" + facetVar1 + "'"
-          + ", '" + facetVar2 + "'), "
-          + "'dataType'=c('" + xVarType + "'"
-          + ", '" + yVarType + "'"
-          + ", '" + overlayType + "'"
-          + ", '" + facetType1 + "'"
-          + ", '" + facetType2 + "'), "
-          + "'dataShape'=c('" + xVarShape + "'"
-          + ", '" + yVarShape + "'"
-          + ", '" + overlayShape + "'"
-          + ", '" + facetShape1 + "'"
-          + ", '" + facetShape2 + "'), stringsAsFactors=FALSE)");
-      connection.voidEval("head(data)");
-      System.err.println("plot.data::box(data, map, '" +
-          spec.getPoints().getValue() + "', " +
-          showMean + ", " + 
-          computeStats + ", " + 
-          showMissingness + ")");
-      String outFile = connection.eval("plot.data::box(data, map, '" +
-          spec.getPoints().getValue() + "', " +
-          showMean + ", " + 
-          computeStats + ", " + 
-          showMissingness + ")").asString();
+            + "'plotRef'=c('xAxisVariable', "
+            + "       'yAxisVariable', "
+            + "       'overlayVariable', "
+            + "       'facetVariable1', "
+            + "       'facetVariable2'), "
+            + "'id'=c('" + xVar + "'"
+            + ", '" + yVar + "'"
+            + ", '" + overlayVar + "'"
+            + ", '" + facetVar1 + "'"
+            + ", '" + facetVar2 + "'), "
+            + "'dataType'=c('" + xVarType + "'"
+            + ", '" + yVarType + "'"
+            + ", '" + overlayType + "'"
+            + ", '" + facetType1 + "'"
+            + ", '" + facetType2 + "'), "
+            + "'dataShape'=c('" + xVarShape + "'"
+            + ", '" + yVarShape + "'"
+            + ", '" + overlayShape + "'"
+            + ", '" + facetShape1 + "'"
+            + ", '" + facetShape2 + "'), stringsAsFactors=FALSE)");
+      String outFile = connection.eval("plot.data::scattergl(data, map, '" + valueSpec + "', " + showMissingness + ")").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
       }
       out.flush();
-    });
+    }); 
   }
 }

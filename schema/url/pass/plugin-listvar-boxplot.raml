@@ -3,13 +3,12 @@
 types:
   # Type name determines the name of the Java class that will be generated.
 
-  AbundanceBoxplotPostRequest:
+  ListvarBoxplotPostRequest:
     type: VisualizationRequestBase
     properties:
-      config: AbundanceBoxplotSpec
+      config: ListvarBoxplotSpec
 
-# Assuming abundance must be on y axis and that x axis is determined by compute service
-  AbundanceBoxplotSpec:
+  ListvarBoxplotSpec:
     additionalProperties: false
     properties:
       outputEntityId:
@@ -27,10 +26,17 @@ types:
       computeStats:
         type: string
         enum: ['TRUE', 'FALSE']
-      overlayVariable:
+      xAxisVariable: 
+        type: VariableSpec[]
+        maxItems: 10
+      yAxisVariable: 
         type: VariableSpec
         required: false
-      facetVariable:
+      overlayVariable: 
+        type: VariableSpec
+        required: false
+      facetVariable: 
         type: VariableSpec[]
         maxItems: 2
         required: false
+

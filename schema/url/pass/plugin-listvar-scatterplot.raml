@@ -3,13 +3,12 @@
 types:
   # Type name determines the name of the Java class that will be generated.
 
-  AbundanceBoxplotPostRequest:
+  ListvarScatterplotPostRequest:
     type: VisualizationRequestBase
     properties:
-      config: AbundanceBoxplotSpec
+      config: ListvarScatterplotSpec
 
-# Assuming abundance must be on y axis and that x axis is determined by compute service
-  AbundanceBoxplotSpec:
+  ListvarScatterplotSpec:
     additionalProperties: false
     properties:
       outputEntityId:
@@ -18,19 +17,18 @@ types:
         type: string
         enum: ['TRUE', 'FALSE']
         required: false
-      points:
+      valueSpec:
         type: string
-        enum: ['outliers', 'all']
-      mean:
-        type: string
-        enum: ['TRUE', 'FALSE']
-      computeStats:
-        type: string
-        enum: ['TRUE', 'FALSE']
-      overlayVariable:
+        enum: ['raw', 'smoothedMeanWithRaw', 'bestFitLineWithRaw']
+      xAxisVariable: 
         type: VariableSpec
+      yAxisVariable: 
+        type: VariableSpec
+      overlayVariable: 
+        type: VariableSpec[]
+        maxItems: 8
         required: false
-      facetVariable:
+      facetVariable: 
         type: VariableSpec[]
         maxItems: 2
         required: false

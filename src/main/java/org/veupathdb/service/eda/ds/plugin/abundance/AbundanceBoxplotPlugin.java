@@ -52,9 +52,9 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
       .pattern()
 //        .element("yAxisVariable") // Not needed because we won't have y-axis dropdown
 //          .types(APIVariableType.NUMBER)  // Can remove
-        .element("xAxisVariable")
-          .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
-          .maxValues(10)
+//        .element("xAxisVariable")
+//          .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
+//          .maxValues(10)
         .element("overlayVariable")
           .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
           .maxValues(8)  
@@ -69,7 +69,7 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
   protected void validateVisualizationSpec(BoxplotSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
             .entity(pluginSpec.getOutputEntityId())
-            .var("xAxisVariable", pluginSpec.getXAxisVariable())
+//            .var("xAxisVariable", pluginSpec.getXAxisVariable())
 //            .var("yAxisVariable", pluginSpec.getYAxisVariable())
             .var("overlayVariable", pluginSpec.getOverlayVariable())
             .var("facetVariable", pluginSpec.getFacetVariable()));
@@ -79,7 +79,7 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
   protected List<StreamSpec> getRequestedStreams(BoxplotSpec pluginSpec) {
     return ListBuilder.asList(
             new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
-                    .addVar(pluginSpec.getXAxisVariable())
+//                    .addVar(pluginSpec.getXAxisVariable())
 //                    .addVar(pluginSpec.getYAxisVariable())
                     .addVar(pluginSpec.getOverlayVariable())
                     .addVars(pluginSpec.getFacetVariable()));
@@ -88,22 +88,22 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     AbundanceBoxplotSpec spec = getPluginSpec();
-    String xVar = toColNameOrEmpty(spec.getXAxisVariable());
+    String xVar = toColNameOrEmpty(spec.getXAxisVariable());  // Needs to come from compute service
     String yVar = "Abundance";
     String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());
     String facetVar1 = toColNameOrEmpty(spec.getFacetVariable(), 0);
     String facetVar2 = toColNameOrEmpty(spec.getFacetVariable(), 1);
-    // String xVarDisplayName = getVariableDisplayName(spec.getXAxisVariable());
-    // String yVarDisplayName = getVariableDisplayName(spec.getYAxisVariable());
+    // String xVarDisplayName = getVariableDisplayName(spec.getXAxisVariable());  // From compute service
+    // String yVarDisplayName = getVariableDisplayName(spec.getYAxisVariable());  // From compute service
     // String overlayVarDisplayName = getVariableDisplayName(spec.getOverlayVariable());
     // String facet1VarDisplayName = getVariableDisplayName(spec.getFacetVariable(), 0);
     // String facet2VarDisplayName = getVariableDisplayName(spec.getFacetVariable(), 1);
-    String xVarType = getVariableType(spec.getXAxisVariable());
+    String xVarType = getVariableType(spec.getXAxisVariable());  // Needs to come from compute service? Could be hard coded.
     String yVarType = "NUMBER";
     String overlayType = getVariableType(spec.getOverlayVariable());
     String facetType1 = getVariableType(spec.getFacetVariable(), 0);
     String facetType2 = getVariableType(spec.getFacetVariable(), 1);
-    String xVarShape = getVariableDataShape(spec.getXAxisVariable());
+    String xVarShape = getVariableDataShape(spec.getXAxisVariable());  // Needs to come from compute service? Could be hard coded.
     String yVarShape = "CONTINUOUS";
     String overlayShape = getVariableDataShape(spec.getOverlayVariable());
     String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
@@ -113,6 +113,7 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
     String showMean = spec.getMean() != null ? spec.getMean().getValue() : "FALSE";
 
     // Proposed solution for listvars, using x var as example (see toCommaSepString in AbstractPlugin.java)
+    // Note we still get a listvar as x here because we should get 10ish taxa returned.
     // String xVars = toCommaSepString(toColsNamesOrEmpty(sepc.getListVariable()));
     // String xVarDisplayNames = toCommaSepString(getVariableDisplayName(spec.getXAxisVariable()));
     // String xVarTypes = toCommaSepString(getListVarType(spec.getListVariable()));
@@ -123,6 +124,8 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
 
     // repeat above for all variables.
 
+    // @Ann the cs and var config should set axis names, which here mean listVar/listValue names. Pass as args to
+    // box.dt and then we can name the outputs appropriately.
 
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");

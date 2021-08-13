@@ -41,7 +41,7 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
 
   @Override
   public List<String> getProjects() {
-    return Arrays.asList("ClinEpiDB", "MicrobiomeDB");
+    return Arrays.asList("ClinEpiDB");
   }
   
   @Override
