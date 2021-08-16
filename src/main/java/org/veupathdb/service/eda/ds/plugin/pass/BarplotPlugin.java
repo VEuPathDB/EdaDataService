@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import org.gusdb.fgputil.IoUtil;
@@ -21,6 +22,7 @@ import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
 import org.veupathdb.service.eda.generated.model.BarplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BarplotSpec;
+import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
@@ -169,41 +171,22 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
       out.flush();
     }
     else {
-      String xVar = toColNameOrEmpty(spec.getXAxisVariable());
-      String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());
-      String facetVar1 = toColNameOrEmpty(spec.getFacetVariable(), 0);
-      String facetVar2 = toColNameOrEmpty(spec.getFacetVariable(), 1);
-      String xVarType = getVariableType(spec.getXAxisVariable());
-      String overlayType = getVariableType(spec.getOverlayVariable());
-      String facetType1 = getVariableType(spec.getFacetVariable(), 0);
-      String facetType2 = getVariableType(spec.getFacetVariable(), 1);
-      String xVarShape = getVariableDataShape(spec.getXAxisVariable());
-      String overlayShape = getVariableDataShape(spec.getOverlayVariable());
-      String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
-      String facetShape2 = getVariableDataShape(spec.getFacetVariable(), 1);
       String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
       String barMode = spec.getBarMode().getValue();
+
+      Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
+      varMap.put("xAxisVariable", spec.getXAxisVariable());
+      varMap.put("overlayVariable", spec.getOverlayVariable());
+      varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
+      varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
       
       useRConnectionWithRemoteFiles(dataStreams, connection -> {
-        connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
-        String createMapString = "map <- data.frame("
-            + "'plotRef'=c('xAxisVariable', "
-            + "       'overlayVariable', "
-            + "       'facetVariable1', "
-            + "       'facetVariable2'), "
-            + "'id'=c('" + xVar + "'"
-            + ", '" + overlayVar + "'"
-            + ", '" + facetVar1 + "'"
-            + ", '" + facetVar2 + "'), "
-            + "'dataType'=c('" + xVarType + "'"
-            + ", '" + overlayType + "'"
-            + ", '" + facetType1 + "'"
-            + ", '" + facetType2 + "'), "
-            + "'dataShape'=c('" + xVarShape + "'"
-            + ", '" + overlayShape + "'"
-            + ", '" + facetShape1 + "'"
-            + ", '" + facetShape2 + "'), stringsAsFactors=FALSE)";
-        connection.voidEval(createMapString);
+        connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
+            spec.getXAxisVariable(),
+            spec.getOverlayVariable(),
+            getVariableSpecFromList(spec.getFacetVariable(), 0),
+            getVariableSpecFromList(spec.getFacetVariable(), 1)));
+        connection.voidEval(getVoidEvalVarMetadataMap(varMap));
         String outFile = connection.eval("plot.data::bar(data, map, '" + 
                                                          spec.getValueSpec().getValue() + "', '" + 
                                                          barMode + "', " +
