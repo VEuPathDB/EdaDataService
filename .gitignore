@@ -3,6 +3,7 @@
 /build/
 /vendor/
 /.tools/
+/.bin/
 
 /tmp/
 generated/
