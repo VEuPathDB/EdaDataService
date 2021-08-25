@@ -37,6 +37,8 @@ repositories {
 }
 
 tasks.jar {
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
   manifest {
     attributes["Main-Class"] = "${fullPack}.${buildProps["app.main-class"]}"
     attributes["Implementation-Title"] = buildProps["project.name"]
