@@ -66,20 +66,6 @@ types:
       label:
         type: string[]
         
-  BoxplotStat:
-    additionalProperties: false
-    properties:
-      statistic:
-        type: string
-      pvalue:
-        type: number
-      parameter:
-        type: number
-      method:
-        type: string
-      statsError:
-        type: string
-
   BoxplotStatsTable:
     additionalProperties: false
     properties:
@@ -87,8 +73,19 @@ types:
         type: StrataVariableDetails[]
         maxItems: 2
         required: false
-      statistics:
-        type: BoxplotStat      
+      xVariableDetails:
+        type: StrataVariableDetails
+        required: false
+      statistic:
+        type: string
+      pvalue:
+        type: number
+      parameter:
+        type: number[]
+      method:
+        type: string
+      statsError:
+        type: string       
         
   HistogramData:
     additionalProperties: false
