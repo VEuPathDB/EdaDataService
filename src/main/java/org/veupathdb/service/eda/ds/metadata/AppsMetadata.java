@@ -13,6 +13,7 @@ import org.veupathdb.service.eda.ds.plugin.pass.HistogramPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.LineplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.MapPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ScatterplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.pass.FilledareaPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.MultiStreamPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.RecordCountPlugin;
@@ -39,7 +40,8 @@ public class AppsMetadata {
           viz("boxplot", new BoxplotPlugin()),
           viz("heatmap", new HeatmapPlugin()),
           viz("conttable", new ContTablePlugin()),
-          viz("twobytwo", new TwoByTwoPlugin())),
+          viz("twobytwo", new TwoByTwoPlugin()),
+          viz("filledarea", new FilledareaPlugin())),
       app("sample", "Sample", "Wrapper app for sample/test plugins",
           Arrays.asList(""),
           viz("record-count", new RecordCountPlugin()),

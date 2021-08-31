@@ -86,6 +86,22 @@ securitySchemes:
               application/json:
                 type: error.ServerError
 
+    /filledarea:
+      post:
+        description: Returns data required to create a filled Area visualization <br> Java impl- NA <br> R impl- working
+        body:
+          application/json:
+            type: lib.FilledareaPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.FilledareaPostResponse
+          500:
+            body:
+              application/json:
+                type: error.ServerError
+
     /densityplot:
       post:
         description: Returns data required to create a densityplot visualization <br> Java impl- NA <br> R impl- drafted, passing unit tests, not confirmed working

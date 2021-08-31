@@ -22,6 +22,7 @@ import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
 import org.veupathdb.service.eda.ds.plugin.sample.RecordCountPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ScatterplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.pass.FilledareaPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.MultiStreamPlugin;
 import org.veupathdb.service.eda.ds.util.NonEmptyResultStream;
 import org.veupathdb.service.eda.ds.util.NonEmptyResultStream.EmptyResultException;
@@ -50,6 +51,8 @@ import org.veupathdb.service.eda.generated.model.RecordCountPostRequest;
 import org.veupathdb.service.eda.generated.model.RecordCountPostResponseStream;
 import org.veupathdb.service.eda.generated.model.ScatterplotPostRequest;
 import org.veupathdb.service.eda.generated.model.ScatterplotPostResponseStream;
+import org.veupathdb.service.eda.generated.model.FilledareaPostRequest;
+import org.veupathdb.service.eda.generated.model.FilledareaPostResponseStream;
 import org.veupathdb.service.eda.generated.resources.Apps;
 
 public class AppsService implements Apps {
@@ -96,6 +99,13 @@ public class AppsService implements Apps {
   public PostAppsPassVisualizationsScatterplotResponse postAppsPassVisualizationsScatterplot(ScatterplotPostRequest entity) {
     return wrapPlugin(() -> PostAppsPassVisualizationsScatterplotResponse.respond200WithApplicationJson(
         new ScatterplotPostResponseStream(new ScatterplotPlugin().processRequest(entity))));
+  }
+
+  @DisableJackson
+  @Override
+  public PostAppsPassVisualizationsFilledareaResponse postAppsPassVisualizationsFilledarea(FilledareaPostRequest entity) {
+    return wrapPlugin(() -> PostAppsPassVisualizationsFilledareaResponse.respond200WithApplicationJson(
+        new FilledareaPostResponseStream(new FilledareaPlugin().processRequest(entity))));
   }
 
   @DisableJackson
