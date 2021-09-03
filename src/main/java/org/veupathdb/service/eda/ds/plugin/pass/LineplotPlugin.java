@@ -31,7 +31,7 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
 
   @Override
   public String getDisplayName() {
-    return "Line plot";
+    return "Time series";
   }
 
   @Override
