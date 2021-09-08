@@ -280,31 +280,10 @@ types:
     type: object
     additionalProperties: false
     properties:
-      outputEntityId: string
-      showMissingness:
-        type: string
-        required: false
-        enum:
-          - "TRUE"
-          - "FALSE"
-      valueSpec:
-        type: string
-        enum:
-          - raw
-          - smoothedMeanWithRaw
-          - bestFitLineWithRaw
-      xAxisVariable: VariableSpec
-      yAxisVariable: VariableSpec
-      overlayVariable:
-        type: VariableSpec
-        required: false
-      facetVariable:
-        type: VariableSpec[]
+      facetVariableDetails:
+        type: StrataVariableDetails[]
         maxItems: 2
         required: false
-  ScatterplotConfig:
-    type: PlotConfig
-    properties:
       xVariableDetails:
         type: VariableSpec
       yVariableDetails:
@@ -353,25 +332,11 @@ types:
     type: object
     additionalProperties: false
     properties:
-      outputEntityId: string
-      showMissingness:
-        type: string
+      overlayVariableDetails:
+        type: StrataVariableDetails
         required: false
-        enum:
-          - "TRUE"
-          - "FALSE"
-      barMode:
-        type: string
-        enum:
-          - group
-          - stack
-      valueSpec: ValueSpec
-      xAxisVariable: VariableSpec
-      overlayVariable:
-        type: VariableSpec
-        required: false
-      facetVariable:
-        type: VariableSpec[]
+      facetVariableDetails:
+        type: StrataVariableDetails[]
         maxItems: 2
         required: false
   BarplotConfig:
@@ -975,6 +940,11 @@ types:
         enum:
           - "TRUE"
           - "FALSE"
+      valueSpec:
+        type: string
+        enum:
+          - collection
+          - series
       xAxisVariable: VariableSpec
       barMode:
         type: string
