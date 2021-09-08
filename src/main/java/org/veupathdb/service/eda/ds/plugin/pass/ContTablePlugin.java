@@ -61,15 +61,15 @@ public class ContTablePlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpe
       .dependencyOrder("yAxisVariable", "xAxisVariable", "facetVariable")
       .pattern()
         .element("yAxisVariable")
-          .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
           .maxValues(8)
+          .description("Variable must have 8 or fewer unique values.")
         .element("xAxisVariable")
-          .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
           .maxValues(10)
+          .description("Variable must have 10 or fewer unique values and be of the same or a parent entity of the Y-axis variable.")
         .element("facetVariable")
           .required(false)
           .maxVars(2)
-          .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
+          .description("Variable(s) must have 25 or fewer cartesian products and be of the same or a parent entity of the X-axis variable.")
       .done();
   }
 

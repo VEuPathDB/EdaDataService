@@ -62,15 +62,17 @@ public class HeatmapPlugin extends AbstractPlugin<HeatmapPostRequest, HeatmapSpe
       .pattern()
         .element("zAxisVariable")
           .types(APIVariableType.NUMBER)
-          .shapes(APIVariableDataShape.CONTINUOUS)
+          .description("Variable must be a number.")
         .element("yAxisVariable")
-          .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
+          .maxValues(1000)
+          .description("Variable must have 1000 or fewer unique values and be of the same or a parent entity as the Z-axis variable.")
         .element("xAxisVariable")
-          .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
+          .maxValues(1000)
+          .description("Variable must have 1000 or fewer unique values and be of the same or a parent entity as the Y-axis variable.")
         .element("facetVariable")
           .required(false)
           .maxVars(2)
-          .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
+          .description("Variable(s) must have 25 or fewer cartesian products and be of the same or a parent entity as the X-axis variable.")
       .done();
   }
   
