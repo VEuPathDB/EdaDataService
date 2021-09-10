@@ -19,6 +19,7 @@ public class VisualizationDataElement extends VisualizationDataElementConstraint
     setMinNumVars(1);
     setMaxNumVars(1);
     setMaxNumValues(null);
+    setDescription(null);
   }
 
   public VisualizationDataElement required(boolean isRequired) {
@@ -48,6 +49,11 @@ public class VisualizationDataElement extends VisualizationDataElementConstraint
   
   public VisualizationDataElement maxValues(int maxNumValues) {
     setMaxNumValues(maxNumValues);
+    return this;
+  }
+
+  public VisualizationDataElement description(String description) {
+    setDescription(description);
     return this;
   }
 

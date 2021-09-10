@@ -61,12 +61,14 @@ public class TwoByTwoPlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpec
       .pattern()
         .element("yAxisVariable")
           .shapes(APIVariableDataShape.BINARY)
+          .description("Variable must have exactly 2 unique values.")
         .element("xAxisVariable")
           .shapes(APIVariableDataShape.BINARY)
+          .description("Variable must have exactly 2 unique values and be of the same or a parent entity as the Y-axis variable.")
         .element("facetVariable")
           .required(false)
           .maxVars(2)
-          .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
+          .description("Variable(s) must have 25 or fewer cartesian products and be of the same or a parent entity as the X-axis variable.")
       .done();
   }
   
