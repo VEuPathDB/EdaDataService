@@ -15,3 +15,8 @@ services:
     build:
       dockerfile: Dockerfile
       context: .
+
+  user:
+    build:
+      dockerfile: Dockerfile
+      context: ../EdaUserService
