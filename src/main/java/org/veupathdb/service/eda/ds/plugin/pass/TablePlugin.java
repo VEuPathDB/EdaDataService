@@ -103,7 +103,7 @@ public class TablePlugin extends AbstractPlugin<TablePostRequest, TableSpec> {
           .toString()
         );
     }
-    bufOut.write("],{\"rows\":[");
+    bufOut.write("],\"rows\":[");
     
     //loop through and print data
     first = true;
