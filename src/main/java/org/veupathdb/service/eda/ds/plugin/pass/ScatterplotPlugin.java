@@ -21,6 +21,7 @@ import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.ds.constraints.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
+import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.ScatterplotPostRequest;
 import org.veupathdb.service.eda.generated.model.ScatterplotSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
@@ -62,16 +63,18 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
       .dependencyOrder("yAxisVariable", "xAxisVariable", "overlayVariable", "facetVariable")
       .pattern()
         .element("yAxisVariable")
-          .shapes(APIVariableDataShape.CONTINUOUS)
+          .types(APIVariableType.NUMBER, APIVariableType.DATE) 
+          .description("Variable must be a number or date.")
         .element("xAxisVariable")
-          .shapes(APIVariableDataShape.CONTINUOUS)
+          .types(APIVariableType.NUMBER, APIVariableType.DATE)
+          .description("Variable must be a number or date and be of the same or a parent entity as the Y-axis variable.")
         .element("overlayVariable")
-          .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
           .maxValues(8)
+          .description("Variable must have 8 or fewer values and be of the same or a parent entity as the X-axis variable.")
         .element("facetVariable")
           .required(false)
           .maxVars(2)
-          .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
+          .description("Variable(s) must have 25 or fewer cartesian products and be of the same or a parent entity as the Overlay variable.")
       .done();
   }
   

@@ -31,7 +31,7 @@ public class TwoByTwoPlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpec
 
   @Override
   public String getDisplayName() {
-    return "2x2 Contingency Table";
+    return "Mosaic Plot, 2x2 Table";
   }
 
   @Override
@@ -61,12 +61,14 @@ public class TwoByTwoPlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpec
       .pattern()
         .element("yAxisVariable")
           .shapes(APIVariableDataShape.BINARY)
+          .description("Variable must have exactly 2 unique values.")
         .element("xAxisVariable")
           .shapes(APIVariableDataShape.BINARY)
+          .description("Variable must have exactly 2 unique values and be of the same or a parent entity as the Y-axis variable.")
         .element("facetVariable")
           .required(false)
           .maxVars(2)
-          .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
+          .description("Variable(s) must have 25 or fewer cartesian products and be of the same or a parent entity as the X-axis variable.")
       .done();
   }
   
@@ -105,7 +107,7 @@ public class TwoByTwoPlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpec
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
       connection.voidEval(getVoidEvalVarMetadataMap(varMap));
-      String outFile = connection.eval("plot.data::mosaic(data, map, NULL, " + showMissingness + ")").asString();
+      String outFile = connection.eval("plot.data::mosaic(data, map, 'bothRatios', " + showMissingness + ")").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
       }

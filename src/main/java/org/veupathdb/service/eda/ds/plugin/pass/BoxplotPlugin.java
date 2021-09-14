@@ -57,17 +57,17 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
       .pattern()
         .element("yAxisVariable")
           .types(APIVariableType.NUMBER)
-          .shapes(APIVariableDataShape.CONTINUOUS)
+          .description("Variable must be a number.")
         .element("xAxisVariable")
-          .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
           .maxValues(10)
+          .description("Variable must have 10 or fewer unique values and be the same or a parent entity of the Y-axis variable.")
         .element("overlayVariable")
-          .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
-          .maxValues(8)  
+          .maxValues(8)
+          .description("Variable must have 8 or fewer unique values and be the same or a parent entity of the X-axis variable.")
         .element("facetVariable")
           .required(false)
           .maxVars(2)
-          .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
+          .description("Variable(s) must have 25 or fewer cartesian products and be of the same or a parent entity of the Overlay variable.")
       .done();
   }
   
