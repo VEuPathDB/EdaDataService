@@ -83,7 +83,7 @@ services:
     labels:
     - "com.centurylinklabs.watchtower.enable=${USER_WATCHTOWER:-false}"
     - "traefik.http.services.${TRAEFIK_USER_ROUTER:-edauser-dev}.loadbalancer.server.port=${USER_SERVER_PORT:-8080}"
-    - "traefik.http.routers.${TRAEFIK_USER_ROUTER:-edauser-dev}.rule=Host(`${TRAEFIK_DATA_HOST:-edadata-dev.local.apidb.org}`) && PathPrefix(`/users/`)"
+    - "traefik.http.routers.${TRAEFIK_USER_ROUTER:-edauser-dev}.rule=Host(`${TRAEFIK_DATA_HOST:-edadata-dev.local.apidb.org}`) && PathPrefix(`/users/`,`/public/`)"
     - "traefik.http.routers.${TRAEFIK_USER_ROUTER:-edauser-dev}.tls=true"
     - "traefik.http.routers.${TRAEFIK_USER_ROUTER:-edauser-dev}.entrypoints=${TRAEFIK_ENTRYPOINTS:-local}"
     - "prometheus.scrape_enabled=true"
