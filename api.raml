@@ -86,21 +86,6 @@ securitySchemes:
               application/json:
                 type: error.ServerError
 
-    /listvar-scatterplot:
-      post:
-        description: Returns data required to create a scatterplot visualization with custom columns chosen as one variable <br> Java impl- NA <br> R impl- drafted
-        body:
-          application/json:
-            type: lib.ListvarScatterplotPostRequest
-        responses:
-          200:
-            body:
-              application/json:
-                type: lib.ScatterplotPostResponse
-          500:
-            body:
-              application/json:
-                type: error.ServerError
 
     /densityplot:
       post:
@@ -165,22 +150,6 @@ securitySchemes:
             body:
               application/json:
                 type: error.ServerError
-
-    /listvar-boxplot:
-          post:
-            description: Returns data required to create a boxplot visualization with custom columns chosen as one variable <br> Java impl- NA <br> R impl- drafted
-            body:
-              application/json:
-                type: lib.ListvarBoxplotPostRequest
-            responses:
-              200:
-                body:
-                  application/json:
-                    type: lib.BoxplotPostResponse
-              500:
-                body:
-                  application/json:
-                    type: error.ServerError
 
     /heatmap:
       post:

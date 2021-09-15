@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import org.gusdb.fgputil.IoUtil;
 import org.gusdb.fgputil.ListBuilder;
@@ -14,9 +15,15 @@ import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.ds.constraints.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.generated.model.*;
+import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
+import org.veupathdb.service.eda.generated.model.APIVariableType;
+import org.veupathdb.service.eda.generated.model.AbundanceBoxplotPostRequest;
+import org.veupathdb.service.eda.generated.model.AbundanceBoxplotSpec;
+import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
+
+
 
 public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostRequest, AbundanceBoxplotSpec> {
 
@@ -27,144 +34,102 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
 
   @Override
   public String getDescription() {
-    return "Visualize summary values for abundance data";
+    return "Visualize abundance summary values";
   }
 
   @Override
   public List<String> getProjects() {
     return Arrays.asList("MicrobiomeDB");
   }
-
+  
   @Override
   public Integer getMaxPanels() {
     return 25;
   }
-
+  
   @Override
   protected Class<AbundanceBoxplotSpec> getVisualizationSpecClass() {
     return AbundanceBoxplotSpec.class;
   }
 
+  // Constraints on computation?
+
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder("yAxisVariable", "xAxisVariable", "overlayVariable", "facetVariable")
+      .dependencyOrder("xAxisVariable", "overlayVariable", "facetVariable")
       .pattern()
-//        .element("yAxisVariable") // Not needed because we won't have y-axis dropdown
-//          .types(APIVariableType.NUMBER)  // Can remove
-//        .element("xAxisVariable")
-//          .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
-//          .maxValues(10)
+        // .element("yAxisVariable")
+        //   .types(APIVariableType.NUMBER)
+        //   .description("Variable must be a number.")
+        .element("xAxisVariable")
+          .maxVars(10)
+          .description("Variable must have 10 or fewer unique values and be the same or a parent entity of the Y-axis variable.")
         .element("overlayVariable")
-          .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
-          .maxValues(8)  
+          .required(false)
+          .maxValues(8)
+          .description("Variable must have 8 or fewer unique values and be the same or a parent entity of the X-axis variable.")
         .element("facetVariable")
           .required(false)
           .maxVars(2)
-          .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
+          .description("Variable(s) must have 25 or fewer cartesian products and be of the same or a parent entity of the Overlay variable.")
       .done();
   }
-
+  
   @Override
-  protected void validateVisualizationSpec(BoxplotSpec pluginSpec) throws ValidationException {
+  protected void validateVisualizationSpec(AbundanceBoxplotSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
-            .entity(pluginSpec.getOutputEntityId())
-//            .var("xAxisVariable", pluginSpec.getXAxisVariable())
-//            .var("yAxisVariable", pluginSpec.getYAxisVariable())
-            .var("overlayVariable", pluginSpec.getOverlayVariable())
-            .var("facetVariable", pluginSpec.getFacetVariable()));
+      .entity(pluginSpec.getOutputEntityId())
+      .var("xAxisVariable", pluginSpec.getXAxisVariable())
+      // .var("yAxisVariable", pluginSpec.getYAxisVariable())
+      .var("overlayVariable", pluginSpec.getOverlayVariable())
+      .var("facetVariable", pluginSpec.getFacetVariable()));
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(BoxplotSpec pluginSpec) {
+  protected List<StreamSpec> getRequestedStreams(AbundanceBoxplotSpec pluginSpec) {
     return ListBuilder.asList(
-            new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
-//                    .addVar(pluginSpec.getXAxisVariable())
-//                    .addVar(pluginSpec.getYAxisVariable())
-                    .addVar(pluginSpec.getOverlayVariable())
-                    .addVars(pluginSpec.getFacetVariable()));
+      new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
+        // .addVar(pluginSpec.getXAxisVariable())
+        // .addVar(pluginSpec.getYAxisVariable())
+        .addVar(pluginSpec.getOverlayVariable())
+        .addVars(pluginSpec.getFacetVariable()));
   }
+
+  // Get compute results and merge/reformat based on incoming varMap?
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     AbundanceBoxplotSpec spec = getPluginSpec();
-    String xVar = toColNameOrEmpty(spec.getXAxisVariable());  // Needs to come from compute service
-    String yVar = "Abundance";
-    String overlayVar = toColNameOrEmpty(spec.getOverlayVariable());
-    String facetVar1 = toColNameOrEmpty(spec.getFacetVariable(), 0);
-    String facetVar2 = toColNameOrEmpty(spec.getFacetVariable(), 1);
-    // String xVarDisplayName = getVariableDisplayName(spec.getXAxisVariable());  // From compute service
-    // String yVarDisplayName = getVariableDisplayName(spec.getYAxisVariable());  // From compute service
-    // String overlayVarDisplayName = getVariableDisplayName(spec.getOverlayVariable());
-    // String facet1VarDisplayName = getVariableDisplayName(spec.getFacetVariable(), 0);
-    // String facet2VarDisplayName = getVariableDisplayName(spec.getFacetVariable(), 1);
-    String xVarType = getVariableType(spec.getXAxisVariable());  // Needs to come from compute service? Could be hard coded.
-    String yVarType = "NUMBER";
-    String overlayType = getVariableType(spec.getOverlayVariable());
-    String facetType1 = getVariableType(spec.getFacetVariable(), 0);
-    String facetType2 = getVariableType(spec.getFacetVariable(), 1);
-    String xVarShape = getVariableDataShape(spec.getXAxisVariable());  // Needs to come from compute service? Could be hard coded.
-    String yVarShape = "CONTINUOUS";
-    String overlayShape = getVariableDataShape(spec.getOverlayVariable());
-    String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
-    String facetShape2 = getVariableDataShape(spec.getFacetVariable(), 1);
+    Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
+    // varMap.put("xAxisVariable", spec.getXAxisVariable());
+    // varMap.put("yAxisVariable", spec.getYAxisVariable());
+    varMap.put("overlayVariable", spec.getOverlayVariable());
+    varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
+    varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
-    String computeStats = spec.getComputeStats() != null ? spec.getComputeStats().getValue() : "TRUE";
+    String computeStats = spec.getComputeStats() != null ? spec.getComputeStats().getValue() : "FALSE";
     String showMean = spec.getMean() != null ? spec.getMean().getValue() : "FALSE";
-
-    // Proposed solution for listvars, using x var as example (see toCommaSepString in AbstractPlugin.java)
-    // Note we still get a listvar as x here because we should get 10ish taxa returned.
-    // String xVars = toCommaSepString(toColsNamesOrEmpty(sepc.getListVariable()));
-    // String xVarDisplayNames = toCommaSepString(getVariableDisplayName(spec.getXAxisVariable()));
-    // String xVarTypes = toCommaSepString(getListVarType(spec.getListVariable()));
-    // String xVarShapes = toCommaSepString(getListVarShape(spec.getListVariable()));
-    // String[] xVarPlotRefs = new boolean[5];
-    // Arrays.fill(array, "xAxisVariable");
-    // String xVarPlotRef = toCommaSepString(xVarPlotRefs);
-
-    // repeat above for all variables.
-
-    // @Ann the cs and var config should set axis names, which here mean listVar/listValue names. Pass as args to
-    // box.dt and then we can name the outputs appropriately.
-
+    String listVarPlotRef = "xAxisVariable"; // soon will be part of the viz post request
+    String listVarDisplayLabel = "Phylum"; // get x axis label from compute output.
+    String inferredVarDisplayLabel = "Abundance"; // Also could grab from the compute output.
+    
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
-      connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
-      connection.voidEval("map <- data.frame("
-              + "'plotRef'=c('xAxisVariable', "
-              + "       'yAxisVariable', "
-              + "       'overlayVariable', "
-              + "       'facetVariable1', "
-              + "       'facetVariable2'), "
-              + "'id'=c('" + xVar + "'"
-              + ", '" + yVar + "'"
-              + ", '" + overlayVar + "'"
-              + ", '" + facetVar1 + "'"
-//              + "'displayName'=c('" + xVarDisplayName + "'"
-//              + ", '" + yVarDisplayName + "'"
-//              + ", '" + overlayVarDisplayName + "'"
-//              + ", '" + facetVar1DisplayName + "'"
-//              + ", '" + facetVar2DisplayName + "'), "
-              + "'dataType'=c('" + xVarType + "'"
-              + ", '" + yVarType + "'"
-              + ", '" + overlayType + "'"
-              + ", '" + facetType1 + "'"
-              + ", '" + facetType2 + "'), "
-              + "'dataShape'=c('" + xVarShape + "'"
-              + ", '" + yVarShape + "'"
-              + ", '" + overlayShape + "'"
-              + ", '" + facetShape1 + "'"
-              + ", '" + facetShape2 + "'), stringsAsFactors=FALSE)");
-      connection.voidEval("head(data)");
-      System.err.println("plot.data::box(data, map, '" +
-              spec.getPoints().getValue() + "', " +
-              showMean + ", " +
-              computeStats + ", " +
-              showMissingness + ")");
+      connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
+          // spec.getXAxisVariable(),
+          // spec.getYAxisVariable(),
+          spec.getOverlayVariable(),
+          getVariableSpecFromList(spec.getFacetVariable(), 0),
+          getVariableSpecFromList(spec.getFacetVariable(), 1)));
+      connection.voidEval(getVoidEvalVarMetadataMap(varMap));
       String outFile = connection.eval("plot.data::box(data, map, '" +
-              spec.getPoints().getValue() + "', " +
-              showMean + ", " +
-              computeStats + ", " +
-              showMissingness + ")").asString();
+          spec.getPoints().getValue() + "', " +
+          showMean + ", " + 
+          computeStats + ", " + 
+          showMissingness + ",'" +
+          listVarPlotRef + "','" +
+          listVarDisplayLabel + "','" +
+          inferredVarDisplayLabel + "')").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
       }

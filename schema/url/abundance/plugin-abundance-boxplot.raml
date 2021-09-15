@@ -8,7 +8,7 @@ types:
     properties:
       config: AbundanceBoxplotSpec
 
-# Assuming abundance must be on y axis and that x axis is determined by compute service
+  # Assuming abundance must be on y axis and that x axis is determined by compute service unless user selects custom listvar
   AbundanceBoxplotSpec:
     additionalProperties: false
     properties:
@@ -17,6 +17,10 @@ types:
       showMissingness:
         type: string
         enum: ['TRUE', 'FALSE']
+        required: false
+      xAxisVariable: 
+        type: VariableSpec[]
+        maxItems: 10
         required: false
       points:
         type: string

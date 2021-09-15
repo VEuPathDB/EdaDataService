@@ -16,8 +16,6 @@ import org.veupathdb.service.eda.ds.plugin.pass.DensityplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.HeatmapPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.HistogramPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.LineplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.ListvarBoxplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.ListvarScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.MapPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
