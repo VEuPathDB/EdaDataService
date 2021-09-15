@@ -20,6 +20,7 @@ local.properties
 /run.sh
 *.env
 
+/.bin/
 /bin
 .project
 .settings

@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import org.gusdb.fgputil.IoUtil;
 import org.gusdb.fgputil.ListBuilder;
@@ -30,7 +31,7 @@ public class TwoByTwoPlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpec
 
   @Override
   public String getDisplayName() {
-    return "2x2 Contingency Table";
+    return "Mosaic Plot, 2x2 Table";
   }
 
   @Override
@@ -60,12 +61,14 @@ public class TwoByTwoPlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpec
       .pattern()
         .element("yAxisVariable")
           .shapes(APIVariableDataShape.BINARY)
+          .description("Variable must have exactly 2 unique values.")
         .element("xAxisVariable")
           .shapes(APIVariableDataShape.BINARY)
+          .description("Variable must have exactly 2 unique values and be of the same or a parent entity as the Y-axis variable.")
         .element("facetVariable")
           .required(false)
           .maxVars(2)
-          .shapes(APIVariableDataShape.BINARY, APIVariableDataShape.ORDINAL, APIVariableDataShape.CATEGORICAL)
+          .description("Variable(s) must have 25 or fewer cartesian products and be of the same or a parent entity as the X-axis variable.")
       .done();
   }
   
@@ -90,40 +93,21 @@ public class TwoByTwoPlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpec
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     MosaicSpec spec = getPluginSpec();;
-    String xVar = toColNameOrEmpty(spec.getXAxisVariable());
-    String yVar = toColNameOrEmpty(spec.getYAxisVariable());
-    String facetVar1 = toColNameOrEmpty(spec.getFacetVariable(), 0);
-    String facetVar2 = toColNameOrEmpty(spec.getFacetVariable(), 1);
-    String xVarType = getVariableType(spec.getXAxisVariable());
-    String yVarType = getVariableType(spec.getYAxisVariable());
-    String facetType1 = getVariableType(spec.getFacetVariable(), 0);
-    String facetType2 = getVariableType(spec.getFacetVariable(), 1);
-    String xVarShape = getVariableDataShape(spec.getXAxisVariable());
-    String yVarShape = getVariableDataShape(spec.getYAxisVariable());
-    String facetShape1 = getVariableDataShape(spec.getFacetVariable(), 0);
-    String facetShape2 = getVariableDataShape(spec.getFacetVariable(), 1);
+    Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
+    varMap.put("xAxisVariable", spec.getXAxisVariable());
+    varMap.put("yAxisVariable", spec.getYAxisVariable());
+    varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
+    varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
-      connection.voidEval("data <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
-      connection.voidEval("map <- data.frame("
-          + "'plotRef'=c('xAxisVariable', "
-          + "       'yAxisVariable', "
-          + "       'facetVariable1', "
-          + "       'facetVariable2'), "
-          + "'id'=c('" + xVar + "'"
-          + ", '" + yVar  + "'"
-          + ", '" + facetVar1 + "'"
-          + ", '" + facetVar2 + "'), "
-          + "'dataType'=c('" + xVarType + "'"
-          + ", '" + yVarType + "'"
-          + ", '" + facetType1 + "'"
-          + ", '" + facetType2 + "'), "
-          + "'dataShape'=c('" + xVarShape + "'"
-          + ", '" + yVarShape + "'"
-          + ", '" + facetShape1 + "'"
-          + ", '" + facetShape2 + "'), stringsAsFactors=FALSE)");
-      String outFile = connection.eval("plot.data::mosaic(data, map, NULL, " + showMissingness + ")").asString();
+      connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
+          spec.getXAxisVariable(),
+          spec.getYAxisVariable(),
+          getVariableSpecFromList(spec.getFacetVariable(), 0),
+          getVariableSpecFromList(spec.getFacetVariable(), 1)));
+      connection.voidEval(getVoidEvalVarMetadataMap(varMap));
+      String outFile = connection.eval("plot.data::mosaic(data, map, 'bothRatios', " + showMissingness + ")").asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
       }

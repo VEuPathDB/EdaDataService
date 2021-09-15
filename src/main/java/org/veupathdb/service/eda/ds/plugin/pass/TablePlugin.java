@@ -1,8 +1,10 @@
 package org.veupathdb.service.eda.ds.plugin.pass;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -76,39 +78,63 @@ public class TablePlugin extends AbstractPlugin<TablePostRequest, TableSpec> {
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-
+    BufferedWriter bufOut = new BufferedWriter(new OutputStreamWriter(out));
+    //get paging config
+    TableSpec spec = getPluginSpec();
+    Integer numRows = spec.getPagingConfig().getNumRows();
+    Integer offset = spec.getPagingConfig().getOffset();
+    
     // create scanner and line parser
     Scanner s = new Scanner(dataStreams.get(DEFAULT_SINGLE_STREAM_NAME)).useDelimiter(NL);
     DelimitedDataParser parser = new DelimitedDataParser(s.nextLine(), TAB, true);
 
     //print header
     List<String> header = parser.getColumnNames();
-    out.write("{\"columns\":[".getBytes());
+    bufOut.write("{\"columns\":[");
     boolean first = true;
     for (String colName : header) {
-      if (first) first = false; else out.write(",".getBytes());
+      if (first) first = false; else bufOut.write(",");
       System.err.println("col name: " + colName);
       String varSpec[] = colName.split("\\.");
       System.err.println(varSpec.toString());
-      out.write(new JSONObject()
+      bufOut.write(new JSONObject()
           .put("entityId", varSpec[0])
           .put("variableId", varSpec[1])
           .toString()
-          .getBytes()
         );
     }
-    out.write("],{\"rows\":[".getBytes());
+    bufOut.write("],\"rows\":[");
     
     //loop through and print data
     first = true;
+    int offsetCount = 0;
+    int rowCount = 0;
     while (s.hasNextLine()) {
-      String[] row = parser.parseLineToArray(s.nextLine());
-      if (first) first = false; else out.write(",".getBytes());
-      out.write(new JSONArray(row).toString().getBytes());
+      if (offset != null) {
+        if (offsetCount < offset) {
+          offsetCount++;
+          s.nextLine();
+        } else {
+          if (numRows != null) {
+            if (rowCount < numRows) {
+              rowCount++;
+              String[] row = parser.parseLineToArray(s.nextLine());
+              if (first) first = false; else bufOut.write(",");
+              bufOut.write(new JSONArray(row).toString());
+            } else {
+              break;
+            }
+          } else {
+            String[] row = parser.parseLineToArray(s.nextLine());
+            if (first) first = false; else bufOut.write(",");
+            bufOut.write(new JSONArray(row).toString());
+          }
+        }
+      }
     }
     
     // close array and enclosing object
-    out.write("]}".getBytes());
-    out.flush();
+    bufOut.write("]}");
+    bufOut.flush();
   }
 }

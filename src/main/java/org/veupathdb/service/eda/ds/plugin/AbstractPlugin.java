@@ -235,4 +235,74 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   //    return commaString;
   //  }
 
+  
+  protected String singleQuote(String unquotedString) {
+    return "'" + unquotedString + "'";
+  }
+  
+  protected String getVoidEvalFreadCommand(String fileName, VariableSpec... vars) {    
+    boolean first = true;
+    String namedTypes = new String();
+    
+    for(VariableSpec var : vars) {
+      String varName = toColNameOrEmpty(var);
+      if (varName.equals("")) continue;
+      String varType = getVariableType(var);
+      String varShape = getVariableDataShape(var);
+      if (varType.equals("NUMBER") & !varShape.equals("CATEGORICAL")) {
+        varType = "double";
+      } else {
+        varType = "character";
+      }
+      if (first) {
+        first = false;
+        namedTypes = singleQuote(varName) + "=" + singleQuote(varType);
+      } else {
+        namedTypes = namedTypes + "," + singleQuote(varName) + "=" + singleQuote(varType);
+      }
+    }
+        
+    String freadCommand = "data <- fread(" + singleQuote(fileName) + 
+                                         ", select=c(" + namedTypes + ")" +
+                                         ", na.strings=c(''))";
+    
+    return freadCommand;
+  }
+  
+  protected String getVoidEvalVarMetadataMap(Map<String, VariableSpec> vars) {
+    boolean first = true;
+    String plotRefVector = new String();
+    String varColNameVector = new String();
+    String varTypeVector = new String();
+    String varShapeVector = new String();
+    
+    for(Map.Entry<String, VariableSpec> entry : vars.entrySet()) {
+      String plotRef = entry.getKey();
+      VariableSpec var = entry.getValue();
+      String varName = toColNameOrEmpty(var);
+      if (varName.equals("")) continue;
+      String varType = getVariableType(var);
+      String varShape = getVariableDataShape(var);
+      if (first) {
+        first = false;
+        plotRefVector = singleQuote(plotRef);
+        varColNameVector = singleQuote(varName);
+        varTypeVector = singleQuote(varType);
+        varShapeVector = singleQuote(varShape);
+      } else {
+        plotRefVector = plotRefVector + "," + singleQuote(plotRef);
+        varColNameVector = varColNameVector + "," + singleQuote(varName);
+        varTypeVector = varTypeVector + "," + singleQuote(varType);
+        varShapeVector = varShapeVector + "," + singleQuote(varShape);
+      }
+    }
+        
+    String varMetadataMapString = "map <- data.frame("
+        + "'plotRef'=c(" + plotRefVector + "), "
+        + "'id'=c(" + varColNameVector + "), "
+        + "'dataType'=c("+ varTypeVector + "), "
+        + "'dataShape'=c(" + varShapeVector + "), stringsAsFactors=FALSE)";
+    
+    return varMetadataMapString;
+  }
 }
