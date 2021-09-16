@@ -23,6 +23,29 @@ types:
         type: string[]
         minItems: 1
         required: true
+
+  BeeswarmData:
+    additionalProperties: false
+    properties:
+      overlayVariableDetails:
+        type: StrataVariableDetails
+        required: false
+      facetVariableDetails:
+        type: StrataVariableDetails[]
+        maxItems: 2
+        required: false
+      label:
+        type: string[]
+      rawData:
+        type: number[][]
+        required: true
+      jitteredValues:
+        type: number[][]
+        required: true
+      median:
+        type: number[]
+        minItems: 1
+        required: false
         
   BoxplotData:
     additionalProperties: false

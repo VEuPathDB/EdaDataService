@@ -10,6 +10,7 @@ import org.gusdb.fgputil.functional.FunctionalInterfaces;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.lib.container.jaxrs.server.annotations.DisableJackson;
 import org.veupathdb.service.eda.ds.plugin.pass.BarplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.pass.BeeswarmPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.BoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ContTablePlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.DensityplotPlugin;
@@ -27,6 +28,8 @@ import org.veupathdb.service.eda.ds.util.NonEmptyResultStream;
 import org.veupathdb.service.eda.ds.util.NonEmptyResultStream.EmptyResultException;
 import org.veupathdb.service.eda.generated.model.BarplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BarplotPostResponseStream;
+import org.veupathdb.service.eda.generated.model.BeeswarmPostRequest;
+import org.veupathdb.service.eda.generated.model.BeeswarmPostResponseStream;
 import org.veupathdb.service.eda.generated.model.BoxplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BoxplotPostResponseStream;
 import org.veupathdb.service.eda.generated.model.DensityplotPostRequest;
@@ -124,6 +127,13 @@ public class AppsService implements Apps {
   public PostAppsPassVisualizationsBarplotResponse postAppsPassVisualizationsBarplot(BarplotPostRequest entity) {
     return wrapPlugin(() -> PostAppsPassVisualizationsBarplotResponse.respond200WithApplicationJson(
         new BarplotPostResponseStream(new BarplotPlugin().processRequest(entity))));
+  }
+
+  @DisableJackson
+  @Override
+  public PostAppsPassVisualizationsBeeswarmResponse postAppsPassVisualizationsBeeswarm(BeeswarmPostRequest entity) {
+    return wrapPlugin(() -> PostAppsPassVisualizationsBeeswarmResponse.respond200WithApplicationJson(
+        new BeeswarmPostResponseStream(new BeeswarmPlugin().processRequest(entity))));
   }
 
   @DisableJackson

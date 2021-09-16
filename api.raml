@@ -150,6 +150,22 @@ securitySchemes:
               application/json:
                 type: error.ServerError
 
+    /beeswarm:
+      post:
+        description: Returns data required to create a beeswarm visualization <br> Java impl- NA <br> R impl- working
+        body:
+          application/json:
+            type: lib.BeeswarmPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.BeeswarmPostResponse
+          500:
+            body:
+              application/json:
+                type: error.ServerError
+
     /heatmap:
       post:
         description: Returns data required to create a heatmap visualization <br> Java impl- NA <br> R impl- drafted

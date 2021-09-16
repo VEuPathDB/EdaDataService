@@ -5,6 +5,7 @@ import java.util.List;
 import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.BarplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.pass.BeeswarmPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.BoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ContTablePlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.DensityplotPlugin;
@@ -37,6 +38,7 @@ public class AppsMetadata {
           viz("histogram", new HistogramPlugin()),
           viz("barplot", new BarplotPlugin()),
           viz("boxplot", new BoxplotPlugin()),
+          viz("beeswarm", new BeeswarmPlugin()),
           viz("heatmap", new HeatmapPlugin()),
           viz("conttable", new ContTablePlugin()),
           viz("twobytwo", new TwoByTwoPlugin())),
