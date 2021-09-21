@@ -31,7 +31,7 @@ services:
     - internal
     - monitoring-ext
     environment:
-      SUBSETTING_SERVICE_URL: ${SUBSETTING_SERVICE_URL:-http://subsetting:8080}
+      SUBSETTING_SERVICE_URL: ${SUBSETTING_SERVICE_URL:-http://subsetting}:${SUBSETTING_SERVER_PORT:-8080}
       SERVER_PORT: ${MERGING_SERVER_PORT:-8080}
     labels:
     - "prometheus.scrape_enabled=true"
@@ -44,8 +44,8 @@ services:
     - traefik
     - monitoring-ext
     environment:
-      SUBSETTING_SERVICE_URL: ${SUBSETTING_SERVICE_URL:-http://subsetting:8080}
-      MERGING_SERVICE_URL: ${MERGING_SERVICE_URL:-http://merging:8080}
+      SUBSETTING_SERVICE_URL: ${SUBSETTING_SERVICE_URL:-http://subsetting}:${SUBSETTING_SERVER_PORT:-8080}
+      MERGING_SERVICE_URL: ${MERGING_SERVICE_URL:-http://merging}:${MERGING_SERVER_PORT:-8080}
       RSERVE_URL: ${RSERVE_URL:-http://rserve:6311}
       SERVER_PORT: ${DATA_SERVER_PORT:-8080}
     labels:
