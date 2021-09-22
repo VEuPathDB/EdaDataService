@@ -56,7 +56,7 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
       .dependencyOrder("yAxisVariable", "xAxisVariable", "overlayVariable", "facetVariable")
       .pattern()
         .element("yAxisVariable")
-          .types(APIVariableType.NUMBER)
+          .types(APIVariableType.NUMBER, APIVariableType.INTEGER)
           .description("Variable must be a number.")
         .element("xAxisVariable")
           .maxValues(10)
