@@ -7,6 +7,7 @@ services:
     networks:
     - internal
     - external
+    - monitoring-ext
     environment:
       # if ascertaining DB via LDAP
       LDAP_SERVER:
@@ -21,16 +22,19 @@ services:
       # port providing the service
       SERVER_PORT: ${SUBSETTING_SERVER_PORT:-8080}
     labels:
+    - "prometheus.scrape_enabled=true"
     - "com.centurylinklabs.watchtower.enable=${SUBSETTING_WATCHTOWER:-false}"
 
   merging:
     image: veupathdb/eda-merging:${MERGING_TAG:-latest}
     networks:
     - internal
+    - monitoring-ext
     environment:
-      SUBSETTING_SERVICE_URL: ${SUBSETTING_SERVICE_URL:-http://subsetting:8080}
+      SUBSETTING_SERVICE_URL: ${SUBSETTING_SERVICE_URL:-http://subsetting}:${SUBSETTING_SERVER_PORT:-8080}
       SERVER_PORT: ${MERGING_SERVER_PORT:-8080}
     labels:
+    - "prometheus.scrape_enabled=true"
     - "com.centurylinklabs.watchtower.enable=${MERGING_WATCHTOWER:-false}"
 
   data:
@@ -38,12 +42,14 @@ services:
     networks:
     - internal
     - traefik
+    - monitoring-ext
     environment:
-      SUBSETTING_SERVICE_URL: ${SUBSETTING_SERVICE_URL:-http://subsetting:8080}
-      MERGING_SERVICE_URL: ${MERGING_SERVICE_URL:-http://merging:8080}
+      SUBSETTING_SERVICE_URL: ${SUBSETTING_SERVICE_URL:-http://subsetting}:${SUBSETTING_SERVER_PORT:-8080}
+      MERGING_SERVICE_URL: ${MERGING_SERVICE_URL:-http://merging}:${MERGING_SERVER_PORT:-8080}
       RSERVE_URL: ${RSERVE_URL:-http://rserve:6311}
       SERVER_PORT: ${DATA_SERVER_PORT:-8080}
     labels:
+    - "prometheus.scrape_enabled=true"
     - "com.centurylinklabs.watchtower.enable=${DATA_WATCHTOWER:-false}"
     - "traefik.http.services.${TRAEFIK_DATA_ROUTER:-edadata-dev}.loadbalancer.server.port=${DATA_SERVER_PORT:-8080}"
     - "traefik.http.routers.${TRAEFIK_DATA_ROUTER:-edadata-dev}.rule=Host(`${TRAEFIK_DATA_HOST:-edadata-dev.local.apidb.org}`)"
@@ -64,6 +70,7 @@ services:
     - internal
     - external
     - traefik
+    - monitoring-ext
     environment:
       AUTH_SECRET_KEY: ${AUTH_SECRET_KEY}
       SERVER_PORT: ${USER_SERVER_PORT:-8080}
@@ -81,12 +88,12 @@ services:
       USER_DB_PASS: ${USER_DB_PASS}
 
     labels:
+    - "prometheus.scrape_enabled=true"
     - "com.centurylinklabs.watchtower.enable=${USER_WATCHTOWER:-false}"
     - "traefik.http.services.${TRAEFIK_USER_ROUTER:-edauser-dev}.loadbalancer.server.port=${USER_SERVER_PORT:-8080}"
     - "traefik.http.routers.${TRAEFIK_USER_ROUTER:-edauser-dev}.rule=Host(`${TRAEFIK_DATA_HOST:-edadata-dev.local.apidb.org}`) && PathPrefix(`/users/`,`/public/`)"
     - "traefik.http.routers.${TRAEFIK_USER_ROUTER:-edauser-dev}.tls=true"
     - "traefik.http.routers.${TRAEFIK_USER_ROUTER:-edauser-dev}.entrypoints=${TRAEFIK_ENTRYPOINTS:-local}"
-    - "prometheus.scrape_enabled=true"
     - "traefik.docker.network=traefik"
 
 networks:
@@ -95,5 +102,7 @@ networks:
   internal:
     internal: true
   traefik:
+    external: true
+  monitoring-ext:
     external: true
 

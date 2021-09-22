@@ -36,12 +36,12 @@ public class MapPlugin extends AbstractPlugin<MapPostRequest, MapSpec> {
 
   @Override
   public String getDisplayName() {
-    return "Record Count";
+    return "Geolocation Map";
   }
 
   @Override
   public String getDescription() {
-    return "Counts how many rows in a single stream of records";
+    return "Visualize available variables on a geographic map.";
   }
 
   @Override
