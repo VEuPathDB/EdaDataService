@@ -1,6 +1,5 @@
 package org.veupathdb.service.eda.ds.service;
 
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.function.Consumer;
@@ -8,16 +7,21 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotAllowedException;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import org.gusdb.fgputil.IoUtil;
 import org.gusdb.fgputil.client.RequestFailure;
 import org.gusdb.fgputil.functional.Either;
 import org.gusdb.fgputil.functional.FunctionalInterfaces.FunctionWithException;
 import org.veupathdb.lib.container.jaxrs.errors.UnprocessableEntityException;
+import org.veupathdb.service.eda.common.client.TabularResponseType;
 import org.veupathdb.service.eda.common.client.EdaSubsettingClient;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.generated.model.EntityCountPostRequest;
 import org.veupathdb.service.eda.generated.model.EntityCountPostResponseStream;
 import org.veupathdb.service.eda.generated.model.EntityIdGetResponseStream;
+import org.veupathdb.service.eda.generated.model.EntityTabularPostRequest;
+import org.veupathdb.service.eda.generated.model.EntityTabularPostResponseStream;
 import org.veupathdb.service.eda.generated.model.StudiesGetResponseStream;
 import org.veupathdb.service.eda.generated.model.StudyIdGetResponseStream;
 import org.veupathdb.service.eda.generated.model.VariableDistributionPostRequest;
@@ -27,6 +31,9 @@ import org.veupathdb.service.eda.generated.resources.Studies;
 import static org.gusdb.fgputil.functional.Functions.cSwallow;
 
 public class PassThroughService implements Studies {
+
+  @Context
+  private ContainerRequestContext _request;
 
   private interface DataProducer extends
       FunctionWithException<EdaSubsettingClient, Either<InputStream, RequestFailure>> {}
@@ -84,6 +91,17 @@ public class PassThroughService implements Studies {
   public PostStudiesEntitiesCountByStudyIdAndEntityIdResponse postStudiesEntitiesCountByStudyIdAndEntityId(String studyId, String entityId, EntityCountPostRequest entity) {
     return PostStudiesEntitiesCountByStudyIdAndEntityIdResponse.respond200WithApplicationJson(
         new EntityCountPostResponseStream(buildStreamer(c -> c.getEntityCountStream(studyId, entityId, entity))));
+  }
+
+  @Override
+  public PostStudiesEntitiesTabularByStudyIdAndEntityIdResponse postStudiesEntitiesTabularByStudyIdAndEntityId(String studyId, String entityId, EntityTabularPostRequest entity) {
+    TabularResponseType responseType = TabularResponseType.fromAcceptHeader(_request);
+    var responseStream = new EntityTabularPostResponseStream(buildStreamer(
+        c -> c.getEntityTabularStream(studyId, entityId, entity, responseType)));
+    return switch(responseType) {
+      case JSON -> PostStudiesEntitiesTabularByStudyIdAndEntityIdResponse.respond200WithApplicationJson(responseStream);
+      case TABULAR -> PostStudiesEntitiesTabularByStudyIdAndEntityIdResponse.respond200WithTextTabSeparatedValues(responseStream);
+    };
   }
 
   @Override
