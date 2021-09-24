@@ -88,7 +88,7 @@ public class RServeClient {
     try {
       int numRows = connection.eval("nrow("+ name + ")").asInteger();
       LOG.info("R found " + numRows + " rows in file " + name);
-      if (numRows - 1 /* header? */ > maxRows) {
+      if (numRows > maxRows) {
         filesTooBig.add(name);
       }
     }
