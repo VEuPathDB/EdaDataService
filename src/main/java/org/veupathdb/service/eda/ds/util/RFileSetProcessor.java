@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.gusdb.fgputil.Tuples.TwoTuple;
-import org.gusdb.fgputil.functional.FunctionalInterfaces;
 import org.gusdb.fgputil.functional.FunctionalInterfaces.BiConsumerWithException;
 import org.gusdb.fgputil.functional.FunctionalInterfaces.ConsumerWithException;
 import org.rosuda.REngine.Rserve.RConnection;
