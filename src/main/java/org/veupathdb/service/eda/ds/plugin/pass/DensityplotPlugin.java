@@ -54,7 +54,7 @@ public class DensityplotPlugin extends AbstractPlugin<DensityplotPostRequest, De
       .dependencyOrder("xAxisVariable", "overlayVariable", "facetVariable")
       .pattern()
         .element("xAxisVariable")
-          .types(APIVariableType.NUMBER)
+          .types(APIVariableType.NUMBER, APIVariableType.INTEGER)
           .description("Variable must be a number.")
         .element("overlayVariable")
           .maxValues(8)
