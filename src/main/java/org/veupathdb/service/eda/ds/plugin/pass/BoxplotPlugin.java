@@ -132,7 +132,7 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       String cmd =
           "plot.data::box(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" +
-              spec.getPoints().getValue() + "', " +
+              showPoints + "', " +
               showMean + ", " +
               computeStats + ", " +
               showMissingness + ")";
