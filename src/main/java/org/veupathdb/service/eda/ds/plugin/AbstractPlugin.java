@@ -50,7 +50,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   private static final Logger LOG = LogManager.getLogger(AbstractPlugin.class);
 
   // shared stream name for plugins that need request only a single stream
-  protected static final String DEFAULT_SINGLE_STREAM_NAME = "single-tabular-dataset.txt";
+  protected static final String DEFAULT_SINGLE_STREAM_NAME = "single_tabular_dataset";
 
   // methods that need to be implemented
   protected abstract Class<S> getVisualizationSpecClass();
@@ -247,7 +247,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
       }
     }
         
-    String freadCommand = "data <- fread(" + singleQuote(fileName) + 
+    String freadCommand = fileName + " <- fread(" + singleQuote(fileName) +
                                          ", select=c(" + namedTypes + ")" +
                                          ", na.strings=c(''))";
     

@@ -3,30 +3,27 @@ package org.veupathdb.service.eda.ds.plugin.pass;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Array;
 import java.util.Arrays;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.IoUtil;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
-import org.json.JSONObject;
 import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.ds.constraints.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
+import org.veupathdb.service.eda.ds.util.RFileSetProcessor;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.ScatterplotPostRequest;
 import org.veupathdb.service.eda.generated.model.ScatterplotSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
-import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
+import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithProcessedRemoteFiles;
 
 public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, ScatterplotSpec> {
 
@@ -114,16 +111,21 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
     if (yVarType.equals("DATE") && !valueSpec.equals("raw")) {
       LOG.error("Cannot calculate trend lines for y-axis date variables. The `valueSpec` property must be set to `raw`.");
     }
-    
-    useRConnectionWithRemoteFiles(dataStreams, connection -> {
-      connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
+
+    RFileSetProcessor filesProcessor = new RFileSetProcessor(dataStreams)
+      .add(DEFAULT_SINGLE_STREAM_NAME, (name, conn) ->
+        conn.voidEval(getVoidEvalFreadCommand(name,
           spec.getXAxisVariable(),
           spec.getYAxisVariable(),
           spec.getOverlayVariable(),
           getVariableSpecFromList(spec.getFacetVariable(), 0),
-          getVariableSpecFromList(spec.getFacetVariable(), 1)));
+          getVariableSpecFromList(spec.getFacetVariable(), 1)))
+      );
+
+    useRConnectionWithProcessedRemoteFiles(filesProcessor, connection -> {
       connection.voidEval(getVoidEvalVarMetadataMap(varMap));
-      String outFile = connection.eval("plot.data::scattergl(data, map, '" + valueSpec + "', " + showMissingness + ")").asString();
+      String cmd = "plot.data::scattergl(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" + valueSpec + "', " + showMissingness + ")";
+      String outFile = connection.eval(cmd).asString();
       try (RFileInputStream response = connection.openFile(outFile)) {
         IoUtil.transferStream(out, response);
       }
