@@ -15,6 +15,7 @@ import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.ds.constraints.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.ds.util.RFileSetProcessor;
 import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.BoxplotPostRequest;
@@ -104,14 +105,30 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
     String computeStats = spec.getComputeStats() != null ? spec.getComputeStats().getValue() : "FALSE";
     String showMean = spec.getMean() != null ? spec.getMean().getValue() : "FALSE";
+    String showPoints = spec.getPoints().getValue();
     
-    useRConnectionWithRemoteFiles(dataStreams, connection -> {
-      connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
+    RFileSetProcessor filesProcessor = new RFileSetProcessor(dataStreams);
+    if (showPoints.equals("all")) {
+      filesProcessor.add(DEFAULT_SINGLE_STREAM_NAME, 300000, (name, conn) ->
+        conn.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
           spec.getXAxisVariable(),
           spec.getYAxisVariable(),
           spec.getOverlayVariable(),
           getVariableSpecFromList(spec.getFacetVariable(), 0),
-          getVariableSpecFromList(spec.getFacetVariable(), 1)));
+          getVariableSpecFromList(spec.getFacetVariable(), 1)))
+      );
+    } else {
+      filesProcessor.add(DEFAULT_SINGLE_STREAM_NAME, (name, conn) ->
+        conn.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
+          spec.getXAxisVariable(),
+          spec.getYAxisVariable(),
+          spec.getOverlayVariable(),
+          getVariableSpecFromList(spec.getFacetVariable(), 0),
+          getVariableSpecFromList(spec.getFacetVariable(), 1)))
+      );
+    }
+
+    useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       String cmd =
           "plot.data::box(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" +
