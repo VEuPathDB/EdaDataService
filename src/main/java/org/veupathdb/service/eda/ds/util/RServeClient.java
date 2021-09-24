@@ -64,7 +64,7 @@ public class RServeClient {
           spec.fileReader.accept(connection);
 
           // if requested, check number of rows read against max and throw later if violated
-          spec.maxAllowedRows.ifPresent(maxRows -> checkMaxRows(connection, spec.name, filesTooBig, maxRows));
+          spec.maxAllowedRows.ifPresent(maxRows -> checkMaxRows(connection, spec.name, spec.showMissingness, filesTooBig, maxRows));
         }
 
         // if any files too big, throw
@@ -84,11 +84,16 @@ public class RServeClient {
     });
   }
 
-  private static void checkMaxRows(RConnection connection, String name, List<String> filesTooBig, Integer maxRows) {
+  private static void checkMaxRows(RConnection connection, String name, Boolean showMissingness, List<String> filesTooBig, Integer maxRows) {
     try {
-      int numRows = connection.eval("nrow("+ name + ")").asInteger();
-      LOG.info("R found " + numRows + " rows in file " + name);
-      if (numRows > maxRows) {
+      int numPlottableRows;
+      if (showMissingness) {
+        // TODO get nonStrataCols here and use complete.cases on those only
+      } else {
+        numPlottableRows = connection.eval("sum(complete.cases("+ name + "))").asInteger();
+      }
+      LOG.info("R found " + numPlottableRows + " plottable rows in file " + name);
+      if (numPlottableRows > maxRows) {
         filesTooBig.add(name);
       }
     }

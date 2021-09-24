@@ -105,7 +105,7 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
     String showPoints = spec.getPoints().getValue();
     
     RFileSetProcessor filesProcessor = new RFileSetProcessor(dataStreams)
-      .add(DEFAULT_SINGLE_STREAM_NAME, spec.getMaxAllowedDataPoints(), (name, conn) ->
+      .add(DEFAULT_SINGLE_STREAM_NAME, spec.getMaxAllowedDataPoints(), showMissingness, (name, conn) ->
         conn.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
           spec.getXAxisVariable(),
           spec.getYAxisVariable(),
@@ -114,7 +114,7 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
           getVariableSpecFromList(spec.getFacetVariable(), 1)))
       );
 
-    useRConnectionWithRemoteFiles(dataStreams, connection -> {
+    useRConnectionWithProcessedRemoteFiles(dataStreams, connection -> {
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       String cmd =
           "plot.data::box(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" +

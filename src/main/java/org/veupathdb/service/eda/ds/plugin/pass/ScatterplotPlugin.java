@@ -115,7 +115,7 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
     }
 
     RFileSetProcessor filesProcessor = new RFileSetProcessor(dataStreams)
-      .add(DEFAULT_SINGLE_STREAM_NAME, spec.getMaxAllowedDataPoints(), (name, conn) ->
+      .add(DEFAULT_SINGLE_STREAM_NAME, spec.getMaxAllowedDataPoints(), showMissingness, (name, conn) ->
         conn.voidEval(getVoidEvalFreadCommand(name,
           spec.getXAxisVariable(),
           spec.getYAxisVariable(),
