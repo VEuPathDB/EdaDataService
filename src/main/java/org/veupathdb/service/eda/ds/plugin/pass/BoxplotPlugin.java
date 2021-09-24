@@ -104,9 +104,8 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
     String showMean = spec.getMean() != null ? spec.getMean().getValue() : "FALSE";
     String showPoints = spec.getPoints().getValue();
     
-    RFileSetProcessor filesProcessor = new RFileSetProcessor(dataStreams);
-    if (showPoints.equals("all")) {
-      filesProcessor.add(DEFAULT_SINGLE_STREAM_NAME, 300000, (name, conn) ->
+    RFileSetProcessor filesProcessor = new RFileSetProcessor(dataStreams)
+      .add(DEFAULT_SINGLE_STREAM_NAME, spec.getMaxAllowedDataPoints(), (name, conn) ->
         conn.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
           spec.getXAxisVariable(),
           spec.getYAxisVariable(),
@@ -114,16 +113,6 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)))
       );
-    } else {
-      filesProcessor.add(DEFAULT_SINGLE_STREAM_NAME, (name, conn) ->
-        conn.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
-          spec.getXAxisVariable(),
-          spec.getYAxisVariable(),
-          spec.getOverlayVariable(),
-          getVariableSpecFromList(spec.getFacetVariable(), 0),
-          getVariableSpecFromList(spec.getFacetVariable(), 1)))
-      );
-    }
 
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
