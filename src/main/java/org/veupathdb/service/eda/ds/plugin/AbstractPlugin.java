@@ -254,7 +254,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     return freadCommand;
   }
   
-  protected String getVoidEvalVarMetadataMap(Map<String, VariableSpec> vars) {
+  protected String getVoidEvalVarMetadataMap(String datasetName, Map<String, VariableSpec> vars) {
     boolean first = true;
     String plotRefVector = new String();
     String varColNameVector = new String();
@@ -282,7 +282,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
       }
     }
         
-    String varMetadataMapString = "map <- data.frame("
+    String varMetadataMapString = "map <- " + datasetName + ".frame("
         + "'plotRef'=c(" + plotRefVector + "), "
         + "'id'=c(" + varColNameVector + "), "
         + "'dataType'=c("+ varTypeVector + "), "

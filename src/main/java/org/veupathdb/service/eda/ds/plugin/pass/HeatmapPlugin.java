@@ -26,6 +26,7 @@ import org.veupathdb.service.eda.generated.model.HeatmapPostRequest;
 import org.veupathdb.service.eda.generated.model.HeatmapSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
+import static org.veupathdb.service.eda.ds.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
 public class HeatmapPlugin extends AbstractPlugin<HeatmapPostRequest, HeatmapSpec> {
@@ -116,12 +117,9 @@ public class HeatmapPlugin extends AbstractPlugin<HeatmapPostRequest, HeatmapSpe
           spec.getZAxisVariable(),
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
-      connection.voidEval(getVoidEvalVarMetadataMap(varMap));
-      String outFile = connection.eval("plot.data::heatmap(data, map, '" + spec.getValueSpec().toString().toLowerCase() + "')").asString();
-      try (RFileInputStream response = connection.openFile(outFile)) {
-        IoUtil.transferStream(out, response);
-      }
-      out.flush();
+      connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
+      String cmd = "plot.data::heatmap(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" + spec.getValueSpec().toString().toLowerCase() + "')";
+      streamResult(connection, cmd, out);
     });
   }
 }

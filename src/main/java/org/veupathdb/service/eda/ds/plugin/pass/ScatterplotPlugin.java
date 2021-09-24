@@ -23,6 +23,7 @@ import org.veupathdb.service.eda.generated.model.ScatterplotPostRequest;
 import org.veupathdb.service.eda.generated.model.ScatterplotSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
+import static org.veupathdb.service.eda.ds.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithProcessedRemoteFiles;
 
 public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, ScatterplotSpec> {
@@ -123,13 +124,9 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
       );
 
     useRConnectionWithProcessedRemoteFiles(filesProcessor, connection -> {
-      connection.voidEval(getVoidEvalVarMetadataMap(varMap));
+      connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       String cmd = "plot.data::scattergl(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" + valueSpec + "', " + showMissingness + ")";
-      String outFile = connection.eval(cmd).asString();
-      try (RFileInputStream response = connection.openFile(outFile)) {
-        IoUtil.transferStream(out, response);
-      }
-      out.flush();
+      streamResult(connection, cmd, out);
     }); 
   }
 }

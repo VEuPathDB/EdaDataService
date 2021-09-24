@@ -25,6 +25,7 @@ import org.veupathdb.service.eda.generated.model.MosaicPostRequest;
 import org.veupathdb.service.eda.generated.model.MosaicSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
+import static org.veupathdb.service.eda.ds.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
 public class TwoByTwoPlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpec> {
@@ -92,8 +93,8 @@ public class TwoByTwoPlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpec
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    MosaicSpec spec = getPluginSpec();;
-    Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
+    MosaicSpec spec = getPluginSpec();
+    Map<String, VariableSpec> varMap = new HashMap<>();
     varMap.put("xAxisVariable", spec.getXAxisVariable());
     varMap.put("yAxisVariable", spec.getYAxisVariable());
     varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
@@ -106,12 +107,9 @@ public class TwoByTwoPlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpec
           spec.getYAxisVariable(),
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
-      connection.voidEval(getVoidEvalVarMetadataMap(varMap));
-      String outFile = connection.eval("plot.data::mosaic(data, map, 'bothRatios', " + showMissingness + ")").asString();
-      try (RFileInputStream response = connection.openFile(outFile)) {
-        IoUtil.transferStream(out, response);
-      }
-      out.flush();
+      connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
+      String cmd = "plot.data::mosaic(" + DEFAULT_SINGLE_STREAM_NAME + ", map, 'bothRatios', " + showMissingness + ")";
+      streamResult(connection, cmd, out);
     });
   }
 }

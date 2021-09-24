@@ -26,6 +26,7 @@ import org.veupathdb.service.eda.generated.model.MosaicPostRequest;
 import org.veupathdb.service.eda.generated.model.MosaicSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
+import static org.veupathdb.service.eda.ds.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
 public class ContTablePlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpec> {
@@ -102,19 +103,14 @@ public class ContTablePlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpe
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
-
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
           spec.getXAxisVariable(),
           spec.getYAxisVariable(),
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
-      connection.voidEval(getVoidEvalVarMetadataMap(varMap));
-      String outFile = connection.eval("plot.data::mosaic(data, map, 'chiSq', " + showMissingness + ")").asString();
-
-      try (RFileInputStream response = connection.openFile(outFile)) {
-        IoUtil.transferStream(out, response);
-      }
-      out.flush();
+      connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
+      String cmd = "plot.data::mosaic(" + DEFAULT_SINGLE_STREAM_NAME + ", map, 'chiSq', " + showMissingness + ")";
+      streamResult(connection, cmd, out);
     });
   }
 }

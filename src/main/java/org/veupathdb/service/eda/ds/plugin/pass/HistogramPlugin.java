@@ -29,6 +29,7 @@ import org.veupathdb.service.eda.generated.model.HistogramSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 
+import static org.veupathdb.service.eda.ds.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
 public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, HistogramSpec> {
@@ -118,7 +119,7 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
           spec.getOverlayVariable(),
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
-      connection.voidEval(getVoidEvalVarMetadataMap(varMap));
+      connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       
       if (spec.getViewport() != null) {
         // think if we just pass the string plot.data will convert it to the claimed type
@@ -161,16 +162,14 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
         }
         connection.voidEval("binWidth <- " + binWidth);
       }
-      
-      String outFile = connection.eval("plot.data::histogram(data, map, binWidth, '" + 
-                                                             spec.getValueSpec().getValue() + "', '" + 
-                                                             binReportValue + "', '" + 
-                                                             barMode + "', viewport, " +
-                                                             showMissingness + ")").asString();
-      try (RFileInputStream response = connection.openFile(outFile)) {
-        IoUtil.transferStream(out, response);
-      }
-      out.flush();
+
+      String cmd =
+          "plot.data::histogram(" + DEFAULT_SINGLE_STREAM_NAME + ", map, binWidth, '" +
+               spec.getValueSpec().getValue() + "', '" +
+               binReportValue + "', '" +
+               barMode + "', viewport, " +
+               showMissingness + ")";
+      streamResult(connection, cmd, out);
     });
   }
 }

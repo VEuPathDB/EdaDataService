@@ -1,6 +1,8 @@
 package org.veupathdb.service.eda.ds.util;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +17,7 @@ import org.gusdb.fgputil.functional.FunctionalInterfaces.ConsumerWithException;
 import org.rosuda.REngine.REXP;
 import org.rosuda.REngine.REXPMismatchException;
 import org.rosuda.REngine.Rserve.RConnection;
+import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.rosuda.REngine.Rserve.RFileOutputStream;
 import org.rosuda.REngine.Rserve.RserveException;
 import org.veupathdb.service.eda.ds.Resources;
@@ -94,5 +97,14 @@ public class RServeClient {
     catch (Exception e) {
       LOG.error("Error checking num rows; ignoring", e);
     }
+  }
+
+  public static void streamResult(RConnection connection, String cmd, OutputStream out)
+      throws RserveException, REXPMismatchException, IOException {
+    String outFile = connection.eval(cmd).asString();
+    try (RFileInputStream response = connection.openFile(outFile)) {
+      IoUtil.transferStream(out, response);
+    }
+    out.flush();
   }
 }

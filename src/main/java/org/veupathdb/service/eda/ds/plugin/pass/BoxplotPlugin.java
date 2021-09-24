@@ -21,6 +21,7 @@ import org.veupathdb.service.eda.generated.model.BoxplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BoxplotSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
+import static org.veupathdb.service.eda.ds.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
 public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpec> {
@@ -111,16 +112,14 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
           spec.getOverlayVariable(),
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
-      connection.voidEval(getVoidEvalVarMetadataMap(varMap));
-      String outFile = connection.eval("plot.data::box(data, map, '" +
-          spec.getPoints().getValue() + "', " +
-          showMean + ", " + 
-          computeStats + ", " + 
-          showMissingness + ")").asString();
-      try (RFileInputStream response = connection.openFile(outFile)) {
-        IoUtil.transferStream(out, response);
-      }
-      out.flush();
+      connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
+      String cmd =
+          "plot.data::box(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" +
+              spec.getPoints().getValue() + "', " +
+              showMean + ", " +
+              computeStats + ", " +
+              showMissingness + ")";
+      streamResult(connection, cmd, out);
     });
   }
 }

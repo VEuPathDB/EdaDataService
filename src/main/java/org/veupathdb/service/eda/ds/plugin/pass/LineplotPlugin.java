@@ -25,6 +25,7 @@ import org.veupathdb.service.eda.generated.model.LineplotPostRequest;
 import org.veupathdb.service.eda.generated.model.LineplotSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
+import static org.veupathdb.service.eda.ds.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
 public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, LineplotSpec> {
@@ -113,12 +114,9 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
           spec.getOverlayVariable(),
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
-      connection.voidEval(getVoidEvalVarMetadataMap(varMap));
-      String outFile = connection.eval("plot.data::scattergl(data, map, 'raw'," + showMissingness + ")").asString();
-      try (RFileInputStream response = connection.openFile(outFile)) {
-        IoUtil.transferStream(out, response);
-      }
-      out.flush();
+      connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
+      String cmd = "plot.data::scattergl(" + DEFAULT_SINGLE_STREAM_NAME + ", map, 'raw'," + showMissingness + ")";
+      streamResult(connection, cmd, out);
     }); 
   }
 }
