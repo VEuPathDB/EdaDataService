@@ -3,6 +3,7 @@ package org.veupathdb.service.eda.ds.plugin.pass;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -104,8 +105,16 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
     String showMean = spec.getMean() != null ? spec.getMean().getValue() : "FALSE";
     String showPoints = spec.getPoints().getValue();
     
+    List<String> nonStrataVarColNames = new ArrayList<String>()
+    .add(toColNameOrEmpty(spec.getXAxisVariable()))
+    .add(toColNameOrEmpty(spec.getYAxisVariable()));
+
     RFileSetProcessor filesProcessor = new RFileSetProcessor(dataStreams)
-      .add(DEFAULT_SINGLE_STREAM_NAME, spec.getMaxAllowedDataPoints(), showMissingness, (name, conn) ->
+      .add(DEFAULT_SINGLE_STREAM_NAME, 
+        spec.getMaxAllowedDataPoints(), 
+        showMissingness, 
+        nonStrataVarColNames, 
+        (name, conn) ->
         conn.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
           spec.getXAxisVariable(),
           spec.getYAxisVariable(),
@@ -114,7 +123,7 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
           getVariableSpecFromList(spec.getFacetVariable(), 1)))
       );
 
-    useRConnectionWithProcessedRemoteFiles(dataStreams, connection -> {
+    useRConnectionWithProcessedRemoteFiles(filesProcessor, connection -> {
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       String cmd =
           "plot.data::box(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" +

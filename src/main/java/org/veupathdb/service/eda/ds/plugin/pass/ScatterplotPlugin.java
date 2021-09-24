@@ -3,6 +3,7 @@ package org.veupathdb.service.eda.ds.plugin.pass;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -113,9 +114,17 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
     if (yVarType.equals("DATE") && !valueSpec.equals("raw")) {
       LOG.error("Cannot calculate trend lines for y-axis date variables. The `valueSpec` property must be set to `raw`.");
     }
+    
+    List<String> nonStrataVarColNames = new ArrayList<String>()
+    .add(toColNameOrEmpty(spec.getXAxisVariable()))
+    .add(toColNameOrEmpty(spec.getYAxisVariable()));
 
     RFileSetProcessor filesProcessor = new RFileSetProcessor(dataStreams)
-      .add(DEFAULT_SINGLE_STREAM_NAME, spec.getMaxAllowedDataPoints(), showMissingness, (name, conn) ->
+      .add(DEFAULT_SINGLE_STREAM_NAME, 
+        spec.getMaxAllowedDataPoints(), 
+        showMissingness, 
+        nonStrataVarColNames, 
+        (name, conn) ->
         conn.voidEval(getVoidEvalFreadCommand(name,
           spec.getXAxisVariable(),
           spec.getYAxisVariable(),
