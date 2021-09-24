@@ -67,7 +67,7 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
       .dependencyOrder("xAxisVariable", "overlayVariable", "facetVariable")
       .pattern()
         .element("xAxisVariable")
-          .types(APIVariableType.NUMBER, APIVariableType.DATE)
+          .types(APIVariableType.NUMBER, APIVariableType.DATE, APIVariableType.INTEGER)
           .description("Variable must be a number or date.")
         .element("overlayVariable")
           .maxValues(8)

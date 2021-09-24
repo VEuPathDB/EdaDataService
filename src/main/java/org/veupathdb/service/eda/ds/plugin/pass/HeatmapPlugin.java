@@ -62,7 +62,7 @@ public class HeatmapPlugin extends AbstractPlugin<HeatmapPostRequest, HeatmapSpe
       .dependencyOrder("zAxisVariable", "yAxisVariable", "xAxisVariable", "facetVariable")
       .pattern()
         .element("zAxisVariable")
-          .types(APIVariableType.NUMBER)
+          .types(APIVariableType.NUMBER, APIVariableType.INTEGER)
           .description("Variable must be a number.")
         .element("yAxisVariable")
           .maxValues(1000)
