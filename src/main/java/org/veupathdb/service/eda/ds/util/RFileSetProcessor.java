@@ -34,8 +34,8 @@ public class RFileSetProcessor implements Iterable<RFileSetProcessor.RFileProces
   }
 
   private final Map<String,InputStream> _dataStreams;
-  private final Map<String, Boolean> _showMissingnessMap;
-  private final Map<String, List<String>> _nonStrataColNamesMap;
+  private final Map<String, Boolean> _showMissingnessMap = new HashMap<>();
+  private final Map<String, List<String>> _nonStrataColNamesMap = new HashMap<>();
   private final Map<String, TwoTuple<Optional<Integer>,BiConsumerWithException<String, RConnection>>> _processingInfoMap = new HashMap<>();
 
   public RFileSetProcessor(Map<String, InputStream> dataStreams) {
@@ -58,8 +58,8 @@ public class RFileSetProcessor implements Iterable<RFileSetProcessor.RFileProces
     return this;
   }
 
-   public RFileSetProcessor add(String name, Integer maxAllowedRows, BiConsumerWithException<String, RConnection> fileReader) {
-     add(name, maxAllowedRows, "FALSE", null, fileReader);
+  public RFileSetProcessor add(String name, Integer maxAllowedRows, BiConsumerWithException<String, RConnection> fileReader) {
+     return add(name, maxAllowedRows, "FALSE", null, fileReader);
    }
 
   @Override

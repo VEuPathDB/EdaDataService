@@ -115,9 +115,9 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
       LOG.error("Cannot calculate trend lines for y-axis date variables. The `valueSpec` property must be set to `raw`.");
     }
     
-    List<String> nonStrataVarColNames = new ArrayList<String>()
-    .add(toColNameOrEmpty(spec.getXAxisVariable()))
-    .add(toColNameOrEmpty(spec.getYAxisVariable()));
+    List<String> nonStrataVarColNames = new ArrayList<String>();
+    nonStrataVarColNames.add(toColNameOrEmpty(spec.getXAxisVariable()));
+    nonStrataVarColNames.add(toColNameOrEmpty(spec.getYAxisVariable()));
 
     RFileSetProcessor filesProcessor = new RFileSetProcessor(dataStreams)
       .add(DEFAULT_SINGLE_STREAM_NAME, 
@@ -135,7 +135,10 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
 
     useRConnectionWithProcessedRemoteFiles(filesProcessor, connection -> {
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      String cmd = "plot.data::scattergl(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" + valueSpec + "', " + showMissingness + ")";
+      String cmd = 
+          "plot.data::scattergl(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" + 
+              valueSpec + "', " + 
+              showMissingness + ")";
       streamResult(connection, cmd, out);
     }); 
   }

@@ -94,7 +94,7 @@ public class RServeClient {
           nonStrataColNamesAsRVector = first ? "'" + nonStrataColNamesAsRVector + "'" : ",'" + nonStrataColNamesAsRVector + "'";
         }
         nonStrataColNamesAsRVector = nonStrataColNamesAsRVector + ")";
-        connection.eval("sum(complete.cases(" + name + "[, " + nonStrataColNamesAsRVector + ", with=FALSE]))");
+        numPlottableRows = connection.eval("sum(complete.cases(" + name + "[, " + nonStrataColNamesAsRVector + ", with=FALSE]))").asInteger();
       } else {
         numPlottableRows = connection.eval("sum(complete.cases("+ name + "))").asInteger();
       }

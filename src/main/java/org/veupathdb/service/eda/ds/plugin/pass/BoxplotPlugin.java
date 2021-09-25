@@ -21,7 +21,7 @@ import org.veupathdb.service.eda.generated.model.BoxplotSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import static org.veupathdb.service.eda.ds.util.RServeClient.streamResult;
-import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
+import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithProcessedRemoteFiles;
 
 public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpec> {
 
@@ -105,9 +105,9 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
     String showMean = spec.getMean() != null ? spec.getMean().getValue() : "FALSE";
     String showPoints = spec.getPoints().getValue();
     
-    List<String> nonStrataVarColNames = new ArrayList<String>()
-    .add(toColNameOrEmpty(spec.getXAxisVariable()))
-    .add(toColNameOrEmpty(spec.getYAxisVariable()));
+    List<String> nonStrataVarColNames = new ArrayList<String>();
+    nonStrataVarColNames.add(toColNameOrEmpty(spec.getXAxisVariable()));
+    nonStrataVarColNames.add(toColNameOrEmpty(spec.getYAxisVariable()));
 
     RFileSetProcessor filesProcessor = new RFileSetProcessor(dataStreams)
       .add(DEFAULT_SINGLE_STREAM_NAME, 
