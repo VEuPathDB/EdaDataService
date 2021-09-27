@@ -115,7 +115,7 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
         showMissingness, 
         nonStrataVarColNames, 
         (name, conn) ->
-        conn.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
+        conn.voidEval(getVoidEvalFreadCommand(name, 
           spec.getXAxisVariable(),
           spec.getYAxisVariable(),
           spec.getOverlayVariable(),
