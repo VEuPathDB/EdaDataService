@@ -47,7 +47,7 @@ public class RFileSetProcessor implements Iterable<RFileSetProcessor.RFileProces
   }
 
   public RFileSetProcessor add(String name, Integer maxAllowedRows, String showMissingness, List<String> nonStrataColNames, BiConsumerWithException<String, RConnection> fileReader) {
-    Boolean booleanShowMissingness = showMissingness.equals("FALSE") ? false : true;
+    Boolean booleanShowMissingness = "FALSE".equals(showMissingness) ? false : true;
     
     if (!_dataStreams.containsKey(name)) {
       throw new IllegalArgumentException("name parameter value '" + name + "' must be contained in dataStreams map passed to constructor");
