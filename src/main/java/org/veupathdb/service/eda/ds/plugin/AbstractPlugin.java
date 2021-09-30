@@ -282,7 +282,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
       }
     }
         
-    String varMetadataMapString = "map <- " + datasetName + ".frame("
+    String varMetadataMapString = "map <- data.frame("
         + "'plotRef'=c(" + plotRefVector + "), "
         + "'id'=c(" + varColNameVector + "), "
         + "'dataType'=c("+ varTypeVector + "), "
