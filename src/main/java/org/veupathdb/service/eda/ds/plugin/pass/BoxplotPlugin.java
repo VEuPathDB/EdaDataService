@@ -3,6 +3,7 @@ package org.veupathdb.service.eda.ds.plugin.pass;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -13,13 +14,14 @@ import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.ds.constraints.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.ds.util.RFileSetProcessor;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.BoxplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BoxplotSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import static org.veupathdb.service.eda.ds.util.RServeClient.streamResult;
-import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
+import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithProcessedRemoteFiles;
 
 public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpec> {
 
@@ -101,18 +103,31 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
     String computeStats = spec.getComputeStats() != null ? spec.getComputeStats().getValue() : "FALSE";
     String showMean = spec.getMean() != null ? spec.getMean().getValue() : "FALSE";
+    String showPoints = spec.getPoints().getValue();
     
-    useRConnectionWithRemoteFiles(dataStreams, connection -> {
-      connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
+    List<String> nonStrataVarColNames = new ArrayList<String>();
+    nonStrataVarColNames.add(toColNameOrEmpty(spec.getXAxisVariable()));
+    nonStrataVarColNames.add(toColNameOrEmpty(spec.getYAxisVariable()));
+
+    RFileSetProcessor filesProcessor = new RFileSetProcessor(dataStreams)
+      .add(DEFAULT_SINGLE_STREAM_NAME, 
+        spec.getMaxAllowedDataPoints(), 
+        showMissingness, 
+        nonStrataVarColNames, 
+        (name, conn) ->
+        conn.voidEval(getVoidEvalFreadCommand(name, 
           spec.getXAxisVariable(),
           spec.getYAxisVariable(),
           spec.getOverlayVariable(),
           getVariableSpecFromList(spec.getFacetVariable(), 0),
-          getVariableSpecFromList(spec.getFacetVariable(), 1)));
+          getVariableSpecFromList(spec.getFacetVariable(), 1)))
+      );
+
+    useRConnectionWithProcessedRemoteFiles(filesProcessor, connection -> {
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       String cmd =
           "plot.data::box(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" +
-              spec.getPoints().getValue() + "', " +
+              showPoints + "', " +
               showMean + ", " +
               computeStats + ", " +
               showMissingness + ")";

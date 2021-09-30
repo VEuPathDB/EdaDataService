@@ -64,7 +64,7 @@ public class RServeClient {
           spec.fileReader.accept(connection);
 
           // if requested, check number of rows read against max and throw later if violated
-          spec.maxAllowedRows.ifPresent(maxRows -> checkMaxRows(connection, spec.name, filesTooBig, maxRows));
+          spec.maxAllowedRows.ifPresent(maxRows -> checkMaxRows(connection, spec.name, spec.showMissingness, spec.nonStrataColNames, filesTooBig, maxRows));
         }
 
         // if any files too big, throw
@@ -84,11 +84,22 @@ public class RServeClient {
     });
   }
 
-  private static void checkMaxRows(RConnection connection, String name, List<String> filesTooBig, Integer maxRows) {
+  private static void checkMaxRows(RConnection connection, String name, Boolean showMissingness, List<String> nonStrataColNames, List<String> filesTooBig, Integer maxRows) {
     try {
-      int numRows = connection.eval("nrow("+ name + ")").asInteger();
-      LOG.info("R found " + numRows + " rows in file " + name);
-      if (numRows - 1 /* header? */ > maxRows) {
+      int numPlottableRows;
+      if (showMissingness) {
+        String nonStrataColNamesAsRVector = "c(";
+        Boolean first = true;
+        for (String nonStrataColName : nonStrataColNames) {
+          nonStrataColNamesAsRVector = first ? "'" + nonStrataColNamesAsRVector + "'" : ",'" + nonStrataColNamesAsRVector + "'";
+        }
+        nonStrataColNamesAsRVector = nonStrataColNamesAsRVector + ")";
+        numPlottableRows = connection.eval("sum(complete.cases(" + name + "[, " + nonStrataColNamesAsRVector + ", with=FALSE]))").asInteger();
+      } else {
+        numPlottableRows = connection.eval("sum(complete.cases("+ name + "))").asInteger();
+      }
+        LOG.info("R found " + numPlottableRows + " plottable rows in file " + name);
+      if (numPlottableRows > maxRows) {
         filesTooBig.add(name);
       }
     }
