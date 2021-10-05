@@ -18,12 +18,12 @@ public class RFileSetProcessor implements Iterable<RFileSetProcessor.RFileProces
 
     public final String name;
     public final InputStream stream;
-    public final Optional<Integer> maxAllowedRows;
+    public final Optional<Long> maxAllowedRows;
     public final Boolean showMissingness;
     public final List<String> nonStrataColNames;
     public final ConsumerWithException<RConnection> fileReader;
 
-    public RFileProcessingSpec(String name, InputStream stream, Boolean showMissingness, List<String> nonStrataColNames, Optional<TwoTuple<Optional<Integer>,BiConsumerWithException<String, RConnection>>> processingInfo) {
+    public RFileProcessingSpec(String name, InputStream stream, Boolean showMissingness, List<String> nonStrataColNames, Optional<TwoTuple<Optional<Long>,BiConsumerWithException<String, RConnection>>> processingInfo) {
       this.name = name;
       this.stream = stream;
       this.maxAllowedRows = processingInfo.map(i -> i.getFirst()).orElse(Optional.empty());
@@ -36,7 +36,7 @@ public class RFileSetProcessor implements Iterable<RFileSetProcessor.RFileProces
   private final Map<String,InputStream> _dataStreams;
   private final Map<String, Boolean> _showMissingnessMap = new HashMap<>();
   private final Map<String, List<String>> _nonStrataColNamesMap = new HashMap<>();
-  private final Map<String, TwoTuple<Optional<Integer>,BiConsumerWithException<String, RConnection>>> _processingInfoMap = new HashMap<>();
+  private final Map<String, TwoTuple<Optional<Long>,BiConsumerWithException<String, RConnection>>> _processingInfoMap = new HashMap<>();
 
   public RFileSetProcessor(Map<String, InputStream> dataStreams) {
     _dataStreams = dataStreams;
@@ -46,7 +46,7 @@ public class RFileSetProcessor implements Iterable<RFileSetProcessor.RFileProces
     return add(name, null, "FALSE", null, fileReader);
   }
 
-  public RFileSetProcessor add(String name, Integer maxAllowedRows, String showMissingness, List<String> nonStrataColNames, BiConsumerWithException<String, RConnection> fileReader) {
+  public RFileSetProcessor add(String name, Long maxAllowedRows, String showMissingness, List<String> nonStrataColNames, BiConsumerWithException<String, RConnection> fileReader) {
     Boolean booleanShowMissingness = "FALSE".equals(showMissingness) ? false : true;
     
     if (!_dataStreams.containsKey(name)) {
@@ -58,7 +58,7 @@ public class RFileSetProcessor implements Iterable<RFileSetProcessor.RFileProces
     return this;
   }
 
-  public RFileSetProcessor add(String name, Integer maxAllowedRows, BiConsumerWithException<String, RConnection> fileReader) {
+  public RFileSetProcessor add(String name, Long maxAllowedRows, BiConsumerWithException<String, RConnection> fileReader) {
      return add(name, maxAllowedRows, "FALSE", null, fileReader);
    }
 

@@ -74,6 +74,7 @@ install-dev-env:
 	else \
 		cd .tools && git pull && cd ..; \
 	fi
+	cd .tools && git checkout int-to-long && cd ..
 	@$(BIN_DIR)/check-env.sh
 	@$(BIN_DIR)/install-fgputil.sh
 	@$(BIN_DIR)/install-oracle.sh

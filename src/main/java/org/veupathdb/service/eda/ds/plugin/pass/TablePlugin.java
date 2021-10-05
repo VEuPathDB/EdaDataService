@@ -73,8 +73,8 @@ public class TablePlugin extends AbstractPlugin<TablePostRequest, TableSpec> {
     BufferedWriter bufOut = new BufferedWriter(new OutputStreamWriter(out));
     //get paging config
     TableSpec spec = getPluginSpec();
-    Integer numRows = spec.getPagingConfig().getNumRows();
-    Integer offset = spec.getPagingConfig().getOffset();
+    Long numRows = spec.getPagingConfig().getNumRows();
+    Long offset = spec.getPagingConfig().getOffset();
     
     // create scanner and line parser
     Scanner s = new Scanner(dataStreams.get(DEFAULT_SINGLE_STREAM_NAME)).useDelimiter(NL);

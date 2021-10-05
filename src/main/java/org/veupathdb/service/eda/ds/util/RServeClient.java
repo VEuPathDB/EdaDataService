@@ -84,7 +84,7 @@ public class RServeClient {
     });
   }
 
-  private static void checkMaxRows(RConnection connection, String name, Boolean showMissingness, List<String> nonStrataColNames, List<String> filesTooBig, Integer maxRows) {
+  private static void checkMaxRows(RConnection connection, String name, Boolean showMissingness, List<String> nonStrataColNames, List<String> filesTooBig, Long maxRows) {
     try {
       int numPlottableRows;
       if (showMissingness) {
