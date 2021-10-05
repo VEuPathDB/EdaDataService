@@ -1,5 +1,6 @@
 package org.veupathdb.service.eda.ds.service;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.function.Consumer;
@@ -38,7 +39,7 @@ public class PassThroughService implements Studies {
   private interface DataProducer extends
       FunctionWithException<EdaSubsettingClient, Either<InputStream, RequestFailure>> {}
 
-  private Consumer<OutputStream> buildStreamer(DataProducer dataProducer) {
+  private static Consumer<OutputStream> buildStreamer(DataProducer dataProducer) {
     try {
       // get result
       Either<InputStream, RequestFailure> result =
@@ -62,6 +63,12 @@ public class PassThroughService implements Studies {
     }
   }
 
+  private static String convertToString(Consumer<OutputStream> writer) {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    writer.accept(out);
+    return out.toString();
+  }
+
   @Override
   public GetStudiesResponse getStudies() {
     return GetStudiesResponse.respond200WithApplicationJson(
@@ -70,9 +77,8 @@ public class PassThroughService implements Studies {
 
   @Override
   public GetStudiesClearMetadataCacheResponse getStudiesClearMetadataCache() {
-    // make the request but discard all bytes (don't expect to receive any)
-    buildStreamer(c -> c.clearMetadataCache()).accept(OutputStream.nullOutputStream());
-    return GetStudiesClearMetadataCacheResponse.respond202();
+    return GetStudiesClearMetadataCacheResponse.respond200WithTextPlain(
+        convertToString(buildStreamer(c -> c.clearMetadataCache())));
   }
 
   @Override
