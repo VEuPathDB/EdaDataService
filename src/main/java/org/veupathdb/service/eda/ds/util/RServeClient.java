@@ -19,6 +19,7 @@ import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.rosuda.REngine.Rserve.RFileOutputStream;
 import org.rosuda.REngine.Rserve.RserveException;
 import org.veupathdb.service.eda.ds.Resources;
+import org.veupathdb.service.eda.ds.util.NonEmptyResultStream.EmptyResultException;
 import org.veupathdb.service.eda.ds.util.RFileSetProcessor.RFileProcessingSpec;
 
 public class RServeClient {
@@ -36,7 +37,7 @@ public class RServeClient {
       consumer.accept(c);
     }
     catch (Exception e) {
-      throw e instanceof WebApplicationException ? (WebApplicationException)e :
+      throw e instanceof RuntimeException ? (RuntimeException)e :
           new RuntimeException("Unable to complete processing", e);
     }
     finally {
