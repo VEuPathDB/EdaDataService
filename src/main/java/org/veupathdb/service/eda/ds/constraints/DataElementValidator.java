@@ -25,6 +25,8 @@ public class DataElementValidator {
   }
 
   public void validate(DataElementSet values) throws ValidationException {
+
+    // TODO: don't forget to make sure variables specified are unique e.g. you cannot use the same var for x and y axes
   }
 
   private EntityDef validateEntityAndGet(String entityId) throws ValidationException {

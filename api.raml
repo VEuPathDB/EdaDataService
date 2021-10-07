@@ -266,7 +266,9 @@ securitySchemes:
     displayName: Clears the metadata cache; useful if new data has been loaded into the database
     get:
       responses:
-        202:
+        200:
+          body:
+            text/plain:
 
   /{study-id}:
     uriParameters:
