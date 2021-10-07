@@ -115,7 +115,7 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
       
       if (spec.getViewport() != null) {
         // think if we just pass the string plot.data will convert it to the claimed type
-        if (xVarType.equals("NUMBER")) {
+        if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
           connection.voidEval("viewport <- list('xMin'=" + spec.getViewport().getXMin() + ", 'xMax'=" + spec.getViewport().getXMax() + ")");
         } else {
           connection.voidEval("viewport <- list('xMin'=" + singleQuote(spec.getViewport().getXMin()) + ", 'xMax'=" + singleQuote(spec.getViewport().getXMax()) + ")");
@@ -132,7 +132,7 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
         if (binSpec.getValue() != null) {
           String numBins = binSpec.getValue().toString();
           connection.voidEval("xVP <- adjustToViewport(data$" + xVar + ", viewport)");
-          if (xVarType.equals("NUMBER")) {
+          if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
             connection.voidEval("xRange <- diff(range(xVP))");
             connection.voidEval("binWidth <- xRange/" + numBins);
           } else {
@@ -144,7 +144,7 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
         }
       } else {
         String binWidth = "NULL";
-        if (xVarType.equals("NUMBER")) {
+        if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
           binWidth = binSpec.getValue() == null ? "NULL" : "as.numeric('" + binSpec.getValue() + "')";
           if (binSpec.getUnits() != null) {
             LOG.warn("The `units` property of the `BinSpec` class is only used for DATE x-axis variables. It will be ignored.");
