@@ -4,31 +4,24 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.gusdb.fgputil.IoUtil;
 import org.gusdb.fgputil.ListBuilder;
-import org.gusdb.fgputil.validation.ValidationBundle;
-import org.gusdb.fgputil.validation.ValidationBundle.ValidationBundleBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
-import org.gusdb.fgputil.validation.ValidationLevel;
-import org.rosuda.REngine.Rserve.RFileInputStream;
-import org.veupathdb.service.eda.common.model.EntityDef;
-import org.veupathdb.service.eda.common.model.ReferenceMetadata;
+import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.ds.constraints.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.BinSpec;
 import org.veupathdb.service.eda.generated.model.HistogramPostRequest;
 import org.veupathdb.service.eda.generated.model.HistogramSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
-import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 
+import static org.veupathdb.service.eda.ds.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
 public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, HistogramSpec> {
@@ -66,7 +59,7 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
       .dependencyOrder("xAxisVariable", "overlayVariable", "facetVariable")
       .pattern()
         .element("xAxisVariable")
-          .types(APIVariableType.NUMBER, APIVariableType.DATE)
+          .types(APIVariableType.NUMBER, APIVariableType.DATE, APIVariableType.INTEGER)
           .description("Variable must be a number or date.")
         .element("overlayVariable")
           .maxValues(8)
@@ -118,11 +111,11 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
           spec.getOverlayVariable(),
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
-      connection.voidEval(getVoidEvalVarMetadataMap(varMap));
+      connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       
       if (spec.getViewport() != null) {
         // think if we just pass the string plot.data will convert it to the claimed type
-        if (xVarType.equals("NUMBER")) {
+        if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
           connection.voidEval("viewport <- list('xMin'=" + spec.getViewport().getXMin() + ", 'xMax'=" + spec.getViewport().getXMax() + ")");
         } else {
           connection.voidEval("viewport <- list('xMin'=" + singleQuote(spec.getViewport().getXMin()) + ", 'xMax'=" + singleQuote(spec.getViewport().getXMax()) + ")");
@@ -139,7 +132,7 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
         if (binSpec.getValue() != null) {
           String numBins = binSpec.getValue().toString();
           connection.voidEval("xVP <- adjustToViewport(data$" + xVar + ", viewport)");
-          if (xVarType.equals("NUMBER")) {
+          if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
             connection.voidEval("xRange <- diff(range(xVP))");
             connection.voidEval("binWidth <- xRange/" + numBins);
           } else {
@@ -151,7 +144,7 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
         }
       } else {
         String binWidth = "NULL";
-        if (xVarType.equals("NUMBER")) {
+        if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
           binWidth = binSpec.getValue() == null ? "NULL" : "as.numeric('" + binSpec.getValue() + "')";
           if (binSpec.getUnits() != null) {
             LOG.warn("The `units` property of the `BinSpec` class is only used for DATE x-axis variables. It will be ignored.");
@@ -161,16 +154,14 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
         }
         connection.voidEval("binWidth <- " + binWidth);
       }
-      
-      String outFile = connection.eval("plot.data::histogram(data, map, binWidth, '" + 
-                                                             spec.getValueSpec().getValue() + "', '" + 
-                                                             binReportValue + "', '" + 
-                                                             barMode + "', viewport, " +
-                                                             showMissingness + ")").asString();
-      try (RFileInputStream response = connection.openFile(outFile)) {
-        IoUtil.transferStream(out, response);
-      }
-      out.flush();
+
+      String cmd =
+          "plot.data::histogram(" + DEFAULT_SINGLE_STREAM_NAME + ", map, binWidth, '" +
+               spec.getValueSpec().getValue() + "', '" +
+               binReportValue + "', '" +
+               barMode + "', viewport, " +
+               showMissingness + ")";
+      streamResult(connection, cmd, out);
     });
   }
 }

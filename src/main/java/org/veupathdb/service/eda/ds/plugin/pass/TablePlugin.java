@@ -5,17 +5,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Scanner;
-import java.util.function.Function;
 import org.gusdb.fgputil.DelimitedDataParser;
-import org.gusdb.fgputil.FormatUtil;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.json.JSONArray;
@@ -24,10 +18,8 @@ import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.ds.constraints.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.TablePostRequest;
 import org.veupathdb.service.eda.generated.model.TableSpec;
-import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import static org.gusdb.fgputil.FormatUtil.NL;
 import static org.gusdb.fgputil.FormatUtil.TAB;
@@ -81,8 +73,8 @@ public class TablePlugin extends AbstractPlugin<TablePostRequest, TableSpec> {
     BufferedWriter bufOut = new BufferedWriter(new OutputStreamWriter(out));
     //get paging config
     TableSpec spec = getPluginSpec();
-    Integer numRows = spec.getPagingConfig().getNumRows();
-    Integer offset = spec.getPagingConfig().getOffset();
+    Long numRows = spec.getPagingConfig().getNumRows();
+    Long offset = spec.getPagingConfig().getOffset();
     
     // create scanner and line parser
     Scanner s = new Scanner(dataStreams.get(DEFAULT_SINGLE_STREAM_NAME)).useDelimiter(NL);

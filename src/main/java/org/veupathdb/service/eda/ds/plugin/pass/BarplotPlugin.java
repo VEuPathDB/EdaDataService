@@ -4,26 +4,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import org.gusdb.fgputil.IoUtil;
 import org.gusdb.fgputil.ListBuilder;
-import org.gusdb.fgputil.validation.ValidationBundle;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.json.JSONObject;
-import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
-import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.ds.constraints.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
 import org.veupathdb.service.eda.generated.model.BarplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BarplotSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
+import static org.veupathdb.service.eda.ds.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
 public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpec> {
@@ -186,15 +182,13 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
             spec.getOverlayVariable(),
             getVariableSpecFromList(spec.getFacetVariable(), 0),
             getVariableSpecFromList(spec.getFacetVariable(), 1)));
-        connection.voidEval(getVoidEvalVarMetadataMap(varMap));
-        String outFile = connection.eval("plot.data::bar(data, map, '" + 
-                                                         spec.getValueSpec().getValue() + "', '" + 
-                                                         barMode + "', " +
-                                                         showMissingness + ")").asString();
-        try (RFileInputStream response = connection.openFile(outFile)) {
-          IoUtil.transferStream(out, response);
-        }
-        out.flush();
+        connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
+        String cmd =
+            "plot.data::bar(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" +
+                spec.getValueSpec().getValue() + "', '" +
+                barMode + "', " +
+                showMissingness + ")";
+        streamResult(connection, cmd, out);
       });
     }
   }

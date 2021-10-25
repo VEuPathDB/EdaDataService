@@ -3,7 +3,6 @@ package org.veupathdb.service.eda.ds.util;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import javax.ws.rs.BadRequestException;
 
 /**
  * Wrapper around an input stream whose content must be a newline-delimited
