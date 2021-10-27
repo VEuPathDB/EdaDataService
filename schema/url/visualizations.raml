@@ -13,21 +13,8 @@ types:
       derivedVariables:
         required: false
         type: DerivedVariable[]
-      computeConfig:
-        required: false
-        type: ComputeConfig
                   
   StrataVariableDetails:
     type: VariableSpec
     properties:
       value: string
-
-  # Should be moved to edacommon -- leaving here until merge for easier iteration
-  ComputeConfig:
-        type: object
-        additionalProperties: false
-        properties:
-          name: string
-          parameters:
-            required: false
-            type: string[]

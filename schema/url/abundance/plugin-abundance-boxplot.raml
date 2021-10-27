@@ -6,6 +6,7 @@ types:
   AbundanceBoxplotPostRequest:
     type: VisualizationRequestBase
     properties:
+      computeConfig: AbundanceComputeConfig
       config: AbundanceBoxplotSpec
 
   # Assuming abundance must be on y axis and that x axis is determined by compute service unless user selects custom listvar

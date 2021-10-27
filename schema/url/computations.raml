@@ -1,0 +1,126 @@
+#%RAML 1.0 Library
+
+types:
+  #generally need to talk w others about how and where all this lives ideally/ when there is a compute service
+
+  #is this a good way to try to force everything to have a name and parameters of whatever theyd like?
+  #assumed this gets passed directly to compute service, and so wants the name explicitly
+  ComputeConfig:
+    type: object
+      additionalProperties: false
+      properties:
+        name: string
+        parameters:
+          required: false
+
+  #how do we want to ensure the collectionVariable is a collection variable?
+  #presumably the compute service will check and err, but do we want to talk about constraints?
+  AlphaDivComputeConfig:
+    type: ComputeConfig
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          enum: ['AlphaDivComputation']
+        parameters:
+          collectionVariable: VariableSpec
+
+  AbundanceComputeConfig:
+    type: ComputeConfig
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          enum: ['RelativeAbundanceComputation']
+        parameters:
+          collectionVariable: VariableSpec
+
+  BetaDivComputeConfig:
+    type: ComputeConfig
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          enum: ['BetaDivComputation']
+        parameters:
+          collectionVariable: VariableSpec
+          method:
+            type: string
+            enum: ['unifrac', 'wunifrac', 'bray', 'jaccard', 'jensen-shannon']
+  
+  #schema for compute responses. dont think well need it for now, but leaving the draft here
+  #the compute will be baked right in to the viz plugin until we have a compute service
+  #think we still need to draft the *ComputeData objects
+  AbundanceComputePostResponse:
+    additionalProperties: false
+    properties:
+      data: 
+        type: AbundanceComputeData # some data table with samples as rows
+      appMetadata: AbundanceMetadata[] # one per computation.
+      stats: # none?
+
+  AbundanceComputeData:
+    additionalProperties: false
+    properties: 
+      todo:
+
+  AbundanceMetadata:
+    additionalProperties: false
+    type: Metadata
+    properties:
+      wasCutoff:
+        type: boolean
+
+  AlphaDivComputePostRespose:
+    additionalProperties: false
+    properties:
+      data:
+        type: AlphaDivComputeData # some data table with samples as rows
+      appMetadata: 
+        type: Metadata[]
+      stats: # none?
+
+  AlphaDivComputeData:
+    additionalProperties: false
+    properties: 
+      todo:
+
+  BetaDivComputePostResponse:
+    additionalProperties: false
+    properties: 
+      data:
+        type: BetaDivComputeData  # some data table with samples as rows
+      appMetadata:
+        type: Metadata[]
+      stats: BetaDivStats[]
+
+  BetaDivComputeData:
+    additionalProperties: false
+    properties:
+      todo:
+
+  BetaDivStats:
+    additionalProperties: false
+    properties: 
+      pcoaVariance: 
+        type: number[]    # Ex. [0.5, 0.2, ...]
+
+  #some questions here
+  #what if there is more than one computed var? need multiple ranges?
+  #what if the computed var is categorical, edge case for now but still
+  #may need a better name for computeName, not to be confused w the name prop above? what is this?
+  Metadata:
+    additionalProperties: false
+    properties:
+      computedVariableColumnNames:
+        type: string[]    # Ex. ['shannon’]
+      computedVariableLabels:
+        type: string[]    # Ex. ['Alpha Diversity: Shannon']
+        required: false
+      computedVariableRange:
+        type: number[]    # Ex. [0, 1]
+        required: false
+      computeDetails:
+        type: string      # Ex. 'No convergence after 100 iterations' or ‘134 of 150 samples have sufficient data for this computation’
+      computeName:
+        type: string # Ex. 'median'
