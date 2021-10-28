@@ -25,17 +25,17 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
 
   @Override
   public String getDisplayName() {
-    return "Time series";
+    return "Line Plot";
   }
 
   @Override
   public String getDescription() {
-    return "Visualize aggregate values of one variable across the sequential values of a temporal variable";
+    return "Visualize aggregate values of one variable across the sequential values of another variable";
   }
 
   @Override
   public List<String> getProjects() {
-    return Arrays.asList("ClinEpiDB", "MicrobiomeDB");
+    return Arrays.asList("MicrobiomeDB");
   }
   
   @Override
