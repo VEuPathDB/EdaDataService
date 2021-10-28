@@ -1,68 +1,70 @@
 #%RAML 1.0 Library
 
 types:
-  #generally need to talk w others about how and where all this lives ideally/ when there is a compute service
+  # where will all this live ideally/ when there is a compute service?
 
-  #is this a good way to try to force everything to have a name and parameters of whatever theyd like?
-  #assumed this gets passed directly to compute service, and so wants the name explicitly
   ComputeConfig:
-    type: object
-      additionalProperties: false
-      properties:
-        name: string
-        parameters:
-          required: false
+    additionalProperties: false
+    properties:
+      name: string
+      parameters:
+        required: false
+        type: object
 
-  #how do we want to ensure the collectionVariable is a collection variable?
-  #presumably the compute service will check and err, but do we want to talk about constraints?
+  # how do we want to ensure the collectionVariable is a collection variable?
+  # presumably the compute service will check and err
+  # but do we want to talk about constraints?
   AlphaDivComputeConfig:
     type: ComputeConfig
-      additionalProperties: false
-      properties:
-        name:
-          type: string
-          enum: ['AlphaDivComputation']
-        parameters:
+    additionalProperties: false
+    properties:
+      name:
+        type: string
+        enum: ['AlphaDivComputation']
+      parameters:
+        properties:
           collectionVariable: VariableSpec
 
   AbundanceComputeConfig:
     type: ComputeConfig
-      additionalProperties: false
-      properties:
-        name:
-          type: string
-          enum: ['RelativeAbundanceComputation']
-        parameters:
+    additionalProperties: false
+    properties:
+      name:
+        type: string
+        enum: ['RelativeAbundanceComputation']
+      parameters:
+        properties:
           collectionVariable: VariableSpec
 
   BetaDivComputeConfig:
     type: ComputeConfig
-      additionalProperties: false
-      properties:
-        name:
-          type: string
-          enum: ['BetaDivComputation']
-        parameters:
+    additionalProperties: false
+    properties:
+      name:
+        type: string
+        enum: ['BetaDivComputation']
+      parameters:
+        properties:
           collectionVariable: VariableSpec
           method:
             type: string
             enum: ['unifrac', 'wunifrac', 'bray', 'jaccard', 'jensen-shannon']
-  
-  #schema for compute responses. dont think well need it for now, but leaving the draft here
-  #the compute will be baked right in to the viz plugin until we have a compute service
-  #think we still need to draft the *ComputeData objects
+
+  # compute responses. for later, but leaving the draft here
+  # the compute will be baked right in to the viz plugin for now
+  # still need to draft the *ComputeData objects
   AbundanceComputePostResponse:
     additionalProperties: false
     properties:
-      data: 
+      data:
         type: AbundanceComputeData # some data table with samples as rows
       appMetadata: AbundanceMetadata[] # one per computation.
-      stats: # none?
+      stats: string # none?
 
   AbundanceComputeData:
     additionalProperties: false
-    properties: 
-      todo:
+    properties:
+      todo: string
 
   AbundanceMetadata:
     additionalProperties: false
@@ -76,18 +78,18 @@ types:
     properties:
       data:
         type: AlphaDivComputeData # some data table with samples as rows
-      appMetadata: 
+      appMetadata:
         type: Metadata[]
-      stats: # none?
+      stats: string # none?
 
   AlphaDivComputeData:
     additionalProperties: false
-    properties: 
-      todo:
+    properties:
+      todo: string
 
   BetaDivComputePostResponse:
     additionalProperties: false
-    properties: 
+    properties:
       data:
         type: BetaDivComputeData  # some data table with samples as rows
       appMetadata:
@@ -97,18 +99,21 @@ types:
   BetaDivComputeData:
     additionalProperties: false
     properties:
-      todo:
+      todo: string
 
   BetaDivStats:
     additionalProperties: false
-    properties: 
-      pcoaVariance: 
+    properties:
+      pcoaVariance:
         type: number[]    # Ex. [0.5, 0.2, ...]
 
-  #some questions here
-  #what if there is more than one computed var? need multiple ranges?
-  #what if the computed var is categorical, edge case for now but still
-  #may need a better name for computeName, not to be confused w the name prop above? what is this?
+  # some questions here
+  # what if there is more than one computed var? need multiple ranges?
+  # what if the computed var is categorical, edge case for now but still
+  # need better name for computeName, not to be confused w name prop above?
+  # what is computeName anyway?
+  # two conceptual levels here ComputedVariableMetadata and ComputeMetadata
+  # maybe Metadata -> ComputeMetadata and has a ComputedVariableMetadata child?
   Metadata:
     additionalProperties: false
     properties:
@@ -121,6 +126,6 @@ types:
         type: number[]    # Ex. [0, 1]
         required: false
       computeDetails:
-        type: string      # Ex. 'No convergence after 100 iterations' or ‘134 of 150 samples have sufficient data for this computation’
+        type: string      # Ex. 'No convergence after 100 iterations'
       computeName:
         type: string # Ex. 'median'
