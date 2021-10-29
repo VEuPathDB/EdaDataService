@@ -30,7 +30,7 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
 
   @Override
   public String getDescription() {
-    return "Visualize aggregate values of one variable across the sequential values of another variable";
+    return "Visualize aggregate values of one variable across the sequential values of an ordered variable";
   }
 
   @Override
