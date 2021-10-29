@@ -109,7 +109,7 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      String cmd = "plot.data::scattergl(" + DEFAULT_SINGLE_STREAM_NAME + ", map, " + valueSpec + "," + showMissingness + ")";
+      String cmd = "plot.data::scattergl(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" + valueSpec + "'," + showMissingness + ")";
       streamResult(connection, cmd, out);
     }); 
   }
