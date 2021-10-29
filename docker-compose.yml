@@ -9,22 +9,43 @@ services:
     - external
     - monitoring-ext
     environment:
-      # if ascertaining DB via LDAP
-      LDAP_SERVER:
-      ORACLE_BASE_DN:
-      APP_DB_TNS_NAME:
-      # if using DB name directly
-      APP_DB_NAME:
-      APP_DB_HOST:
-      # connection credentials (needed regardless of method)
-      APP_DB_USER:
-      APP_DB_PASS:
-      APP_DB_SCHEMA: ${APP_DB_SCHEMA:-apidb.}
       # port providing the service
       SERVER_PORT: ${SUBSETTING_SERVER_PORT:-8080}
+
+      # URLs of required services
+      DATASET_ACCESS_SERVICE_URL: ${DATASET_ACCESS_SERVICE_URL:-http://dataset-access}:${DATASET_ACCESS_SERVER_PORT:-8080}
+
+      # LDAP values to look up DBs
+      LDAP_SERVER: ${LDAP_SERVER}
+      ORACLE_BASE_DN: ${ORACLE_BASE_DN}
+
+      # Application Database
+      APP_DB_TNS_NAME: ${APP_DB_TNS_NAME}
+      APP_DB_USER: ${APP_DB_USER}
+      APP_DB_PASS: ${APP_DB_PASS}
+      APP_DB_SCHEMA: ${APP_DB_SCHEMA:-eda.}
+
+      # Account Database
+      ACCT_DB_TNS_NAME: ${ACCT_DB_TNS_NAME}
+      ACCT_DB_USER: ${ACCT_DB_USER}
+      ACCT_DB_PASS: ${ACCT_DB_PASS}
+
+      # User Database
+      USER_DB_TNS_NAME: ${USER_DB_TNS_NAME}
+      USER_DB_USER: ${USER_DB_USER}
+      USER_DB_PASS: ${USER_DB_PASS}
+
+      # Auth Secret (needed along with user/acct DBs for auth)
+      AUTH_SECRET_KEY: ${AUTH_SECRET_KEY}
+
     labels:
     - "prometheus.scrape_enabled=true"
     - "com.centurylinklabs.watchtower.enable=${SUBSETTING_WATCHTOWER:-false}"
+    - "traefik.http.services.${TRAEFIK_SUBSETTING_ROUTER:-edasubsetting-dev}.loadbalancer.server.port=${SUBSETTING_SERVER_PORT:-8080}"
+    - "traefik.http.routers.${TRAEFIK_SUBSETTING_ROUTER:-edasubsetting-dev}.rule=Host(`${TRAEFIK_DATA_HOST:-edadata-dev.local.apidb.org}`) && PathPrefix(`/studies/`)"
+    - "traefik.http.routers.${TRAEFIK_SUBSETTING_ROUTER:-edasubsetting-dev}.tls=true"
+    - "traefik.http.routers.${TRAEFIK_SUBSETTING_ROUTER:-edasubsetting-dev}.entrypoints=${TRAEFIK_ENTRYPOINTS:-local}"
+    - "traefik.docker.network=traefik"
 
   merging:
     image: veupathdb/eda-merging:${MERGING_TAG:-latest}
@@ -32,8 +53,12 @@ services:
     - internal
     - monitoring-ext
     environment:
-      SUBSETTING_SERVICE_URL: ${SUBSETTING_SERVICE_URL:-http://subsetting}:${SUBSETTING_SERVER_PORT:-8080}
+      # port providing the service
       SERVER_PORT: ${MERGING_SERVER_PORT:-8080}
+
+      # URLs of required services
+      SUBSETTING_SERVICE_URL: ${SUBSETTING_SERVICE_URL:-http://subsetting}:${SUBSETTING_SERVER_PORT:-8080}
+
     labels:
     - "prometheus.scrape_enabled=true"
     - "com.centurylinklabs.watchtower.enable=${MERGING_WATCHTOWER:-false}"
@@ -45,10 +70,32 @@ services:
     - traefik
     - monitoring-ext
     environment:
+      # port providing the service
+      SERVER_PORT: ${DATA_SERVER_PORT:-8080}
+
+      # URLs of required services
       SUBSETTING_SERVICE_URL: ${SUBSETTING_SERVICE_URL:-http://subsetting}:${SUBSETTING_SERVER_PORT:-8080}
       MERGING_SERVICE_URL: ${MERGING_SERVICE_URL:-http://merging}:${MERGING_SERVER_PORT:-8080}
       RSERVE_URL: ${RSERVE_URL:-http://rserve:6311}
-      SERVER_PORT: ${DATA_SERVER_PORT:-8080}
+      DATASET_ACCESS_SERVICE_URL: ${DATASET_ACCESS_SERVICE_URL:-http://dataset-access}:${DATASET_ACCESS_SERVER_PORT:-8080}
+
+      # LDAP values to look up DBs
+      LDAP_SERVER: ${LDAP_SERVER}
+      ORACLE_BASE_DN: ${ORACLE_BASE_DN}
+
+      # Account Database
+      ACCT_DB_TNS_NAME: ${ACCT_DB_TNS_NAME}
+      ACCT_DB_USER: ${ACCT_DB_USER}
+      ACCT_DB_PASS: ${ACCT_DB_PASS}
+
+      # User Database
+      USER_DB_TNS_NAME: ${USER_DB_TNS_NAME}
+      USER_DB_USER: ${USER_DB_USER}
+      USER_DB_PASS: ${USER_DB_PASS}
+
+      # Auth Secret (needed along with user/acct DBs for auth)
+      AUTH_SECRET_KEY: ${AUTH_SECRET_KEY}
+
     labels:
     - "prometheus.scrape_enabled=true"
     - "com.centurylinklabs.watchtower.enable=${DATA_WATCHTOWER:-false}"
@@ -73,8 +120,10 @@ services:
     - traefik
     - monitoring-ext
     environment:
-      AUTH_SECRET_KEY: ${AUTH_SECRET_KEY}
+      # port providing the service
       SERVER_PORT: ${USER_SERVER_PORT:-8080}
+
+      # LDAP values to look up DBs
       LDAP_SERVER: ${LDAP_SERVER}
       ORACLE_BASE_DN: ${ORACLE_BASE_DN}
 
@@ -88,13 +137,70 @@ services:
       USER_DB_USER: ${USER_DB_USER}
       USER_DB_PASS: ${USER_DB_PASS}
 
+      # Auth Secret (needed along with user/acct DBs for auth)
+      AUTH_SECRET_KEY: ${AUTH_SECRET_KEY}
+
     labels:
     - "prometheus.scrape_enabled=true"
     - "com.centurylinklabs.watchtower.enable=${USER_WATCHTOWER:-false}"
     - "traefik.http.services.${TRAEFIK_USER_ROUTER:-edauser-dev}.loadbalancer.server.port=${USER_SERVER_PORT:-8080}"
-    - "traefik.http.routers.${TRAEFIK_USER_ROUTER:-edauser-dev}.rule=Host(`${TRAEFIK_DATA_HOST:-edadata-dev.local.apidb.org}`) && PathPrefix(`/users/`,`/public/`)"
+    - "traefik.http.routers.${TRAEFIK_USER_ROUTER:-edauser-dev}.rule=Host(`${TRAEFIK_DATA_HOST:-edadata-dev.local.apidb.org}`) && PathPrefix(`/users/`,`/public/`,`/import-analysis`)"
     - "traefik.http.routers.${TRAEFIK_USER_ROUTER:-edauser-dev}.tls=true"
     - "traefik.http.routers.${TRAEFIK_USER_ROUTER:-edauser-dev}.entrypoints=${TRAEFIK_ENTRYPOINTS:-local}"
+    - "traefik.docker.network=traefik"
+
+  dataset-access:
+    image: veupathdb/dataset-access-service:${SERVICE_TAG:-latest}
+    networks:
+    - internal
+    - external
+    - traefik
+    - monitoring-ext
+    environment:
+      # port providing the service
+      SERVER_PORT: ${DATASET_ACCESS_SERVER_PORT:-8080}
+
+      # LDAP values to look up DBs
+      LDAP_SERVER: ${LDAP_SERVER}
+      ORACLE_BASE_DN: ${ORACLE_BASE_DN}
+
+      # Application Database
+      APP_DB_TNS_NAME: ${APP_DB_TNS_NAME}
+      APP_DB_USER: ${APP_DB_USER}
+      APP_DB_PASS: ${APP_DB_PASS}
+      APP_DB_POOL_SIZE: 20
+
+      # Account Database
+      ACCT_DB_TNS_NAME: ${ACCT_DB_TNS_NAME}
+      ACCT_DB_USER: ${ACCT_DB_USER}
+      ACCT_DB_PASS: ${ACCT_DB_PASS}
+      ACCT_DB_POOL_SIZE: 20
+
+      # User Database
+      USER_DB_TNS_NAME: ${USER_DB_TNS_NAME}
+      USER_DB_USER: ${USER_DB_USER}
+      USER_DB_PASS: ${USER_DB_PASS}
+
+      # Auth Secret (needed along with user/acct DBs for auth)
+      AUTH_SECRET_KEY: ${AUTH_SECRET_KEY}
+
+      # Email Config
+      SMTP_HOST: ${SMTP_HOST?required}
+      SUPPORT_EMAIL: ${SUPPORT_EMAIL?required}
+      EMAIL_DEBUG: !!str false
+
+      # Web Client URLs
+      SITE_URL: ${SITE_URL}                     # e.g. https://clinepidb.org/ce
+      REGISTRATION_PATH: /app/user/registration # unused for now
+      APPLICATION_PATH: /app/study-access       # unused for now
+
+    labels:
+    - "prometheus-scrape.enabled=true"
+    - "com.centurylinklabs.watchtower.enable=${DAS_WATCHTOWER:-false}"
+    - "traefik.http.services.${TRAEFIK_DAS_ROUTER:-edadas-dev}.loadbalancer.server.port=${DATASET_ACCESS_SERVER_PORT:-8080}"
+    - "traefik.http.routers.${TRAEFIK_DAS_ROUTER:-edadas-dev}.rule=Host(`${TRAEFIK_DAS_HOST:-edadata-dev.local.apidb.org}`) && PathPrefix(`/staff`,`/dataset-providers`,`/dataset-end-users`,`/permissions`,`/history`)"
+    - "traefik.http.routers.${TRAEFIK_DAS_ROUTER:-edadas-dev}.tls=true"
+    - "traefik.http.routers.${TRAEFIK_DAS_ROUTER:-edadas-dev}.entrypoints=${TRAEFIK_ENTRYPOINTS:-local}"
     - "traefik.docker.network=traefik"
 
 networks:

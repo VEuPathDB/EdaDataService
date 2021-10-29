@@ -3,6 +3,7 @@ package org.veupathdb.service.eda.ds;
 import org.gusdb.fgputil.client.ClientUtil;
 import org.veupathdb.lib.container.jaxrs.config.Options;
 import org.veupathdb.lib.container.jaxrs.server.ContainerResources;
+import org.veupathdb.lib.container.jaxrs.utils.db.DbManager;
 import org.veupathdb.service.eda.ds.service.AppsService;
 import org.veupathdb.service.eda.ds.service.PassThroughService;
 
@@ -22,10 +23,17 @@ public class Resources extends ContainerResources {
 
   public static final String SUBSETTING_SERVICE_URL = getRequiredVar("SUBSETTING_SERVICE_URL");
   public static final String MERGING_SERVICE_URL = getRequiredVar("MERGING_SERVICE_URL");
+  public static final String DATASET_ACCESS_SERVICE_URL = getRequiredVar("DATASET_ACCESS_SERVICE_URL");
   public static final String RSERVE_URL = getRequiredVar("RSERVE_URL");
 
   public Resources(Options opts) {
     super(opts);
+
+    // initialize auth and required DBs
+    DbManager.initUserDatabase(opts);
+    DbManager.initAccountDatabase(opts);
+    enableAuth();
+
     if (DEVELOPMENT_MODE) {
       enableJerseyTrace();
       ClientUtil.LOG_RESPONSE_HEADERS = true;
