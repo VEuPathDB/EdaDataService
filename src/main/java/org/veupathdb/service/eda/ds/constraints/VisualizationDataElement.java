@@ -14,7 +14,7 @@ public class VisualizationDataElement extends VisualizationDataElementConstraint
     _parent = parent;
     // set defaults
     setIsRequired(true);
-    setIsTemporal(false);
+    setIsTemporal(null);
     setAllowedTypes(null);
     setAllowedShapes(null);
     setMinNumVars(1);
