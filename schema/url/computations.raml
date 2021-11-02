@@ -56,76 +56,129 @@ types:
   AbundanceComputePostResponse:
     additionalProperties: false
     properties:
-      data:
-        type: AbundanceComputeData # some data table with samples as rows
-      appMetadata: AbundanceMetadata[] # one per computation.
-      stats: string # none?
+      median:
+        type: AbundanceComputation
+      max:
+        type: AbundanceComputation
+      q3:
+        type: AbundanceComputation
+      var:
+        type: AbundanceComputation
 
-  AbundanceComputeData:
+  AbundanceComputation:
+    type: Computation
     additionalProperties: false
-    properties:
-      todo: string
-
-  AbundanceMetadata:
-    additionalProperties: false
-    type: Metadata
-    properties:
-      wasCutoff:
+    properties: 
+      data: AbundanceComputationData[]
+      isCutoff:
         type: boolean
+    
+  AbundanceComputationData:
+    additionalProperties: false
+    properties:
+      record: string
+      taxon: string
+      abundance: number
 
   AlphaDivComputePostRespose:
     additionalProperties: false
     properties:
-      data:
-        type: AlphaDivComputeData # some data table with samples as rows
-      appMetadata:
-        type: Metadata[]
-      stats: string # none?
+      shannon:
+        type: AlphaDivComputation
+      simpson:
+        type: AlphaDivComputation
+      evenness:
+        type: AlphaDivComputation
 
-  AlphaDivComputeData:
+  AlphaDivComputation:
+    type: Computation
+    additionalProperties: false
+    properties: 
+      data: AlphaDivComputationData[]
+      
+  AlphaDivComputationData:
     additionalProperties: false
     properties:
-      todo: string
+      record: string
+      alphaDiversity: number
 
+  Computation:
+    properties:
+      computedVariableDetails:
+        type: ComputedVariableDetails[]
+      parameterSet:
+        type: string[]
+      computeDetails:
+        type: string
+        required: false
+
+  ComputedVariableDetails:
+    properties:
+      computedVariableIds:
+        type: string[] # if more than one, than must be a collection var
+      computedVariableEntity:
+        type: string  # all have to be of the same entity, so should be just one string
+      computedVariableDisplayLabels:
+        type: string[]
+        required: false
+      isCollection:
+        type: boolean  # Might return only 1 var but it would still need to be able to act like collection var (ex. abundance returns only 1 taxon)
+      defaultRange:
+        type: number[]
+        maxItems: 2
+        minItems: 2
+        required: false
+      vocabulary:
+        type: string[]
+        required: false
+      isOrdinal: 
+        type: boolean
+        required: false
+        
   BetaDivComputePostResponse:
     additionalProperties: false
     properties:
+      dissimilarity:
+        type: BetaDivComputation
+
+  BetaDivComputation:
+    type: Computation
+    additionalProperties: false
+    properties:
       data:
-        type: BetaDivComputeData  # some data table with samples as rows
-      appMetadata:
-        type: Metadata[]
-      stats: BetaDivStats[]
-
-  BetaDivComputeData:
-    additionalProperties: false
-    properties:
-      todo: string
-
-  BetaDivStats:
-    additionalProperties: false
-    properties:
+        type: BetaDivComputationData[]
       pcoaVariance:
-        type: number[]    # Ex. [0.5, 0.2, ...]
+        type: number[]
+
+  BetaDivComputationData:
+    additionalProperties: false
+    properties:
+      record: string
+      axis: number  # or string?
+      coordinate: number
+
 
   # some questions here
   # what if there is more than one computed var? need multiple ranges?
+  # - AB can we assume that if one computation returns multiple numeric vars, that they'd make a collection var so all have the same range?
+  # - AB no, beta div phase dolphin will break this, because it wants to return beta div dissimilarity matrix *and* the pcoa results.
+  # - AB but, should one computation return vars so different they aren't in a collection? In the beta div case, should the dissimilarity measures and pcoa results be different computations in the same app?
+  # - AB phase 1 alpa, beta, abundance, correlation, and diff abund will be okay.
+  # - AB but what really *is* a computation? Ideally one computation = 1 computed variable.
   # what if the computed var is categorical, edge case for now but still
+  # - AB will need to return ordered vocabulary, and is ordinal, and...
   # need better name for computeName, not to be confused w name prop above?
   # what is computeName anyway?
   # two conceptual levels here ComputedVariableMetadata and ComputeMetadata
   # maybe Metadata -> ComputeMetadata and has a ComputedVariableMetadata child?
-  Metadata:
-    additionalProperties: false
-    properties:
-      computedVariableColumnNames:
-        type: string[]    # Ex. ['shannon’]
-      computedVariableLabels:
-        type: string[]    # Ex. ['Alpha Diversity: Shannon']
-        required: false
-      computedVariableRange:
-        type: number[]    # Ex. [0, 1]
-        required: false
-      computeDetails:
-        type: string      # Ex. 'No convergence after 100 iterations'
-      computeName:
-        type: string # Ex. 'median'
+  # AB some apps may generalize to clinepi (ranked abundance). Maybe 'record' is a better name than 'SampleID' for sake of generalizability?
+  # AB plot responses return the config. Should app responses also return a nice config?
+  # AB don't forget about entities!
+
+  # Proposal
+  # 1. Apps are a list of computations
+  # 2. Computations input parameters and output a single var or collection var. Computations have a name, unique set of parameters, computed var(s), and details on how it went.
+  # 3. Computed vars are one output. Computed vars have names, displayNames, entities.
+  # 4. Computed vars are either categorical or numeric, so must also carry the appropriate annotations (ex. display range, vocabulary)
+
+  # The above means we would have the beta div app return a dissimilarity matrix and pcoa results as two computations. 
