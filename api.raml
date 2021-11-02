@@ -285,24 +285,24 @@ securitySchemes:
                     application/json:
                       type: error.ServerError
 
-  /betadiv/visualizations:
-        displayName: Visualizations for exploring the diversity between samples (beta diversity).
+  # /betadiv/visualizations:
+  #       displayName: Visualizations for exploring the diversity between samples (beta diversity).
 
-        /scatterplot:
-              post:
-                description: Returns data required to create a scatterplot that explores the differences between samples in a dataset as described by beta diversity <br> Java impl- NA <br> R impl- NA
-                body:
-                  application/json:
-                    type: lib.BetaDivScatterplotPostRequest
-                responses:
-                  200:
-                    body:
-                      application/json:
-                        type: lib.ScatterplotPostResponse
-                  500:
-                    body:
-                      application/json:
-                        type: error.ServerError
+  #       /scatterplot:
+  #             post:
+  #               description: Returns data required to create a scatterplot that explores the differences between samples in a dataset as described by beta diversity <br> Java impl- NA <br> R impl- NA
+  #               body:
+  #                 application/json:
+  #                   type: lib.BetaDivScatterplotPostRequest
+  #               responses:
+  #                 200:
+  #                   body:
+  #                     application/json:
+  #                       type: lib.ScatterplotPostResponse
+  #                 500:
+  #                   body:
+  #                     application/json:
+  #                       type: error.ServerError
 
   /sample/visualizations:
     displayName: Sample visualizations demonstrating/testing service capabilities
