@@ -18,6 +18,7 @@ import org.veupathdb.service.eda.ds.plugin.pass.HistogramPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.LineplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.MapPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ScatterplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.pass.TimeSeriesPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.MultiStreamPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.RecordCountPlugin;
@@ -42,9 +43,9 @@ public class AppsMetadata {
           viz("boxplot", new BoxplotPlugin()),
           viz("twobytwo", new TwoByTwoPlugin()),
           viz("conttable", new ContTablePlugin()),
+          viz("timeseries", new TimeSeriesPlugin()),
           viz("densityplot", new DensityplotPlugin()),
           viz("heatmap", new HeatmapPlugin()),
-          viz("lineplot", new LineplotPlugin()),
           viz("map-markers", new MapPlugin())),
       app("alphadiv", "Alpha Diversity",
               "A collection of visualizations designed to support the unbiased exploration of relationships between variables and Alpha Diversity.",

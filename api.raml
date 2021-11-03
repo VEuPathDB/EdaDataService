@@ -103,6 +103,22 @@ securitySchemes:
               application/json:
                 type: error.ServerError
 
+    /timeseries:
+      post:
+        description: Returns data required to create a Time Series visualization <br> Java impl- NA <br> R impl- working
+        body:
+          application/json:
+            type: lib.LineplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.LineplotPostResponse
+          500:
+            body:
+              application/json:
+                type: error.ServerError
+
     /lineplot:
       post:
         description: Returns data required to create a lineplot visualization <br> Java impl- NA <br> R impl- working

@@ -23,6 +23,7 @@ import org.veupathdb.service.eda.ds.plugin.pass.HistogramPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.LineplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.MapPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TablePlugin;
+import org.veupathdb.service.eda.ds.plugin.pass.TimeSeriesPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
 import org.veupathdb.service.eda.ds.plugin.sample.RecordCountPlugin;
@@ -125,6 +126,13 @@ public class AppsService implements Apps {
   public PostAppsPassVisualizationsLineplotResponse postAppsPassVisualizationsLineplot(LineplotPostRequest entity) {
     return wrapPlugin(() -> PostAppsPassVisualizationsLineplotResponse.respond200WithApplicationJson(
         new LineplotPostResponseStream(new LineplotPlugin().processRequest(entity))));
+  }
+
+  @DisableJackson
+  @Override
+  public PostAppsPassVisualizationsTimeseriesResponse postAppsPassVisualizationsTimeseries(LineplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsPassVisualizationsTimeseriesResponse.respond200WithApplicationJson(
+        new LineplotPostResponseStream(new TimeSeriesPlugin().processRequest(entity))));
   }
 
   @DisableJackson

@@ -52,7 +52,7 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder("xAxisVariable", "overlayVariable")
+      .dependencyOrder("xAxisVariable", "overlayVariable", "facetVariable")
       .pattern()
         .element("xAxisVariable")
           .maxValues(10)

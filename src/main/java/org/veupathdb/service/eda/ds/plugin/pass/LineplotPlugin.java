@@ -25,17 +25,17 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
 
   @Override
   public String getDisplayName() {
-    return "Time series";
+    return "Line Plot";
   }
 
   @Override
   public String getDescription() {
-    return "Visualize aggregate values of one variable across the sequential values of a temporal variable";
+    return "Visualize aggregate values of one variable across the sequential values of an ordered variable";
   }
 
   @Override
   public List<String> getProjects() {
-    return Arrays.asList("ClinEpiDB", "MicrobiomeDB");
+    return Arrays.asList("MicrobiomeDB");
   }
   
   @Override
@@ -99,6 +99,7 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
     varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
     varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
+    String valueSpec = spec.getValueSpec().getValue();
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
@@ -108,7 +109,7 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      String cmd = "plot.data::scattergl(" + DEFAULT_SINGLE_STREAM_NAME + ", map, 'raw'," + showMissingness + ")";
+      String cmd = "plot.data::lineplot(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" + valueSpec + "'," + showMissingness + ")";
       streamResult(connection, cmd, out);
     }); 
   }
