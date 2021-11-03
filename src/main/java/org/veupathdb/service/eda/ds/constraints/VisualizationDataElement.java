@@ -14,6 +14,7 @@ public class VisualizationDataElement extends VisualizationDataElementConstraint
     _parent = parent;
     // set defaults
     setIsRequired(true);
+    setIsTemporal(null);
     setAllowedTypes(null);
     setAllowedShapes(null);
     setMinNumVars(1);
@@ -24,6 +25,11 @@ public class VisualizationDataElement extends VisualizationDataElementConstraint
 
   public VisualizationDataElement required(boolean isRequired) {
     setIsRequired(isRequired);
+    return this;
+  }
+
+  public VisualizationDataElement temporal(boolean isTemporal) {
+    setIsTemporal(isTemporal);
     return this;
   }
 
