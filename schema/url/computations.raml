@@ -38,17 +38,11 @@ types:
   # compute responses. for later, but leaving the draft here
   # the compute will be baked right in to the viz plugin for now
   # still need to draft the *ComputeData objects
+
+  # Realized there may be so many options someday, we don't want to have to list all of them here. 
   AbundanceComputePostResponse:
+    type: AbundanceComputation[]
     additionalProperties: false
-    properties:
-      median:
-        type: AbundanceComputation
-      max:
-        type: AbundanceComputation
-      q3:
-        type: AbundanceComputation
-      var:
-        type: AbundanceComputation
 
   AbundanceComputation:
     type: Computation
@@ -66,14 +60,8 @@ types:
       abundance: number
 
   AlphaDivComputePostRespose:
+    type: AlphaDivComputation[]
     additionalProperties: false
-    properties:
-      shannon:
-        type: AlphaDivComputation
-      simpson:
-        type: AlphaDivComputation
-      evenness:
-        type: AlphaDivComputation
 
   AlphaDivComputation:
     type: Computation
@@ -88,11 +76,11 @@ types:
       alphaDiversity: number
 
   Computation:
-    additionalProperties: false
     properties:
       computedVariableDetails: ComputedVariableDetails[]
       parameterSet: string[]
       computeDetails?: string
+      # add compute type? For example, to distinguish dissimilarity from pcoa results?
 
   ComputedVariableDetails:
     additionalProperties: false
