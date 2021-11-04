@@ -93,8 +93,7 @@ public class AppsService implements Apps {
   }
 
   private String getAppName() {
-    LOG.info(_request.getUriInfo().getPathSegments().get(2).getPath());
-    return "blah";
+    return _request.getUriInfo().getPathSegments().get(1).getPath();
   }
 
   @DisableJackson
