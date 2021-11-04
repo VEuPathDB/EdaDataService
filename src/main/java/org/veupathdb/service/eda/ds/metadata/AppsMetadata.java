@@ -86,6 +86,7 @@ public class AppsMetadata {
     app.setDisplayName(displayName);
     app.setDescription(description);
     app.setProjects(projects);
+    app.setComputeName(computeName);
     app.setVisualizations(Arrays.asList(visualizations));
     return app;
   }
