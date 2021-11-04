@@ -3,27 +3,25 @@ package org.veupathdb.service.eda.ds.plugin.alphadiv;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import org.gusdb.fgputil.IoUtil;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
-import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.ds.constraints.DataElementSet;
-import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
-import org.veupathdb.service.eda.generated.model.APIVariableType;
+import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
+import org.veupathdb.service.eda.ds.plugin.AbstractPluginWithCompute;
+import org.veupathdb.service.eda.ds.util.RServeClient;
 import org.veupathdb.service.eda.generated.model.AlphaDivBoxplotPostRequest;
 import org.veupathdb.service.eda.generated.model.AlphaDivBoxplotSpec;
+import org.veupathdb.service.eda.generated.model.AlphaDivComputeConfig;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class AlphaDivBoxplotPlugin extends AbstractPlugin<AlphaDivBoxplotPostRequest, AlphaDivBoxplotSpec> {
+public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBoxplotPostRequest, AlphaDivBoxplotSpec, AlphaDivComputeConfig> {
 
   @Override
   public String getDisplayName() {
@@ -37,7 +35,7 @@ public class AlphaDivBoxplotPlugin extends AbstractPlugin<AlphaDivBoxplotPostReq
 
   @Override
   public List<String> getProjects() {
-    return Arrays.asList("MicrobiomeDB");
+    return List.of(AppsMetadata.MICROBIOME_PROJECT);
   }
   
   @Override
@@ -48,6 +46,11 @@ public class AlphaDivBoxplotPlugin extends AbstractPlugin<AlphaDivBoxplotPostReq
   @Override
   protected Class<AlphaDivBoxplotSpec> getVisualizationSpecClass() {
     return AlphaDivBoxplotSpec.class;
+  }
+
+  @Override
+  protected Class<AlphaDivComputeConfig> getComputeSpecClass() {
+    return AlphaDivComputeConfig.class;
   }
 
   @Override
@@ -94,7 +97,7 @@ public class AlphaDivBoxplotPlugin extends AbstractPlugin<AlphaDivBoxplotPostReq
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     AlphaDivBoxplotSpec spec = getPluginSpec();
-    Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
+    Map<String, VariableSpec> varMap = new HashMap<>();
     varMap.put("xAxisVariable", spec.getXAxisVariable());
     // varMap.put("yAxisVariable", spec.getYAxisVariable()); // Needs to come from compute response
     varMap.put("overlayVariable", spec.getOverlayVariable());
@@ -111,16 +114,13 @@ public class AlphaDivBoxplotPlugin extends AbstractPlugin<AlphaDivBoxplotPostReq
           spec.getOverlayVariable(),
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
-      connection.voidEval(getVoidEvalVarMetadataMap(varMap));
-      String outFile = connection.eval("plot.data::box(data, map, '" +
+      connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
+      String command = "plot.data::box(data, map, '" +
           spec.getPoints().getValue() + "', " +
           showMean + ", " + 
           computeStats + ", " + 
-          showMissingness + ")").asString();
-      try (RFileInputStream response = connection.openFile(outFile)) {
-        IoUtil.transferStream(out, response);
-      }
-      out.flush();
+          showMissingness + ")";
+      RServeClient.streamResult(connection, command, out);
     });
   }
 }

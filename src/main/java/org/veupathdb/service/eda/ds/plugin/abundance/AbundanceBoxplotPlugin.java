@@ -3,29 +3,25 @@ package org.veupathdb.service.eda.ds.plugin.abundance;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import org.gusdb.fgputil.IoUtil;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
-import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.ds.constraints.DataElementSet;
-import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
-import org.veupathdb.service.eda.generated.model.APIVariableType;
+import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
+import org.veupathdb.service.eda.ds.plugin.AbstractPluginWithCompute;
+import org.veupathdb.service.eda.ds.util.RServeClient;
 import org.veupathdb.service.eda.generated.model.AbundanceBoxplotPostRequest;
 import org.veupathdb.service.eda.generated.model.AbundanceBoxplotSpec;
+import org.veupathdb.service.eda.generated.model.AbundanceComputeConfig;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
-
-
-public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostRequest, AbundanceBoxplotSpec> {
+public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceBoxplotPostRequest, AbundanceBoxplotSpec, AbundanceComputeConfig> {
 
   @Override
   public String getDisplayName() {
@@ -39,7 +35,7 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
 
   @Override
   public List<String> getProjects() {
-    return Arrays.asList("MicrobiomeDB");
+    return List.of(AppsMetadata.MICROBIOME_PROJECT);
   }
   
   @Override
@@ -50,6 +46,11 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
   @Override
   protected Class<AbundanceBoxplotSpec> getVisualizationSpecClass() {
     return AbundanceBoxplotSpec.class;
+  }
+
+  @Override
+  protected Class<AbundanceComputeConfig> getComputeSpecClass() {
+    return AbundanceComputeConfig.class;
   }
 
   // Constraints on computation?
@@ -101,7 +102,7 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     AbundanceBoxplotSpec spec = getPluginSpec();
-    Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
+    Map<String, VariableSpec> varMap = new HashMap<>();
     // varMap.put("xAxisVariable", spec.getXAxisVariable());
     // varMap.put("yAxisVariable", spec.getYAxisVariable());
     varMap.put("overlayVariable", spec.getOverlayVariable());
@@ -121,19 +122,16 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
           spec.getOverlayVariable(),
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
-      connection.voidEval(getVoidEvalVarMetadataMap(varMap));
-      String outFile = connection.eval("plot.data::box(data, map, '" +
+      connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
+      String command = "plot.data::box(data, map, '" +
           spec.getPoints().getValue() + "', " +
           showMean + ", " + 
           computeStats + ", " + 
           showMissingness + ",'" +
           listVarPlotRef + "','" +
           listVarDisplayLabel + "','" +
-          inferredVarDisplayLabel + "')").asString();
-      try (RFileInputStream response = connection.openFile(outFile)) {
-        IoUtil.transferStream(out, response);
-      }
-      out.flush();
+          inferredVarDisplayLabel + "')";
+      RServeClient.streamResult(connection, command, out);
     });
   }
 }

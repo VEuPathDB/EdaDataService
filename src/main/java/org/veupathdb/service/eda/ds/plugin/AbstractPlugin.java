@@ -78,14 +78,14 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
 
   private List<StreamSpec> _requiredStreams;
 
-  public final AbstractPlugin<T,S> processRequest(T request) throws ValidationException {
+  public AbstractPlugin<T,S> processRequest(String appName, T request) throws ValidationException {
 
     // start request timer (used to profile request performance dynamics)
     _timer = new Timer();
     logRequestTime("Starting timer");
 
     // validate config type matches class provided by subclass
-    _pluginSpec = getSpecObject(request);
+    _pluginSpec = getSpecObject(request, "getConfig", getVisualizationSpecClass());
 
     // check for subset and derived entity properties of request
     _subset = Optional.ofNullable(request.getFilters()).orElse(Collections.emptyList());
@@ -153,21 +153,21 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   }
 
   @SuppressWarnings("unchecked")
-  private S getSpecObject(T request) {
+  protected <Q> Q getSpecObject(T request, String methodName, Class<Q> specClass) {
     try {
-      Method configGetter = request.getClass().getMethod("getConfig");
+      Method configGetter = request.getClass().getMethod(methodName);
       Object config = configGetter.invoke(request);
-      if (getVisualizationSpecClass().isAssignableFrom(config.getClass())) {
-        return (S)config;
+      if (specClass.isAssignableFrom(config.getClass())) {
+        return (Q)config;
       }
       throw new RuntimeException("Plugin class " + getClass().getName() +
-          " declares spec class "  + getVisualizationSpecClass().getName() +
-          " but " + request.getClass().getName() + "::getConfig()" +
+          " declares spec class "  + specClass.getName() +
+          " but " + request.getClass().getName() + "::" + methodName + "()" +
           " returned " + config.getClass().getName() + ". The second must be a subclass of the first.");
     }
     catch (NoSuchMethodException noSuchMethodException) {
       throw new RuntimeException("Generated class " + request.getClass().getName() +
-          " must implement a no-arg method getConfig() which returns an instance of " + getVisualizationSpecClass().getName());
+          " must implement a no-arg method " + methodName + "() which returns an instance of " + specClass.getName());
     }
     catch (IllegalAccessException | InvocationTargetException e) {
       throw new RuntimeException("Misconfiguration of visualization plugin: " + getClass().getName(), e);

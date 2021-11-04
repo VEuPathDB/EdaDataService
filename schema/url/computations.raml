@@ -7,9 +7,7 @@ types:
     additionalProperties: false
     properties:
       name: string
-      parameters:
-        required: false
-        type: object
+      studyId: string
 
   # how do we want to ensure the collectionVariable is a collection variable?
   # presumably the compute service will check and err
@@ -18,37 +16,24 @@ types:
     type: ComputeConfig
     additionalProperties: false
     properties:
-      name:
-        type: string
-        enum: ['AlphaDivComputation']
-      parameters:
-        properties:
-          collectionVariable: VariableSpec
+      collectionVariable: VariableSpec
 
   AbundanceComputeConfig:
     type: ComputeConfig
     additionalProperties: false
     properties:
-      name:
-        type: string
-        enum: ['RelativeAbundanceComputation']
-      parameters:
-        properties:
-          collectionVariable: VariableSpec
+      collectionVariable: VariableSpec
+
+  DistanceMethod:
+    type: string
+    enum: ['unifrac', 'wunifrac', 'bray', 'jaccard', 'jensen-shannon']
 
   BetaDivComputeConfig:
     type: ComputeConfig
     additionalProperties: false
     properties:
-      name:
-        type: string
-        enum: ['BetaDivComputation']
-      parameters:
-        properties:
-          collectionVariable: VariableSpec
-          method:
-            type: string
-            enum: ['unifrac', 'wunifrac', 'bray', 'jaccard', 'jensen-shannon']
+      collectionVariable: VariableSpec
+      method: DistanceMethod
 
   # compute responses. for later, but leaving the draft here
   # the compute will be baked right in to the viz plugin for now
@@ -103,16 +88,14 @@ types:
       alphaDiversity: number
 
   Computation:
+    additionalProperties: false
     properties:
-      computedVariableDetails:
-        type: ComputedVariableDetails[]
-      parameterSet:
-        type: string[]
-      computeDetails:
-        type: string
-        required: false
+      computedVariableDetails: ComputedVariableDetails[]
+      parameterSet: string[]
+      computeDetails?: string
 
   ComputedVariableDetails:
+    additionalProperties: false
     properties:
       computedVariableIds:
         type: string[] # if more than one, than must be a collection var

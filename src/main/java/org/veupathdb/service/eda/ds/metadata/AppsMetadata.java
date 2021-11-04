@@ -31,12 +31,15 @@ import org.veupathdb.service.eda.generated.model.VisualizationOverviewImpl;
 
 public class AppsMetadata {
 
+  public static final String CLINEPI_PROJECT = "ClinEpiDB";
+  public static final String MICROBIOME_PROJECT = "MicrobiomeDB";
+
   // NOTE: these names must match the url segments defined in the api.raml
   // Pass vizs are now different based on mbio vs clinepi so we need to adjust the below array?
   public static final AppsGetResponse APPS = apps(
-      app("pass", "Pass-Through", 
+      app("pass", "Pass-Through", null,
           "A collection of visualizations designed to support the unbiased exploration of relationships between variables",
-          Arrays.asList("ClinEpiDB", "MicrobiomeDB"),
+          Arrays.asList(CLINEPI_PROJECT, MICROBIOME_PROJECT),
           viz("histogram", new HistogramPlugin()),
           viz("barplot", new BarplotPlugin()),
           viz("scatterplot", new ScatterplotPlugin()),
@@ -47,22 +50,22 @@ public class AppsMetadata {
           viz("densityplot", new DensityplotPlugin()),
           viz("heatmap", new HeatmapPlugin()),
           viz("map-markers", new MapPlugin())),
-      app("alphadiv", "Alpha Diversity",
-              "A collection of visualizations designed to support the unbiased exploration of relationships between variables and Alpha Diversity.",
-              Arrays.asList("MicrobiomeDB"),
-              viz("boxplot", new AlphaDivBoxplotPlugin()),
-              viz("scatterplot", new AlphaDivScatterplotPlugin())),
-      app("abundance", "Relative Abundance",
-              "A collection of visualizations designed to support the unbiased exploration of relationships between variables and abundance data.",
-              Arrays.asList("MicrobiomeDB"),
-              viz("boxplot", new AbundanceBoxplotPlugin()),
-              viz("scatterplot", new AbundanceScatterplotPlugin())),
-      app("betadiv", "Beta Diversity",
-              "A collection of visualizations designed to support the unbiased exploration of relationships between variables and Beta Diversity.",
-              Arrays.asList("MicrobiomeDB"),
-              viz("scatterplot", new BetaDivScatterplotPlugin())),
-      app("sample", "Sample", "Wrapper app for sample/test plugins",
-          Arrays.asList(""),
+      app("alphadiv", "Alpha Diversity", "AlphaDivComputation",
+          "A collection of visualizations designed to support the unbiased exploration of relationships between variables and Alpha Diversity.",
+          List.of(MICROBIOME_PROJECT),
+          viz("boxplot", new AlphaDivBoxplotPlugin()),
+          viz("scatterplot", new AlphaDivScatterplotPlugin())),
+      app("abundance", "Relative Abundance", "RelativeAbundanceComputation",
+          "A collection of visualizations designed to support the unbiased exploration of relationships between variables and abundance data.",
+          List.of(MICROBIOME_PROJECT),
+          viz("boxplot", new AbundanceBoxplotPlugin()),
+          viz("scatterplot", new AbundanceScatterplotPlugin())),
+      app("betadiv", "Beta Diversity", "BetaDivComputation",
+          "A collection of visualizations designed to support the unbiased exploration of relationships between variables and Beta Diversity.",
+          List.of(MICROBIOME_PROJECT),
+          viz("scatterplot", new BetaDivScatterplotPlugin())),
+      app("sample", "Sample", "Wrapper app for sample/test plugins", null,
+          List.of(),
           viz("record-count", new RecordCountPlugin()),
           viz("multi-stream", new MultiStreamPlugin()))
   );
@@ -77,7 +80,7 @@ public class AppsMetadata {
     return responseObj;
   }
 
-  private static AppOverview app(String name, String displayName, String description, List<String> projects, VisualizationOverview... visualizations) {
+  private static AppOverview app(String name, String displayName, String computeName, String description, List<String> projects, VisualizationOverview... visualizations) {
     AppOverviewImpl app = new AppOverviewImpl();
     app.setName(name);
     app.setDisplayName(displayName);
