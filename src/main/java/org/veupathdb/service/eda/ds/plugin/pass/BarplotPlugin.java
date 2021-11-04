@@ -3,7 +3,6 @@ package org.veupathdb.service.eda.ds.plugin.pass;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +18,8 @@ import org.veupathdb.service.eda.generated.model.BarplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BarplotSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
+import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.CLINEPI_PROJECT;
+import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.MICROBIOME_PROJECT;
 import static org.veupathdb.service.eda.ds.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
@@ -36,7 +37,7 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
   
   @Override
   public List<String> getProjects() {
-    return Arrays.asList("ClinEpiDB", "MicrobiomeDB");
+    return List.of(CLINEPI_PROJECT, MICROBIOME_PROJECT);
   }
 
   @Override

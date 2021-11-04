@@ -1,9 +1,10 @@
 package org.veupathdb.service.eda.ds.plugin.pass;
 
-import java.util.Arrays;
 import java.util.List;
 import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
+
+import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.CLINEPI_PROJECT;
 
 public class TimeSeriesPlugin extends LineplotPlugin {
 
@@ -19,7 +20,7 @@ public class TimeSeriesPlugin extends LineplotPlugin {
 
   @Override
   public List<String> getProjects() {
-    return Arrays.asList("ClinEpiDB");
+    return List.of(CLINEPI_PROJECT);
   }
   
   @Override

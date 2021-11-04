@@ -61,7 +61,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   // methods that should probably be overridden
   public String getDisplayName() { return getClass().getName(); }
   public String getDescription() { return ""; }
-  public List<String> getProjects() { return Arrays.asList(""); }
+  public List<String> getProjects() { return Collections.emptyList(); }
   // have to decide if default is 1 and 25 override or vice versa. to facet or not, that is the question...
   public Integer getMaxPanels() { return 1; }
   public ConstraintSpec getConstraintSpec() { return new ConstraintSpec(); }
