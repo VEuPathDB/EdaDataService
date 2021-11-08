@@ -86,6 +86,7 @@ types:
         type: VariableDetails  # poor name
       
   Computation:
+    additionalProperties: false
     properties:
       computedVariableDetails: ComputedVariableDetails[]
       computeDetails?: string
@@ -124,7 +125,6 @@ types:
         type: BetaDivComputation[]
       parameterSets: 
         type: ParameterSet[]
-
 
   BetaDivComputation:
     type: Computation
