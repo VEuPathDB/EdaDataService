@@ -5,7 +5,7 @@ services:
   subsetting:
     image: veupathdb/eda-subsetting:${SUBSETTING_TAG:-latest}
     networks:
-    - internal
+    - default
     - external
     - monitoring-ext
     environment:
@@ -29,7 +29,7 @@ services:
   merging:
     image: veupathdb/eda-merging:${MERGING_TAG:-latest}
     networks:
-    - internal
+    - default
     - monitoring-ext
     environment:
       SUBSETTING_SERVICE_URL: ${SUBSETTING_SERVICE_URL:-http://subsetting}:${SUBSETTING_SERVER_PORT:-8080}
@@ -41,7 +41,7 @@ services:
   data:
     image: veupathdb/eda-data:${DATA_TAG:-latest}
     networks:
-    - internal
+    - default
     - traefik
     - monitoring-ext
     environment:
@@ -61,14 +61,14 @@ services:
   rserve:
     image: veupathdb/rserve:${RSERVE_TAG:-latest}
     networks:
-    - internal
+    - default
     labels:
     - "com.centurylinklabs.watchtower.enable=${RSERVE_WATCHTOWER:-false}"
 
   user:
     image: veupathdb/eda-user:${USER_TAG:-latest}
     networks:
-    - internal
+    - default
     - external
     - traefik
     - monitoring-ext
@@ -100,8 +100,6 @@ services:
 networks:
   # external network used for containers that need to reach outside
   external:
-  internal:
-    internal: true
   traefik:
     external: true
   monitoring-ext:
