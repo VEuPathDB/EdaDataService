@@ -5,7 +5,6 @@ import org.veupathdb.lib.container.jaxrs.config.Options;
 import org.veupathdb.lib.container.jaxrs.server.ContainerResources;
 import org.veupathdb.lib.container.jaxrs.utils.db.DbManager;
 import org.veupathdb.service.eda.ds.service.AppsService;
-import org.veupathdb.service.eda.ds.service.PassThroughService;
 
 import static org.gusdb.fgputil.runtime.Environment.getOptionalVar;
 import static org.gusdb.fgputil.runtime.Environment.getRequiredVar;
@@ -48,8 +47,7 @@ public class Resources extends ContainerResources {
   @Override
   protected Object[] resources() {
     return new Object[] {
-      AppsService.class,
-      PassThroughService.class
+      AppsService.class
     };
   }
 }
