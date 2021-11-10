@@ -63,9 +63,6 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
     return new ConstraintSpec()
       .dependencyOrder("xAxisVariable", "overlayVariable", "facetVariable")
       .pattern()
-        // .element("yAxisVariable")
-        //   .types(APIVariableType.NUMBER, APIVariableType.DATE) 
-        //   .description("Variable must be a number or date.")
         .element("xAxisVariable")
           .types(APIVariableType.NUMBER, APIVariableType.DATE)
           .description("Variable must be a number or date and be of the same or a parent entity as the Y-axis variable.")
@@ -83,20 +80,20 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
       .var("xAxisVariable", pluginSpec.getXAxisVariable())
-      // .var("yAxisVariable", pluginSpec.getYAxisVariable())
       .var("overlayVariable", pluginSpec.getOverlayVariable())
       .var("facetVariable", pluginSpec.getFacetVariable()));
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(AlphaDivScatterplotSpec pluginSpec) {
+  protected List<StreamSpec> getRequestedStreams(AlphaDivScatterplotSpec pluginSpec, AlphaDivComputeConfig computeConfig) {
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
-        // .addVar(pluginSpec.getYAxisVariable())
         .addVar(pluginSpec.getOverlayVariable())
         .addVars(pluginSpec.getFacetVariable()));
   }
+
+  
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {

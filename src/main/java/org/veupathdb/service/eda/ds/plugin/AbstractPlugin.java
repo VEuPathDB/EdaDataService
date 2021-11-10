@@ -14,6 +14,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.Timer;
 import org.gusdb.fgputil.client.ResponseFuture;
 import org.gusdb.fgputil.functional.FunctionalInterfaces.ConsumerWithException;
@@ -51,6 +52,9 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
 
   // shared stream name for plugins that need request only a single stream
   protected static final String DEFAULT_SINGLE_STREAM_NAME = "single_tabular_dataset";
+  protected ReferenceMetadata _referenceMetadata;
+  protected S _pluginSpec;
+  protected List<StreamSpec> _requiredStreams;
 
   // methods that need to be implemented
   protected abstract Class<S> getVisualizationSpecClass();
@@ -71,12 +75,8 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
 
   private Timer _timer;
   private boolean _requestProcessed = false;
-  private S _pluginSpec;
   private List<APIFilter> _subset;
   private List<DerivedVariable> _derivedVariables;
-  private ReferenceMetadata _referenceMetadata;
-
-  private List<StreamSpec> _requiredStreams;
 
   public AbstractPlugin<T,S> processRequest(String appName, T request) throws ValidationException {
 
@@ -102,7 +102,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     validateVisualizationSpec(_pluginSpec);
 
     // get list of data streams required by this subclass
-    _requiredStreams = getRequestedStreams(_pluginSpec);
+    _requiredStreams = _requiredStreams == null ? _requiredStreams = getRequestedStreams(_pluginSpec) : _requiredStreams;
 
     // validate stream specs provided by the subclass
     _mergingClient.getStreamSpecValidator()
@@ -239,8 +239,12 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   protected String singleQuote(String unquotedString) {
     return "'" + unquotedString + "'";
   }
+
+  protected String getVoidEvalFreadCommand(String fileName, VariableSpec... vars) {  
+    return getVoidEvalFreadCommand(fileName, new ListBuilder().addAll(vars).toList());
+  }  
   
-  protected String getVoidEvalFreadCommand(String fileName, VariableSpec... vars) {    
+  protected String getVoidEvalFreadCommand(String fileName, List<VariableSpec> vars) {
     boolean first = true;
     String namedTypes = new String();
     

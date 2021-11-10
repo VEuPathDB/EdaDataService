@@ -88,7 +88,7 @@ public class BetaDivScatterplotPlugin extends AbstractPluginWithCompute<BetaDivS
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(BetaDivScatterplotSpec pluginSpec) {
+  protected List<StreamSpec> getRequestedStreams(BetaDivScatterplotSpec pluginSpec, BetaDivComputeConfig computeConfig) {
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         // .addVar(pluginSpec.getXAxisVariable())

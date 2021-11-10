@@ -88,7 +88,7 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(AbundanceBoxplotSpec pluginSpec) {
+  protected List<StreamSpec> getRequestedStreams(AbundanceBoxplotSpec pluginSpec, AbundanceComputeConfig computeConfig) {
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         // .addVar(pluginSpec.getXAxisVariable())

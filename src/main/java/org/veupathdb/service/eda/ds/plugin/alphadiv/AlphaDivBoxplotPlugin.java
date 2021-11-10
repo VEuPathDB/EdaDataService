@@ -58,9 +58,6 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
     return new ConstraintSpec()
       .dependencyOrder("xAxisVariable", "overlayVariable", "facetVariable")
       .pattern()
-        // .element("yAxisVariable")
-        //   .types(APIVariableType.NUMBER)
-        //   .description("Variable must be a number.")
         .element("xAxisVariable")
           .maxValues(10)
           .description("Variable must have 10 or fewer unique values and be the same or a parent entity of the Y-axis variable.") // Of taxa entity?
@@ -79,43 +76,67 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
       .var("xAxisVariable", pluginSpec.getXAxisVariable())
-      // .var("yAxisVariable", pluginSpec.getYAxisVariable())
       .var("overlayVariable", pluginSpec.getOverlayVariable())
       .var("facetVariable", pluginSpec.getFacetVariable()));
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(AlphaDivBoxplotSpec pluginSpec) {
-    return ListBuilder.asList(
+  protected List<StreamSpec> getRequestedStreams(AlphaDivBoxplotSpec pluginSpec, AlphaDivComputeConfig computeConfig) {
+    List<StreamSpec> requestedStreamsList = ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
-        // .addVar(pluginSpec.getYAxisVariable())
         .addVar(pluginSpec.getOverlayVariable())
-        .addVars(pluginSpec.getFacetVariable()));
+        .addVars(pluginSpec.getFacetVariable())
+      );
+    requestedStreamsList.add(
+      new StreamSpec(COMPUTE_STREAM_NAME, computeConfig.getCollectionVariable().getEntityId())
+        .addVars(getChildrenVariables(computeConfig.getCollectionVariable()) 
+      ));
+    
+    return requestedStreamsList;
   }
 
   @Override
-  protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
+ protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
+    AlphaDivComputeConfig computeConfig = getComputeConfig();
     AlphaDivBoxplotSpec spec = getPluginSpec();
     Map<String, VariableSpec> varMap = new HashMap<>();
     varMap.put("xAxisVariable", spec.getXAxisVariable());
-    // varMap.put("yAxisVariable", spec.getYAxisVariable()); // Needs to come from compute response
     varMap.put("overlayVariable", spec.getOverlayVariable());
     varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
     varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
     String computeStats = spec.getComputeStats() != null ? spec.getComputeStats().getValue() : "FALSE";
     String showMean = spec.getMean() != null ? spec.getMean().getValue() : "FALSE";
+    String valueSpec = spec.getValueSpec().getValue();
+    String computeEntityPKColName = toColNameOrEmpty(getComputeEntityPrimaryKeyVarSpec(computeConfig.getCollectionVariable().getEntityId()));
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
+      List<VariableSpec> computeInputVars = ListBuilder.asList(getComputeEntityPrimaryKeyVarSpec(computeConfig.getCollectionVariable().getEntityId()));
+      computeInputVars.addAll(getChildrenVariables(computeConfig.getCollectionVariable()));
+      connection.voidEval(getVoidEvalFreadCommand(COMPUTE_STREAM_NAME,
+        computeInputVars
+      ));
+      connection.voidEval("alphaDivDT <- alphaDiv(" + COMPUTE_STREAM_NAME + ", " + 
+                                                      computeEntityPKColName + ", " + 
+                                                      valueSpec + ")");
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
           spec.getXAxisVariable(),
-          // spec.getYAxisVariable(),
           spec.getOverlayVariable(),
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
+      // merge alpha div and other viz stream data as input to boxplot
+      connection.voidEval("vizData <- merge(alphaDivDT, " + 
+                                            DEFAULT_SINGLE_STREAM_NAME + 
+                                         ", by=" + computeEntityPKColName +")");
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      String command = "plot.data::box(data, map, '" +
+      // update the new map obj in R to add alphaDiv
+      connection.voidEval("map <- rbind(map, list('id'='alphaDiversity'," +
+                                                 "'plotRef'='yAxisVariable'," +
+                                                 "'dataType'='NUMBER'," +
+                                                 "'dataShape'='CONTINUOUS'," +
+                                                 "'displayLabel'=attributes(alphaDivDT)$computedVariableDetails$displayLabel))");
+      String command = "plot.data::box(vizData, map, '" +
           spec.getPoints().getValue() + "', " +
           showMean + ", " + 
           computeStats + ", " + 

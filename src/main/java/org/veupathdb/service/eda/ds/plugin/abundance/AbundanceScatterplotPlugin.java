@@ -90,7 +90,7 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithCompute<Abunda
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(AbundanceScatterplotSpec pluginSpec) {
+  protected List<StreamSpec> getRequestedStreams(AbundanceScatterplotSpec pluginSpec, AbundanceComputeConfig computeConfig) {
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())

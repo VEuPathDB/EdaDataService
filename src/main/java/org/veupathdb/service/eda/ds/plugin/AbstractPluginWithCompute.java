@@ -1,10 +1,20 @@
 package org.veupathdb.service.eda.ds.plugin;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+
 import javax.ws.rs.BadRequestException;
+import org.gusdb.fgputil.functional.TreeNode;
 import org.gusdb.fgputil.validation.ValidationException;
+import org.veupathdb.service.eda.common.client.spec.StreamSpec;
+import org.veupathdb.service.eda.common.model.EntityDef;
+import org.veupathdb.service.eda.common.model.VariableDef;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
 import org.veupathdb.service.eda.generated.model.AppOverview;
 import org.veupathdb.service.eda.generated.model.ComputeConfig;
+import org.veupathdb.service.eda.generated.model.VariableSpec;
 import org.veupathdb.service.eda.generated.model.VisualizationRequestBase;
 
 public abstract class AbstractPluginWithCompute<T extends VisualizationRequestBase, S, R extends ComputeConfig> extends AbstractPlugin<T, S> {
@@ -14,6 +24,12 @@ public abstract class AbstractPluginWithCompute<T extends VisualizationRequestBa
 
   // returns the compute-spec class this visualization expects
   protected abstract Class<R> getComputeSpecClass();
+  protected List<StreamSpec> getRequestedStreams(S pluginSpec) {
+    return getRequestedStreams(pluginSpec, _computeSpec);
+  }
+  protected abstract List<StreamSpec> getRequestedStreams(S pluginSpec, R computeConfig);
+
+  protected static final String COMPUTE_STREAM_NAME = "compute_input_dataset";
 
   @Override
   public AbstractPlugin<T,S> processRequest(String appName, T request) throws ValidationException {
@@ -21,6 +37,8 @@ public abstract class AbstractPluginWithCompute<T extends VisualizationRequestBa
     // pull out the passed config spec
     _computeSpec = getSpecObject(request, "getComputeConfig", getComputeSpecClass());
     validateComputeName(_computeSpec.getName(), appName);
+
+    _requiredStreams = getRequestedStreams(_pluginSpec, _computeSpec);
 
     return super.processRequest(appName, request);
   }
@@ -40,5 +58,22 @@ public abstract class AbstractPluginWithCompute<T extends VisualizationRequestBa
 
   protected R getComputeConfig() {
     return _computeSpec;
+  }
+  
+  // think this and next need to catch NoSuchElementException ??
+  protected List<VariableSpec> getChildrenVariables(VariableSpec collectionVar) {
+    EntityDef collectionVarEntityDef = _referenceMetadata.getEntity(collectionVar.getEntityId()).get();
+    VariableDef collectionVarDef = _referenceMetadata.getVariable(collectionVar).get();
+    TreeNode<VariableDef> childVarsTree = collectionVarEntityDef.getNativeVariableTreeNode(collectionVarDef);
+    // for now assuming we only have leaves as children. revisit if that turns out to not be true
+    Collection<VariableDef> childVarDefs = childVarsTree.flatten();
+
+    return new ArrayList(childVarDefs);
+  }
+
+  protected VariableSpec getComputeEntityPrimaryKeyVarSpec(String entityId) {
+    VariableDef idColVariableDef = _referenceMetadata.getEntity(entityId).get().getIdColumnDef();
+
+    return idColVariableDef;
   }
 }
