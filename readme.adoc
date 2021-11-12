@@ -21,11 +21,12 @@ When everything comes up successfully, you'll be able to reach this service at:
 
 https://edadata-dev.local.apidb.org:8443/
 
-### using dbforward
+### using the forwarder
 
-The docker-compose-forwarder.yml file defines an additional container and config that will handle forwarding local db connections.  This eliminates the use of sshuttle, and some of the quirks related to sshuttle.
+The docker-compose-forwarder.yml file defines an additional set of containers and config that will handle forwarding local db connections.  This eliminates the use of sshuttle, and some of the quirks related to sshuttle.
 
-#### how to use dbforward
+#### how to use the forwarder containers
+
 To bring up the stack this way:
 
 * ensure you are running an ssh-agent
