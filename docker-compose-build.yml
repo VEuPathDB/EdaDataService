@@ -1,0 +1,36 @@
+version: "3.5"
+
+services:
+  subsetting:
+    build:
+      dockerfile: Dockerfile
+      context: ../EdaSubsettingService
+      args:
+        GITHUB_USERNAME: ${GITHUB_USERNAME}
+        GITHUB_TOKEN: ${GITHUB_TOKEN}
+
+
+  merging:
+    build:
+      dockerfile: Dockerfile
+      context: ../EdaMergingService
+      args:
+        GITHUB_USERNAME: ${GITHUB_USERNAME}
+        GITHUB_TOKEN: ${GITHUB_TOKEN}
+
+  data:
+    build:
+      dockerfile: Dockerfile
+      context: .
+      args:
+        GITHUB_USERNAME: ${GITHUB_USERNAME}
+        GITHUB_TOKEN: ${GITHUB_TOKEN}
+
+  user:
+    build:
+      dockerfile: Dockerfile
+      context: ../EdaUserService
+      args:
+        GITHUB_USERNAME: ${GITHUB_USERNAME}
+        GITHUB_TOKEN: ${GITHUB_TOKEN}
+

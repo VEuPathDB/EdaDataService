@@ -10,7 +10,7 @@ To bring up the eda project via docker-compose, you'll need a few things.
 
 * a functioning docker setup and docker-compose (https://www.docker.com/products/docker-desktop)
 * a functioning traefik setup.  clone the https://github.com/VEuPathDB/docker-traefik project, and run `docker-compose up -d` in the clone, or follow the instructions in that repo.  This will run traefik locally, which handles the container routing
-* a functioning sshuttle setup.  If you need to access databases on internal networks, you'll need to properly setup sshuttle so that your containers can reach them.  Setting this up is out of scope for this document, to not expose unnecessary internal details publicly.
+* a properly configured .env file (see .env-sample)
 
 ### bring up the eda project
 
@@ -20,6 +20,48 @@ To bring up the eda project via docker-compose, you'll need a few things.
 When everything comes up successfully, you'll be able to reach this service at:
 
 https://edadata-dev.local.apidb.org:8443/
+
+### using dbforward
+
+The docker-compose-forwarder.yml file defines an additional container and config that will handle forwarding local db connections.  This eliminates the use of sshuttle, and some of the quirks related to sshuttle.
+
+#### how to use dbforward
+To bring up the stack this way:
+* ensure you are running an ssh-agent
+* ensure that your .env file contains the values from .env-sample (or use .env-sample as a template)
+* run `docker-compose -f docker-compose.yml -f docker-compose-forwarder.yml up -d`.
+
+
+#### how dbforward works
+
+The container maps your ssh-agent socket into the container, which allows it to authenticate via ssh to our servers.  It then opens an ssh connection using the vars in .env, and forwards ports to database servers.  It exposes these ports itself, so other containers in the stack can connect to the port on dbforward, which then gets forwarded to db servers.  This ssh command is set as the containers entrypoint, which looks like this:
+
+```
+    entrypoint:
+      - "ssh"
+      - "-tNn"
+      - "-p"
+      - "${DBFORWARD_SSH_PORT}"
+      - "-L"
+      - "0.0.0.0:${DBFORWARD_DB1_PORT}:${DBFORWARD_DB1}:1521"
+      - "-L"
+      - "0.0.0.0:${DBFORWARD_DB2_PORT}:${DBFORWARD_DB2}:1521"
+      - "${DBFORWARD_USER}@${DBFORWARD_HOST}"
+```
+
+Here is a breakdown of the forward arg `-L 0.0.0.0:${DBFORWARD_DB1_PORT}:${DBFORWARD_DB1}:1521` :
+
+```
+0.0.0.0 - this is the listening address, which means that ssh will listen on all interfaces
+${DBFORWARD_DB1_PORT} - this is the port listening for connections
+${DBFORWARD_DB1} - this is the name/address of the remote db server
+1521 - this is the port on the remote db sever
+```
+
+Put another way, this means that connections made to `dbforward:${DBFORWARD_DB1_PORT}` will forward via ssh through a connection to `${DBFORWARD_USER}@${DBFORWARD_HOST}` to connect to `${DBFORWARD_DB1}:1521`
+
+
+dbforward does not currently support ldap queries, since ldap will return the physical host and port, which isn't easily mapped to the dbforward container.  So, you must use host/port/name connections details.
 
 ### notes
 
