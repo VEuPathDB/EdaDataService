@@ -127,7 +127,7 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithCompute<Abunda
           DEFAULT_SINGLE_STREAM_NAME + 
        ", by=" + computeEntityIdColName +")");
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      connection.voidEval("map <- rbind(map, list('id'=attributes(abundanceDT)$computedVariableDetails$variableId," +
+      connection.voidEval("map <- rbind(map, list('id'=veupathUtils::toColNameOrNull(attributes(abundanceDT)$computedVariableDetails)," +
                                                  "'plotRef'=rep('xAxisVariable', length(attributes(abundanceDT)$computedVariableDetails$variableId))," +
                                                  "'dataType'=attributes(abundanceDT)$computedVariableDetails$dataType," +
                                                  "'dataShape'=attributes(abundanceDT)$computedVariableDetails$dataShape");

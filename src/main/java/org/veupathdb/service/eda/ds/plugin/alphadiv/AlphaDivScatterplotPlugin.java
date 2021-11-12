@@ -134,7 +134,7 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
           DEFAULT_SINGLE_STREAM_NAME + 
        ", by=" + computeEntityIdColName +")");
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      connection.voidEval("map <- rbind(map, list('id'=attributes(alphaDivDT)$computedVariableDetails$variableId," +
+      connection.voidEval("map <- rbind(map, list('id'=veupathUtils::toColNameOrNull(attributes(alphaDivDT)$computedVariableDetails)," +
                                                  "'plotRef'='yAxisVariable'," +
                                                  "'dataType'=attributes(alphaDivDT)$computedVariableDetails$dataType," +
                                                  "'dataShape'=attributes(alphaDivDT)$computedVariableDetails$dataShape," +
