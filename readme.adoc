@@ -27,8 +27,9 @@ The docker-compose-forwarder.yml file defines an additional container and config
 
 #### how to use dbforward
 To bring up the stack this way:
+
 * ensure you are running an ssh-agent
-* ensure that your .env file contains the values from .env-sample (or use .env-sample as a template)
+* ensure that your .env file contains the values from env-sample (or use env-sample as a template)
 * run `docker-compose -f docker-compose.yml -f docker-compose-forwarder.yml up -d`.
 
 
