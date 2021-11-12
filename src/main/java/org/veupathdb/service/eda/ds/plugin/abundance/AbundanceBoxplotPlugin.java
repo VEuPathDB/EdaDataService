@@ -30,7 +30,7 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
 
   @Override
   public String getDescription() {
-    return "Visualize abundance summary values";
+    return "Visualize ranked abundance summary values";
   }
 
   @Override
@@ -53,19 +53,12 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
     return AbundanceComputeConfig.class;
   }
 
-  // Constraints on computation?
-
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder("xAxisVariable", "overlayVariable", "facetVariable")
+      // TODO how to say these all have to be dependent on the collectionVar in computeConfig?
+      .dependencyOrder("overlayVariable", "facetVariable")
       .pattern()
-        // .element("yAxisVariable")
-        //   .types(APIVariableType.NUMBER)
-        //   .description("Variable must be a number.")
-        .element("xAxisVariable")
-          .maxVars(10)
-          .description("Variable must have 10 or fewer unique values and be the same or a parent entity of the Y-axis variable.")
         .element("overlayVariable")
           .required(false)
           .maxValues(8)
@@ -81,56 +74,69 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
   protected void validateVisualizationSpec(AbundanceBoxplotSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
-      .var("xAxisVariable", pluginSpec.getXAxisVariable())
-      // .var("yAxisVariable", pluginSpec.getYAxisVariable())
       .var("overlayVariable", pluginSpec.getOverlayVariable())
       .var("facetVariable", pluginSpec.getFacetVariable()));
   }
 
   @Override
   protected List<StreamSpec> getRequestedStreams(AbundanceBoxplotSpec pluginSpec, AbundanceComputeConfig computeConfig) {
-    return ListBuilder.asList(
+    List<StreamSpec> requestedStreamsList = ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
-        // .addVar(pluginSpec.getXAxisVariable())
-        // .addVar(pluginSpec.getYAxisVariable())
         .addVar(pluginSpec.getOverlayVariable())
-        .addVars(pluginSpec.getFacetVariable()));
+        .addVars(pluginSpec.getFacetVariable())
+      );
+    requestedStreamsList.add(
+      new StreamSpec(COMPUTE_STREAM_NAME, computeConfig.getCollectionVariable().getEntityId())
+        .addVars(getChildrenVariables(computeConfig.getCollectionVariable()) 
+      ));
+    
+    return requestedStreamsList;
   }
-
-  // Get compute results and merge/reformat based on incoming varMap?
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
+    AbundanceComputeConfig computeConfig = getComputeConfig();
     AbundanceBoxplotSpec spec = getPluginSpec();
     Map<String, VariableSpec> varMap = new HashMap<>();
-    // varMap.put("xAxisVariable", spec.getXAxisVariable());
-    // varMap.put("yAxisVariable", spec.getYAxisVariable());
     varMap.put("overlayVariable", spec.getOverlayVariable());
     varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
     varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
-    String computeStats = spec.getComputeStats() != null ? spec.getComputeStats().getValue() : "FALSE";
+    String computeStats = spec.getComputeStats() != null ? spec.getComputeStats().getValue() : "TRUE";
     String showMean = spec.getMean() != null ? spec.getMean().getValue() : "FALSE";
-    String listVarPlotRef = "xAxisVariable"; // soon will be part of the viz post request
-    String listVarDisplayLabel = "Phylum"; // get x axis label from compute output.
-    String inferredVarDisplayLabel = "Abundance"; // Also could grab from the compute output.
-    
+    String method = spec.getRankingMethod().getValue();
+    String computeEntityPKColName = toColNameOrEmpty(getComputeEntityPrimaryKeyVarSpec(computeConfig.getCollectionVariable().getEntityId()));
+
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
+      List<VariableSpec> computeInputVars = ListBuilder.asList(getComputeEntityPrimaryKeyVarSpec(computeConfig.getCollectionVariable().getEntityId()));
+      computeInputVars.addAll(getChildrenVariables(computeConfig.getCollectionVariable()));
+      connection.voidEval(getVoidEvalFreadCommand(COMPUTE_STREAM_NAME,
+        computeInputVars
+      ));
+      connection.voidEval("abundanceDT <- rankedAbundance(" + COMPUTE_STREAM_NAME + ", " + 
+                                                      computeEntityPKColName + ", " + 
+                                                      method + ")");
+      // TODO need to make sure id col to merge on is here too
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
-          // spec.getXAxisVariable(),
-          // spec.getYAxisVariable(),
           spec.getOverlayVariable(),
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
+      connection.voidEval("vizData <- merge(abundanceDT, " + 
+          DEFAULT_SINGLE_STREAM_NAME + 
+       ", by=" + computeEntityPKColName +")");
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      String command = "plot.data::box(data, map, '" +
+      connection.voidEval("map <- rbind(map, list('id'=attributes(abundanceDT)$computedVariableDetails$variableId," +
+                                                 "'plotRef'=rep('xAxisVariable', length(attributes(abundanceDT)$computedVariableDetails$variableId))," +
+                                                 "'dataType'=attributes(abundanceDT)$computedVariableDetails$dataType," +
+                                                 "'dataShape'=attributes(abundanceDT)$computedVariableDetails$dataShape");
+      String command = "plot.data::box(vizData, map, '" +
           spec.getPoints().getValue() + "', " +
           showMean + ", " + 
           computeStats + ", " + 
-          showMissingness + ",'" +
-          listVarPlotRef + "','" +
-          listVarDisplayLabel + "','" +
-          inferredVarDisplayLabel + "')";
+          showMissingness + ", " +
+          "'xAxisVariable', " + // x only initially, confusing ux and api otherwise?
+          "NULL, " + // getting display label for collection var might be client side work?
+          "'Abundance')";
       RServeClient.streamResult(connection, command, out);
     });
   }

@@ -30,7 +30,7 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
 
   @Override
   public String getDescription() {
-    return "Visualize alpha diversity summary variables";
+    return "Visualize alpha diversity summary values";
   }
 
   @Override
@@ -106,9 +106,9 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
     varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
     varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
-    String computeStats = spec.getComputeStats() != null ? spec.getComputeStats().getValue() : "FALSE";
+    String computeStats = spec.getComputeStats() != null ? spec.getComputeStats().getValue() : "TRUE";
     String showMean = spec.getMean() != null ? spec.getMean().getValue() : "FALSE";
-    String valueSpec = spec.getValueSpec().getValue();
+    String method = spec.getAlphaDivMethod().getValue();
     String computeEntityPKColName = toColNameOrEmpty(getComputeEntityPrimaryKeyVarSpec(computeConfig.getCollectionVariable().getEntityId()));
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
@@ -119,7 +119,7 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
       ));
       connection.voidEval("alphaDivDT <- alphaDiv(" + COMPUTE_STREAM_NAME + ", " + 
                                                       computeEntityPKColName + ", " + 
-                                                      valueSpec + ")");
+                                                      method + ")");
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
           spec.getXAxisVariable(),
           spec.getOverlayVariable(),
@@ -131,10 +131,10 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
                                          ", by=" + computeEntityPKColName +")");
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       // update the new map obj in R to add alphaDiv
-      connection.voidEval("map <- rbind(map, list('id'='alphaDiversity'," +
+      connection.voidEval("map <- rbind(map, list('id'=attributes(alphaDivDT)$computedVariableDetails$variableId," +
                                                  "'plotRef'='yAxisVariable'," +
-                                                 "'dataType'='NUMBER'," +
-                                                 "'dataShape'='CONTINUOUS'," +
+                                                 "'dataType'=attributes(alphaDivDT)$computedVariableDetails$dataType," +
+                                                 "'dataShape'=attributes(alphaDivDT)$computedVariableDetails$dataShape," +
                                                  "'displayLabel'=attributes(alphaDivDT)$computedVariableDetails$displayLabel))");
       String command = "plot.data::box(vizData, map, '" +
           spec.getPoints().getValue() + "', " +

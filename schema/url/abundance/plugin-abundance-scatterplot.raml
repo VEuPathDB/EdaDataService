@@ -24,11 +24,9 @@ types:
         enum: ['raw', 'smoothedMeanWithRaw', 'bestFitLineWithRaw']
       xAxisVariable:
         type: VariableSpec
-      overlayVariable: 
-        type: VariableSpec[]
-        maxItems: 8
-        required: false
       facetVariable:
         type: VariableSpec[]
         maxItems: 2
         required: false
+      rankingMethod:
+        type: AbundanceRankingMethod

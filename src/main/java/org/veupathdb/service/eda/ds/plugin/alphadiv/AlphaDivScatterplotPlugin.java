@@ -35,7 +35,7 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
 
   @Override
   public String getDescription() {
-    return "Visualize the relationship between a continuous variable and abundance";
+    return "Visualize the relationship between a continuous variable and alpha diversity";
   }
 
   @Override
@@ -86,41 +86,60 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
 
   @Override
   protected List<StreamSpec> getRequestedStreams(AlphaDivScatterplotSpec pluginSpec, AlphaDivComputeConfig computeConfig) {
-    return ListBuilder.asList(
+    List<StreamSpec> requestedStreamsList = ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
         .addVar(pluginSpec.getOverlayVariable())
-        .addVars(pluginSpec.getFacetVariable()));
+        .addVars(pluginSpec.getFacetVariable())
+      );
+    requestedStreamsList.add(
+      new StreamSpec(COMPUTE_STREAM_NAME, computeConfig.getCollectionVariable().getEntityId())
+        .addVars(getChildrenVariables(computeConfig.getCollectionVariable()) 
+      ));
+    
+    return requestedStreamsList;
   }
 
   
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
+    AlphaDivComputeConfig computeConfig = getComputeConfig();
     AlphaDivScatterplotSpec spec = getPluginSpec();
     Map<String, VariableSpec> varMap = new HashMap<>();
     varMap.put("xAxisVariable", spec.getXAxisVariable());
-    // varMap.put("yAxisVariable", spec.getYAxisVariable()); // Comes from compute service
     varMap.put("overlayVariable", spec.getOverlayVariable());
     varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
     varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
     String valueSpec = spec.getValueSpec().getValue();
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
-    // String yVarType = getVariableType(spec.getYAxisVariable());
-    
-    // if (yVarType.equals("DATE") && !valueSpec.equals("raw")) {
-    //   LOG.error("Cannot calculate trend lines for y-axis date variables. The `valueSpec` property must be set to `raw`.");
-    // }
+    String method = spec.getAlphaDivMethod().getValue();
+    String computeEntityPKColName = toColNameOrEmpty(getComputeEntityPrimaryKeyVarSpec(computeConfig.getCollectionVariable().getEntityId()));
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
+      List<VariableSpec> computeInputVars = ListBuilder.asList(getComputeEntityPrimaryKeyVarSpec(computeConfig.getCollectionVariable().getEntityId()));
+      computeInputVars.addAll(getChildrenVariables(computeConfig.getCollectionVariable()));
+      connection.voidEval(getVoidEvalFreadCommand(COMPUTE_STREAM_NAME,
+        computeInputVars
+      ));
+      connection.voidEval("alphaDivDT <- alphaDiv(" + COMPUTE_STREAM_NAME + ", " + 
+                                                      computeEntityPKColName + ", " + 
+                                                      method + ")");
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
           spec.getXAxisVariable(),
-          // spec.getYAxisVariable(),
           spec.getOverlayVariable(),
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
+      connection.voidEval("vizData <- merge(alphaDivDT, " + 
+          DEFAULT_SINGLE_STREAM_NAME + 
+       ", by=" + computeEntityPKColName +")");
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      String command = "plot.data::scattergl(data, map, '" + valueSpec + "', " + showMissingness + ")";
+      connection.voidEval("map <- rbind(map, list('id'=attributes(alphaDivDT)$computedVariableDetails$variableId," +
+                                                 "'plotRef'='yAxisVariable'," +
+                                                 "'dataType'=attributes(alphaDivDT)$computedVariableDetails$dataType," +
+                                                 "'dataShape'=attributes(alphaDivDT)$computedVariableDetails$dataShape," +
+                                                 "'displayLabel'=attributes(alphaDivDT)$computedVariableDetails$displayLabel))");
+      String command = "plot.data::scattergl(vizData, map, '" + valueSpec + "', " + showMissingness + ")";
       RServeClient.streamResult(connection, command, out);
     }); 
   }

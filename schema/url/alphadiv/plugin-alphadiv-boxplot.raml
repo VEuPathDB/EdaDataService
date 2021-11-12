@@ -9,6 +9,10 @@ types:
       computeConfig: AlphaDivComputeConfig
       config: AlphaDivBoxplotSpec
 
+  AlphaDivMethod:
+    type: string
+    enum: ['shannon', 'simpson', 'evenness']
+
   # Assuming alpha div must be on y axis. No list vars allowed
   AlphaDivBoxplotSpec:
     additionalProperties: false
@@ -37,6 +41,5 @@ types:
         type: VariableSpec[]
         maxItems: 2
         required: false
-      valueSpec:
-        type: string
-        enum: ['shannon','simpson','evenness']
+      alphaDivMethod:
+        type: AlphaDivMethod

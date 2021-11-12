@@ -9,7 +9,7 @@ types:
       computeConfig: AlphaDivComputeConfig
       config: AlphaDivScatterplotSpec
 
-  # Assume y-axis is always alpha diversity. No listvars allowed. Cont overlay allowed.
+  # y-axis is alpha diversity. No listvars allowed. Cont overlay allowed.
   AlphaDivScatterplotSpec:
     additionalProperties: false
     properties:
@@ -31,3 +31,5 @@ types:
         type: VariableSpec[]
         maxItems: 2
         required: false
+      alphaDivMethod:
+        type: AlphaDivMethod
