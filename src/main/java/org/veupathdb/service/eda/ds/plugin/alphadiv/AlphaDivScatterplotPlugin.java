@@ -114,16 +114,16 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
     String valueSpec = spec.getValueSpec().getValue();
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
     String method = spec.getAlphaDivMethod().getValue();
-    String computeEntityPKColName = toColNameOrEmpty(getComputeEntityPrimaryKeyVarSpec(computeConfig.getCollectionVariable().getEntityId()));
+    String computeEntityIdColName = toColNameOrEmpty(getComputeEntityIdVarSpec(computeConfig.getCollectionVariable().getEntityId()));
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
-      List<VariableSpec> computeInputVars = ListBuilder.asList(getComputeEntityPrimaryKeyVarSpec(computeConfig.getCollectionVariable().getEntityId()));
+      List<VariableSpec> computeInputVars = ListBuilder.asList(getComputeEntityIdVarSpec(computeConfig.getCollectionVariable().getEntityId()));
       computeInputVars.addAll(getChildrenVariables(computeConfig.getCollectionVariable()));
       connection.voidEval(getVoidEvalFreadCommand(COMPUTE_STREAM_NAME,
         computeInputVars
       ));
       connection.voidEval("alphaDivDT <- alphaDiv(" + COMPUTE_STREAM_NAME + ", " + 
-                                                      computeEntityPKColName + ", " + 
+                                                      computeEntityIdColName + ", " + 
                                                       method + ")");
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
           spec.getXAxisVariable(),
@@ -132,7 +132,7 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
       connection.voidEval("vizData <- merge(alphaDivDT, " + 
           DEFAULT_SINGLE_STREAM_NAME + 
-       ", by=" + computeEntityPKColName +")");
+       ", by=" + computeEntityIdColName +")");
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       connection.voidEval("map <- rbind(map, list('id'=attributes(alphaDivDT)$computedVariableDetails$variableId," +
                                                  "'plotRef'='yAxisVariable'," +

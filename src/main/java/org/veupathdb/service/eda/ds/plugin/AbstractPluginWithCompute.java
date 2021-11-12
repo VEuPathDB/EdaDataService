@@ -71,7 +71,7 @@ public abstract class AbstractPluginWithCompute<T extends VisualizationRequestBa
     return new ArrayList(childVarDefs);
   }
 
-  protected VariableSpec getComputeEntityPrimaryKeyVarSpec(String entityId) {
+  protected VariableSpec getComputeEntityIdVarSpec(String entityId) {
     VariableDef idColVariableDef = _referenceMetadata.getEntity(entityId).get().getIdColumnDef();
 
     return idColVariableDef;

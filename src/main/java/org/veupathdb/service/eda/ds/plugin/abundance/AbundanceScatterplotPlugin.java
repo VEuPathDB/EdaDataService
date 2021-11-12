@@ -108,16 +108,16 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithCompute<Abunda
     String valueSpec = spec.getValueSpec().getValue();
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
     String method = spec.getRankingMethod().getValue();
-    String computeEntityPKColName = toColNameOrEmpty(getComputeEntityPrimaryKeyVarSpec(computeConfig.getCollectionVariable().getEntityId())); 
+    String computeEntityIdColName = toColNameOrEmpty(getComputeEntityIdVarSpec(computeConfig.getCollectionVariable().getEntityId())); 
 
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
-      List<VariableSpec> computeInputVars = ListBuilder.asList(getComputeEntityPrimaryKeyVarSpec(computeConfig.getCollectionVariable().getEntityId()));
+      List<VariableSpec> computeInputVars = ListBuilder.asList(getComputeEntityIdVarSpec(computeConfig.getCollectionVariable().getEntityId()));
       computeInputVars.addAll(getChildrenVariables(computeConfig.getCollectionVariable()));
       connection.voidEval(getVoidEvalFreadCommand(COMPUTE_STREAM_NAME,
         computeInputVars
       ));
       connection.voidEval("abundanceDT <- rankedAbundance(" + COMPUTE_STREAM_NAME + ", " + 
-                                                      computeEntityPKColName + ", " + 
+                                                      computeEntityIdColName + ", " + 
                                                       method + ", 8)");
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
           spec.getXAxisVariable(),
@@ -125,7 +125,7 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithCompute<Abunda
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
       connection.voidEval("vizData <- merge(abundanceDT, " + 
           DEFAULT_SINGLE_STREAM_NAME + 
-       ", by=" + computeEntityPKColName +")");
+       ", by=" + computeEntityIdColName +")");
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       connection.voidEval("map <- rbind(map, list('id'=attributes(abundanceDT)$computedVariableDetails$variableId," +
                                                  "'plotRef'=rep('xAxisVariable', length(attributes(abundanceDT)$computedVariableDetails$variableId))," +
