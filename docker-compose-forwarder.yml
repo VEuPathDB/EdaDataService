@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
 
-  dbforward:
+  ldapforward:
     image: kroniak/ssh-client
     volumes:
       - type: bind
@@ -22,54 +22,95 @@ services:
       - "-p"
       - "${DBFORWARD_SSH_PORT}"
       - "-L"
-      - "0.0.0.0:${DBFORWARD_DB1_PORT}:${DBFORWARD_DB1}:1521"
-      - "-L"
-      - "0.0.0.0:${DBFORWARD_DB2_PORT}:${DBFORWARD_DB2}:1521"
+      - "0.0.0.0:389:${LDAPFORWARD_HOST}:389"
       - "${DBFORWARD_USER}@${DBFORWARD_HOST}"
 
     networks:
-    - internal
-    - external
+      internal:
+        aliases:
+          - ${LDAPFORWARD_HOST}
+      external:
 
+  dbforward1:
+    image: kroniak/ssh-client
+    volumes:
+      - type: bind
+        source: $SSH_AUTH_SOCK
+        target: $SSH_AUTH_SOCK
+      - type: bind
+        source: $HOME/.ssh/known_hosts
+        target: /root/.ssh/known_hosts
+        read_only: true
 
-  subsetting:
     environment:
-      USER_DB_HOST: ${USER_DB_HOST}
-      USER_DB_PORT: ${USER_DB_PORT}
-      USER_DB_NAME: ${USER_DB_NAME}
+      SSH_AUTH_SOCK: $SSH_AUTH_SOCK
 
-      ACCT_DB_HOST: ${ACCT_DB_HOST}
-      ACCT_DB_PORT: ${ACCT_DB_PORT}
-      ACCT_DB_NAME: acctdb
+    entrypoint:
+      - "ssh"
+      - "-tNn"
+      - "-p"
+      - "${DBFORWARD_SSH_PORT}"
+      - "-L"
+      - "0.0.0.0:1521:${DBFORWARD_DB1}:1521"
+      - "${DBFORWARD_USER}@${DBFORWARD_HOST}"
+
+    networks:
+      internal:
+        aliases:
+          - ${DBFORWARD_DB1}
+      external:
+
+  dbforward2:
+    image: kroniak/ssh-client
+    volumes:
+      - type: bind
+        source: $SSH_AUTH_SOCK
+        target: $SSH_AUTH_SOCK
+      - type: bind
+        source: $HOME/.ssh/known_hosts
+        target: /root/.ssh/known_hosts
+        read_only: true
+
+    environment:
+      SSH_AUTH_SOCK: $SSH_AUTH_SOCK
+
+    entrypoint:
+      - "ssh"
+      - "-tNn"
+      - "-p"
+      - "${DBFORWARD_SSH_PORT}"
+      - "-L"
+      - "0.0.0.0:1521:${DBFORWARD_DB2}:1521"
+      - "${DBFORWARD_USER}@${DBFORWARD_HOST}"
+
+    networks:
+      internal:
+        aliases:
+          - ${DBFORWARD_DB2}
+      external:
+
+
+# setup dependencies so the forwarders come up first
 
   data:
-    environment:
-      USER_DB_HOST: ${USER_DB_HOST}
-      USER_DB_PORT: ${USER_DB_PORT}
-      USER_DB_NAME: ${USER_DB_NAME}
-
-      ACCT_DB_HOST: ${ACCT_DB_HOST}
-      ACCT_DB_PORT: ${ACCT_DB_PORT}
-      ACCT_DB_NAME: acctdb
+    depends_on:
+      - ldapforward
+      - dbforward1
+      - dbforward2
+  user:
+    depends_on:
+      - ldapforward
+      - dbforward1
+      - dbforward2
 
   dataset-access:
-    environment:
-      APP_DB_HOST: ${APP_DB_HOST}
-      APP_DB_PORT: ${APP_DB_PORT}
-      APP_DB_NAME: ${APP_DB_NAME}
+    depends_on:
+      - ldapforward
+      - dbforward1
+      - dbforward2
 
-      ACCT_DB_HOST: ${ACCT_DB_HOST}
-      ACCT_DB_PORT: ${ACCT_DB_PORT}
-      ACCT_DB_NAME: acctdb
-
-  user:
-    environment:
-      ACCT_DB_HOST: ${ACCT_DB_HOST}
-      ACCT_DB_PORT: ${ACCT_DB_PORT}
-      ACCT_DB_NAME: ${ACCT_DB_NAME}
-
-      USER_DB_HOST: ${USER_DB_HOST}
-      USER_DB_PORT: ${USER_DB_PORT}
-      USER_DB_NAME: ${USER_DB_NAME}
-
-
+  subsetting:
+    depends_on:
+      - ldapforward
+      - dbforward1
+      - dbforward2
