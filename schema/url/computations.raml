@@ -47,6 +47,8 @@ types:
         type: AbundanceComputation[]
       parameterSets: 
         type: ParameterSet[]
+      recordVariableDetails:
+        type: VariableDetails 
 
   ParameterSet:
     additionalProperties: false
@@ -58,36 +60,29 @@ types:
     type: Computation
     additionalProperties: false
     properties:
-      recordVariableDetails:
-        type: VariableDetails  # poor name
       isCutoff:
         type: boolean
   
+  # Should get renamed
   VariableDetails:
     type: VariableSpec
     properties:
       values: string[]  # or number[]?
   
-
   AlphaDivComputePostRespose:
     additionalProperties: false
     properties:
       computations: 
-        type: AlphaDivComputation[]
+        type: Computation[]
       parameterSets: 
         type: ParameterSet[]
-
-  AlphaDivComputation:
-    type: Computation
-    additionalProperties: false
-    properties: 
       recordVariableDetails:
-        type: VariableDetails  # poor name
+        type: VariableDetails 
       
   Computation:
     additionalProperties: false
     properties:
-      computedVariableDetails: ComputedVariableDetails[]
+      computedVariableDetails: ComputedVariableDetails[] # for now doesn't need to be an array, but would be in the future (beta div)
       computeDetails?: string
       # add compute type? For example, to distinguish dissimilarity from pcoa results?
 
@@ -97,7 +92,7 @@ types:
       variableId:
         type: string[] 
       entityId:
-        type: string  # all have to be of the same entity, so should be just one string
+        type: string[]  
       values:
         type: number[][]  # or string[][]??
       displayLabel:
@@ -105,6 +100,7 @@ types:
         required: false
       isCollection:
         type: boolean  # abundance comptued vars are but pcoa axes aren't.
+        required: false
       defaultRange:
         type: number[]
         maxItems: 2
@@ -124,13 +120,13 @@ types:
         type: BetaDivComputation[]
       parameterSets: 
         type: ParameterSet[]
+      recordVariableDetails:
+        type: VariableDetails
 
   BetaDivComputation:
     type: Computation
     additionalProperties: false
     properties: 
-      recordVariableDetails:
-        type: VariableDetails  # poor name
       pcoaVariance:
         type: number[]
 
