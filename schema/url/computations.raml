@@ -82,24 +82,40 @@ types:
   Computation:
     additionalProperties: false
     properties:
-      computedVariableDetails: ComputedVariableDetails[] # for now doesn't need to be an array, but would be in the future (beta div)
+      computedVariables: ComputedVariable[] # for now doesn't need to be an array, but would be in the future (beta div)
       computeDetails?: string
       # add compute type? For example, to distinguish dissimilarity from pcoa results?
 
-  ComputedVariableDetails:
+  ComputedVariable:
     additionalProperties: false
     properties:
+      variableDetails:
+        type: ComputedVariableDetails
+      variableMetadata:
+        type: ComputedVariableMetadata
+
+  ComputedVariableDetails:
+    additionalProperties: false
+    properties: 
       variableId:
         type: string[] 
       entityId:
-        type: string[]  
+        type: string[]
+      dataType:
+        type: string[]
+      dataShape:
+        type: string[] 
       values:
         type: number[][]  # or string[][]??
+      isCollection:  # maybe isn't needed yet since we're wiring all up very explicitly right now?
+        type: boolean  # abundance comptued vars are but pcoa axes aren't.
+        required: false
+
+  ComputedVariableMetadata:
+    additionalProperties: false
+    properties: 
       displayLabel:
         type: string[]
-        required: false
-      isCollection:
-        type: boolean  # abundance comptued vars are but pcoa axes aren't.
         required: false
       defaultRange:
         type: number[]
@@ -112,7 +128,7 @@ types:
       isOrdinal: 
         type: boolean
         required: false
-        
+
   BetaDivComputePostResponse:
     additionalProperties: false
     properties:
