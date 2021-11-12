@@ -102,7 +102,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     validateVisualizationSpec(_pluginSpec);
 
     // get list of data streams required by this subclass
-    _requiredStreams = _requiredStreams == null ? _requiredStreams = getRequestedStreams(_pluginSpec) : _requiredStreams;
+    _requiredStreams = getRequestedStreams(_pluginSpec);
 
     // validate stream specs provided by the subclass
     _mergingClient.getStreamSpecValidator()
