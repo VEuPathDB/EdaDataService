@@ -38,11 +38,6 @@ public class ContTablePlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpe
   }
   
   @Override
-  public Integer getMaxPanels() {
-    return 25;
-  }
-  
-  @Override
   protected Class<MosaicSpec> getVisualizationSpecClass() {
     return MosaicSpec.class;
   }
@@ -61,6 +56,7 @@ public class ContTablePlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpe
         .element("facetVariable")
           .required(false)
           .maxVars(2)
+          .maxValues(7)
           .description("Variable(s) must have 25 or fewer cartesian products and be of the same or a parent entity of the X-axis variable.")
       .done();
   }

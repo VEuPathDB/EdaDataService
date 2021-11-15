@@ -41,11 +41,6 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
   }
   
   @Override
-  public Integer getMaxPanels() {
-    return 25;
-  }
-  
-  @Override
   protected Class<BoxplotSpec> getVisualizationSpecClass() {
     return BoxplotSpec.class;
   }
@@ -67,6 +62,7 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
         .element("facetVariable")
           .required(false)
           .maxVars(2)
+          .maxValues(7)
           .description("Variable(s) must have 25 or fewer cartesian products and be of the same or a parent entity of the Overlay variable.")
       .done();
   }

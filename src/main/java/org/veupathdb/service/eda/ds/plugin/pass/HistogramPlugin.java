@@ -45,11 +45,6 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
   }
   
   @Override
-  public Integer getMaxPanels() {
-    return 25;
-  }
-  
-  @Override
   protected Class<HistogramSpec> getVisualizationSpecClass() {
     return HistogramSpec.class;
   }
@@ -68,6 +63,7 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
         .element("facetVariable")
           .required(false)
           .maxVars(2)
+          .maxValues(7)
           .description("Variable(s) must have 25 or fewer cartesian products and be of the same or a parent entity as the Overlay variable.")
       .done();
   }
