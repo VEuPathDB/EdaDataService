@@ -37,11 +37,6 @@ public class DensityplotPlugin extends AbstractPlugin<DensityplotPostRequest, De
   public List<String> getProjects() {
     return Arrays.asList("ClinEpiDB", "MicrobiomeDB");
   }
-
-  @Override
-  public Integer getMaxPanels() {
-    return 25;
-  }
   
   @Override
   protected Class<DensityplotSpec> getVisualizationSpecClass() {
@@ -62,6 +57,7 @@ public class DensityplotPlugin extends AbstractPlugin<DensityplotPostRequest, De
         .element("facetVariable")
           .required(false)
           .maxVars(2)
+          .maxValues(7)
           .description("Variable(s) must have 25 or fewer cartesian products and be of the same or a parent entity of the Overlay variable.")
       .done();
   }

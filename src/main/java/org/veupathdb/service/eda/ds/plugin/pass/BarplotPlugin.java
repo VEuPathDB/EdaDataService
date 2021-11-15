@@ -38,11 +38,6 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
   public List<String> getProjects() {
     return Arrays.asList("ClinEpiDB", "MicrobiomeDB");
   }
-
-  @Override
-  public Integer getMaxPanels() {
-    return 25;
-  }
   
   @Override
   protected Class<BarplotSpec> getVisualizationSpecClass() {
@@ -63,6 +58,7 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
         .element("facetVariable")
           .required(false)
           .maxVars(2)
+          .maxValues(7)
           .description("Variable(s) must have 25 or fewer cartesian products and be of the same or a parent entity of the Overlay variable.")
       .done();
   }
