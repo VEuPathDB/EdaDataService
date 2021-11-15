@@ -43,11 +43,6 @@ public class BetaDivScatterplotPlugin extends AbstractPluginWithCompute<BetaDivS
   }
   
   @Override
-  public Integer getMaxPanels() {
-    return 25;
-  }
-  
-  @Override
   protected Class<BetaDivScatterplotSpec> getVisualizationSpecClass() {
     return BetaDivScatterplotSpec.class;
   }
@@ -70,10 +65,6 @@ public class BetaDivScatterplotPlugin extends AbstractPluginWithCompute<BetaDivS
         //   .description("Variable must be a number or date and be of the same or a parent entity as the Y-axis variable.")
         .element("overlayVariable")
           .description("Variable must be of the same or a parent entity as the X-axis variable.")
-        // .element("facetVariable")
-        //   .required(false)
-        //   .maxVars(2)
-        //   .description("Variable(s) must have 25 or fewer cartesian products and be of the same or a parent entity as the Overlay variable.")
       .done();
   }
   
@@ -84,7 +75,6 @@ public class BetaDivScatterplotPlugin extends AbstractPluginWithCompute<BetaDivS
       // .var("xAxisVariable", pluginSpec.getXAxisVariable())
       // .var("yAxisVariable", pluginSpec.getYAxisVariable())
       .var("overlayVariable", pluginSpec.getOverlayVariable()));
-      // .var("facetVariable", pluginSpec.getFacetVariable()));
   }
 
   @Override
@@ -94,7 +84,6 @@ public class BetaDivScatterplotPlugin extends AbstractPluginWithCompute<BetaDivS
         // .addVar(pluginSpec.getXAxisVariable())
         // .addVar(pluginSpec.getYAxisVariable())
         .addVar(pluginSpec.getOverlayVariable()));
-        // .addVars(pluginSpec.getFacetVariable()));
   }
 
   @Override
@@ -104,23 +93,14 @@ public class BetaDivScatterplotPlugin extends AbstractPluginWithCompute<BetaDivS
     // varMap.put("xAxisVariable", spec.getXAxisVariable()); // Will come from compute service
     // varMap.put("yAxisVariable", spec.getYAxisVariable());  // Will come from compute service
     varMap.put("overlayVariable", spec.getOverlayVariable());
-    // varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
-    // varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
     String valueSpec = "raw";
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
-    // String yVarType = getVariableType(spec.getYAxisVariable());
-    
-    // if (yVarType.equals("DATE") && !valueSpec.equals("raw")) {
-    //   LOG.error("Cannot calculate trend lines for y-axis date variables. The `valueSpec` property must be set to `raw`.");
-    // }
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
           // spec.getXAxisVariable(), // Will come from CS
           // spec.getYAxisVariable(), // Will come from CS
           spec.getOverlayVariable()));
-          // getVariableSpecFromList(spec.getFacetVariable(), 0),
-          // getVariableSpecFromList(spec.getFacetVariable(), 1)));
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       String command = "plot.data::scattergl(data, map, '" + valueSpec + "', " + showMissingness + ")";
       RServeClient.streamResult(connection, command, out);
