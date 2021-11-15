@@ -44,11 +44,6 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithCompute<Abunda
   }
   
   @Override
-  public Integer getMaxPanels() {
-    return 25;
-  }
-  
-  @Override
   protected Class<AbundanceScatterplotSpec> getVisualizationSpecClass() {
     return AbundanceScatterplotSpec.class;
   }
@@ -70,6 +65,7 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithCompute<Abunda
         .element("facetVariable")
           .required(false)
           .maxVars(2)
+          .maxValues(7)
           .description("Variable(s) must have 25 or fewer cartesian products and be of the same or a parent entity as the Overlay variable.")
       .done();
   }
