@@ -131,7 +131,7 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
           computeStats + ", " + 
           showMissingness + ", " +
           "'xAxisVariable', " + // x only initially, confusing ux and api otherwise?
-          "NULL, " + // getting display label for collection var might be client side work?
+          "NULL, " + // pass the parent term spec here, client turns it into display label
           "'Abundance')";
       RServeClient.streamResult(connection, command, out);
     });

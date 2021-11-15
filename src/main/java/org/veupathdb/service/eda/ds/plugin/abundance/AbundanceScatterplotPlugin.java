@@ -132,7 +132,7 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithCompute<Abunda
           valueSpec + "', " + 
           showMissingness + ", " +
           "'overlayVariable', " +
-          "NULL, " +
+          singleQuote(computeEntityIdColName) + ", " +
           "'Abundance')";
       RServeClient.streamResult(connection, command, out);
     }); 
