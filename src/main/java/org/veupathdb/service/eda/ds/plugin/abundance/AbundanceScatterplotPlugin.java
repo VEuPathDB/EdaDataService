@@ -103,10 +103,11 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithCompute<Abunda
     String valueSpec = spec.getValueSpec().getValue();
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
     String method = spec.getRankingMethod().getValue();
-    String computeEntityIdColName = toColNameOrEmpty(getComputeEntityIdVarSpec(computeConfig.getCollectionVariable().getEntityId())); 
+    VariableSpec computeEntityIdVarSpec = getComputeEntityIdVarSpec(computeConfig.getCollectionVariable().getEntityId());
+    String computeEntityIdColName = toColNameOrEmpty(computeEntityIdVarSpec); 
 
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
-      List<VariableSpec> computeInputVars = ListBuilder.asList(getComputeEntityIdVarSpec(computeConfig.getCollectionVariable().getEntityId()));
+      List<VariableSpec> computeInputVars = ListBuilder.asList(computeEntityIdVarSpec);
       computeInputVars.addAll(getChildrenVariables(computeConfig.getCollectionVariable()));
       connection.voidEval(getVoidEvalFreadCommand(COMPUTE_STREAM_NAME,
         computeInputVars
@@ -115,6 +116,7 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithCompute<Abunda
                                                       computeEntityIdColName + ", " + 
                                                       method + ", 8)");
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
+          computeEntityIdVarSpec,
           spec.getXAxisVariable(),
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));

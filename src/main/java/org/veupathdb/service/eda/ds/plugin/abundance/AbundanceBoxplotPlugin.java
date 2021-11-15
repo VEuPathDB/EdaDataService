@@ -100,10 +100,11 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
     String computeStats = spec.getComputeStats() != null ? spec.getComputeStats().getValue() : "TRUE";
     String showMean = spec.getMean() != null ? spec.getMean().getValue() : "FALSE";
     String method = spec.getRankingMethod().getValue();
-    String computeEntityIdColName = toColNameOrEmpty(getComputeEntityIdVarSpec(computeConfig.getCollectionVariable().getEntityId()));
+    VariableSpec computeEntityIdVarSpec = getComputeEntityIdVarSpec(computeConfig.getCollectionVariable().getEntityId());
+    String computeEntityIdColName = toColNameOrEmpty(computeEntityIdVarSpec);
 
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
-      List<VariableSpec> computeInputVars = ListBuilder.asList(getComputeEntityIdVarSpec(computeConfig.getCollectionVariable().getEntityId()));
+      List<VariableSpec> computeInputVars = ListBuilder.asList(computeEntityIdVarSpec);
       computeInputVars.addAll(getChildrenVariables(computeConfig.getCollectionVariable()));
       connection.voidEval(getVoidEvalFreadCommand(COMPUTE_STREAM_NAME,
         computeInputVars
@@ -111,8 +112,8 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
       connection.voidEval("abundanceDT <- rankedAbundance(" + COMPUTE_STREAM_NAME + ", " + 
                                                       computeEntityIdColName + ", " + 
                                                       method + ")");
-      // TODO need to make sure id col to merge on is here too
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
+          computeEntityIdVarSpec,
           spec.getOverlayVariable(),
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
