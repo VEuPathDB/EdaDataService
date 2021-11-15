@@ -56,7 +56,6 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithCompute<Abunda
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      // TODO here collectionVar is between x axis and facet !!
       .dependencyOrder("xAxisVariable", "facetVariable")
       .pattern()
         .element("xAxisVariable")

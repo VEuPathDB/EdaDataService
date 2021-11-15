@@ -51,7 +51,6 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      // TODO how to say these all have to be dependent on the collectionVar in computeConfig?
       .dependencyOrder("overlayVariable", "facetVariable")
       .pattern()
         .element("overlayVariable")
