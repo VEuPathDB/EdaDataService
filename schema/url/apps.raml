@@ -42,18 +42,6 @@ types:
     properties:
       //: VisualizationDataElementConstraint
 
-  # only really need this when value is false i suppose
-  # the key should be a usual suspect for the particular viz
-  # ex:  usual scatter plot has a valueSpec, beta div scatter will not
-  # for beta div scatter key 'valueSpec' should have a value of 'false'
-  # this leaves us very flexible, but also possible to put nonsense in here
-  # alternative might be defining unique configs for each plot type explicitly
-  BooleanMap:
-    additionalProperties: false
-    properties: 
-      key: string 
-      value: boolean
-
   VisualizationOverview:
     additionalProperties: false
     properties:
@@ -62,9 +50,6 @@ types:
       description: string
       projects: string[]
       maxPanels: number
-      config: 
-        type: BooleanMap[]
-        required: false
       dataElementConstraints:
         type: VisualizationDataElementConstraintPattern[]
         required: false
