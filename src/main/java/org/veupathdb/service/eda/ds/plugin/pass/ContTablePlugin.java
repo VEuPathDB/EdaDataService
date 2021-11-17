@@ -57,7 +57,7 @@ public class ContTablePlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpe
           .required(false)
           .maxVars(2)
           .maxValues(7)
-          .description("Variable(s) must have 25 or fewer cartesian products and be of the same or a parent entity of the X-axis variable.")
+          .description("Variable(s) must have 7 or fewer unique values and be of the same or a parent entity of the X-axis variable.")
       .done();
   }
 
