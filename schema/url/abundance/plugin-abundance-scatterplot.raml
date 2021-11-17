@@ -1,0 +1,32 @@
+#%RAML 1.0 Library
+
+types:
+  # Type name determines the name of the Java class that will be generated.
+
+  AbundanceScatterplotPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      computeConfig: AbundanceComputeConfig
+      config: AbundanceScatterplotSpec
+
+  # Assume y-axis is always abundance. Overlay can be listvar
+  AbundanceScatterplotSpec:
+    additionalProperties: false
+    properties:
+      outputEntityId:
+        type: string
+      showMissingness:
+        type: string
+        enum: ['TRUE', 'FALSE']
+        required: false
+      valueSpec:
+        type: string
+        enum: ['raw', 'smoothedMeanWithRaw', 'bestFitLineWithRaw']
+      xAxisVariable:
+        type: VariableSpec
+      facetVariable:
+        type: VariableSpec[]
+        maxItems: 2
+        required: false
+      rankingMethod:
+        type: AbundanceRankingMethod

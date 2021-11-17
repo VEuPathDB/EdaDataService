@@ -1,0 +1,45 @@
+#%RAML 1.0 Library
+
+types:
+  # Type name determines the name of the Java class that will be generated.
+
+  AlphaDivBoxplotPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      computeConfig: AlphaDivComputeConfig
+      config: AlphaDivBoxplotSpec
+
+  AlphaDivMethod:
+    type: string
+    enum: ['shannon', 'simpson', 'evenness']
+
+  # Assuming alpha div must be on y axis. No list vars allowed
+  AlphaDivBoxplotSpec:
+    additionalProperties: false
+    properties:
+      outputEntityId:
+        type: string
+      showMissingness:
+        type: string
+        enum: ['TRUE', 'FALSE']
+        required: false
+      points:
+        type: string
+        enum: ['outliers', 'all']
+      mean:
+        type: string
+        enum: ['TRUE', 'FALSE']
+      computeStats:
+        type: string
+        enum: ['TRUE', 'FALSE']
+      xAxisVariable:
+        type: VariableSpec
+      overlayVariable:
+        type: VariableSpec
+        required: false
+      facetVariable:
+        type: VariableSpec[]
+        maxItems: 2
+        required: false
+      alphaDivMethod:
+        type: AlphaDivMethod

@@ -4,7 +4,7 @@ types:
   # Type name determines the name of the Java class that will be generated.
 
   # maybe make plots a dir and break out into files?
-  # current assumption is the data object will be consistent across all barplot (etc) vizs
+  # assumption is data object is consistent across all barplot (etc) vizs
   BarplotData:
     additionalProperties: false
     properties:
@@ -23,7 +23,7 @@ types:
         type: string[]
         minItems: 1
         required: true
-        
+
   BoxplotData:
     additionalProperties: false
     properties:
@@ -65,7 +65,7 @@ types:
         required: false
       label:
         type: string[]
-        
+
   BoxplotStatsTable:
     additionalProperties: false
     properties:
@@ -85,8 +85,8 @@ types:
       method:
         type: string
       statsError:
-        type: string       
-        
+        type: string
+
   HistogramData:
     additionalProperties: false
     properties:
@@ -113,7 +113,7 @@ types:
         type: string[]
         minItems: 1
         required: true
-        
+
   BinSlider:
     additionalProperties: false
     properties:
@@ -123,7 +123,7 @@ types:
         type: number
       step:
         type: number
-        
+
   HeatmapData:
     additionalProperties: false
     properties:
@@ -138,8 +138,8 @@ types:
       label:
         type: string[]
         minItems: 1
-        required: true 
-   
+        required: true
+
   MosaicPostRequest:
     type: VisualizationRequestBase
     properties:
@@ -154,15 +154,15 @@ types:
         type: string
         enum: ['TRUE', 'FALSE']
         required: false
-      xAxisVariable: 
+      xAxisVariable:
         type: VariableSpec
-      yAxisVariable: 
+      yAxisVariable:
         type: VariableSpec
-      facetVariable: 
+      facetVariable:
         type: VariableSpec[]
         maxItems: 2
-        required: false 
-   
+        required: false
+
   MosaicConfig:
     type: PlotConfig
     properties:
@@ -189,16 +189,16 @@ types:
       value:
         type: number[][]
         minItems: 1
-        required: true      
-  
+        required: true
+
   Mosaic:
     additionalProperties: false
     properties:
-      data: 
+      data:
         type: MosaicData[]
       config:
         type: MosaicConfig
-        
+
   ScatterplotData:
     additionalProperties: false
     properties:
@@ -276,12 +276,15 @@ types:
     properties:
       completeCasesAllVars: number
       completeCasesAxesVars: number
-      
+      computedVariableMetadata:
+        type: ComputedVariableMetadata
+        required: false
+
   SampleSizeTable:
     additionalProperties: false
     properties:
       xVariableDetails:
-        type: StrataVariableDetails
+        type: StrataVariableDetails[]
         required: false
       overlayVariableDetails:
         type: StrataVariableDetails
@@ -289,7 +292,7 @@ types:
       facetVariableDetails:
         type: StrataVariableDetails[]
         maxItems: 2
-        required : false
+        required: false
       size:
         type: number[]
         minItems: 1

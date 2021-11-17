@@ -14,6 +14,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.Timer;
 import org.gusdb.fgputil.client.ResponseFuture;
 import org.gusdb.fgputil.functional.FunctionalInterfaces.ConsumerWithException;
@@ -51,6 +52,9 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
 
   // shared stream name for plugins that need request only a single stream
   protected static final String DEFAULT_SINGLE_STREAM_NAME = "single_tabular_dataset";
+  protected ReferenceMetadata _referenceMetadata;
+  protected S _pluginSpec;
+  protected List<StreamSpec> _requiredStreams;
 
   // methods that need to be implemented
   protected abstract Class<S> getVisualizationSpecClass();
@@ -61,7 +65,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   // methods that should probably be overridden
   public String getDisplayName() { return getClass().getName(); }
   public String getDescription() { return ""; }
-  public List<String> getProjects() { return Arrays.asList(""); }
+  public List<String> getProjects() { return Collections.emptyList(); }
   // have to decide if default is 1 and 25 override or vice versa. to facet or not, that is the question...
   public Integer getMaxPanels() { return 1; }
   public ConstraintSpec getConstraintSpec() { return new ConstraintSpec(); }
@@ -71,21 +75,17 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
 
   private Timer _timer;
   private boolean _requestProcessed = false;
-  private S _pluginSpec;
   private List<APIFilter> _subset;
   private List<DerivedVariable> _derivedVariables;
-  private ReferenceMetadata _referenceMetadata;
 
-  private List<StreamSpec> _requiredStreams;
-
-  public final AbstractPlugin<T,S> processRequest(T request) throws ValidationException {
+  public AbstractPlugin<T,S> processRequest(String appName, T request) throws ValidationException {
 
     // start request timer (used to profile request performance dynamics)
     _timer = new Timer();
     logRequestTime("Starting timer");
 
     // validate config type matches class provided by subclass
-    _pluginSpec = getSpecObject(request);
+    _pluginSpec = getSpecObject(request, "getConfig", getVisualizationSpecClass());
 
     // check for subset and derived entity properties of request
     _subset = Optional.ofNullable(request.getFilters()).orElse(Collections.emptyList());
@@ -153,21 +153,21 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   }
 
   @SuppressWarnings("unchecked")
-  private S getSpecObject(T request) {
+  protected <Q> Q getSpecObject(T request, String methodName, Class<Q> specClass) {
     try {
-      Method configGetter = request.getClass().getMethod("getConfig");
+      Method configGetter = request.getClass().getMethod(methodName);
       Object config = configGetter.invoke(request);
-      if (getVisualizationSpecClass().isAssignableFrom(config.getClass())) {
-        return (S)config;
+      if (specClass.isAssignableFrom(config.getClass())) {
+        return (Q)config;
       }
       throw new RuntimeException("Plugin class " + getClass().getName() +
-          " declares spec class "  + getVisualizationSpecClass().getName() +
-          " but " + request.getClass().getName() + "::getConfig()" +
+          " declares spec class "  + specClass.getName() +
+          " but " + request.getClass().getName() + "::" + methodName + "()" +
           " returned " + config.getClass().getName() + ". The second must be a subclass of the first.");
     }
     catch (NoSuchMethodException noSuchMethodException) {
       throw new RuntimeException("Generated class " + request.getClass().getName() +
-          " must implement a no-arg method getConfig() which returns an instance of " + getVisualizationSpecClass().getName());
+          " must implement a no-arg method " + methodName + "() which returns an instance of " + specClass.getName());
     }
     catch (IllegalAccessException | InvocationTargetException e) {
       throw new RuntimeException("Misconfiguration of visualization plugin: " + getClass().getName(), e);
@@ -220,12 +220,31 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   protected String getVariableDataShape(List<VariableSpec> vars, int index) {
     return getVariableDataShape(getVariableSpecFromList(vars, index));
   }
+
+  // Suggested helper to take array of var names, entities, types, or shapes, and rewrite them into one comma separated string.
+  //  public static String toCommaSepString(String[] stringArray) {
+  //    String commaString = "";
+  //    for (int i = 0; i < stringArray.length; i++) {
+  //      //Do your stuff here
+  //      if (i < stringArray.length - 1){
+  //        commaString += ("'" + stringArray[i] + "', ");
+  //      } else {
+  //        commaString += ("'" + stringArray[i] + "'");
+  //      }
+  //    }
+  //    return commaString;
+  //  }
+
   
   protected String singleQuote(String unquotedString) {
     return "'" + unquotedString + "'";
   }
+
+  protected String getVoidEvalFreadCommand(String fileName, VariableSpec... vars) {  
+    return getVoidEvalFreadCommand(fileName, new ListBuilder().addAll(vars).toList());
+  }  
   
-  protected String getVoidEvalFreadCommand(String fileName, VariableSpec... vars) {    
+  protected String getVoidEvalFreadCommand(String fileName, List<VariableSpec> vars) {
     boolean first = true;
     String namedTypes = new String();
     
