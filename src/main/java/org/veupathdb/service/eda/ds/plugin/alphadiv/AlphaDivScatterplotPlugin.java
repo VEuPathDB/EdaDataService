@@ -132,12 +132,12 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
           DEFAULT_SINGLE_STREAM_NAME + 
        ", by=" + computeEntityIdColName +")");
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      connection.voidEval("map <- rbind(map, list('id'=veupathUtils::toColNameOrNull(attributes(alphaDivDT)$computedVariableDetails)," +
+      connection.voidEval("map <- rbind(map, list('id'=veupathUtils::toColNameOrNull(attributes(alphaDivDT)$computedVariables[[1]]$computedVariableDetails)," +
                                                  "'plotRef'='yAxisVariable'," +
-                                                 "'dataType'=attributes(alphaDivDT)$computedVariableDetails$dataType," +
-                                                 "'dataShape'=attributes(alphaDivDT)$computedVariableDetails$dataShape," +
-                                                 "'displayLabel'=attributes(alphaDivDT)$computedVariableDetails$displayLabel))");
-      String command = "plot.data::scattergl(vizData, map, '" + valueSpec + "', " + showMissingness + ")";
+                                                 "'dataType'=attributes(alphaDivDT)$computedVariables[[1]]$computedVariableDetails$dataType," +
+                                                 "'dataShape'=attributes(alphaDivDT)$computedVariables[[1]]$computedVariableDetails$dataShape," +
+                                                 "'displayLabel'=attributes(alphaDivDT)$computedVariables[[1]]$computedVariableMetadata$displayName))");
+      String command = "plot.data::scattergl(vizData, map, '" + valueSpec + "', " + showMissingness + ", computedVariableMetadata=attributes(alphaDivDT)$computedVariables[[1]]$computedVariableMetadata)";
       RServeClient.streamResult(connection, command, out);
     }); 
   }

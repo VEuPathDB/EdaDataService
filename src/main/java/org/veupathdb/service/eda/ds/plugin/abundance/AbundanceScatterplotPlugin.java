@@ -124,16 +124,16 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithCompute<Abunda
           DEFAULT_SINGLE_STREAM_NAME + 
        ", by=" + computeEntityIdColName +")");
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      connection.voidEval("map <- rbind(map, list('id'=veupathUtils::toColNameOrNull(attributes(abundanceDT)$computedVariableDetails)," +
-                                                 "'plotRef'=rep('xAxisVariable', length(attributes(abundanceDT)$computedVariableDetails$variableId))," +
-                                                 "'dataType'=attributes(abundanceDT)$computedVariableDetails$dataType," +
-                                                 "'dataShape'=attributes(abundanceDT)$computedVariableDetails$dataShape");
+      connection.voidEval("map <- rbind(map, list('id'=veupathUtils::toColNameOrNull(attributes(abundanceDT)$computedVariables[[1]]$computedVariableDetails)," +
+                                                 "'plotRef'=rep('xAxisVariable', length(attributes(abundanceDT)$computedVariables[[1]]$computedVariableDetails$variableId))," +
+                                                 "'dataType'=attributes(abundanceDT)$computedVariables[[1]]$computedVariableDetails$dataType," +
+                                                 "'dataShape'=attributes(abundanceDT)$computedVariables[[1]]$computedVariableDetails$dataShape");
       String command = "plot.data::scattergl(vizData, map, '" +
           valueSpec + "', " + 
           showMissingness + ", " +
           "'overlayVariable', " +
           singleQuote(computeEntityIdColName) + ", " +
-          "'Abundance')";
+          "'Abundance', computedVariableMetadata=attributes(abundanceDT)$computedVariables[[1]]$computedVariableMetadata)";
       RServeClient.streamResult(connection, command, out);
     }); 
   }

@@ -114,13 +114,14 @@ types:
   ComputedVariableMetadata:
     additionalProperties: false
     properties: 
-      displayLabel:
+      displayName:
         type: string[]
         required: false
-      defaultRange:
-        type: number[]
-        maxItems: 2
-        minItems: 2
+      displayRangeMin:
+        type: string
+        required: false
+      displayRangeMax:
+        type: string
         required: false
       vocabulary:
         type: string[]
