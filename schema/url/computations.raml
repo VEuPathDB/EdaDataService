@@ -129,6 +129,24 @@ types:
       isOrdinal: 
         type: boolean
         required: false
+      collectionVariable:
+        type: CollectionVariableDetails
+        required: false
+
+  CollectionVariableDetails:
+    additionalProperties: false
+    properties: 
+      collectionVariableDetails:
+        type: VariableSpec[]
+        required: false
+      collectionType:
+        type: string
+      collectionVariablePlotRef:
+        type: string
+        required: false
+      collectionValuePlotRef:
+        type: string
+        required: false
 
   BetaDivComputePostResponse:
     additionalProperties: false
