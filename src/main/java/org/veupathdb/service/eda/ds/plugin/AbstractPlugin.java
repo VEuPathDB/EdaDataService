@@ -6,9 +6,9 @@ import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -70,15 +70,14 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   public Integer getMaxPanels() { return 1; }
   public ConstraintSpec getConstraintSpec() { return new ConstraintSpec(); }
 
-  private final EdaSubsettingClient _subsettingClient = new EdaSubsettingClient(Resources.SUBSETTING_SERVICE_URL);
-  private final StreamingDataClient _mergingClient = new EdaMergingClient(Resources.MERGING_SERVICE_URL);
-
   private Timer _timer;
   private boolean _requestProcessed = false;
   private List<APIFilter> _subset;
   private List<DerivedVariable> _derivedVariables;
+  private EdaSubsettingClient _subsettingClient;
+  private StreamingDataClient _mergingClient;
 
-  public AbstractPlugin<T,S> processRequest(String appName, T request) throws ValidationException {
+  public AbstractPlugin<T,S> processRequest(String appName, T request, Entry<String,String> authHeader) throws ValidationException {
 
     // start request timer (used to profile request performance dynamics)
     _timer = new Timer();
@@ -90,6 +89,10 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     // check for subset and derived entity properties of request
     _subset = Optional.ofNullable(request.getFilters()).orElse(Collections.emptyList());
     _derivedVariables = Optional.ofNullable(request.getDerivedVariables()).orElse(Collections.emptyList());
+
+    // build clients for required services
+    _subsettingClient = new EdaSubsettingClient(Resources.SUBSETTING_SERVICE_URL, authHeader);
+    _mergingClient = new EdaMergingClient(Resources.MERGING_SERVICE_URL, authHeader);
 
     // get study
     APIStudyDetail study = _subsettingClient.getStudy(request.getStudyId())
@@ -180,9 +183,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
 
   protected String toColNameOrEmpty(List<VariableSpec> vars, int index) {
     VariableSpec var = getVariableSpecFromList(vars, index);
-    String colName = toColNameOrEmpty(var);
-
-    return colName;
+    return toColNameOrEmpty(var);
   }
 
   /*****************************************************************
@@ -235,7 +236,6 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   //    return commaString;
   //  }
 
-  
   protected String singleQuote(String unquotedString) {
     return "'" + unquotedString + "'";
   }
@@ -243,11 +243,11 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   protected String getVoidEvalFreadCommand(String fileName, VariableSpec... vars) {  
     return getVoidEvalFreadCommand(fileName, new ListBuilder().addAll(vars).toList());
   }  
-  
+
   protected String getVoidEvalFreadCommand(String fileName, List<VariableSpec> vars) {
     boolean first = true;
     String namedTypes = new String();
-    
+
     for(VariableSpec var : vars) {
       String varName = toColNameOrEmpty(var);
       if (varName.equals("")) continue;
@@ -265,12 +265,11 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
         namedTypes = namedTypes + "," + singleQuote(varName) + "=" + singleQuote(varType);
       }
     }
-        
-    String freadCommand = fileName + " <- fread(" + singleQuote(fileName) +
-                                         ", select=c(" + namedTypes + ")" +
-                                         ", na.strings=c(''))";
-    
-    return freadCommand;
+
+    return fileName +
+        " <- fread(" + singleQuote(fileName) +
+        ", select=c(" + namedTypes + ")" +
+        ", na.strings=c(''))";
   }
   
   protected String getVoidEvalVarMetadataMap(String datasetName, Map<String, VariableSpec> vars) {
@@ -280,7 +279,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     String varTypeVector = new String();
     String varShapeVector = new String();
     
-    for(Map.Entry<String, VariableSpec> entry : vars.entrySet()) {
+    for(Entry<String, VariableSpec> entry : vars.entrySet()) {
       String plotRef = entry.getKey();
       VariableSpec var = entry.getValue();
       String varName = toColNameOrEmpty(var);

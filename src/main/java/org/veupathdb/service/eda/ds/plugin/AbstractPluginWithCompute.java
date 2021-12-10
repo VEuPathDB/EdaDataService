@@ -3,8 +3,9 @@ package org.veupathdb.service.eda.ds.plugin;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
+import java.util.Map;
+import java.util.Map.Entry;
 import javax.ws.rs.BadRequestException;
 import org.gusdb.fgputil.functional.TreeNode;
 import org.gusdb.fgputil.validation.ValidationException;
@@ -32,7 +33,7 @@ public abstract class AbstractPluginWithCompute<T extends VisualizationRequestBa
   protected static final String COMPUTE_STREAM_NAME = "compute_input_dataset";
 
   @Override
-  public AbstractPlugin<T,S> processRequest(String appName, T request) throws ValidationException {
+  public AbstractPlugin<T,S> processRequest(String appName, T request, Entry<String,String> authHeader) throws ValidationException {
 
     // pull out the passed config spec
     _computeSpec = getSpecObject(request, "getComputeConfig", getComputeSpecClass());
@@ -40,7 +41,7 @@ public abstract class AbstractPluginWithCompute<T extends VisualizationRequestBa
 
     _requiredStreams = getRequestedStreams(_pluginSpec, _computeSpec);
 
-    return super.processRequest(appName, request);
+    return super.processRequest(appName, request, authHeader);
   }
 
   private void validateComputeName(String passedComputeName, String appName) {

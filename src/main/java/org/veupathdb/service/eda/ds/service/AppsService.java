@@ -1,5 +1,8 @@
 package org.veupathdb.service.eda.ds.service;
 
+import java.io.OutputStream;
+import java.util.Map.Entry;
+import java.util.function.Consumer;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.WebApplicationException;
@@ -8,10 +11,15 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.gusdb.fgputil.functional.FunctionalInterfaces;
+import org.gusdb.fgputil.functional.FunctionalInterfaces.SupplierWithException;
 import org.gusdb.fgputil.validation.ValidationException;
+import org.veupathdb.lib.container.jaxrs.server.annotations.Authenticated;
 import org.veupathdb.lib.container.jaxrs.server.annotations.DisableJackson;
+import org.veupathdb.lib.container.jaxrs.utils.RequestKeys;
+import org.veupathdb.service.eda.common.auth.StudyAccess;
+import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
+import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.ds.plugin.abundance.AbundanceBoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.abundance.AbundanceScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivBoxplotPlugin;
@@ -62,8 +70,10 @@ import org.veupathdb.service.eda.generated.model.ScatterplotPostResponseStream;
 import org.veupathdb.service.eda.generated.model.TablePostRequest;
 import org.veupathdb.service.eda.generated.model.TablePostResponseStream;
 import org.veupathdb.service.eda.generated.model.TwoByTwoPostResponseStream;
+import org.veupathdb.service.eda.generated.model.VisualizationRequestBase;
 import org.veupathdb.service.eda.generated.resources.Apps;
 
+@Authenticated(allowGuests = true)
 public class AppsService implements Apps {
 
   private static final Logger LOG = LogManager.getLogger(AppsService.class);
@@ -76,7 +86,7 @@ public class AppsService implements Apps {
     return GetAppsResponse.respond200WithApplicationJson(AppsMetadata.APPS);
   }
 
-  private <T> T wrapPlugin(FunctionalInterfaces.SupplierWithException<T> supplier) {
+  private <T> T wrapPlugin(SupplierWithException<T> supplier) {
     try {
       return supplier.get();
     }
@@ -86,147 +96,154 @@ public class AppsService implements Apps {
     catch (EmptyResultException e) {
       throw new WebApplicationException(e.getMessage(), 204);
     }
+    catch (WebApplicationException e) {
+      throw e;
+    }
     catch (Exception e) {
       LOG.error("Could not execute app.", e);
       throw new ServerErrorException(e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
     }
   }
 
-  private String getAppName() {
-    return _request.getUriInfo().getPathSegments().get(1).getPath();
+  private <T extends VisualizationRequestBase> Consumer<OutputStream> processRequest(AbstractPlugin<T,?> plugin, T entity) throws ValidationException {
+    Entry<String,String> authHeader = StudyAccess.readAuthHeader(_request, RequestKeys.AUTH_HEADER);
+    StudyAccess.confirmPermission(authHeader, Resources.DATASET_ACCESS_SERVICE_URL,
+        entity.getStudyId(), StudyAccess::allowVisualizations);
+    String appName = _request.getUriInfo().getPathSegments().get(1).getPath();
+    return plugin.processRequest(appName, entity, authHeader);
   }
 
   @DisableJackson
   @Override
   public PostAppsPassVisualizationsMapMarkersResponse postAppsPassVisualizationsMapMarkers(MapPostRequest entity) {
     return wrapPlugin(() -> PostAppsPassVisualizationsMapMarkersResponse.respond200WithApplicationJson(
-        new MapPostResponseStream(new MapPlugin().processRequest(getAppName(), entity))));
+        new MapPostResponseStream(processRequest(new MapPlugin(), entity))));
   }
 
   @DisableJackson
   @Override
   public PostAppsPassVisualizationsTableResponse postAppsPassVisualizationsTable(TablePostRequest entity) {
     return wrapPlugin(() -> PostAppsPassVisualizationsTableResponse.respond200WithApplicationJson(
-        new TablePostResponseStream(new TablePlugin().processRequest(getAppName(), entity))));
+        new TablePostResponseStream(processRequest(new TablePlugin(), entity))));
   }
   
   @DisableJackson
   @Override
   public PostAppsPassVisualizationsScatterplotResponse postAppsPassVisualizationsScatterplot(ScatterplotPostRequest entity) {
     return wrapPlugin(() -> PostAppsPassVisualizationsScatterplotResponse.respond200WithApplicationJson(
-        new ScatterplotPostResponseStream(new ScatterplotPlugin().processRequest(getAppName(), entity))));
+        new ScatterplotPostResponseStream(processRequest(new ScatterplotPlugin(), entity))));
   }
 
   @DisableJackson
   @Override
   public PostAppsPassVisualizationsDensityplotResponse postAppsPassVisualizationsDensityplot(DensityplotPostRequest entity) {
     return wrapPlugin(() -> PostAppsPassVisualizationsDensityplotResponse.respond200WithApplicationJson(
-        new DensityplotPostResponseStream(new DensityplotPlugin().processRequest(getAppName(), entity))));
+        new DensityplotPostResponseStream(processRequest(new DensityplotPlugin(), entity))));
   }
 
   @DisableJackson
   @Override
   public PostAppsPassVisualizationsLineplotResponse postAppsPassVisualizationsLineplot(LineplotPostRequest entity) {
     return wrapPlugin(() -> PostAppsPassVisualizationsLineplotResponse.respond200WithApplicationJson(
-        new LineplotPostResponseStream(new LineplotPlugin().processRequest(getAppName(), entity))));
+        new LineplotPostResponseStream(processRequest(new LineplotPlugin(), entity))));
   }
 
   @DisableJackson
   @Override
   public PostAppsPassVisualizationsTimeseriesResponse postAppsPassVisualizationsTimeseries(LineplotPostRequest entity) {
     return wrapPlugin(() -> PostAppsPassVisualizationsTimeseriesResponse.respond200WithApplicationJson(
-        new LineplotPostResponseStream(new TimeSeriesPlugin().processRequest(getAppName(), entity))));
+        new LineplotPostResponseStream(processRequest(new TimeSeriesPlugin(), entity))));
   }
 
   @DisableJackson
   @Override
   public PostAppsPassVisualizationsHistogramResponse postAppsPassVisualizationsHistogram(HistogramPostRequest entity) {
     return wrapPlugin(() -> PostAppsPassVisualizationsHistogramResponse.respond200WithApplicationJson(
-        new HistogramPostResponseStream(new HistogramPlugin().processRequest(getAppName(), entity))));
+        new HistogramPostResponseStream(processRequest(new HistogramPlugin(), entity))));
   }
 
   @DisableJackson
   @Override
   public PostAppsPassVisualizationsBarplotResponse postAppsPassVisualizationsBarplot(BarplotPostRequest entity) {
     return wrapPlugin(() -> PostAppsPassVisualizationsBarplotResponse.respond200WithApplicationJson(
-        new BarplotPostResponseStream(new BarplotPlugin().processRequest(getAppName(), entity))));
+        new BarplotPostResponseStream(processRequest(new BarplotPlugin(), entity))));
   }
 
   @DisableJackson
   @Override
   public PostAppsPassVisualizationsBoxplotResponse postAppsPassVisualizationsBoxplot(BoxplotPostRequest entity) {
     return wrapPlugin(() -> PostAppsPassVisualizationsBoxplotResponse.respond200WithApplicationJson(
-        new BoxplotPostResponseStream(new BoxplotPlugin().processRequest(getAppName(), entity))));
+        new BoxplotPostResponseStream(processRequest(new BoxplotPlugin(), entity))));
   }
 
   @DisableJackson
   @Override
   public PostAppsPassVisualizationsHeatmapResponse postAppsPassVisualizationsHeatmap(HeatmapPostRequest entity) {
     return wrapPlugin(() -> PostAppsPassVisualizationsHeatmapResponse.respond200WithApplicationJson(
-        new HeatmapPostResponseStream(new HeatmapPlugin().processRequest(getAppName(), entity))));
+        new HeatmapPostResponseStream(processRequest(new HeatmapPlugin(), entity))));
   }
 
   @DisableJackson
   @Override
   public PostAppsPassVisualizationsTwobytwoResponse postAppsPassVisualizationsTwobytwo(MosaicPostRequest entity) {
     return wrapPlugin(() -> PostAppsPassVisualizationsTwobytwoResponse.respond200WithApplicationJson(
-        new TwoByTwoPostResponseStream(new TwoByTwoPlugin().processRequest(getAppName(), entity))));
+        new TwoByTwoPostResponseStream(processRequest(new TwoByTwoPlugin(), entity))));
   }
   
   @DisableJackson
   @Override
   public PostAppsPassVisualizationsConttableResponse postAppsPassVisualizationsConttable(MosaicPostRequest entity) {
     return wrapPlugin(() -> PostAppsPassVisualizationsConttableResponse.respond200WithApplicationJson(
-        new ContTablePostResponseStream(new ContTablePlugin().processRequest(getAppName(), entity))));
+        new ContTablePostResponseStream(processRequest(new ContTablePlugin(), entity))));
   }
 
   @DisableJackson
   @Override
   public PostAppsSampleVisualizationsRecordCountResponse postAppsSampleVisualizationsRecordCount(RecordCountPostRequest entity) {
     return wrapPlugin(() -> PostAppsSampleVisualizationsRecordCountResponse.respond200WithApplicationJson(
-        new RecordCountPostResponseStream(new RecordCountPlugin().processRequest(getAppName(), entity))));
+        new RecordCountPostResponseStream(processRequest(new RecordCountPlugin(), entity))));
   }
 
   @DisableJackson
   @Override
   public PostAppsSampleVisualizationsMultiStreamResponse postAppsSampleVisualizationsMultiStream(MultiStreamPostRequest entity) {
     return wrapPlugin(() -> PostAppsSampleVisualizationsMultiStreamResponse.respond200WithTextPlain(
-        new EntityTabularPostResponseStream(new MultiStreamPlugin().processRequest(getAppName(), entity))));
+        new EntityTabularPostResponseStream(processRequest(new MultiStreamPlugin(), entity))));
   }
 
   @DisableJackson
   @Override
   public PostAppsAlphadivVisualizationsBoxplotResponse postAppsAlphadivVisualizationsBoxplot(AlphaDivBoxplotPostRequest entity) {
     return wrapPlugin(() -> PostAppsAlphadivVisualizationsBoxplotResponse.respond200WithApplicationJson(
-        new BoxplotPostResponseStream(new AlphaDivBoxplotPlugin().processRequest(getAppName(), entity))));
+        new BoxplotPostResponseStream(processRequest(new AlphaDivBoxplotPlugin(), entity))));
   }
 
   @DisableJackson
   @Override
   public PostAppsAlphadivVisualizationsScatterplotResponse postAppsAlphadivVisualizationsScatterplot(AlphaDivScatterplotPostRequest entity) {
     return wrapPlugin(() -> PostAppsAlphadivVisualizationsScatterplotResponse.respond200WithApplicationJson(
-        new ScatterplotPostResponseStream(new AlphaDivScatterplotPlugin().processRequest(getAppName(), entity))));
+        new ScatterplotPostResponseStream(processRequest(new AlphaDivScatterplotPlugin(), entity))));
   }
 
   @DisableJackson
   @Override
   public PostAppsBetadivVisualizationsScatterplotResponse postAppsBetadivVisualizationsScatterplot(BetaDivScatterplotPostRequest entity) {
     return wrapPlugin(() -> PostAppsBetadivVisualizationsScatterplotResponse.respond200WithApplicationJson(
-        new ScatterplotPostResponseStream(new BetaDivScatterplotPlugin().processRequest(getAppName(), entity))));
+        new ScatterplotPostResponseStream(processRequest(new BetaDivScatterplotPlugin(), entity))));
   }
 
   @DisableJackson
   @Override
   public PostAppsAbundanceVisualizationsBoxplotResponse postAppsAbundanceVisualizationsBoxplot(AbundanceBoxplotPostRequest entity) {
     return wrapPlugin(() -> PostAppsAbundanceVisualizationsBoxplotResponse.respond200WithApplicationJson(
-            new BoxplotPostResponseStream(new AbundanceBoxplotPlugin().processRequest(getAppName(), entity))));
+        new BoxplotPostResponseStream(processRequest(new AbundanceBoxplotPlugin(), entity))));
   }
 
   @DisableJackson
   @Override
   public PostAppsAbundanceVisualizationsScatterplotResponse postAppsAbundanceVisualizationsScatterplot(AbundanceScatterplotPostRequest entity) {
     return wrapPlugin(() -> PostAppsAbundanceVisualizationsScatterplotResponse.respond200WithApplicationJson(
-            new ScatterplotPostResponseStream(new AbundanceScatterplotPlugin().processRequest(getAppName(), entity))));
+        new ScatterplotPostResponseStream(processRequest(new AbundanceScatterplotPlugin(), entity))));
   }
 
 }
