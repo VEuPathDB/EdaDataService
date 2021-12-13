@@ -124,16 +124,16 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithCompute<Abunda
           DEFAULT_SINGLE_STREAM_NAME + 
        ", by=" + computeEntityIdColName +")");
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      connection.voidEval("map <- rbind(map, list('id'=veupathUtils::toColNameOrNull(attributes(abundanceDT)$computedVariables[[1]]$computedVariableDetails)," +
-                                                 "'plotRef'=rep('xAxisVariable', length(attributes(abundanceDT)$computedVariables[[1]]$computedVariableDetails$variableId))," +
-                                                 "'dataType'=attributes(abundanceDT)$computedVariables[[1]]$computedVariableDetails$dataType," +
-                                                 "'dataShape'=attributes(abundanceDT)$computedVariables[[1]]$computedVariableDetails$dataShape");
+      connection.voidEval("map <- rbind(map, list('id'=veupathUtils::toColNameOrNull(attributes(abundanceDT)$computedVariable$computedVariableDetails)," +
+                                                 "'plotRef'=rep('xAxisVariable', length(attributes(abundanceDT)$computedVariable$computedVariableDetails$variableId))," +
+                                                 "'dataType'=attributes(abundanceDT)$computedVariable$computedVariableDetails$dataType," +
+                                                 "'dataShape'=attributes(abundanceDT)$computedVariable$computedVariableDetails$dataShape");
       String command = "plot.data::scattergl(vizData, map, '" +
           valueSpec + "', " + 
           showMissingness + ", " +
           "'overlayVariable', " +
           singleQuote(computeEntityIdColName) + ", " +
-          "'Abundance', computedVariableMetadata=attributes(abundanceDT)$computedVariables[[1]]$computedVariableMetadata)";
+          "'Abundance', computedVariableMetadata=attributes(abundanceDT)$computedVariable$computedVariableMetadata)";
       RServeClient.streamResult(connection, command, out);
     }); 
   }
