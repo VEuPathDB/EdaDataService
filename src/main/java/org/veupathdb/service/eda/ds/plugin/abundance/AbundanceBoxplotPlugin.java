@@ -121,10 +121,10 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
           DEFAULT_SINGLE_STREAM_NAME + 
        ", by=" + computeEntityIdColName +")");
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      connection.voidEval("map <- rbind(map, list('id'=veupathUtils::toColNameOrNull(attributes(abundanceDT)$computedVariableDetails)," +
-                                                 "'plotRef'=rep('xAxisVariable', length(attributes(abundanceDT)$computedVariableDetails$variableId))," +
-                                                 "'dataType'=attributes(abundanceDT)$computedVariableDetails$dataType," +
-                                                 "'dataShape'=attributes(abundanceDT)$computedVariableDetails$dataShape");
+      connection.voidEval("map <- rbind(map, list('id'=veupathUtils::toColNameOrNull(attributes(abundanceDT)$computedVariable$computedVariableDetails)," +
+                                                 "'plotRef'=rep('xAxisVariable', length(attributes(abundanceDT)$computedVariable$computedVariableDetails$variableId))," +
+                                                 "'dataType'=attributes(abundanceDT)$computedVariable$computedVariableDetails$dataType," +
+                                                 "'dataShape'=attributes(abundanceDT)$computedVariable$computedVariableDetails$dataShape");
       String command = "plot.data::box(vizData, map, '" +
           spec.getPoints().getValue() + "', " +
           showMean + ", " + 
@@ -132,7 +132,7 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
           showMissingness + ", " +
           "'xAxisVariable', " + // x only initially, confusing ux and api otherwise?
           singleQuote(computeEntityIdColName) + ", " + // pass the parent term spec here, client turns it into display label
-          "'Abundance')";
+          "'Abundance', computedVariableMetadata=attributes(abundanceDT)$computedVariable$computedVariableMetadata)";
       RServeClient.streamResult(connection, command, out);
     });
   }

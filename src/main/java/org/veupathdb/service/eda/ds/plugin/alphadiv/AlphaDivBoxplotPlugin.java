@@ -129,16 +129,17 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
                                          ", by=" + computeEntityIdColName +")");
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       // update the new map obj in R to add alphaDiv
-      connection.voidEval("map <- rbind(map, list('id'=veupathUtils::toColNameOrNull(attributes(alphaDivDT)$computedVariableDetails)," +
+      connection.voidEval("map <- rbind(map, list('id'=veupathUtils::toColNameOrNull(attributes(alphaDivDT)$computedVariable$computedVariableDetails)," +
                                                  "'plotRef'='yAxisVariable'," +
-                                                 "'dataType'=attributes(alphaDivDT)$computedVariableDetails$dataType," +
-                                                 "'dataShape'=attributes(alphaDivDT)$computedVariableDetails$dataShape," +
-                                                 "'displayLabel'=attributes(alphaDivDT)$computedVariableDetails$displayLabel))");
+                                                 "'dataType'=attributes(alphaDivDT)$computedVariable$computedVariableDetails$dataType," +
+                                                 "'dataShape'=attributes(alphaDivDT)$computedVariable$computedVariableDetails$dataShape," +
+                                                 "'displayLabel'=attributes(alphaDivDT)$computedVariable$computedVariableMetadata$displayName))");
       String command = "plot.data::box(vizData, map, '" +
           spec.getPoints().getValue() + "', " +
           showMean + ", " + 
           computeStats + ", " + 
-          showMissingness + ")";
+          showMissingness + ", " +
+          "computedVariableMetadata=attributes(alphaDivDT)$computedVariable$computedVariableMetadata)";
       RServeClient.streamResult(connection, command, out);
     });
   }
