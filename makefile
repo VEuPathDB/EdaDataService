@@ -106,6 +106,7 @@ build/libs/service.jar: \
       vendor/fgputil-accountdb-1.0.0.jar \
       vendor/fgputil-cache-1.0.0.jar \
       vendor/fgputil-cli-1.0.0.jar \
+      vendor/fgputil-client-1.0.0.jar \
       vendor/fgputil-core-1.0.0.jar \
       vendor/fgputil-db-1.0.0.jar \
       vendor/fgputil-events-1.0.0.jar \
