@@ -46,7 +46,7 @@ public class AppsMetadata {
           viz("boxplot", new BoxplotPlugin()),
           viz("twobytwo", new TwoByTwoPlugin()),
           viz("conttable", new ContTablePlugin()),
-          viz("timeseries", new TimeSeriesPlugin()),
+          viz("lineplot", new LineplotPlugin()),
           viz("densityplot", new DensityplotPlugin()),
           viz("heatmap", new HeatmapPlugin()),
           viz("map-markers", new MapPlugin())),
