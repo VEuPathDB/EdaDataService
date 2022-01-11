@@ -37,7 +37,7 @@ services:
       USER_DB_TNS_NAME: ${USER_DB_TNS_NAME}
       USER_DB_USER: ${USER_DB_USER}
       USER_DB_PASS: ${USER_DB_PASS}
-      USER_DB_SCHEMA: ${USER_DB_SCHEMA:-userlogins5}
+      USER_DB_SCHEMA: ${USER_DB_SCHEMA:-wdkuser}
 
       # Auth Secret (needed along with user/acct DBs for auth)
       AUTH_SECRET_KEY: ${AUTH_SECRET_KEY}
@@ -100,7 +100,7 @@ services:
       USER_DB_TNS_NAME: ${USER_DB_TNS_NAME}
       USER_DB_USER: ${USER_DB_USER}
       USER_DB_PASS: ${USER_DB_PASS}
-      USER_DB_SCHEMA: ${USER_DB_SCHEMA:-userlogins5}
+      USER_DB_SCHEMA: ${USER_DB_SCHEMA:-wdkuser}
 
       # Auth Secret (needed along with user/acct DBs for auth)
       AUTH_SECRET_KEY: ${AUTH_SECRET_KEY}
@@ -149,7 +149,7 @@ services:
       USER_DB_TNS_NAME: ${USER_DB_TNS_NAME}
       USER_DB_USER: ${USER_DB_USER}
       USER_DB_PASS: ${USER_DB_PASS}
-      USER_DB_SCHEMA: ${USER_DB_SCHEMA:-userlogins5}
+      USER_DB_SCHEMA: ${USER_DB_SCHEMA:-wdkuser}
 
       # Auth Secret (needed along with user/acct DBs for auth)
       AUTH_SECRET_KEY: ${AUTH_SECRET_KEY}
@@ -206,7 +206,7 @@ services:
       USER_DB_TNS_NAME: ${USER_DB_TNS_NAME}
       USER_DB_USER: ${USER_DB_USER}
       USER_DB_PASS: ${USER_DB_PASS}
-      USER_DB_SCHEMA: ${USER_DB_SCHEMA:-userlogins5}
+      USER_DB_SCHEMA: ${USER_DB_SCHEMA:-wdkuser}
 
       # Auth Secret (needed along with user/acct DBs for auth)
       AUTH_SECRET_KEY: ${AUTH_SECRET_KEY}
@@ -258,7 +258,7 @@ services:
       USER_DB_TNS_NAME: ${USER_DB_TNS_NAME}
       USER_DB_USER: ${USER_DB_USER}
       USER_DB_PASS: ${USER_DB_PASS}
-      USER_DB_SCHEMA: ${USER_DB_SCHEMA:-userlogins5}
+      USER_DB_SCHEMA: ${USER_DB_SCHEMA:-wdkuser}
 
       # Auth Secret (needed along with user/acct DBs for auth)
       AUTH_SECRET_KEY: ${AUTH_SECRET_KEY}
