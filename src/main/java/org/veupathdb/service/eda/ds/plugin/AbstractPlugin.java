@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -19,11 +21,13 @@ import org.gusdb.fgputil.Timer;
 import org.gusdb.fgputil.client.ResponseFuture;
 import org.gusdb.fgputil.functional.FunctionalInterfaces.ConsumerWithException;
 import org.gusdb.fgputil.functional.Functions;
+import org.gusdb.fgputil.functional.TreeNode;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.EdaMergingClient;
 import org.veupathdb.service.eda.common.client.EdaSubsettingClient;
 import org.veupathdb.service.eda.common.client.StreamingDataClient;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
+import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.model.ReferenceMetadata;
 import org.veupathdb.service.eda.common.model.VariableDef;
 import org.veupathdb.service.eda.ds.Resources;
@@ -184,6 +188,26 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   protected String toColNameOrEmpty(List<VariableSpec> vars, int index) {
     VariableSpec var = getVariableSpecFromList(vars, index);
     return toColNameOrEmpty(var);
+  }
+
+  // think this and next need to catch NoSuchElementException ??
+  protected List<VariableSpec> getChildrenVariables(VariableSpec collectionVar) {
+    
+    System.out.println(getReferenceMetadata());
+    System.out.println(collectionVar);
+
+    EntityDef collectionVarEntityDef = _referenceMetadata.getEntity(collectionVar.getEntityId()).get();
+
+    System.out.println(_referenceMetadata.getVariable(collectionVar));
+    // Can send in a variable to the following, but not a category. For example, varid=MBioResult_00012_Bacteria_Actinobacteria worked but MBioResult_00012 did not
+    // look for this in EdaCommon!
+    VariableDef collectionVarDef = _referenceMetadata.getVariable(collectionVar).get();
+
+    TreeNode<VariableDef> childVarsTree = collectionVarEntityDef.getNativeVariableTreeNode(collectionVarDef);
+    // for now assuming we only have leaves as children. revisit if that turns out to not be true
+    Collection<VariableDef> childVarDefs = childVarsTree.flatten();
+
+    return new ArrayList(childVarDefs);
   }
 
   /*****************************************************************

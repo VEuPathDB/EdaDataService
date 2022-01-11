@@ -75,6 +75,7 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
 
   @Override
   protected List<StreamSpec> getRequestedStreams(AbundanceBoxplotSpec pluginSpec, AbundanceComputeConfig computeConfig) {
+    System.out.println("getting requested streams...");
     List<StreamSpec> requestedStreamsList = ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getOverlayVariable())
@@ -105,6 +106,7 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
 
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       List<VariableSpec> computeInputVars = ListBuilder.asList(computeEntityIdVarSpec);
+      System.out.println("getting children vars...");
       computeInputVars.addAll(getChildrenVariables(computeConfig.getCollectionVariable()));
       connection.voidEval(getVoidEvalFreadCommand(COMPUTE_STREAM_NAME,
         computeInputVars

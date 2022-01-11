@@ -88,7 +88,6 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
       new StreamSpec(COMPUTE_STREAM_NAME, computeConfig.getCollectionVariable().getEntityId())
         .addVars(getChildrenVariables(computeConfig.getCollectionVariable()) 
       ));
-    
     return requestedStreamsList;
   }
 
@@ -105,6 +104,7 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
     String computeStats = spec.getComputeStats() != null ? spec.getComputeStats().getValue() : "TRUE";
     String showMean = spec.getMean() != null ? spec.getMean().getValue() : "FALSE";
     String method = spec.getAlphaDivMethod().getValue();
+    System.out.println(method);
     VariableSpec computeEntityIdVarSpec = getComputeEntityIdVarSpec(computeConfig.getCollectionVariable().getEntityId());
     String computeEntityIdColName = toColNameOrEmpty(computeEntityIdVarSpec);
     
@@ -116,7 +116,7 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
       ));
       connection.voidEval("alphaDivDT <- alphaDiv(" + COMPUTE_STREAM_NAME + ", " + 
                                                       computeEntityIdColName + ", " + 
-                                                      method + ")");
+                                                      " 'shannon')");
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
           computeEntityIdVarSpec,
           spec.getXAxisVariable(),

@@ -2,17 +2,20 @@ package org.veupathdb.service.eda.ds.plugin;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import javax.ws.rs.BadRequestException;
 import org.gusdb.fgputil.functional.TreeNode;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.model.EntityDef;
+import org.veupathdb.service.eda.common.model.ReferenceMetadata;
 import org.veupathdb.service.eda.common.model.VariableDef;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
+import org.veupathdb.service.eda.generated.model.APIStudyDetail;
 import org.veupathdb.service.eda.generated.model.AppOverview;
 import org.veupathdb.service.eda.generated.model.ComputeConfig;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
@@ -39,7 +42,12 @@ public abstract class AbstractPluginWithCompute<T extends VisualizationRequestBa
     _computeSpec = getSpecObject(request, "getComputeConfig", getComputeSpecClass());
     validateComputeName(_computeSpec.getName(), appName);
 
-    _requiredStreams = getRequestedStreams(_pluginSpec, _computeSpec);
+    // extract plugin spec
+    _pluginSpec = getSpecObject(request, "getConfig", getVisualizationSpecClass());
+      
+    System.out.println(_computeSpec.getName());
+    // _requiredStreams = getRequestedStreams(_pluginSpec, _computeSpec);
+    System.out.println("getRequestedStreams success");
 
     return super.processRequest(appName, request, authHeader);
   }
@@ -59,17 +67,6 @@ public abstract class AbstractPluginWithCompute<T extends VisualizationRequestBa
 
   protected R getComputeConfig() {
     return _computeSpec;
-  }
-  
-  // think this and next need to catch NoSuchElementException ??
-  protected List<VariableSpec> getChildrenVariables(VariableSpec collectionVar) {
-    EntityDef collectionVarEntityDef = _referenceMetadata.getEntity(collectionVar.getEntityId()).get();
-    VariableDef collectionVarDef = _referenceMetadata.getVariable(collectionVar).get();
-    TreeNode<VariableDef> childVarsTree = collectionVarEntityDef.getNativeVariableTreeNode(collectionVarDef);
-    // for now assuming we only have leaves as children. revisit if that turns out to not be true
-    Collection<VariableDef> childVarDefs = childVarsTree.flatten();
-
-    return new ArrayList(childVarDefs);
   }
 
   protected VariableSpec getComputeEntityIdVarSpec(String entityId) {
