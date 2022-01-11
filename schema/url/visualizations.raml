@@ -18,3 +18,14 @@ types:
     type: VariableSpec
     properties:
       value: string
+
+  # think we should assume type is binWidth if not provided?
+  # for line plot do we want to only allow binWidth? if so, we'll need to split this..
+  BinSpec:
+    additionalProperties: false
+    properties:
+      type?:
+        type: string
+        enum: ['binWidth','numBins']
+      value?: number
+      units?: BinUnits

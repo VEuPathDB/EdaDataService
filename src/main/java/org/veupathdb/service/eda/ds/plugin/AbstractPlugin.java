@@ -33,6 +33,7 @@ import org.veupathdb.service.eda.ds.constraints.DataElementValidator;
 import org.veupathdb.service.eda.ds.util.NonEmptyResultStream;
 import org.veupathdb.service.eda.generated.model.APIFilter;
 import org.veupathdb.service.eda.generated.model.APIStudyDetail;
+import org.veupathdb.service.eda.generated.model.BinSpec;
 import org.veupathdb.service.eda.generated.model.DerivedVariable;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 import org.veupathdb.service.eda.generated.model.VisualizationRequestBase;
@@ -235,6 +236,15 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   //    }
   //    return commaString;
   //  }
+
+  protected void validateBinSpec(BinSpec binSpec, String xVarType) {
+    if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
+      if (binSpec.getUnits() != null) {
+        LOG.warn("The `units` property of the `BinSpec` class is only used for DATE x-axis variables. It will be ignored.");
+      }
+    }
+    // need an error here if its a date and we dont have a unit?
+  }
 
   protected String singleQuote(String unquotedString) {
     return "'" + unquotedString + "'";

@@ -12,7 +12,9 @@ import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.ds.constraints.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
+import org.veupathdb.service.eda.generated.model.BinSpec;
 import org.veupathdb.service.eda.generated.model.LineplotPostRequest;
 import org.veupathdb.service.eda.generated.model.LineplotSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
@@ -52,7 +54,7 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
           .types(APIVariableType.NUMBER, APIVariableType.DATE, APIVariableType.INTEGER)
           .description("Variable must be a number or date.")
         .element("xAxisVariable")
-          .types(APIVariableType.NUMBER, APIVariableType.DATE, APIVariableType.INTEGER)
+          .shapes(APIVariableDataShape.ORDINAL, APIVariableDataShape.CONTINUOUS)
           .description("Variable must be a number or date and be of the same or a parent entity as the Y-axis variable.")
         .element("overlayVariable")
           .maxValues(8)
@@ -96,6 +98,7 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
     varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
     String valueSpec = spec.getValueSpec().getValue();
+    String xVarType = getVariableType(spec.getXAxisVariable());
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
@@ -103,9 +106,19 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
           spec.getYAxisVariable(),
           spec.getOverlayVariable(),
           getVariableSpecFromList(spec.getFacetVariable(), 0),
-          getVariableSpecFromList(spec.getFacetVariable(), 1)));
+          getVariableSpecFromList(spec.getFacetVariable(), 1)));          
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      String cmd = "plot.data::lineplot(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" + valueSpec + "'," + showMissingness + ")";
+      BinSpec binSpec = spec.getBinSpec();
+      validateBinSpec(binSpec, xVarType);
+      // right now its possible to pass type 'numBins' in BinSpec, but we arent supporting it here
+      String binWidth = "NULL";
+        if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
+          binWidth = binSpec.getValue() == null ? "NULL" : "as.numeric('" + binSpec.getValue() + "')";
+        } else {
+          binWidth = binSpec.getValue() == null ? "NULL" : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
+        }
+        connection.voidEval("binWidth <- " + binWidth);
+      String cmd = "plot.data::lineplot(" + DEFAULT_SINGLE_STREAM_NAME + ", map, binWidth, '" + valueSpec + "'," + showMissingness + ")";
       streamResult(connection, cmd, out);
     }); 
   }

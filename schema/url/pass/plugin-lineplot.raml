@@ -28,6 +28,9 @@ types:
         type: VariableSpec[]
         maxItems: 2
         required: false
+      binSpec:
+        type: BinSpec
+        required: false
       valueSpec:
         type: string
         enum: ['median','mean']
@@ -39,6 +42,8 @@ types:
         type: VariableSpec
       yVariableDetails:
         type: VariableSpec
+      binSlider?:
+        type: BinSlider
 
   Lineplot:
     additionalProperties: false

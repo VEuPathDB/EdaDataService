@@ -122,7 +122,8 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
       }
       
       BinSpec binSpec = spec.getBinSpec();
-      String binReportValue = binSpec.getType().getValue();
+      validateBinSpec(binSpec, xVarType);
+      String binReportValue = binSpec.getType().getValue() != null ? binSpec.getType().getValue() : "binWidth";
       
       //consider reorganizing conditions, move check for null value up a level ?
       if (binReportValue.equals("numBins")) {
@@ -143,9 +144,6 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
         String binWidth = "NULL";
         if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
           binWidth = binSpec.getValue() == null ? "NULL" : "as.numeric('" + binSpec.getValue() + "')";
-          if (binSpec.getUnits() != null) {
-            LOG.warn("The `units` property of the `BinSpec` class is only used for DATE x-axis variables. It will be ignored.");
-          }
         } else {
           binWidth = binSpec.getValue() == null ? "NULL" : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
         }
