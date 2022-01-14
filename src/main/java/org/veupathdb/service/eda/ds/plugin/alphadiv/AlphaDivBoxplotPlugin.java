@@ -104,7 +104,6 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
     String computeStats = spec.getComputeStats() != null ? spec.getComputeStats().getValue() : "TRUE";
     String showMean = spec.getMean() != null ? spec.getMean().getValue() : "FALSE";
     String method = spec.getAlphaDivMethod().getValue();
-    System.out.println(method);
     VariableSpec computeEntityIdVarSpec = getComputeEntityIdVarSpec(computeConfig.getCollectionVariable().getEntityId());
     String computeEntityIdColName = toColNameOrEmpty(computeEntityIdVarSpec);
     
@@ -114,9 +113,9 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
       connection.voidEval(getVoidEvalFreadCommand(COMPUTE_STREAM_NAME,
         computeInputVars
       ));
-      connection.voidEval("alphaDivDT <- alphaDiv(" + COMPUTE_STREAM_NAME + ", " + 
-                                                      computeEntityIdColName + ", " + 
-                                                      " 'shannon')");
+      connection.voidEval("alphaDivDT <- alphaDiv(" + COMPUTE_STREAM_NAME + ", '" + 
+                                                      computeEntityIdColName + "', '" + 
+                                                      method + "')");
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
           computeEntityIdVarSpec,
           spec.getXAxisVariable(),
@@ -124,9 +123,12 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
       // merge alpha div and other viz stream data as input to boxplot
+      connection.voidEval("print(colnames(alphaDivDT))");
+      connection.voidEval("print(colnames(" + DEFAULT_SINGLE_STREAM_NAME + "))");
+      connection.voidEval("print(str(" + DEFAULT_SINGLE_STREAM_NAME +"))");
       connection.voidEval("vizData <- merge(alphaDivDT, " + 
                                             DEFAULT_SINGLE_STREAM_NAME + 
-                                         ", by=" + computeEntityIdColName +")");
+                                         ", by='" + computeEntityIdColName +"')");
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       // update the new map obj in R to add alphaDiv
       connection.voidEval("map <- rbind(map, list('id'=veupathUtils::toColNameOrNull(attributes(alphaDivDT)$computedVariable$computedVariableDetails)," +
