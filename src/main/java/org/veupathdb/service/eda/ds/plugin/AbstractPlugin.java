@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.ListBuilder;
@@ -19,11 +21,13 @@ import org.gusdb.fgputil.Timer;
 import org.gusdb.fgputil.client.ResponseFuture;
 import org.gusdb.fgputil.functional.FunctionalInterfaces.ConsumerWithException;
 import org.gusdb.fgputil.functional.Functions;
+import org.gusdb.fgputil.functional.TreeNode;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.EdaMergingClient;
 import org.veupathdb.service.eda.common.client.EdaSubsettingClient;
 import org.veupathdb.service.eda.common.client.StreamingDataClient;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
+import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.model.ReferenceMetadata;
 import org.veupathdb.service.eda.common.model.VariableDef;
 import org.veupathdb.service.eda.ds.Resources;
@@ -70,6 +74,9 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   public Integer getMaxPanels() { return 1; }
   public ConstraintSpec getConstraintSpec() { return new ConstraintSpec(); }
 
+  // option for subclass to load any additional information (e.g. compute spec) from the request
+  protected void loadAdditionalConfig(String appName, T request) throws ValidationException {}
+
   private Timer _timer;
   private boolean _requestProcessed = false;
   private List<APIFilter> _subset;
@@ -77,7 +84,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   private EdaSubsettingClient _subsettingClient;
   private StreamingDataClient _mergingClient;
 
-  public AbstractPlugin<T,S> processRequest(String appName, T request, Entry<String,String> authHeader) throws ValidationException {
+  public final AbstractPlugin<T,S> processRequest(String appName, T request, Entry<String,String> authHeader) throws ValidationException {
 
     // start request timer (used to profile request performance dynamics)
     _timer = new Timer();
@@ -100,6 +107,9 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
 
     // construct available variables for each entity from metadata and derived variable config
     _referenceMetadata = new ReferenceMetadata(study, _derivedVariables);
+
+    // ask subclass to load any additional information (e.g. compute spec)
+    loadAdditionalConfig(appName, request);
 
     // ask subclass to validate the configuration
     validateVisualizationSpec(_pluginSpec);
@@ -187,8 +197,12 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   }
 
   /*****************************************************************
-   *** Convenience utilities for subclasses
+   *** Metadata access utilities for subclasses
    ****************************************************************/
+
+  protected VariableDef getEntityIdVarSpec(String entityId) {
+    return getReferenceMetadata().getEntity(entityId).orElseThrow().getIdColumnDef();
+  }
 
   protected VariableSpec getVariableSpecFromList(List<VariableSpec> vars, int index) {
     return vars == null || vars.size() <= index ? null : vars.get(index);
@@ -221,6 +235,17 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   protected String getVariableDataShape(List<VariableSpec> vars, int index) {
     return getVariableDataShape(getVariableSpecFromList(vars, index));
   }
+
+  protected List<VariableDef> getChildrenVariables(VariableSpec collectionVar) {
+    EntityDef collectionVarEntityDef = getReferenceMetadata().getEntity(collectionVar.getEntityId()).orElseThrow();
+    TreeNode<VariableDef> childVarsTree = collectionVarEntityDef.getNativeVariableTreeNode(collectionVar);
+    // TODO: for now assume we only have leaves as children; revisit if that turns out to not be true
+    return childVarsTree.findAndMap(TreeNode::isLeaf, v -> true, v -> v);
+  }
+
+  /*****************************************************************
+   *** RServe command utilities for subclasses
+   ****************************************************************/
 
   // Suggested helper to take array of var names, entities, types, or shapes, and rewrite them into one comma separated string.
   //  public static String toCommaSepString(String[] stringArray) {
