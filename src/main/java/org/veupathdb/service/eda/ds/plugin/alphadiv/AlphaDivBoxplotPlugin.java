@@ -9,6 +9,7 @@ import java.util.Map;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
+import org.veupathdb.service.eda.common.model.VariableDef;
 import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.ds.constraints.DataElementSet;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
@@ -105,7 +106,7 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
     String computeStats = spec.getComputeStats() != null ? spec.getComputeStats().getValue() : "TRUE";
     String showMean = spec.getMean() != null ? spec.getMean().getValue() : "FALSE";
     String method = spec.getAlphaDivMethod().getValue();
-    VariableSpec computeEntityIdVarSpec = getComputeEntityIdVarSpec(computeConfig.getCollectionVariable().getEntityId());
+    VariableDef computeEntityIdVarSpec = getEntityIdVarSpec(computeConfig.getCollectionVariable().getEntityId());
     String computeEntityIdColName = toColNameOrEmpty(computeEntityIdVarSpec);
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
