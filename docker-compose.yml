@@ -234,6 +234,8 @@ services:
     image: veupathdb/dataset-download:${DDS_TAG:-latest}
     networks:
       internal:
+        aliases:
+          - dataset-download-internal
       external:
       monitoring-ext:
       traefik:
