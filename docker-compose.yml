@@ -231,7 +231,7 @@ services:
     - "traefik.docker.network=traefik"
 
   dataset-download:
-    image: veupathdb/dataset-download:${DDS_TAG:-latest}
+    image: veupathdb/dataset-download-service:${DDS_TAG:-latest}
     networks:
       internal:
         aliases:
