@@ -196,26 +196,6 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     return toColNameOrEmpty(var);
   }
 
-  // think this and next need to catch NoSuchElementException ??
-  protected List<VariableSpec> getChildrenVariables(VariableSpec collectionVar) {
-    
-    System.out.println(getReferenceMetadata());
-    System.out.println(collectionVar);
-
-    EntityDef collectionVarEntityDef = _referenceMetadata.getEntity(collectionVar.getEntityId()).get();
-
-    System.out.println(_referenceMetadata.getVariable(collectionVar));
-    // Can send in a variable to the following, but not a category. For example, varid=MBioResult_00012_Bacteria_Actinobacteria worked but MBioResult_00012 did not
-    // look for this in EdaCommon!
-    VariableDef collectionVarDef = _referenceMetadata.getVariable(collectionVar).get();
-
-    TreeNode<VariableDef> childVarsTree = collectionVarEntityDef.getNativeVariableTreeNode(collectionVarDef);
-    // for now assuming we only have leaves as children. revisit if that turns out to not be true
-    Collection<VariableDef> childVarDefs = childVarsTree.flatten();
-
-    return new ArrayList(childVarDefs);
-  }
-
   /*****************************************************************
    *** Metadata access utilities for subclasses
    ****************************************************************/
@@ -257,6 +237,8 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   }
 
   protected List<VariableDef> getChildrenVariables(VariableSpec collectionVar) {
+    System.out.println(collectionVar);
+    System.out.println(collectionVar.getEntityId());
     EntityDef collectionVarEntityDef = getReferenceMetadata().getEntity(collectionVar.getEntityId()).orElseThrow();
     TreeNode<VariableDef> childVarsTree = collectionVarEntityDef.getNativeVariableTreeNode(collectionVar);
     // TODO: for now assume we only have leaves as children; revisit if that turns out to not be true
