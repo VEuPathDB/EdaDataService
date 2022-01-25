@@ -237,8 +237,6 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   }
 
   protected List<VariableDef> getChildrenVariables(VariableSpec collectionVar) {
-    System.out.println(collectionVar);
-    System.out.println(collectionVar.getEntityId());
     EntityDef collectionVarEntityDef = getReferenceMetadata().getEntity(collectionVar.getEntityId()).orElseThrow();
     TreeNode<VariableDef> childVarsTree = collectionVarEntityDef.getNativeVariableTreeNode(collectionVar);
     // TODO: for now assume we only have leaves as children; revisit if that turns out to not be true

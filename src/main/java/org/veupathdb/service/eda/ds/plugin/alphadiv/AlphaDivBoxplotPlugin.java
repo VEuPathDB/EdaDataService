@@ -124,15 +124,8 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
           spec.getOverlayVariable(),
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
+      
       // merge alpha div and other viz stream data as input to boxplot
-      connection.voidEval("print(alphaDivDT)");
-      connection.voidEval("print(colnames(" + DEFAULT_SINGLE_STREAM_NAME + "))");
-      connection.voidEval("print(str(" + DEFAULT_SINGLE_STREAM_NAME +"))");
-      // connection.voidEval("computedt <- fread('" + COMPUTE_STREAM_NAME + "')");
-      // connection.voidEval("vizdt <- fread('" + DEFAULT_SINGLE_STREAM_NAME + "')");
-      // connection.voidEval("str(computedt)");
-      // connection.voidEval("str(vizdt)");
-      connection.voidEval("print('" + computeEntityIdColName + "')");
       connection.voidEval("vizData <- merge(alphaDivDT, " + 
                                             DEFAULT_SINGLE_STREAM_NAME + 
                                          ", by='" + computeEntityIdColName +"')");
