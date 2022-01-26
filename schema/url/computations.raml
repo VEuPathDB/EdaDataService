@@ -16,23 +16,34 @@ types:
     additionalProperties: false
     properties:
       collectionVariable: VariableSpec
+      alphaDivMethod: AlphaDivMethod
+
+  AlphaDivMethod:
+    type: string
+    enum: ['shannon', 'simpson', 'evenness']
 
   AbundanceComputeConfig:
     type: ComputeConfig
     additionalProperties: false
     properties:
       collectionVariable: VariableSpec
+      rankingMethod: RankingMethod
 
-  DistanceMethod:
+  RankingMethod:
     type: string
-    enum: ['unifrac', 'wunifrac', 'bray', 'jaccard', 'jensen-shannon']
+    enum: ['median', 'q3', 'variance', 'max']
 
   BetaDivComputeConfig:
     type: ComputeConfig
     additionalProperties: false
     properties:
       collectionVariable: VariableSpec
-      method: DistanceMethod
+      distanceMethod: DistanceMethod
+
+  DistanceMethod:
+    type: string
+    enum: ['unifrac', 'wunifrac', 'bray', 'jaccard', 'jensen-shannon']
+
 
   # compute responses. for later, but leaving the draft here
   # the compute will be baked right in to the viz plugin for now

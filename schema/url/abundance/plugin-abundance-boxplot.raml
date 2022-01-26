@@ -7,37 +7,5 @@ types:
     type: VisualizationRequestBase
     properties:
       computeConfig: AbundanceComputeConfig
-      config: AbundanceBoxplotSpec
+      config: BoxplotWith1ComputeSpec
 
-  AbundanceRankingMethod:
-    type: string
-    enum: ['median', 'q3', 'variance', 'max']
-
-  # Assuming abundance must be on y axis and that x axis is determined by compute service unless user selects custom listvar
-  AbundanceBoxplotSpec:
-    additionalProperties: false
-    properties:
-      outputEntityId:
-        type: string
-      showMissingness:
-        type: string
-        enum: ['TRUE', 'FALSE']
-        required: false
-      points:
-        type: string
-        enum: ['outliers', 'all']
-      mean:
-        type: string
-        enum: ['TRUE', 'FALSE']
-      computeStats:
-        type: string
-        enum: ['TRUE', 'FALSE']
-      overlayVariable:
-        type: VariableSpec
-        required: false
-      facetVariable:
-        type: VariableSpec[]
-        maxItems: 2
-        required: false
-      rankingMethod:
-        type: AbundanceRankingMethod

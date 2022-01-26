@@ -18,3 +18,56 @@ types:
     type: VariableSpec
     properties:
       value: string
+
+  # Assuming computed variable must be on y axis and that x axis may be determined by collection var or specified.
+  BoxplotWith1ComputeSpec:
+    additionalProperties: false
+    properties:
+      outputEntityId:
+        type: string
+      showMissingness:
+        type: string
+        enum: ['TRUE', 'FALSE']
+        required: false
+      points:
+        type: string
+        enum: ['outliers', 'all']
+      mean:
+        type: string
+        enum: ['TRUE', 'FALSE']
+      computeStats:
+        type: string
+        enum: ['TRUE', 'FALSE']
+      xAxisVariable:
+        type: VariableSpec
+        required: false
+      overlayVariable:
+        type: VariableSpec
+        required: false
+      facetVariable:
+        type: VariableSpec[]
+        maxItems: 2
+        required: false
+
+  # Assume y-axis is always computed variable
+  ScatterplotWith1ComputeSpec:
+    additionalProperties: false
+    properties:
+      outputEntityId:
+        type: string
+      showMissingness:
+        type: string
+        enum: ['TRUE', 'FALSE']
+        required: false
+      valueSpec:
+        type: string
+        enum: ['raw', 'smoothedMeanWithRaw', 'bestFitLineWithRaw']
+      xAxisVariable:
+        type: VariableSpec
+      overlayVariable: 
+        type: VariableSpec
+        required: false
+      facetVariable:
+        type: VariableSpec[]
+        maxItems: 2
+        required: false
