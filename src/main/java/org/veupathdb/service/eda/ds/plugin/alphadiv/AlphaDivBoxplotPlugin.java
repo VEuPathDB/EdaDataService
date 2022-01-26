@@ -115,9 +115,9 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
         computeInputVars
       ));
       connection.voidEval("print("+ COMPUTE_STREAM_NAME + ")");
-      connection.voidEval("alphaDivDT <- alphaDiv(" + COMPUTE_STREAM_NAME + ", '" + 
-                                                      computeEntityIdColName + "', '" + 
-                                                      method + "')");
+      connection.voidEval("alphaDivDT <- alphaDiv(" + COMPUTE_STREAM_NAME + ", " + 
+                                                      singleQuote(computeEntityIdColName) + ", " + 
+                                                      singleQuote(method) + ")");
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
           computeEntityIdVarSpec,
           spec.getXAxisVariable(),
@@ -128,7 +128,7 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
       // merge alpha div and other viz stream data as input to boxplot
       connection.voidEval("vizData <- merge(alphaDivDT, " + 
                                             DEFAULT_SINGLE_STREAM_NAME + 
-                                         ", by='" + computeEntityIdColName +"')");
+                                         ", by=" + singleQuote(computeEntityIdColName) +")");
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       // update the new map obj in R to add alphaDiv
       connection.voidEval("map <- rbind(map, list('id'=veupathUtils::toColNameOrNull(attributes(alphaDivDT)$computedVariable$computedVariableDetails)," +

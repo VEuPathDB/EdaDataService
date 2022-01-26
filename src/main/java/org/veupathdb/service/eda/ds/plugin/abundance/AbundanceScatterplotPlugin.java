@@ -113,9 +113,10 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithCompute<Abunda
       connection.voidEval(getVoidEvalFreadCommand(COMPUTE_STREAM_NAME,
         computeInputVars
       ));
-      connection.voidEval("abundanceDT <- rankedAbundance(" + COMPUTE_STREAM_NAME + ", '" + 
-                                                      computeEntityIdColName + "', '" + 
-                                                      method + "', 8)");
+
+      connection.voidEval("abundanceDT <- rankedAbundance(" + COMPUTE_STREAM_NAME + ", " + 
+                                                      singleQuote(computeEntityIdColName) + ", " + 
+                                                      singleQuote(method) + ", 8)");
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
           computeEntityIdVarSpec,
           spec.getXAxisVariable(),
@@ -123,7 +124,7 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithCompute<Abunda
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
       connection.voidEval("vizData <- merge(abundanceDT, " + 
           DEFAULT_SINGLE_STREAM_NAME + 
-       ", by='" + computeEntityIdColName +"')");
+       ", by=" + singleQuote(computeEntityIdColName) +")");
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
 
       connection.voidEval("map <- rbind(map, list('id'=veupathUtils::toColNameOrNull(attributes(abundanceDT)$computedVariable$computedVariableDetails)," +

@@ -120,9 +120,9 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
       connection.voidEval(getVoidEvalFreadCommand(COMPUTE_STREAM_NAME,
         computeInputVars
       ));
-      connection.voidEval("alphaDivDT <- alphaDiv(" + COMPUTE_STREAM_NAME + ", '" + 
-                                                      computeEntityIdColName + "', '" + 
-                                                      method + "')");
+      connection.voidEval("alphaDivDT <- alphaDiv(" + COMPUTE_STREAM_NAME + ", " + 
+                                                      singleQuote(computeEntityIdColName) + ", " + 
+                                                      singleQuote(method) + ")");
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
           computeEntityIdVarSpec,
           spec.getXAxisVariable(),
@@ -131,7 +131,7 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
       connection.voidEval("vizData <- merge(alphaDivDT, " + 
           DEFAULT_SINGLE_STREAM_NAME + 
-       ", by='" + computeEntityIdColName +"')");
+       ", by=" + singleQuote(computeEntityIdColName) +")");
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       connection.voidEval("map <- rbind(map, list('id'=veupathUtils::toColNameOrNull(attributes(alphaDivDT)$computedVariable$computedVariableDetails)," +
                                                  "'plotRef'='yAxisVariable'," +

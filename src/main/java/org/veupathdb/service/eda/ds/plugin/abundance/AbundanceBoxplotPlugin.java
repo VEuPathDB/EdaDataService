@@ -111,9 +111,9 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
         computeInputVars
       ));
 
-      connection.voidEval("abundanceDT <- rankedAbundance(" + COMPUTE_STREAM_NAME + ", '" + 
-                                                      computeEntityIdColName + "', '" + 
-                                                      method + "')");
+      connection.voidEval("abundanceDT <- rankedAbundance(" + COMPUTE_STREAM_NAME + ", " + 
+                                                      singleQuote(computeEntityIdColName) + ", " + 
+                                                      singleQuote(method) + ")");
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
           computeEntityIdVarSpec,
           spec.getOverlayVariable(),
@@ -122,7 +122,7 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
 
       connection.voidEval("vizData <- merge(abundanceDT, " + 
           DEFAULT_SINGLE_STREAM_NAME + 
-          ", by='" + computeEntityIdColName +"')");
+          ", by=" + singleQuote(computeEntityIdColName) +")");
 
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       connection.voidEval("map <- rbind(map, list('id'=veupathUtils::toColNameOrNull(attributes(abundanceDT)$computedVariable$computedVariableDetails)," +
