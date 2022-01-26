@@ -37,6 +37,7 @@ services:
       USER_DB_TNS_NAME: ${USER_DB_TNS_NAME}
       USER_DB_USER: ${USER_DB_USER}
       USER_DB_PASS: ${USER_DB_PASS}
+      USER_DB_SCHEMA: ${USER_DB_SCHEMA:-userlogins5}
 
       # Auth Secret (needed along with user/acct DBs for auth)
       AUTH_SECRET_KEY: ${AUTH_SECRET_KEY}
@@ -99,6 +100,7 @@ services:
       USER_DB_TNS_NAME: ${USER_DB_TNS_NAME}
       USER_DB_USER: ${USER_DB_USER}
       USER_DB_PASS: ${USER_DB_PASS}
+      USER_DB_SCHEMA: ${USER_DB_SCHEMA:-userlogins5}
 
       # Auth Secret (needed along with user/acct DBs for auth)
       AUTH_SECRET_KEY: ${AUTH_SECRET_KEY}
@@ -147,9 +149,20 @@ services:
       USER_DB_TNS_NAME: ${USER_DB_TNS_NAME}
       USER_DB_USER: ${USER_DB_USER}
       USER_DB_PASS: ${USER_DB_PASS}
+      USER_DB_SCHEMA: ${USER_DB_SCHEMA:-userlogins5}
 
       # Auth Secret (needed along with user/acct DBs for auth)
       AUTH_SECRET_KEY: ${AUTH_SECRET_KEY}
+
+      # Project-specific properties for user schema
+      PROJECT_SPECIFIC_PROP_CE_PROJECT_ID: ClinEpiDB
+      PROJECT_SPECIFIC_PROP_CE_USER_SCHEMA: edauserce
+
+      PROJECT_SPECIFIC_PROP_ACE_PROJECT_ID: AllClinEpiDB
+      PROJECT_SPECIFIC_PROP_ACE_USER_SCHEMA: edauserce
+
+      PROJECT_SPECIFIC_PROP_MB_PROJECT_ID: MicrobiomeDB
+      PROJECT_SPECIFIC_PROP_MB_USER_SCHEMA: edausermb
 
     labels:
     - "prometheus.scrape_enabled=true"
@@ -193,6 +206,7 @@ services:
       USER_DB_TNS_NAME: ${USER_DB_TNS_NAME}
       USER_DB_USER: ${USER_DB_USER}
       USER_DB_PASS: ${USER_DB_PASS}
+      USER_DB_SCHEMA: ${USER_DB_SCHEMA:-userlogins5}
 
       # Auth Secret (needed along with user/acct DBs for auth)
       AUTH_SECRET_KEY: ${AUTH_SECRET_KEY}
@@ -214,6 +228,68 @@ services:
     - "traefik.http.routers.${TRAEFIK_DAS_ROUTER:-edadas-dev}.rule=Host(`${TRAEFIK_DATA_HOST:-edadata-dev.local.apidb.org}`) && PathPrefix(`/staff`,`/dataset-providers`,`/dataset-end-users`,`/permissions`,`/history`)"
     - "traefik.http.routers.${TRAEFIK_DAS_ROUTER:-edadas-dev}.tls=true"
     - "traefik.http.routers.${TRAEFIK_DAS_ROUTER:-edadas-dev}.entrypoints=${TRAEFIK_ENTRYPOINTS:-local}"
+    - "traefik.docker.network=traefik"
+
+  dataset-download:
+    image: veupathdb/dataset-download-service:${DDS_TAG:-latest}
+    networks:
+      internal:
+        aliases:
+          - dataset-download-internal
+      external:
+      monitoring-ext:
+      traefik:
+    volumes:
+      - type: bind
+        source: ${DOWNLOAD_FILES_DIR:-/var/www/Common/apiSiteFilesMirror/downloadSite}
+        target: /downloadFiles
+        read_only: true
+    environment:
+      # port providing the service
+      SERVER_PORT: ${DATASET_DOWNLOAD_SERVER_PORT:-8080}
+
+      # URLs of required services
+      DATASET_ACCESS_SERVICE_URL: ${DATASET_ACCESS_SERVICE_URL:-http://dataset-access-internal}:${DATASET_ACCESS_SERVER_PORT:-8080}
+
+      # LDAP values to look up DBs
+      LDAP_SERVER: ${LDAP_SERVER}
+      ORACLE_BASE_DN: ${ORACLE_BASE_DN}
+
+      # Account Database
+      ACCT_DB_TNS_NAME: ${ACCT_DB_TNS_NAME}
+      ACCT_DB_USER: ${ACCT_DB_USER}
+      ACCT_DB_PASS: ${ACCT_DB_PASS}
+      ACCT_DB_POOL_SIZE: 20
+
+      # User Database
+      USER_DB_TNS_NAME: ${USER_DB_TNS_NAME}
+      USER_DB_USER: ${USER_DB_USER}
+      USER_DB_PASS: ${USER_DB_PASS}
+      USER_DB_SCHEMA: ${USER_DB_SCHEMA:-userlogins5}
+
+      # Auth Secret (needed along with user/acct DBs for auth)
+      AUTH_SECRET_KEY: ${AUTH_SECRET_KEY}
+
+      # Parent directory for raw download files
+      DOWNLOAD_FILES_MOUNT_PATH: ${DOWNLOAD_FILES_MOUNT_PATH:-/downloadFiles}
+
+      # Project-specific properties for raw files parent directory
+      PROJECT_SPECIFIC_PROP_CE_PROJECT_ID: ClinEpiDB
+      PROJECT_SPECIFIC_PROP_CE_RAW_FILES_DIR: ClinEpiDB
+
+      PROJECT_SPECIFIC_PROP_ACE_PROJECT_ID: AllClinEpiDB
+      PROJECT_SPECIFIC_PROP_ACE_RAW_FILES_DIR: ClinEpiDB
+
+      PROJECT_SPECIFIC_PROP_MB_PROJECT_ID: MicrobiomeDB
+      PROJECT_SPECIFIC_PROP_MB_RAW_FILES_DIR: MicrobiomeDB
+
+    labels:
+    - "prometheus-scrape.enabled=true"
+    - "com.centurylinklabs.watchtower.enable=${DDS_WATCHTOWER:-false}"
+    - "traefik.http.services.${TRAEFIK_DDS_ROUTER:-edadds-dev}.loadbalancer.server.port=${DATASET_DOWNLOAD_SERVER_PORT:-8080}"
+    - "traefik.http.routers.${TRAEFIK_DDS_ROUTER:-edadds-dev}.rule=Host(`${TRAEFIK_DATA_HOST:-edadata-dev.local.apidb.org}`) && PathPrefix(`/download`)"
+    - "traefik.http.routers.${TRAEFIK_DDS_ROUTER:-edadds-dev}.tls=true"
+    - "traefik.http.routers.${TRAEFIK_DDS_ROUTER:-edadds-dev}.entrypoints=${TRAEFIK_ENTRYPOINTS:-local}"
     - "traefik.docker.network=traefik"
 
 networks:
