@@ -20,12 +20,12 @@ import org.veupathdb.service.eda.ds.util.RServeClient;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.AbundanceComputeConfig;
 import org.veupathdb.service.eda.generated.model.AbundanceScatterplotPostRequest;
-import org.veupathdb.service.eda.generated.model.AbundanceScatterplotSpec;
+import org.veupathdb.service.eda.generated.model.ScatterplotWith1ComputeSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class AbundanceScatterplotPlugin extends AbstractPluginWithCompute<AbundanceScatterplotPostRequest, AbundanceScatterplotSpec, AbundanceComputeConfig> {
+public class AbundanceScatterplotPlugin extends AbstractPluginWithCompute<AbundanceScatterplotPostRequest, ScatterplotWith1ComputeSpec, AbundanceComputeConfig> {
 
   private static final Logger LOG = LogManager.getLogger(AbundanceScatterplotPlugin.class);
   
@@ -45,8 +45,8 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithCompute<Abunda
   }
   
   @Override
-  protected Class<AbundanceScatterplotSpec> getVisualizationSpecClass() {
-    return AbundanceScatterplotSpec.class;
+  protected Class<ScatterplotWith1ComputeSpec> getVisualizationSpecClass() {
+    return ScatterplotWith1ComputeSpec.class;
   }
 
   @Override
@@ -71,7 +71,7 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithCompute<Abunda
   }
   
   @Override
-  protected void validateVisualizationSpec(AbundanceScatterplotSpec pluginSpec) throws ValidationException {
+  protected void validateVisualizationSpec(ScatterplotWith1ComputeSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
       .var("xAxisVariable", pluginSpec.getXAxisVariable())
@@ -79,7 +79,7 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithCompute<Abunda
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(AbundanceScatterplotSpec pluginSpec, AbundanceComputeConfig computeConfig) {
+  protected List<StreamSpec> getRequestedStreams(ScatterplotWith1ComputeSpec pluginSpec, AbundanceComputeConfig computeConfig) {
     List<StreamSpec> requestedStreamsList = ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
@@ -96,14 +96,14 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithCompute<Abunda
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     AbundanceComputeConfig computeConfig = getComputeConfig();
-    AbundanceScatterplotSpec spec = getPluginSpec();
+    ScatterplotWith1ComputeSpec spec = getPluginSpec();
     Map<String, VariableSpec> varMap = new HashMap<>();
     varMap.put("xAxisVariable", spec.getXAxisVariable());
     varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
     varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
     String valueSpec = spec.getValueSpec().getValue();
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
-    String method = spec.getRankingMethod().getValue();
+    String method = computeConfig.getRankingMethod().getValue();
     VariableDef computeEntityIdVarSpec = getEntityIdVarSpec(computeConfig.getCollectionVariable().getEntityId());
     String computeEntityIdColName = toColNameOrEmpty(computeEntityIdVarSpec); 
 

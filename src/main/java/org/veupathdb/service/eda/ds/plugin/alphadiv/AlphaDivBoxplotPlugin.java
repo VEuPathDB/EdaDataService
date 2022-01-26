@@ -16,13 +16,13 @@ import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
 import org.veupathdb.service.eda.ds.plugin.AbstractPluginWithCompute;
 import org.veupathdb.service.eda.ds.util.RServeClient;
 import org.veupathdb.service.eda.generated.model.AlphaDivBoxplotPostRequest;
-import org.veupathdb.service.eda.generated.model.AlphaDivBoxplotSpec;
+import org.veupathdb.service.eda.generated.model.BoxplotWith1ComputeSpec;
 import org.veupathdb.service.eda.generated.model.AlphaDivComputeConfig;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBoxplotPostRequest, AlphaDivBoxplotSpec, AlphaDivComputeConfig> {
+public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBoxplotPostRequest, BoxplotWith1ComputeSpec, AlphaDivComputeConfig> {
 
   @Override
   public String getDisplayName() {
@@ -40,8 +40,8 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
   }
   
   @Override
-  protected Class<AlphaDivBoxplotSpec> getVisualizationSpecClass() {
-    return AlphaDivBoxplotSpec.class;
+  protected Class<BoxplotWith1ComputeSpec> getVisualizationSpecClass() {
+    return BoxplotWith1ComputeSpec.class;
   }
 
   @Override
@@ -69,7 +69,7 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
   }
   
   @Override
-  protected void validateVisualizationSpec(AlphaDivBoxplotSpec pluginSpec) throws ValidationException {
+  protected void validateVisualizationSpec(BoxplotWith1ComputeSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
       .var("xAxisVariable", pluginSpec.getXAxisVariable())
@@ -78,7 +78,7 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(AlphaDivBoxplotSpec pluginSpec, AlphaDivComputeConfig computeConfig) {
+  protected List<StreamSpec> getRequestedStreams(BoxplotWith1ComputeSpec pluginSpec, AlphaDivComputeConfig computeConfig) {
     List<StreamSpec> requestedStreamsList = ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
@@ -95,7 +95,7 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
   @Override
  protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     AlphaDivComputeConfig computeConfig = getComputeConfig();
-    AlphaDivBoxplotSpec spec = getPluginSpec();
+    BoxplotWith1ComputeSpec spec = getPluginSpec();
     Map<String, VariableSpec> varMap = new HashMap<>();
     varMap.put("xAxisVariable", spec.getXAxisVariable());
     varMap.put("overlayVariable", spec.getOverlayVariable());
@@ -104,7 +104,7 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
     String computeStats = spec.getComputeStats() != null ? spec.getComputeStats().getValue() : "TRUE";
     String showMean = spec.getMean() != null ? spec.getMean().getValue() : "FALSE";
-    String method = spec.getAlphaDivMethod().getValue();
+    String method = computeConfig.getAlphaDivMethod().getValue();
     VariableDef computeEntityIdVarSpec = getEntityIdVarSpec(computeConfig.getCollectionVariable().getEntityId());
     String computeEntityIdColName = toColNameOrEmpty(computeEntityIdVarSpec);
     
