@@ -89,7 +89,6 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
       new StreamSpec(COMPUTE_STREAM_NAME, computeConfig.getCollectionVariable().getEntityId())
         .addVars(getChildrenVariables(computeConfig.getCollectionVariable()) 
       ));
-    
     return requestedStreamsList;
   }
 
@@ -115,26 +114,27 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
       connection.voidEval(getVoidEvalFreadCommand(COMPUTE_STREAM_NAME,
         computeInputVars
       ));
+      connection.voidEval("print("+ COMPUTE_STREAM_NAME + ")");
       connection.voidEval("alphaDivDT <- alphaDiv(" + COMPUTE_STREAM_NAME + ", " + 
-                                                      computeEntityIdColName + ", " + 
-                                                      method + ")");
+                                                      singleQuote(computeEntityIdColName) + ", " + 
+                                                      singleQuote(method) + ")");
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
           computeEntityIdVarSpec,
           spec.getXAxisVariable(),
           spec.getOverlayVariable(),
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
+      
       // merge alpha div and other viz stream data as input to boxplot
       connection.voidEval("vizData <- merge(alphaDivDT, " + 
                                             DEFAULT_SINGLE_STREAM_NAME + 
-                                         ", by=" + computeEntityIdColName +")");
+                                         ", by=" + singleQuote(computeEntityIdColName) +")");
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       // update the new map obj in R to add alphaDiv
       connection.voidEval("map <- rbind(map, list('id'=veupathUtils::toColNameOrNull(attributes(alphaDivDT)$computedVariable$computedVariableDetails)," +
                                                  "'plotRef'='yAxisVariable'," +
                                                  "'dataType'=attributes(alphaDivDT)$computedVariable$computedVariableDetails$dataType," +
-                                                 "'dataShape'=attributes(alphaDivDT)$computedVariable$computedVariableDetails$dataShape," +
-                                                 "'displayLabel'=attributes(alphaDivDT)$computedVariable$computedVariableMetadata$displayName))");
+                                                 "'dataShape'=attributes(alphaDivDT)$computedVariable$computedVariableDetails$dataShape))");
       String command = "plot.data::box(vizData, map, '" +
           spec.getPoints().getValue() + "', " +
           showMean + ", " + 

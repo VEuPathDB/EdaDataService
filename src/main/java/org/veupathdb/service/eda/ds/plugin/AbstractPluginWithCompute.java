@@ -5,6 +5,7 @@ import javax.ws.rs.BadRequestException;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
+import org.veupathdb.service.eda.generated.model.APIStudyDetail;
 import org.veupathdb.service.eda.generated.model.AppOverview;
 import org.veupathdb.service.eda.generated.model.ComputeConfig;
 import org.veupathdb.service.eda.generated.model.VisualizationRequestBase;

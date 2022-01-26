@@ -110,30 +110,32 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
       connection.voidEval(getVoidEvalFreadCommand(COMPUTE_STREAM_NAME,
         computeInputVars
       ));
+
       connection.voidEval("abundanceDT <- rankedAbundance(" + COMPUTE_STREAM_NAME + ", " + 
-                                                      computeEntityIdColName + ", " + 
-                                                      method + ")");
+                                                      singleQuote(computeEntityIdColName) + ", " + 
+                                                      singleQuote(method) + ")");
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
           computeEntityIdVarSpec,
           spec.getOverlayVariable(),
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
+
       connection.voidEval("vizData <- merge(abundanceDT, " + 
           DEFAULT_SINGLE_STREAM_NAME + 
-       ", by=" + computeEntityIdColName +")");
+          ", by=" + singleQuote(computeEntityIdColName) +")");
+
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       connection.voidEval("map <- rbind(map, list('id'=veupathUtils::toColNameOrNull(attributes(abundanceDT)$computedVariable$computedVariableDetails)," +
                                                  "'plotRef'=rep('xAxisVariable', length(attributes(abundanceDT)$computedVariable$computedVariableDetails$variableId))," +
                                                  "'dataType'=attributes(abundanceDT)$computedVariable$computedVariableDetails$dataType," +
-                                                 "'dataShape'=attributes(abundanceDT)$computedVariable$computedVariableDetails$dataShape");
+                                                 "'dataShape'=attributes(abundanceDT)$computedVariable$computedVariableDetails$dataShape))");
+
       String command = "plot.data::box(vizData, map, '" +
           spec.getPoints().getValue() + "', " +
           showMean + ", " + 
           computeStats + ", " + 
           showMissingness + ", " +
-          "'xAxisVariable', " + // x only initially, confusing ux and api otherwise?
-          singleQuote(computeEntityIdColName) + ", " + // pass the parent term spec here, client turns it into display label
-          "'Abundance', computedVariableMetadata=attributes(abundanceDT)$computedVariable$computedVariableMetadata)";
+          "'xAxisVariable', computedVariableMetadata=attributes(abundanceDT)$computedVariable$computedVariableMetadata, TRUE)";
       RServeClient.streamResult(connection, command, out);
     });
   }
