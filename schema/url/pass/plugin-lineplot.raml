@@ -34,6 +34,13 @@ types:
       valueSpec:
         type: string
         enum: ['median','mean']
+      # for now assume 95 ci only, eventually values like 'se', 'sd', 'ci' etc
+      errorBars:
+        type: string
+        enum: ['TRUE', 'FALSE']
+      viewport:
+        type: XAxisViewport
+        required: false
 
   LineplotConfig:
     type: PlotConfig

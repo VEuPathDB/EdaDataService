@@ -29,3 +29,31 @@ types:
         enum: ['binWidth','numBins']
       value?: number
       units?: BinUnits
+
+  XAxisViewport:
+    additionalProperties: false
+    properties:
+      xMin:
+        type: string
+      xMax:
+        type: string
+
+  ErrorBar:
+    additionalProperties: false
+    properties:
+      lowerBound: number
+      upperBound: number
+
+  SimpleSampleSize:
+    additionalProperties: false
+    properties:
+      N: number
+
+  ProportionSampleSize:
+    additionalProperties: false
+    properties:
+      numeratorN: number
+      denominatorN: number
+  
+  SampleSize:
+    type: SimpleSampleSize | ProportionSampleSize

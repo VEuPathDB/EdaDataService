@@ -41,6 +41,7 @@ import org.veupathdb.service.eda.generated.model.BinSpec;
 import org.veupathdb.service.eda.generated.model.DerivedVariable;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 import org.veupathdb.service.eda.generated.model.VisualizationRequestBase;
+import org.veupathdb.service.eda.generated.model.XAxisViewport;
 
 /**
  * Base vizualization plugin for all other plugins.  Provides access to parts of
@@ -239,7 +240,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
 
   protected List<VariableDef> getChildrenVariables(VariableSpec collectionVar) {
     EntityDef collectionVarEntityDef = getReferenceMetadata().getEntity(collectionVar.getEntityId()).orElseThrow();
-    TreeNode<VariableDef> childVarsTree = collectionVarEntityDef.getNativeVariableTreeNode(collectionVar);
+    TreeNode<VariableDef> childVarsTree = collectionVarEntityDef.getNativeVariableTreeNode(getReferenceMetadata().getVariable(collectionVar).orElseThrow());
     // TODO: for now assume we only have leaves as children; revisit if that turns out to not be true
     return childVarsTree.findAndMap(TreeNode::isLeaf, v -> true, v -> v);
   }
@@ -306,7 +307,20 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
         ", select=c(" + namedTypes + ")" +
         ", na.strings=c(''))";
   }
-  
+ 
+  protected String getViewportAsRString(XAxisViewport viewport, String xVarType) {
+    if (viewport != null) {
+      // think if we just pass the string plot.data will convert it to the claimed type
+      if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
+        return("viewport <- list('xMin'=" + viewport.getXMin() + ", 'xMax'=" + viewport.getXMax() + ")");
+      } else {
+        return("viewport <- list('xMin'=" + singleQuote(viewport.getXMin()) + ", 'xMax'=" + singleQuote(viewport.getXMax()) + ")");
+      }
+    } else {
+      return("viewport <- NULL");
+    }
+  }
+
   protected String getVoidEvalVarMetadataMap(String datasetName, Map<String, VariableSpec> vars) {
     boolean first = true;
     String plotRefVector = new String();

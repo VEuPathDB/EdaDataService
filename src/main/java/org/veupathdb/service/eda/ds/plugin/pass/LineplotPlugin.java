@@ -97,6 +97,7 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
     varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
     varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
+    String errorBars = spec.getErrorBars() != null ? spec.getErrorBars().getValue() : "FALSE";
     String valueSpec = spec.getValueSpec().getValue();
     String xVarType = getVariableType(spec.getXAxisVariable());
     
@@ -108,6 +109,8 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));          
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
+      String viewportRString = getViewportAsRString(spec.getViewport(), xVarType);
+      connection.voidEval(viewportRString);
       BinSpec binSpec = spec.getBinSpec();
       validateBinSpec(binSpec, xVarType);
       // right now its possible to pass type 'numBins' in BinSpec, but we arent supporting it here
@@ -118,7 +121,12 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
           binWidth = binSpec.getValue() == null ? "NULL" : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
         }
         connection.voidEval("binWidth <- " + binWidth);
-      String cmd = "plot.data::lineplot(" + DEFAULT_SINGLE_STREAM_NAME + ", map, binWidth, '" + valueSpec + "'," + showMissingness + ")";
+      String cmd = "plot.data::lineplot(" + DEFAULT_SINGLE_STREAM_NAME + 
+                                        ", map, binWidth, " + 
+                                        singleQuote(valueSpec) + 
+                                        ", " + errorBars + 
+                                        ", viewport," + 
+                                        showMissingness + ")";
       streamResult(connection, cmd, out);
     }); 
   }

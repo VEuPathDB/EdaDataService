@@ -109,17 +109,9 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      
-      if (spec.getViewport() != null) {
-        // think if we just pass the string plot.data will convert it to the claimed type
-        if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
-          connection.voidEval("viewport <- list('xMin'=" + spec.getViewport().getXMin() + ", 'xMax'=" + spec.getViewport().getXMax() + ")");
-        } else {
-          connection.voidEval("viewport <- list('xMin'=" + singleQuote(spec.getViewport().getXMin()) + ", 'xMax'=" + singleQuote(spec.getViewport().getXMax()) + ")");
-        }
-      } else {
-        connection.voidEval("viewport <- NULL");
-      }
+     
+      String viewportRString = getViewportAsRString(spec.getViewport(), xVarType);
+      connection.voidEval(viewportRString);
       
       BinSpec binSpec = spec.getBinSpec();
       validateBinSpec(binSpec, xVarType);
