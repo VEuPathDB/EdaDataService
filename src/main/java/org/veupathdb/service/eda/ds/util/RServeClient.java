@@ -115,6 +115,5 @@ public class RServeClient {
     try (RFileInputStream response = connection.openFile(outFile)) {
       IoUtil.transferStream(out, response);
     }
-    out.flush();
   }
 }

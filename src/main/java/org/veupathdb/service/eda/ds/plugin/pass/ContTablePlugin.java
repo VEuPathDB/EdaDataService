@@ -3,7 +3,6 @@ package org.veupathdb.service.eda.ds.plugin.pass;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +16,7 @@ import org.veupathdb.service.eda.generated.model.MosaicPostRequest;
 import org.veupathdb.service.eda.generated.model.MosaicSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
+import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.CLINEPI_PROJECT;
 import static org.veupathdb.service.eda.ds.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
@@ -34,12 +34,7 @@ public class ContTablePlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpe
 
   @Override
   public List<String> getProjects() {
-    return Arrays.asList("ClinEpiDB");
-  }
-  
-  @Override
-  public Integer getMaxPanels() {
-    return 25;
+    return List.of(CLINEPI_PROJECT);
   }
   
   @Override
@@ -61,7 +56,8 @@ public class ContTablePlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpe
         .element("facetVariable")
           .required(false)
           .maxVars(2)
-          .description("Variable(s) must have 25 or fewer cartesian products and be of the same or a parent entity of the X-axis variable.")
+          .maxValues(7)
+          .description("Variable(s) must have 7 or fewer unique values and be of the same or a parent entity of the X-axis variable.")
       .done();
   }
 

@@ -1,13 +1,13 @@
 //
 // Version Numbers
 //
-val coreLib   = "5.1.7"  // Container core lib version
-val edaCommon = "6.1.0"  // EDA Common version
+val coreLib   = "5.4.0"  // Container core lib version
+val edaCommon = "7.1.1"  // EDA Common version
 
 val jersey    = "2.33"   // Jersey/JaxRS version
 val jackson   = "2.12.2" // FasterXML Jackson version
 val junit     = "5.7.1"  // JUnit version
-val log4j     = "2.14.0" // Log4J version
+val log4j     = "2.16.0" // Log4J version
 val metrics   = "0.9.0"  // Prometheus lib version
 
 val implementation by configurations

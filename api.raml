@@ -49,10 +49,6 @@ securitySchemes:
             body:
               application/json:
                 type: lib.MapPostResponse
-          500:
-            body:
-              application/json:
-                type: error.ServerError
 
     /table:
       post:
@@ -65,10 +61,6 @@ securitySchemes:
             body:
               application/json:
                 type: lib.TablePostResponse
-          500:
-            body:
-              application/json:
-                type: error.ServerError
 
     /scatterplot:
       post:
@@ -81,10 +73,7 @@ securitySchemes:
             body:
               application/json:
                 type: lib.ScatterplotPostResponse
-          500:
-            body:
-              application/json:
-                type: error.ServerError
+
 
     /densityplot:
       post:
@@ -97,10 +86,6 @@ securitySchemes:
             body:
               application/json:
                 type: lib.DensityplotPostResponse
-          500:
-            body:
-              application/json:
-                type: error.ServerError
 
     /timeseries:
       post:
@@ -113,10 +98,6 @@ securitySchemes:
             body:
               application/json:
                 type: lib.LineplotPostResponse
-          500:
-            body:
-              application/json:
-                type: error.ServerError
 
     /lineplot:
       post:
@@ -129,10 +110,6 @@ securitySchemes:
             body:
               application/json:
                 type: lib.LineplotPostResponse
-          500:
-            body:
-              application/json:
-                type: error.ServerError
 
     /histogram:
       post:
@@ -145,10 +122,6 @@ securitySchemes:
             body:
               application/json:
                 type: lib.HistogramPostResponse
-          500:
-            body:
-              application/json:
-                type: error.ServerError
 
     /boxplot:
       post:
@@ -161,10 +134,6 @@ securitySchemes:
             body:
               application/json:
                 type: lib.BoxplotPostResponse
-          500:
-            body:
-              application/json:
-                type: error.ServerError
 
     /heatmap:
       post:
@@ -177,10 +146,6 @@ securitySchemes:
             body:
               application/json:
                 type: lib.HeatmapPostResponse
-          500:
-            body:
-              application/json:
-                type: error.ServerError
 
     /barplot:
       post:
@@ -193,10 +158,6 @@ securitySchemes:
             body:
               application/json:
                 type: lib.BarplotPostResponse
-          500:
-            body:
-              application/json:
-                type: error.ServerError
 
     /twobytwo:
       post:
@@ -209,11 +170,7 @@ securitySchemes:
             body:
               application/json:
                 type: lib.TwoByTwoPostResponse
-          500:
-            body:
-              application/json:
-                type: error.ServerError
-                
+
     /conttable:
       post:
         description: Returns data required to create a mosaic plot visualization <br> Java impl- NA <br> R impl- drafted
@@ -225,10 +182,75 @@ securitySchemes:
             body:
               application/json:
                 type: lib.ContTablePostResponse
-          500:
+
+  /alphadiv/visualizations:
+    displayName: Visualizations for assessing internal sample diversity (alpha diversity).
+
+    /boxplot:
+      post:
+        description: Returns data required to create a box plot with alpha diversity as dependent axis <br> Java impl- NA <br> R impl- NA
+        body:
+          application/json:
+            type: lib.AlphaDivBoxplotPostRequest
+        responses:
+          200:
             body:
               application/json:
-                type: error.ServerError
+                type: lib.BoxplotPostResponse
+
+    /scatterplot:
+        post:
+          description: Returns data required to create a scatterplot that explores the relationship between a continuous variable and alpha diversity <br> Java impl- NA <br> R impl- NA
+          body:
+            application/json:
+              type: lib.AlphaDivScatterplotPostRequest
+          responses:
+            200:
+              body:
+                application/json:
+                  type: lib.ScatterplotPostResponse
+
+  /abundance/visualizations:
+    displayName: Visualizations for assessing abundance data in a collection of samples.
+
+    /boxplot:
+      post:
+        description: Returns data required to create a box plot with abundance as dependent axis <br> Java impl- NA <br> R impl- NA
+        body:
+          application/json:
+            type: lib.AbundanceBoxplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.BoxplotPostResponse
+
+    /scatterplot:
+      post:
+        description: Returns data required to create a scatterplot that explores the relationship between a continuous variable and alpha diversity <br> Java impl- NA <br> R impl- NA
+        body:
+          application/json:
+            type: lib.AbundanceScatterplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.ScatterplotPostResponse
+
+  /betadiv/visualizations:
+    displayName: Visualizations for exploring the diversity between samples (beta diversity).
+
+    /scatterplot:
+      post:
+        description: Returns data required to create a scatterplot that explores the differences between samples in a dataset as described by beta diversity <br> Java impl- NA <br> R impl- NA
+        body:
+          application/json:
+            type: lib.BetaDivScatterplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.ScatterplotPostResponse
 
   /sample/visualizations:
     displayName: Sample visualizations demonstrating/testing service capabilities

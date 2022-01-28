@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -23,6 +22,8 @@ import org.veupathdb.service.eda.generated.model.TableSpec;
 
 import static org.gusdb.fgputil.FormatUtil.NL;
 import static org.gusdb.fgputil.FormatUtil.TAB;
+import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.CLINEPI_PROJECT;
+import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.MICROBIOME_PROJECT;
 
 public class TablePlugin extends AbstractPlugin<TablePostRequest, TableSpec> {
 
@@ -38,7 +39,7 @@ public class TablePlugin extends AbstractPlugin<TablePostRequest, TableSpec> {
   
   @Override
   public List<String> getProjects() {
-    return Arrays.asList("ClinEpiDB", "MicrobiomeDB");
+    return List.of(CLINEPI_PROJECT, MICROBIOME_PROJECT);
   }
 
   @Override

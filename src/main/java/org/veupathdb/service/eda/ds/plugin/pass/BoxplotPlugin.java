@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +19,7 @@ import org.veupathdb.service.eda.generated.model.BoxplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BoxplotSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
+import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.CLINEPI_PROJECT;
 import static org.veupathdb.service.eda.ds.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithProcessedRemoteFiles;
 
@@ -37,12 +37,7 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
 
   @Override
   public List<String> getProjects() {
-    return Arrays.asList("ClinEpiDB", "MicrobiomeDB");
-  }
-  
-  @Override
-  public Integer getMaxPanels() {
-    return 25;
+    return List.of(CLINEPI_PROJECT);
   }
   
   @Override
@@ -67,7 +62,8 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
         .element("facetVariable")
           .required(false)
           .maxVars(2)
-          .description("Variable(s) must have 25 or fewer cartesian products and be of the same or a parent entity of the Overlay variable.")
+          .maxValues(7)
+          .description("Variable(s) must have 7 or fewer unique values and be of the same or a parent entity of the Overlay variable.")
       .done();
   }
   

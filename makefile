@@ -4,12 +4,9 @@ PWD          := $(shell pwd)
 MAIN_DIR     := src/main/java/$(shell echo $(APP_PACKAGE) | sed 's/\./\//g')
 TEST_DIR     := $(shell echo $(MAIN_DIR) | sed 's/main/test/')
 ALL_PACKABLE := $(shell find src/main -type f)
-BIN_DIR := .tools/bin
+BIN_DIR      := .tools/bin
 
 FETCH_EDA_COMMON_SCHEMA := $(shell ./gradlew -q "print-eda-common-schema-fetch")
-
-EXAMPLE_DIR      := src/main/java/org/veupathdb/service/demo
-EXAMPLE_TEST_DIR := src/test/java/org/veupathdb/service/demo
 
 C_BLUE := "\\033[94m"
 C_NONE := "\\033[0m"
@@ -63,10 +60,6 @@ docker:
 		--build-arg=GITHUB_USERNAME=$(GITHUB_USERNAME) \
 		--build-arg=GITHUB_TOKEN=$(GITHUB_TOKEN) .
 
-.PHONY: cleanup-example
-cleanup-example:
-	@$(BIN_DIR)/demo-cleanup.sh $(MAIN_DIR)
-
 .PHONY: install-dev-env
 install-dev-env:
 	@if [ ! -d .tools ]; then \
@@ -86,8 +79,8 @@ clean:
 	@rm -rf .gradle .tools vendor build
 
 fix-path:
-	@$(BIN_DIR)/fix-path.sh $(EXAMPLE_DIR) $(MAIN_DIR)
-	@$(BIN_DIR)/fix-path.sh $(EXAMPLE_TEST_DIR) $(TEST_DIR)
+	@$(BIN_DIR)/fix-path.sh $(MAIN_DIR)
+	@$(BIN_DIR)/fix-path.sh $(TEST_DIR)
 
 gen-jaxrs: api.raml merge-raml
 	@$(BIN_DIR)/generate-jaxrs.sh $(GEN_PACKAGE)
@@ -113,6 +106,7 @@ build/libs/service.jar: \
       vendor/fgputil-accountdb-1.0.0.jar \
       vendor/fgputil-cache-1.0.0.jar \
       vendor/fgputil-cli-1.0.0.jar \
+      vendor/fgputil-client-1.0.0.jar \
       vendor/fgputil-core-1.0.0.jar \
       vendor/fgputil-db-1.0.0.jar \
       vendor/fgputil-events-1.0.0.jar \

@@ -5,24 +5,29 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.Timer;
 import org.gusdb.fgputil.client.ResponseFuture;
 import org.gusdb.fgputil.functional.FunctionalInterfaces.ConsumerWithException;
 import org.gusdb.fgputil.functional.Functions;
+import org.gusdb.fgputil.functional.TreeNode;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.EdaMergingClient;
 import org.veupathdb.service.eda.common.client.EdaSubsettingClient;
 import org.veupathdb.service.eda.common.client.StreamingDataClient;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
+import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.model.ReferenceMetadata;
 import org.veupathdb.service.eda.common.model.VariableDef;
 import org.veupathdb.service.eda.ds.Resources;
@@ -51,6 +56,9 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
 
   // shared stream name for plugins that need request only a single stream
   protected static final String DEFAULT_SINGLE_STREAM_NAME = "single_tabular_dataset";
+  protected ReferenceMetadata _referenceMetadata;
+  protected S _pluginSpec;
+  protected List<StreamSpec> _requiredStreams;
 
   // methods that need to be implemented
   protected abstract Class<S> getVisualizationSpecClass();
@@ -61,35 +69,37 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   // methods that should probably be overridden
   public String getDisplayName() { return getClass().getName(); }
   public String getDescription() { return ""; }
-  public List<String> getProjects() { return Arrays.asList(""); }
+  public List<String> getProjects() { return Collections.emptyList(); }
   // have to decide if default is 1 and 25 override or vice versa. to facet or not, that is the question...
   public Integer getMaxPanels() { return 1; }
   public ConstraintSpec getConstraintSpec() { return new ConstraintSpec(); }
 
-  private final EdaSubsettingClient _subsettingClient = new EdaSubsettingClient(Resources.SUBSETTING_SERVICE_URL);
-  private final StreamingDataClient _mergingClient = new EdaMergingClient(Resources.MERGING_SERVICE_URL);
+  // option for subclass to load any additional information (e.g. compute spec) from the request
+  protected void loadAdditionalConfig(String appName, T request) throws ValidationException {}
 
   private Timer _timer;
   private boolean _requestProcessed = false;
-  private S _pluginSpec;
   private List<APIFilter> _subset;
   private List<DerivedVariable> _derivedVariables;
-  private ReferenceMetadata _referenceMetadata;
+  private EdaSubsettingClient _subsettingClient;
+  private StreamingDataClient _mergingClient;
 
-  private List<StreamSpec> _requiredStreams;
-
-  public final AbstractPlugin<T,S> processRequest(T request) throws ValidationException {
+  public final AbstractPlugin<T,S> processRequest(String appName, T request, Entry<String,String> authHeader) throws ValidationException {
 
     // start request timer (used to profile request performance dynamics)
     _timer = new Timer();
     logRequestTime("Starting timer");
 
     // validate config type matches class provided by subclass
-    _pluginSpec = getSpecObject(request);
+    _pluginSpec = getSpecObject(request, "getConfig", getVisualizationSpecClass());
 
     // check for subset and derived entity properties of request
     _subset = Optional.ofNullable(request.getFilters()).orElse(Collections.emptyList());
     _derivedVariables = Optional.ofNullable(request.getDerivedVariables()).orElse(Collections.emptyList());
+
+    // build clients for required services
+    _subsettingClient = new EdaSubsettingClient(Resources.SUBSETTING_SERVICE_URL, authHeader);
+    _mergingClient = new EdaMergingClient(Resources.MERGING_SERVICE_URL, authHeader);
 
     // get study
     APIStudyDetail study = _subsettingClient.getStudy(request.getStudyId())
@@ -97,6 +107,9 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
 
     // construct available variables for each entity from metadata and derived variable config
     _referenceMetadata = new ReferenceMetadata(study, _derivedVariables);
+
+    // ask subclass to load any additional information (e.g. compute spec)
+    loadAdditionalConfig(appName, request);
 
     // ask subclass to validate the configuration
     validateVisualizationSpec(_pluginSpec);
@@ -153,21 +166,21 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   }
 
   @SuppressWarnings("unchecked")
-  private S getSpecObject(T request) {
+  protected <Q> Q getSpecObject(T request, String methodName, Class<Q> specClass) {
     try {
-      Method configGetter = request.getClass().getMethod("getConfig");
+      Method configGetter = request.getClass().getMethod(methodName);
       Object config = configGetter.invoke(request);
-      if (getVisualizationSpecClass().isAssignableFrom(config.getClass())) {
-        return (S)config;
+      if (specClass.isAssignableFrom(config.getClass())) {
+        return (Q)config;
       }
       throw new RuntimeException("Plugin class " + getClass().getName() +
-          " declares spec class "  + getVisualizationSpecClass().getName() +
-          " but " + request.getClass().getName() + "::getConfig()" +
+          " declares spec class "  + specClass.getName() +
+          " but " + request.getClass().getName() + "::" + methodName + "()" +
           " returned " + config.getClass().getName() + ". The second must be a subclass of the first.");
     }
     catch (NoSuchMethodException noSuchMethodException) {
       throw new RuntimeException("Generated class " + request.getClass().getName() +
-          " must implement a no-arg method getConfig() which returns an instance of " + getVisualizationSpecClass().getName());
+          " must implement a no-arg method " + methodName + "() which returns an instance of " + specClass.getName());
     }
     catch (IllegalAccessException | InvocationTargetException e) {
       throw new RuntimeException("Misconfiguration of visualization plugin: " + getClass().getName(), e);
@@ -180,14 +193,16 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
 
   protected String toColNameOrEmpty(List<VariableSpec> vars, int index) {
     VariableSpec var = getVariableSpecFromList(vars, index);
-    String colName = toColNameOrEmpty(var);
-
-    return colName;
+    return toColNameOrEmpty(var);
   }
 
   /*****************************************************************
-   *** Convenience utilities for subclasses
+   *** Metadata access utilities for subclasses
    ****************************************************************/
+
+  protected VariableDef getEntityIdVarSpec(String entityId) {
+    return getReferenceMetadata().getEntity(entityId).orElseThrow().getIdColumnDef();
+  }
 
   protected VariableSpec getVariableSpecFromList(List<VariableSpec> vars, int index) {
     return vars == null || vars.size() <= index ? null : vars.get(index);
@@ -220,15 +235,44 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   protected String getVariableDataShape(List<VariableSpec> vars, int index) {
     return getVariableDataShape(getVariableSpecFromList(vars, index));
   }
-  
+
+  protected List<VariableDef> getChildrenVariables(VariableSpec collectionVar) {
+    EntityDef collectionVarEntityDef = getReferenceMetadata().getEntity(collectionVar.getEntityId()).orElseThrow();
+    TreeNode<VariableDef> childVarsTree = collectionVarEntityDef.getNativeVariableTreeNode(collectionVar);
+    // TODO: for now assume we only have leaves as children; revisit if that turns out to not be true
+    return childVarsTree.findAndMap(TreeNode::isLeaf, v -> true, v -> v);
+  }
+
+  /*****************************************************************
+   *** RServe command utilities for subclasses
+   ****************************************************************/
+
+  // Suggested helper to take array of var names, entities, types, or shapes, and rewrite them into one comma separated string.
+  //  public static String toCommaSepString(String[] stringArray) {
+  //    String commaString = "";
+  //    for (int i = 0; i < stringArray.length; i++) {
+  //      //Do your stuff here
+  //      if (i < stringArray.length - 1){
+  //        commaString += ("'" + stringArray[i] + "', ");
+  //      } else {
+  //        commaString += ("'" + stringArray[i] + "'");
+  //      }
+  //    }
+  //    return commaString;
+  //  }
+
   protected String singleQuote(String unquotedString) {
     return "'" + unquotedString + "'";
   }
-  
-  protected String getVoidEvalFreadCommand(String fileName, VariableSpec... vars) {    
+
+  protected String getVoidEvalFreadCommand(String fileName, VariableSpec... vars) {  
+    return getVoidEvalFreadCommand(fileName, new ListBuilder().addAll(vars).toList());
+  }  
+
+  protected String getVoidEvalFreadCommand(String fileName, List<VariableSpec> vars) {
     boolean first = true;
     String namedTypes = new String();
-    
+
     for(VariableSpec var : vars) {
       String varName = toColNameOrEmpty(var);
       if (varName.equals("")) continue;
@@ -246,12 +290,11 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
         namedTypes = namedTypes + "," + singleQuote(varName) + "=" + singleQuote(varType);
       }
     }
-        
-    String freadCommand = fileName + " <- fread(" + singleQuote(fileName) +
-                                         ", select=c(" + namedTypes + ")" +
-                                         ", na.strings=c(''))";
-    
-    return freadCommand;
+
+    return fileName +
+        " <- fread(" + singleQuote(fileName) +
+        ", select=c(" + namedTypes + ")" +
+        ", na.strings=c(''))";
   }
   
   protected String getVoidEvalVarMetadataMap(String datasetName, Map<String, VariableSpec> vars) {
@@ -261,7 +304,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     String varTypeVector = new String();
     String varShapeVector = new String();
     
-    for(Map.Entry<String, VariableSpec> entry : vars.entrySet()) {
+    for(Entry<String, VariableSpec> entry : vars.entrySet()) {
       String plotRef = entry.getKey();
       VariableSpec var = entry.getValue();
       String varName = toColNameOrEmpty(var);
