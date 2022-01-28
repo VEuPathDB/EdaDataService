@@ -321,6 +321,24 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     }
   }
 
+  // there is probably some JRI util that would make this unnecessary if i were more clever??
+  protected String listToRVector(List<String> values) {
+    boolean first = true;
+    String vector = "c(";
+
+    for (String value : values) {
+      if (first) {
+        vector = vector + singleQuote(value);
+        first = false;
+      } else {
+        vector = vector + singleQuote(value) + ",";
+      }
+    }
+
+    vector = vector + ")";
+    return(vector);
+  }
+
   protected String getVoidEvalVarMetadataMap(String datasetName, Map<String, VariableSpec> vars) {
     boolean first = true;
     String plotRefVector = new String();

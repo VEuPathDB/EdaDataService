@@ -100,6 +100,8 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
     String errorBars = spec.getErrorBars() != null ? spec.getErrorBars().getValue() : "FALSE";
     String valueSpec = spec.getValueSpec().getValue();
     String xVarType = getVariableType(spec.getXAxisVariable());
+    String numeratorValues = spec.getYAxisNumeratorValues() != null ? listToRVector(spec.getYAxisNumeratorValues()) : "NULL";
+    String denominatorValues = spec.getYAxisDenominatorValues() != null ? listToRVector(spec.getYAxisDenominatorValues()) : "NULL";
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
@@ -126,6 +128,8 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
                                         singleQuote(valueSpec) + 
                                         ", " + errorBars + 
                                         ", viewport," + 
+                                        ", " + numeratorValues +
+                                        ", " + denominatorValues + ", " +
                                         showMissingness + ")";
       streamResult(connection, cmd, out);
     }); 
