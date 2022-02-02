@@ -16,13 +16,13 @@ import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
 import org.veupathdb.service.eda.ds.plugin.AbstractPluginWithCompute;
 import org.veupathdb.service.eda.ds.util.RServeClient;
 import org.veupathdb.service.eda.generated.model.AbundanceBoxplotPostRequest;
-import org.veupathdb.service.eda.generated.model.AbundanceBoxplotSpec;
+import org.veupathdb.service.eda.generated.model.BoxplotWith1ComputeSpec;
 import org.veupathdb.service.eda.generated.model.AbundanceComputeConfig;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceBoxplotPostRequest, AbundanceBoxplotSpec, AbundanceComputeConfig> {
+public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceBoxplotPostRequest, BoxplotWith1ComputeSpec, AbundanceComputeConfig> {
 
   @Override
   public String getDisplayName() {
@@ -40,8 +40,8 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
   }
   
   @Override
-  protected Class<AbundanceBoxplotSpec> getVisualizationSpecClass() {
-    return AbundanceBoxplotSpec.class;
+  protected Class<BoxplotWith1ComputeSpec> getVisualizationSpecClass() {
+    return BoxplotWith1ComputeSpec.class;
   }
 
   @Override
@@ -67,7 +67,7 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
   }
   
   @Override
-  protected void validateVisualizationSpec(AbundanceBoxplotSpec pluginSpec) throws ValidationException {
+  protected void validateVisualizationSpec(BoxplotWith1ComputeSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
       .var("overlayVariable", pluginSpec.getOverlayVariable())
@@ -75,7 +75,7 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(AbundanceBoxplotSpec pluginSpec, AbundanceComputeConfig computeConfig) {
+  protected List<StreamSpec> getRequestedStreams(BoxplotWith1ComputeSpec pluginSpec, AbundanceComputeConfig computeConfig) {
     List<StreamSpec> requestedStreamsList = ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getOverlayVariable())
@@ -92,7 +92,7 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     AbundanceComputeConfig computeConfig = getComputeConfig();
-    AbundanceBoxplotSpec spec = getPluginSpec();
+    BoxplotWith1ComputeSpec spec = getPluginSpec();
     Map<String, VariableSpec> varMap = new HashMap<>();
     varMap.put("overlayVariable", spec.getOverlayVariable());
     varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
@@ -100,7 +100,7 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
     String computeStats = spec.getComputeStats() != null ? spec.getComputeStats().getValue() : "TRUE";
     String showMean = spec.getMean() != null ? spec.getMean().getValue() : "FALSE";
-    String method = spec.getRankingMethod().getValue();
+    String method = computeConfig.getRankingMethod().getValue();
     VariableDef computeEntityIdVarSpec = getEntityIdVarSpec(computeConfig.getCollectionVariable().getEntityId());
     String computeEntityIdColName = toColNameOrEmpty(computeEntityIdVarSpec);
 
@@ -110,30 +110,32 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
       connection.voidEval(getVoidEvalFreadCommand(COMPUTE_STREAM_NAME,
         computeInputVars
       ));
+
       connection.voidEval("abundanceDT <- rankedAbundance(" + COMPUTE_STREAM_NAME + ", " + 
-                                                      computeEntityIdColName + ", " + 
-                                                      method + ")");
+                                                      singleQuote(computeEntityIdColName) + ", " + 
+                                                      singleQuote(method) + ")");
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
           computeEntityIdVarSpec,
           spec.getOverlayVariable(),
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
+
       connection.voidEval("vizData <- merge(abundanceDT, " + 
           DEFAULT_SINGLE_STREAM_NAME + 
-       ", by=" + computeEntityIdColName +")");
+          ", by=" + singleQuote(computeEntityIdColName) +")");
+
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       connection.voidEval("map <- rbind(map, list('id'=veupathUtils::toColNameOrNull(attributes(abundanceDT)$computedVariable$computedVariableDetails)," +
                                                  "'plotRef'=rep('xAxisVariable', length(attributes(abundanceDT)$computedVariable$computedVariableDetails$variableId))," +
                                                  "'dataType'=attributes(abundanceDT)$computedVariable$computedVariableDetails$dataType," +
-                                                 "'dataShape'=attributes(abundanceDT)$computedVariable$computedVariableDetails$dataShape");
+                                                 "'dataShape'=attributes(abundanceDT)$computedVariable$computedVariableDetails$dataShape))");
+
       String command = "plot.data::box(vizData, map, '" +
           spec.getPoints().getValue() + "', " +
           showMean + ", " + 
           computeStats + ", " + 
           showMissingness + ", " +
-          "'xAxisVariable', " + // x only initially, confusing ux and api otherwise?
-          singleQuote(computeEntityIdColName) + ", " + // pass the parent term spec here, client turns it into display label
-          "'Abundance', computedVariableMetadata=attributes(abundanceDT)$computedVariable$computedVariableMetadata)";
+          "'xAxisVariable', computedVariableMetadata=attributes(abundanceDT)$computedVariable$computedVariableMetadata, TRUE)";
       RServeClient.streamResult(connection, command, out);
     });
   }

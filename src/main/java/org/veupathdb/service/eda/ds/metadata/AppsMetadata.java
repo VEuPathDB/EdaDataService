@@ -55,7 +55,7 @@ public class AppsMetadata {
           List.of(MICROBIOME_PROJECT),
           viz("boxplot", new AlphaDivBoxplotPlugin()),
           viz("scatterplot", new AlphaDivScatterplotPlugin())),
-      app("abundance", "Relative Abundance", "RelativeAbundanceComputation",
+      app("abundance", "Ranked Abundance", "RankedAbundanceComputation",
           "A collection of visualizations designed to support the unbiased exploration of relationships between variables and abundance data.",
           List.of(MICROBIOME_PROJECT),
           viz("boxplot", new AbundanceBoxplotPlugin()),

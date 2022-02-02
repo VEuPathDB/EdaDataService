@@ -20,12 +20,12 @@ import org.veupathdb.service.eda.ds.util.RServeClient;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.AlphaDivComputeConfig;
 import org.veupathdb.service.eda.generated.model.AlphaDivScatterplotPostRequest;
-import org.veupathdb.service.eda.generated.model.AlphaDivScatterplotSpec;
+import org.veupathdb.service.eda.generated.model.ScatterplotWith1ComputeSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDivScatterplotPostRequest, AlphaDivScatterplotSpec, AlphaDivComputeConfig> {
+public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDivScatterplotPostRequest, ScatterplotWith1ComputeSpec, AlphaDivComputeConfig> {
 
   private static final Logger LOG = LogManager.getLogger(AlphaDivScatterplotPlugin.class);
   
@@ -45,8 +45,8 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
   }
   
   @Override
-  protected Class<AlphaDivScatterplotSpec> getVisualizationSpecClass() {
-    return AlphaDivScatterplotSpec.class;
+  protected Class<ScatterplotWith1ComputeSpec> getVisualizationSpecClass() {
+    return ScatterplotWith1ComputeSpec.class;
   }
 
   @Override
@@ -73,7 +73,7 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
   }
   
   @Override
-  protected void validateVisualizationSpec(AlphaDivScatterplotSpec pluginSpec) throws ValidationException {
+  protected void validateVisualizationSpec(ScatterplotWith1ComputeSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
       .var("xAxisVariable", pluginSpec.getXAxisVariable())
@@ -82,7 +82,7 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(AlphaDivScatterplotSpec pluginSpec, AlphaDivComputeConfig computeConfig) {
+  protected List<StreamSpec> getRequestedStreams(ScatterplotWith1ComputeSpec pluginSpec, AlphaDivComputeConfig computeConfig) {
     List<StreamSpec> requestedStreamsList = ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
@@ -102,7 +102,7 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     AlphaDivComputeConfig computeConfig = getComputeConfig();
-    AlphaDivScatterplotSpec spec = getPluginSpec();
+    ScatterplotWith1ComputeSpec spec = getPluginSpec();
     Map<String, VariableSpec> varMap = new HashMap<>();
     varMap.put("xAxisVariable", spec.getXAxisVariable());
     varMap.put("overlayVariable", spec.getOverlayVariable());
@@ -110,7 +110,7 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
     varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
     String valueSpec = spec.getValueSpec().getValue();
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
-    String method = spec.getAlphaDivMethod().getValue();
+    String method = computeConfig.getAlphaDivMethod().getValue();
     VariableDef computeEntityIdVarSpec = getEntityIdVarSpec(computeConfig.getCollectionVariable().getEntityId());
     String computeEntityIdColName = toColNameOrEmpty(computeEntityIdVarSpec);
     
@@ -121,8 +121,8 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
         computeInputVars
       ));
       connection.voidEval("alphaDivDT <- alphaDiv(" + COMPUTE_STREAM_NAME + ", " + 
-                                                      computeEntityIdColName + ", " + 
-                                                      method + ")");
+                                                      singleQuote(computeEntityIdColName) + ", " + 
+                                                      singleQuote(method) + ")");
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
           computeEntityIdVarSpec,
           spec.getXAxisVariable(),
@@ -131,13 +131,12 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
       connection.voidEval("vizData <- merge(alphaDivDT, " + 
           DEFAULT_SINGLE_STREAM_NAME + 
-       ", by=" + computeEntityIdColName +")");
+       ", by=" + singleQuote(computeEntityIdColName) +")");
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       connection.voidEval("map <- rbind(map, list('id'=veupathUtils::toColNameOrNull(attributes(alphaDivDT)$computedVariable$computedVariableDetails)," +
                                                  "'plotRef'='yAxisVariable'," +
                                                  "'dataType'=attributes(alphaDivDT)$computedVariable$computedVariableDetails$dataType," +
-                                                 "'dataShape'=attributes(alphaDivDT)$computedVariable$computedVariableDetails$dataShape," +
-                                                 "'displayLabel'=attributes(alphaDivDT)$computedVariable$computedVariableMetadata$displayName))");
+                                                 "'dataShape'=attributes(alphaDivDT)$computedVariable$computedVariableDetails$dataShape))");
       String command = "plot.data::scattergl(vizData, map, '" + valueSpec + "', " + showMissingness + ", computedVariableMetadata=attributes(alphaDivDT)$computedVariable$computedVariableMetadata)";
       RServeClient.streamResult(connection, command, out);
     }); 
