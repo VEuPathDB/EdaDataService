@@ -99,6 +99,7 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
     String errorBars = spec.getErrorBars() != null ? spec.getErrorBars().getValue() : "FALSE";
     String valueSpec = spec.getValueSpec().getValue();
+    String xVar = toColNameOrEmpty(spec.getXAxisVariable());
     String xVarType = getVariableType(spec.getXAxisVariable());
     String numeratorValues = spec.getYAxisNumeratorValues() != null ? listToRVector(spec.getYAxisNumeratorValues()) : "NULL";
     String denominatorValues = spec.getYAxisDenominatorValues() != null ? listToRVector(spec.getYAxisDenominatorValues()) : "NULL";
@@ -115,14 +116,29 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
       connection.voidEval(viewportRString);
       BinSpec binSpec = spec.getBinSpec();
       validateBinSpec(binSpec, xVarType);
-      // right now its possible to pass type 'numBins' in BinSpec, but we arent supporting it here
-      String binWidth = "NULL";
+      // consider refactoring this, does the same as something in histo
+      String binType = binSpec.getType().getValue() != null ? binSpec.getType().getValue() : "none";
+      if (binType.equals("numBins")) {
+        if (binSpec.getValue() != null) {
+          String numBins = binSpec.getValue().toString();
+          if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
+            connection.voidEval("binWidth <- plot.data::numBinsToBinWidth(data$" + xVar + ", " + numBins + ")");
+          } else {
+            connection.voidEval("binWidth <- ceiling(as.numeric(diff(range(as.Date(data$" + xVar + ")))/" + numBins + "))");
+            connection.voidEval("binWidth <- paste(binWidth, 'day')");
+          }
+        } else {
+          connection.voidEval("binWidth <- NULL");
+        }
+      } else {
+        String binWidth = "NULL";
         if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
           binWidth = binSpec.getValue() == null ? "NULL" : "as.numeric('" + binSpec.getValue() + "')";
         } else {
           binWidth = binSpec.getValue() == null ? "NULL" : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
         }
         connection.voidEval("binWidth <- " + binWidth);
+      }
       String cmd = "plot.data::lineplot(" + DEFAULT_SINGLE_STREAM_NAME + 
                                         ", map, binWidth, " + 
                                         singleQuote(valueSpec) + 
