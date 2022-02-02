@@ -331,7 +331,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
         vector = vector + singleQuote(value);
         first = false;
       } else {
-        vector = vector + singleQuote(value) + ",";
+        vector = vector + ", " + singleQuote(value);
       }
     }
 
