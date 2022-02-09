@@ -109,20 +109,13 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      
-      if (spec.getViewport() != null) {
-        // think if we just pass the string plot.data will convert it to the claimed type
-        if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
-          connection.voidEval("viewport <- list('xMin'=" + spec.getViewport().getXMin() + ", 'xMax'=" + spec.getViewport().getXMax() + ")");
-        } else {
-          connection.voidEval("viewport <- list('xMin'=" + singleQuote(spec.getViewport().getXMin()) + ", 'xMax'=" + singleQuote(spec.getViewport().getXMax()) + ")");
-        }
-      } else {
-        connection.voidEval("viewport <- NULL");
-      }
+     
+      String viewportRString = getViewportAsRString(spec.getViewport(), xVarType);
+      connection.voidEval(viewportRString);
       
       BinSpec binSpec = spec.getBinSpec();
-      String binReportValue = binSpec.getType().getValue();
+      validateBinSpec(binSpec, xVarType);
+      String binReportValue = binSpec.getType().getValue() != null ? binSpec.getType().getValue() : "binWidth";
       
       //consider reorganizing conditions, move check for null value up a level ?
       if (binReportValue.equals("numBins")) {
@@ -143,9 +136,6 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
         String binWidth = "NULL";
         if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
           binWidth = binSpec.getValue() == null ? "NULL" : "as.numeric('" + binSpec.getValue() + "')";
-          if (binSpec.getUnits() != null) {
-            LOG.warn("The `units` property of the `BinSpec` class is only used for DATE x-axis variables. It will be ignored.");
-          }
         } else {
           binWidth = binSpec.getValue() == null ? "NULL" : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
         }

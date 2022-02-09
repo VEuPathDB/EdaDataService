@@ -252,7 +252,7 @@ types:
         minItems: 1
       densityX:
         type: number[]
-        minItems: 1
+        minItems: 1  
 
   LineplotData:
     additionalProperties: false
@@ -270,6 +270,22 @@ types:
       seriesX:
         type: string[]
         minItems: 1
+      binStart:
+        type: string[]
+        minItems: 1
+        required: false
+      binEnd:
+        type: string[]
+        minItems: 1
+        required: false
+      binSampleSize:
+        type: SampleSize[]
+        minItems: 1
+        required: false
+      errorBars:
+        type: ErrorBar[]
+        minItems: 1
+        required: false
 
   PlotConfig:
     additionalProperties: false

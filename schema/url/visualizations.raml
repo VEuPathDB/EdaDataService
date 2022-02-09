@@ -19,6 +19,44 @@ types:
     properties:
       value: string
 
+  BinSpec:
+    additionalProperties: false
+    properties:
+      type?:
+        type: string
+        enum: ['binWidth','numBins']
+      value?: number
+      units?: BinUnits
+
+  XAxisViewport:
+    additionalProperties: false
+    properties:
+      xMin:
+        type: string
+      xMax:
+        type: string
+
+  ErrorBar:
+    additionalProperties: false
+    properties:
+      lowerBound: number
+      upperBound: number
+      error: string
+
+  SimpleSampleSize:
+    additionalProperties: false
+    properties:
+      N: number
+
+  ProportionSampleSize:
+    additionalProperties: false
+    properties:
+      numeratorN: number
+      denominatorN: number
+  
+  SampleSize:
+    type: SimpleSampleSize | ProportionSampleSize
+
   # Assuming computed variable must be on y axis and that x axis may be determined by collection var or specified.
   BoxplotWith1ComputeSpec:
     additionalProperties: false

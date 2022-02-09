@@ -7,23 +7,6 @@ types:
     properties:
       config: HistogramSpec
 
-  HistogramViewport:
-    additionalProperties: false
-    properties:
-      xMin:
-        type: string
-      xMax:
-        type: string      
-
-  BinSpec:
-    additionalProperties: false
-    properties:
-      type:
-        type: string
-        enum: ['binWidth','numBins']
-      value?: number
-      units?: BinUnits
-
   HistogramSpec:
     additionalProperties: false
     properties:
@@ -50,7 +33,7 @@ types:
       binSpec:
         type: BinSpec
       viewport:
-        type: HistogramViewport
+        type: XAxisViewport
         required: false
         
   HistogramSummary:
@@ -80,7 +63,7 @@ types:
       summary:
         type: HistogramSummary
       viewport:
-        type: HistogramViewport
+        type: XAxisViewport
 
   Histogram:
     additionalProperties: false
