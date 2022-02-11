@@ -1,0 +1,49 @@
+#%RAML 1.0 Library
+
+types:
+  # Type name determines the name of the Java class that will be generated.
+
+  PieplotPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: PieplotSpec
+  
+  PieplotSpec:
+    additionalProperties: false
+    properties:
+      outputEntityId:
+        type: string
+      showMissingness:
+        type: string
+        enum: ['TRUE', 'FALSE']
+        required: false
+      xAxisVariable: 
+        type: VariableSpec
+      facetVariable: 
+        type: VariableSpec[]
+        maxItems: 2
+        required: false
+
+  PieplotConfig:
+    type: PlotConfig
+    properties:
+      xVariableDetails:
+        type: VariableSpec
+
+  Pieplot:
+    additionalProperties: false
+    properties:
+      data:
+        type: PieplotData[]
+      config:
+        type: PieplotConfig
+
+  PieplotPostResponse:
+    additionalProperties: false
+    properties:
+      Pieplot:
+        type: Pieplot
+      sampleSizeTable:
+        type: SampleSizeTable[]
+      completeCasesTable:
+        type: VariableCompleteCases[]
