@@ -149,7 +149,7 @@ securitySchemes:
 
     /barplot:
       post:
-        description: Returns data required to create a bar or pie plot visualization <br> Java impl- drafted, not working <br> R impl- working
+        description: Returns data required to create a bar plot visualization <br> Java impl- drafted, not working <br> R impl- working
         body:
           application/json:
             type: lib.BarplotPostRequest
@@ -158,6 +158,18 @@ securitySchemes:
             body:
               application/json:
                 type: lib.BarplotPostResponse
+
+    /pieplot:
+      post:
+        description: Returns data required to create a pie plot visualization <br> Java impl- NA <br> R impl- working
+        body:
+          application/json:
+            type: lib.PieplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.PieplotPostResponse
 
     /twobytwo:
       post:

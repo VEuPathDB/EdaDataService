@@ -33,6 +33,7 @@ import org.veupathdb.service.eda.ds.plugin.pass.HeatmapPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.HistogramPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.LineplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.MapPlugin;
+import org.veupathdb.service.eda.ds.plugin.pass.PieplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TablePlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TimeSeriesPlugin;
@@ -63,6 +64,8 @@ import org.veupathdb.service.eda.generated.model.MapPostRequest;
 import org.veupathdb.service.eda.generated.model.MapPostResponseStream;
 import org.veupathdb.service.eda.generated.model.MosaicPostRequest;
 import org.veupathdb.service.eda.generated.model.MultiStreamPostRequest;
+import org.veupathdb.service.eda.generated.model.PieplotPostRequest;
+import org.veupathdb.service.eda.generated.model.PieplotPostResponseStream;
 import org.veupathdb.service.eda.generated.model.RecordCountPostRequest;
 import org.veupathdb.service.eda.generated.model.RecordCountPostResponseStream;
 import org.veupathdb.service.eda.generated.model.ScatterplotPostRequest;
@@ -167,6 +170,13 @@ public class AppsService implements Apps {
   public PostAppsPassVisualizationsBarplotResponse postAppsPassVisualizationsBarplot(BarplotPostRequest entity) {
     return wrapPlugin(() -> PostAppsPassVisualizationsBarplotResponse.respond200WithApplicationJson(
         new BarplotPostResponseStream(processRequest(new BarplotPlugin(), entity))));
+  }
+
+  @DisableJackson
+  @Override
+  public PostAppsPassVisualizationsPieplotResponse postAppsPassVisualizationsPieplot(PieplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsPassVisualizationsPieplotResponse.respond200WithApplicationJson(
+        new PieplotPostResponseStream(processRequest(new PieplotPlugin(), entity))));
   }
 
   @DisableJackson
