@@ -17,6 +17,7 @@ import org.veupathdb.service.eda.ds.plugin.pass.HeatmapPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.HistogramPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.LineplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.MapPlugin;
+import org.veupathdb.service.eda.ds.plugin.pass.PieplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TimeSeriesPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
@@ -49,7 +50,8 @@ public class AppsMetadata {
           viz("lineplot", new LineplotPlugin()),
           viz("densityplot", new DensityplotPlugin()),
           viz("heatmap", new HeatmapPlugin()),
-          viz("map-markers", new MapPlugin())),
+          viz("map-markers", new MapPlugin()),
+          viz("pieplot", new PieplotPlugin())),
       app("alphadiv", "Alpha Diversity", "AlphaDivComputation",
           "A collection of visualizations designed to support the unbiased exploration of relationships between variables and Alpha Diversity.",
           List.of(MICROBIOME_PROJECT),
