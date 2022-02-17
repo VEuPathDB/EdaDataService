@@ -57,8 +57,8 @@ public class TwoByTwoPlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpec
         .element("facetVariable")
           .required(false)
           .maxVars(2)
-          .maxValues(7)
-          .description("Variable(s) must have 7 or fewer unique values and be of the same or a parent entity as the X-axis variable.")
+          .maxValues(10)
+          .description("Variable(s) must have 10 or fewer unique values and be of the same or a parent entity as the X-axis variable.")
       .done();
   }
   
