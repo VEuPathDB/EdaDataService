@@ -246,4 +246,18 @@ public class AppsService implements Apps {
         new ScatterplotPostResponseStream(processRequest(new AbundanceScatterplotPlugin(), entity))));
   }
 
+  @DisableJackson
+  @Override
+  public PostAppsDistributionsVisualizationsBoxplotResponse postAppsDistributionsVisualizationsBoxplot(BoxplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsDistributionsVisualizationsBoxplotResponse.respond200WithApplicationJson(
+        new BoxplotPostResponseStream(processRequest(new BoxplotPlugin(), entity))));
+  }
+
+  @DisableJackson
+  @Override
+  public PostAppsDistributionsVisualizationsHistogramResponse postAppsDistributionsVisualizationsHistogram(HistogramPostRequest entity) {
+    return wrapPlugin(() -> PostAppsDistributionsVisualizationsHistogramResponse.respond200WithApplicationJson(
+        new HistogramPostResponseStream(processRequest(new HistogramPlugin(), entity))));
+  }
+
 }
