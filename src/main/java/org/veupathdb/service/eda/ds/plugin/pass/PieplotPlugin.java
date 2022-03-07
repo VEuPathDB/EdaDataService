@@ -36,11 +36,6 @@ public class PieplotPlugin extends AbstractPlugin<PieplotPostRequest, PieplotSpe
   }
   
   @Override
-  public List<String> getProjects() {
-    return List.of(CLINEPI_PROJECT, MICROBIOME_PROJECT);
-  }
-  
-  @Override
   protected Class<PieplotSpec> getVisualizationSpecClass() {
     return PieplotSpec.class;
   }
@@ -48,11 +43,10 @@ public class PieplotPlugin extends AbstractPlugin<PieplotPostRequest, PieplotSpe
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder("xAxisVariable", "facetVariable")
+      .dependencyOrder("overlayVariable", "facetVariable")
       .pattern()
-        .element("xAxisVariable")
-          .maxValues(8)
-          .description("Variable must have 8 or fewer unique values.")
+        .element("overlayVariable")
+          .description("Variables with more than 8 values will assign the top 7 values by count to their own categories and assign the additonal values into an 'other' category.")
         .element("facetVariable")
           .required(false)
           .maxVars(2)
@@ -64,7 +58,7 @@ public class PieplotPlugin extends AbstractPlugin<PieplotPostRequest, PieplotSpe
   protected void validateVisualizationSpec(PieplotSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
-      .var("xAxisVariable", pluginSpec.getXAxisVariable())
+      .var("overlayVariable", pluginSpec.getOverlayVariable())
       .var("facetVariable", pluginSpec.getFacetVariable()));
   }
 
@@ -72,7 +66,7 @@ public class PieplotPlugin extends AbstractPlugin<PieplotPostRequest, PieplotSpe
   protected List<StreamSpec> getRequestedStreams(PieplotSpec pluginSpec) {
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
-        .addVar(pluginSpec.getXAxisVariable())
+        .addVar(pluginSpec.getOverlayVariable())
         .addVars(pluginSpec.getFacetVariable()));
   }
 
@@ -80,21 +74,22 @@ public class PieplotPlugin extends AbstractPlugin<PieplotPostRequest, PieplotSpe
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PieplotSpec spec = getPluginSpec();
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
+    String valueSpec = singleQuote(spec.getValueSpec().getValue());
 
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
-    varMap.put("xAxisVariable", spec.getXAxisVariable());
+    varMap.put("overlayVariable", spec.getOverlayVariable());
     varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
     varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
       
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
-          spec.getXAxisVariable(),
+          spec.getOverlayVariable(),
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       String cmd =
-          "plot.data::bar(" + DEFAULT_SINGLE_STREAM_NAME + ", map, " +
-              "'count', 'group', " +
+          "plot.data::pie(" + DEFAULT_SINGLE_STREAM_NAME + ", map, " +
+              valueSpec +
               showMissingness + ")";
       streamResult(connection, cmd, out);
     });
