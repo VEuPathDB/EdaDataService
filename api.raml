@@ -264,6 +264,100 @@ securitySchemes:
               application/json:
                 type: lib.ScatterplotPostResponse
 
+  /distributions/visualizations:
+    displayName: Visualizations for exploring distributions of data.
+
+    /histogram:
+      post:
+        description: Returns data required to create a histogram visualization. <br> Java impl- NA <br> R impl- working
+        body:
+          application/json:
+            type: lib.HistogramPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.HistogramPostResponse
+
+    /boxplot:
+      post:
+        description: Returns data required to create a boxplot visualization <br> Java impl- NA <br> R impl- working
+        body:
+          application/json:
+            type: lib.BoxplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.BoxplotPostResponse
+
+  /countsandproportions/visualizations:
+    displayName: Visualizations for exploring quantities and relative sizes of data.
+
+    /barplot:
+      post:
+        description: Returns data required to create a bar or pie plot visualization <br> Java impl- drafted, not working <br> R impl- working
+        body:
+          application/json:
+            type: lib.BarplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.BarplotPostResponse
+
+    /twobytwo:
+      post:
+        description: Returns data required to create a mosaic plot visualization <br> Java impl- NA <br> R impl- working
+        body:
+          application/json:
+            type: lib.MosaicPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.TwoByTwoPostResponse
+
+    /conttable:
+      post:
+        description: Returns data required to create a mosaic plot visualization <br> Java impl- NA <br> R impl- drafted
+        body:
+          application/json:
+            type: lib.MosaicPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.ContTablePostResponse
+
+  /xyrelationships/visualizations:
+    displayName: Visualizations for exploring relationships between two continuous variables.
+
+    /scatterplot:
+      post:
+        description: Returns data required to create a scatterplot visualization <br> Java impl- NA <br> R impl- working
+        body:
+          application/json:
+            type: lib.ScatterplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.ScatterplotPostResponse
+
+    /lineplot:
+      post:
+        description: Returns data required to create a lineplot visualization <br> Java impl- NA <br> R impl- working
+        body:
+          application/json:
+            type: lib.LineplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.LineplotPostResponse
+
+
   /sample/visualizations:
     displayName: Sample visualizations demonstrating/testing service capabilities
 

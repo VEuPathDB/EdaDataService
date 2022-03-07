@@ -256,4 +256,53 @@ public class AppsService implements Apps {
         new ScatterplotPostResponseStream(processRequest(new AbundanceScatterplotPlugin(), entity))));
   }
 
+  @DisableJackson
+  @Override
+  public PostAppsDistributionsVisualizationsBoxplotResponse postAppsDistributionsVisualizationsBoxplot(BoxplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsDistributionsVisualizationsBoxplotResponse.respond200WithApplicationJson(
+        new BoxplotPostResponseStream(processRequest(new BoxplotPlugin(), entity))));
+  }
+
+  @DisableJackson
+  @Override
+  public PostAppsDistributionsVisualizationsHistogramResponse postAppsDistributionsVisualizationsHistogram(HistogramPostRequest entity) {
+    return wrapPlugin(() -> PostAppsDistributionsVisualizationsHistogramResponse.respond200WithApplicationJson(
+        new HistogramPostResponseStream(processRequest(new HistogramPlugin(), entity))));
+  }
+
+  @DisableJackson
+  @Override
+  public PostAppsCountsandproportionsVisualizationsBarplotResponse postAppsCountsandproportionsVisualizationsBarplot(BarplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsCountsandproportionsVisualizationsBarplotResponse.respond200WithApplicationJson(
+        new BarplotPostResponseStream(processRequest(new BarplotPlugin(), entity))));
+  }
+
+  @DisableJackson
+  @Override
+  public PostAppsCountsandproportionsVisualizationsTwobytwoResponse postAppsCountsandproportionsVisualizationsTwobytwo(MosaicPostRequest entity) {
+    return wrapPlugin(() -> PostAppsCountsandproportionsVisualizationsTwobytwoResponse.respond200WithApplicationJson(
+        new TwoByTwoPostResponseStream(processRequest(new TwoByTwoPlugin(), entity))));
+  }
+  
+  @DisableJackson
+  @Override
+  public PostAppsCountsandproportionsVisualizationsConttableResponse postAppsCountsandproportionsVisualizationsConttable(MosaicPostRequest entity) {
+    return wrapPlugin(() -> PostAppsCountsandproportionsVisualizationsConttableResponse.respond200WithApplicationJson(
+        new ContTablePostResponseStream(processRequest(new ContTablePlugin(), entity))));
+  }
+
+  @DisableJackson
+  @Override
+  public PostAppsXyrelationshipsVisualizationsLineplotResponse postAppsXyrelationshipsVisualizationsLineplot(LineplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsXyrelationshipsVisualizationsLineplotResponse.respond200WithApplicationJson(
+        new LineplotPostResponseStream(processRequest(new LineplotPlugin(), entity))));
+  }
+
+  @DisableJackson
+  @Override
+  public PostAppsXyrelationshipsVisualizationsScatterplotResponse postAppsXyrelationshipsVisualizationsScatterplot(ScatterplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsXyrelationshipsVisualizationsScatterplotResponse.respond200WithApplicationJson(
+        new ScatterplotPostResponseStream(processRequest(new ScatterplotPlugin(), entity))));
+  }
+
 }

@@ -40,8 +40,8 @@ public class TimeSeriesPlugin extends LineplotPlugin {
         .element("facetVariable")
           .required(false)
           .maxVars(2)
-          .maxValues(7)
-          .description("Variable(s) must have 7 or fewer unique values and be of the same or a parent entity as the Overlay variable.")
+          .maxValues(10)
+          .description("Variable(s) must have 10 or fewer unique values and be of the same or a parent entity as the Overlay variable.")
       .done();
   }
 }
