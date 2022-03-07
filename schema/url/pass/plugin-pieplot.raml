@@ -27,13 +27,21 @@ types:
       valueSpec: 
         type: ValueSpec
 
+  PieplotConfig:
+    type: PlotConfig
+    properties:
+      rankedOverlayValues:
+        type: string[]
+        minItems: 1
+        maxItems: 8
+
   Pieplot:
     additionalProperties: false
     properties:
       data:
         type: PieplotData[]
       config:
-        type: PlotConfig
+        type: PieplotConfig
 
   PieplotPostResponse:
     additionalProperties: false
