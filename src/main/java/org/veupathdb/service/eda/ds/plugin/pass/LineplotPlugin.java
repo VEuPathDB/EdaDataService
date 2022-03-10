@@ -51,7 +51,6 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
       .dependencyOrder("yAxisVariable", "xAxisVariable", "overlayVariable", "facetVariable")
       .pattern()
         .element("yAxisVariable")
-          .shapes(APIVariableDataShape.CONTINUOUS)
         .element("xAxisVariable")
           .shapes(APIVariableDataShape.ORDINAL, APIVariableDataShape.CONTINUOUS)
           .description("Variable must be a number or date and be of the same or a parent entity as the Y-axis variable.")
