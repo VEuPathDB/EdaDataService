@@ -43,9 +43,10 @@ public class PieplotPlugin extends AbstractPlugin<PieplotPostRequest, PieplotSpe
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder("overlayVariable", "facetVariable")
+      .dependencyOrder("xAxisVariable", "facetVariable")
       .pattern()
-        .element("overlayVariable")
+        .element("xAxisVariable")
+          .maxValues(8)
           .description("Variables with more than 8 values will assign the top 7 values by count to their own categories and assign the additonal values into an 'other' category.")
         .element("facetVariable")
           .required(false)
@@ -58,7 +59,7 @@ public class PieplotPlugin extends AbstractPlugin<PieplotPostRequest, PieplotSpe
   protected void validateVisualizationSpec(PieplotSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
-      .var("overlayVariable", pluginSpec.getOverlayVariable())
+      .var("xAxisVariable", pluginSpec.getXAxisVariable())
       .var("facetVariable", pluginSpec.getFacetVariable()));
   }
 
@@ -66,7 +67,7 @@ public class PieplotPlugin extends AbstractPlugin<PieplotPostRequest, PieplotSpe
   protected List<StreamSpec> getRequestedStreams(PieplotSpec pluginSpec) {
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
-        .addVar(pluginSpec.getOverlayVariable())
+        .addVar(pluginSpec.getXAxisVariable())
         .addVars(pluginSpec.getFacetVariable()));
   }
 
@@ -77,13 +78,13 @@ public class PieplotPlugin extends AbstractPlugin<PieplotPostRequest, PieplotSpe
     String valueSpec = singleQuote(spec.getValueSpec().getValue());
 
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
-    varMap.put("overlayVariable", spec.getOverlayVariable());
+    varMap.put("xAxisVariable", spec.getXAxisVariable());
     varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
     varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
       
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
-          spec.getOverlayVariable(),
+          spec.getXAxisVariable(),
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));

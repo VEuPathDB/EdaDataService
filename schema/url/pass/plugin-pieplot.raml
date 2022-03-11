@@ -8,7 +8,6 @@ types:
     properties:
       config: PieplotSpec
   
-  # were making overlay required, since this plot has no formal axes in the schema
   PieplotSpec:
     additionalProperties: false
     properties:
@@ -18,7 +17,7 @@ types:
         type: string
         enum: ['TRUE', 'FALSE']
         required: false
-      overlayVariable: 
+      xAxisVariable: 
         type: VariableSpec
       facetVariable: 
         type: VariableSpec[]
@@ -34,6 +33,8 @@ types:
         type: string[]
         minItems: 1
         maxItems: 8
+      xVariableDetails:
+        type: VariableSpec
 
   Pieplot:
     additionalProperties: false
