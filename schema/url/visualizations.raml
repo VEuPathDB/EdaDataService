@@ -57,6 +57,11 @@ types:
   SampleSize:
     type: SimpleSampleSize | ProportionSampleSize
 
+  # allVariables is available generally, but not intended for use in all contexts (stand-alone vizs)
+  ShowMissingness:
+    type: string
+    enum: ['allVariables', 'strataVariables', 'noVariables']
+
   # Assuming computed variable must be on y axis and that x axis may be determined by collection var or specified.
   BoxplotWith1ComputeSpec:
     additionalProperties: false
@@ -64,8 +69,7 @@ types:
       outputEntityId:
         type: string
       showMissingness:
-        type: string
-        enum: ['TRUE', 'FALSE']
+        type: ShowMissingness
         required: false
       points:
         type: string
@@ -94,8 +98,7 @@ types:
       outputEntityId:
         type: string
       showMissingness:
-        type: string
-        enum: ['TRUE', 'FALSE']
+        type: ShowMissingness
         required: false
       valueSpec:
         type: string

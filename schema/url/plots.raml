@@ -161,6 +161,8 @@ types:
     properties:
       config: MosaicSpec
 
+  # TODO consider showMissingness here. for 2x2 if we allow axes vars it wont be 2x2 any longer...
+  # in practical terms that means the associated stats dont work. for now not allowing in either mosaic
   MosaicSpec:
     additionalProperties: false
     properties:
@@ -168,7 +170,7 @@ types:
         type: string
       showMissingness:
         type: string
-        enum: ['TRUE', 'FALSE']
+        enum: ['strataVariables', 'noVariables']
         required: false
       xAxisVariable:
         type: VariableSpec
