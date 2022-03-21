@@ -240,7 +240,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
 
   protected List<VariableDef> getChildrenVariables(VariableSpec collectionVar) {
     EntityDef collectionVarEntityDef = getReferenceMetadata().getEntity(collectionVar.getEntityId()).orElseThrow();
-    TreeNode<VariableDef> childVarsTree = collectionVarEntityDef.getNativeVariableTreeNode(getReferenceMetadata().getVariable(collectionVar).orElseThrow());
+    TreeNode<VariableDef> childVarsTree = collectionVarEntityDef.getNativeVariableTreeNode(collectionVar);
     // TODO: for now assume we only have leaves as children; revisit if that turns out to not be true
     return childVarsTree.findAndMap(TreeNode::isLeaf, v -> true, v -> v);
   }
