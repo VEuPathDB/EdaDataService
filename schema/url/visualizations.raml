@@ -57,10 +57,13 @@ types:
   SampleSize:
     type: SimpleSampleSize | ProportionSampleSize
 
-  # allVariables is available generally, but not intended for use in all contexts (stand-alone vizs)
   ShowMissingness:
     type: string
     enum: ['allVariables', 'strataVariables', 'noVariables']
+
+  ShowMissingnessNoAxes:
+    type: string
+    enum: ['strataVariables', 'noVariables']
 
   # Assuming computed variable must be on y axis and that x axis may be determined by collection var or specified.
   BoxplotWith1ComputeSpec:
