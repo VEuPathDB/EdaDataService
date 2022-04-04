@@ -1,0 +1,27 @@
+#%RAML 1.0 Library
+
+types:
+
+  MapHistogramPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: MapHistogramSpec
+
+  MapHistogramSpec:
+    additionalProperties: false
+    properties:
+      outputEntityId:
+        type: string
+      showMissingness:
+        type: ShowMissingness
+        required: false
+      xAxisVariable:
+        type: VariableSpec
+      valueSpec: 
+        type: ValueSpec
+      facetVariable: 
+        type: VariableSpec[]
+        maxItems: 2
+        required: false
+      binSpec:
+        type: BinSpec

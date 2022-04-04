@@ -123,6 +123,18 @@ securitySchemes:
               application/json:
                 type: lib.HistogramPostResponse
 
+    /map-histogram:
+      post:
+        description: Returns data required to create histograms for map markers. <br> Java impl- NA <br> R impl- working
+        body:
+          application/json:
+            type: lib.MapHistogramPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.HistogramPostResponse
+
     /boxplot:
       post:
         description: Returns data required to create a boxplot visualization <br> Java impl- NA <br> R impl- working

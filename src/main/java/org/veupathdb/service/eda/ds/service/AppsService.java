@@ -32,6 +32,7 @@ import org.veupathdb.service.eda.ds.plugin.pass.DensityplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.HeatmapPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.HistogramPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.LineplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.pass.MapHistogramPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.MapPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.PieplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ScatterplotPlugin;
@@ -60,6 +61,7 @@ import org.veupathdb.service.eda.generated.model.HistogramPostRequest;
 import org.veupathdb.service.eda.generated.model.HistogramPostResponseStream;
 import org.veupathdb.service.eda.generated.model.LineplotPostRequest;
 import org.veupathdb.service.eda.generated.model.LineplotPostResponseStream;
+import org.veupathdb.service.eda.generated.model.MapHistogramPostRequest;
 import org.veupathdb.service.eda.generated.model.MapPostRequest;
 import org.veupathdb.service.eda.generated.model.MapPostResponseStream;
 import org.veupathdb.service.eda.generated.model.MosaicPostRequest;
@@ -114,6 +116,13 @@ public class AppsService implements Apps {
         entity.getStudyId(), StudyAccess::allowVisualizations);
     String appName = _request.getUriInfo().getPathSegments().get(1).getPath();
     return plugin.processRequest(appName, entity, authHeader);
+  }
+
+  @DisableJackson
+  @Override
+  public PostAppsPassVisualizationsHistogramResponse postAppsPassVisualizationsMapHistogram(MapHistogramPostRequest entity) {
+    return wrapPlugin(() -> PostAppsPassVisualizationsHistogramResponse.respond200WithApplicationJson(
+        new HistogramPostResponseStream(processRequest(new MapHistogramPlugin(), entity))));
   }
 
   @DisableJackson
