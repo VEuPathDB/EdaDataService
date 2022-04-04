@@ -1,7 +1,7 @@
 package org.veupathdb.service.eda.ds.plugin;
 
 import java.util.List;
-import javax.ws.rs.BadRequestException;
+import jakarta.ws.rs.BadRequestException;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
