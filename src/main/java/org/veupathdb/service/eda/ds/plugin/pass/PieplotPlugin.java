@@ -74,7 +74,7 @@ public class PieplotPlugin extends AbstractPlugin<PieplotPostRequest, PieplotSpe
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PieplotSpec spec = getPluginSpec();
-    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
+    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
     String valueSpec = singleQuote(spec.getValueSpec().getValue());
 
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();

@@ -97,7 +97,7 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
     varMap.put("overlayVariable", spec.getOverlayVariable());
     varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
     varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
-    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
+    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
     String barMode = spec.getBarMode().getValue();
     String xVar = toColNameOrEmpty(spec.getXAxisVariable());
     String xVarType = getVariableType(spec.getXAxisVariable());

@@ -96,7 +96,7 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
     varMap.put("overlayVariable", spec.getOverlayVariable());
     varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
     varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
-    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
+    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
     String computeStats = spec.getComputeStats() != null ? spec.getComputeStats().getValue() : "FALSE";
     String showMean = spec.getMean() != null ? spec.getMean().getValue() : "FALSE";
     String showPoints = spec.getPoints().getValue();

@@ -164,7 +164,7 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
       out.flush();
     }
     else {
-      String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
+      String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
       String barMode = spec.getBarMode().getValue();
 
       Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
