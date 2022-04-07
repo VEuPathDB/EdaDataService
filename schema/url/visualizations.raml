@@ -57,13 +57,14 @@ types:
   SampleSize:
     type: SimpleSampleSize | ProportionSampleSize
 
+  # continue to allow deprecated values for now
   ShowMissingness:
     type: string
-    enum: ['allVariables', 'strataVariables', 'noVariables']
+    enum: ['allVariables', 'strataVariables', 'noVariables', 'TRUE', 'FALSE']
 
   ShowMissingnessNoAxes:
     type: string
-    enum: ['strataVariables', 'noVariables']
+    enum: ['strataVariables', 'noVariables', 'TRUE', 'FALSE']
 
   # Assuming computed variable must be on y axis and that x axis may be determined by collection var or specified.
   BoxplotWith1ComputeSpec:

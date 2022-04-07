@@ -92,7 +92,8 @@ public class PieplotPlugin extends AbstractPlugin<PieplotPostRequest, PieplotSpe
       String cmd =
           "plot.data::pie(" + DEFAULT_SINGLE_STREAM_NAME + ", map, " +
               valueSpec + ", '" +
-              deprecatedShowMissingness + "'')";
+              deprecatedShowMissingness + "')";
+              System.out.println(cmd);
       streamResult(connection, cmd, out);
     });
   }
