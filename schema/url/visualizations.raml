@@ -28,19 +28,13 @@ types:
       value?: number
       units?: BinUnits
 
-  XAxisViewport:
+  NumericViewport:
     additionalProperties: false
     properties:
       xMin:
         type: string
       xMax:
         type: string
-
-  LatitudeViewport:
-    additionalProperties: false
-    properties:
-      min: number
-      max: number
 
   LongitudeViewport:
     additionalProperties: false
@@ -51,7 +45,7 @@ types:
   GeolocationViewport:
     additionalProperties: false
     properties:
-      latitude: LatitudeViewport
+      latitude: NumericViewport
       longitude: LongitudeViewport
 
   ErrorBar:

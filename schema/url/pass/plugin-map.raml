@@ -21,11 +21,16 @@ types:
       viewport:
         type: GeolocationViewport
 
+  MapConfig:
+    additionalProperties: false
+    properties: 
+      completeCasesGeoVar: number
+
   MapPostResponse:
     additionalProperties: false
     properties:
       mapElements: MapElementInfo[]
-      config: PlotConfig
+      config: MapConfig
 
   MapElementInfo:
     additionalProperties: false

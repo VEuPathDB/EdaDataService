@@ -101,8 +101,8 @@ public class MapPlugin extends AbstractPlugin<MapPostRequest, MapSpec> {
   }
 
   private Boolean withinViewport(GeolocationViewport viewport, Double latitude, Double longitude) {
-    Double latitudeMin = viewport.getLatitude().getMin().doubleValue();
-    Double latitudeMax = viewport.getLatitude().getMax().doubleValue();
+    Double latitudeMin = Double.valueOf(viewport.getLatitude().getXMin());
+    Double latitudeMax = Double.valueOf(viewport.getLatitude().getXMax());
     Double longitudeLeft = viewport.getLongitude().getLeft().doubleValue();
     Double longitudeRight = viewport.getLongitude().getRight().doubleValue();
     Boolean viewportIncludesIntlDateLine = longitudeLeft > longitudeRight;
@@ -175,8 +175,7 @@ public class MapPlugin extends AbstractPlugin<MapPostRequest, MapSpec> {
     }
     // add config and close
     // bc the only var we take is geoVar these two values are the same
-    String config = "],\"config\":{\"completeCasesAllVars\":" + entityRecordsWithGeoVar + 
-                              ",\"completeCasesAxesVars\":" + entityRecordsWithGeoVar + "}}";
+    String config = "],\"config\":{\"completeCasesGeoVar\":" + entityRecordsWithGeoVar + "}}";
     out.write(config.getBytes());
     out.flush();
   }
