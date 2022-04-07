@@ -36,6 +36,24 @@ types:
       xMax:
         type: string
 
+  LatitudeViewport:
+    additionalProperties: false
+    properties:
+      min: number
+      max: number
+
+  LongitudeViewport:
+    additionalProperties: false
+    properties: 
+      left: number
+      right: number
+
+  GeolocationViewport:
+    additionalProperties: false
+    properties:
+      latitude: LatitudeViewport
+      longitude: LongitudeViewport
+
   ErrorBar:
     additionalProperties: false
     properties:

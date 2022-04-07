@@ -18,11 +18,14 @@ types:
         type: VariableSpec
       latitudeVariable:
         type: VariableSpec
+      viewport:
+        type: GeolocationViewport
 
   MapPostResponse:
     additionalProperties: false
     properties:
       mapElements: MapElementInfo[]
+      config: PlotConfig
 
   MapElementInfo:
     additionalProperties: false
