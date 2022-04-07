@@ -98,6 +98,7 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
     varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
     varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
+    String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
     String barMode = spec.getBarMode().getValue();
     String xVar = toColNameOrEmpty(spec.getXAxisVariable());
     String xVarType = getVariableType(spec.getXAxisVariable());
@@ -147,7 +148,7 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
                spec.getValueSpec().getValue() + "', '" +
                binReportValue + "', '" +
                barMode + "', viewport, " +
-               showMissingness + ")";
+               deprecatedShowMissingness + ")";
       streamResult(connection, cmd, out);
     });
   }

@@ -105,6 +105,7 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
     varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
     String valueSpec = spec.getValueSpec().getValue();
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
+    String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
     String yVarType = getVariableType(spec.getYAxisVariable());
     
     if (yVarType.equals("DATE") && !valueSpec.equals("raw")) {
@@ -134,7 +135,7 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
       String cmd = 
           "plot.data::scattergl(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" + 
               valueSpec + "', " + 
-              showMissingness + ")";
+              deprecatedShowMissingness + ")";
       streamResult(connection, cmd, out);
     }); 
   }

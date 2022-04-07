@@ -97,7 +97,8 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
     varMap.put("overlayVariable", spec.getOverlayVariable());
     varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
     varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
-    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
+    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
+    String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
     String computeStats = spec.getComputeStats() != null ? spec.getComputeStats().getValue() : "TRUE";
     String showMean = spec.getMean() != null ? spec.getMean().getValue() : "FALSE";
     String method = computeConfig.getRankingMethod().getValue();
@@ -134,7 +135,7 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
           spec.getPoints().getValue() + "', " +
           showMean + ", " + 
           computeStats + ", " + 
-          showMissingness + ", " +
+          deprecatedShowMissingness + ", " +
           "'xAxisVariable', computedVariableMetadata=attributes(abundanceDT)$computedVariable$computedVariableMetadata, TRUE)";
       RServeClient.streamResult(connection, command, out);
     });

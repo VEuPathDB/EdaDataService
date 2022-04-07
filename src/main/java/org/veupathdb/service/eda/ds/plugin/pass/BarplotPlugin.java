@@ -165,6 +165,7 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
     }
     else {
       String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
+      String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
       String barMode = spec.getBarMode().getValue();
 
       Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
@@ -184,7 +185,7 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
             "plot.data::bar(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" +
                 spec.getValueSpec().getValue() + "', '" +
                 barMode + "', " +
-                showMissingness + ")";
+                deprecatedShowMissingness + ")";
         streamResult(connection, cmd, out);
       });
     }

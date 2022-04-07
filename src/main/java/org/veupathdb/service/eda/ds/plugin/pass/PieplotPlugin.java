@@ -75,6 +75,7 @@ public class PieplotPlugin extends AbstractPlugin<PieplotPostRequest, PieplotSpe
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PieplotSpec spec = getPluginSpec();
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
+    String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
     String valueSpec = singleQuote(spec.getValueSpec().getValue());
 
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
@@ -91,7 +92,7 @@ public class PieplotPlugin extends AbstractPlugin<PieplotPostRequest, PieplotSpe
       String cmd =
           "plot.data::pie(" + DEFAULT_SINGLE_STREAM_NAME + ", map, " +
               valueSpec + ", " +
-              showMissingness + ")";
+              deprecatedShowMissingness + ")";
       streamResult(connection, cmd, out);
     });
   }

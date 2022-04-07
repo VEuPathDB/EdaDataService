@@ -102,7 +102,8 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithCompute<Abunda
     varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
     varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
     String valueSpec = spec.getValueSpec().getValue();
-    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
+    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
+    String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
     String method = computeConfig.getRankingMethod().getValue();
     VariableDef computeEntityIdVarSpec = getEntityIdVarSpec(computeConfig.getCollectionVariable().getEntityId());
     String computeEntityIdColName = toColNameOrEmpty(computeEntityIdVarSpec); 
@@ -133,7 +134,7 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithCompute<Abunda
                                                  "'dataShape'=attributes(abundanceDT)$computedVariable$computedVariableDetails$dataShape))");
       String command = "plot.data::scattergl(vizData, map, '" +
           valueSpec + "', " + 
-          showMissingness + ", " +
+          deprecatedShowMissingness + ", " +
           "'overlayVariable', computedVariableMetadata=attributes(abundanceDT)$computedVariable$computedVariableMetadata, TRUE)";
       RServeClient.streamResult(connection, command, out);
     }); 
