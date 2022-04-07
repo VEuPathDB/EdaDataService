@@ -174,7 +174,6 @@ public class MapPlugin extends AbstractPlugin<MapPostRequest, MapSpec> {
       );
     }
     // add config and close
-    // bc the only var we take is geoVar these two values are the same
     String config = "],\"config\":{\"completeCasesGeoVar\":" + entityRecordsWithGeoVar + "}}";
     out.write(config.getBytes());
     out.flush();
