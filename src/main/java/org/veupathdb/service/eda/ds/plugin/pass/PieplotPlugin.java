@@ -91,8 +91,8 @@ public class PieplotPlugin extends AbstractPlugin<PieplotPostRequest, PieplotSpe
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       String cmd =
           "plot.data::pie(" + DEFAULT_SINGLE_STREAM_NAME + ", map, " +
-              valueSpec + ", " +
-              deprecatedShowMissingness + ")";
+              valueSpec + ", '" +
+              deprecatedShowMissingness + "'')";
       streamResult(connection, cmd, out);
     });
   }

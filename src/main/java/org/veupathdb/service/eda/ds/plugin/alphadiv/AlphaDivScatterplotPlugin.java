@@ -138,7 +138,7 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
                                                  "'plotRef'='yAxisVariable'," +
                                                  "'dataType'=attributes(alphaDivDT)$computedVariable$computedVariableDetails$dataType," +
                                                  "'dataShape'=attributes(alphaDivDT)$computedVariable$computedVariableDetails$dataShape))");
-      String command = "plot.data::scattergl(vizData, map, '" + valueSpec + "', " + deprecatedShowMissingness + ", computedVariableMetadata=attributes(alphaDivDT)$computedVariable$computedVariableMetadata)";
+      String command = "plot.data::scattergl(vizData, map, '" + valueSpec + "', '" + deprecatedShowMissingness + "'', computedVariableMetadata=attributes(alphaDivDT)$computedVariable$computedVariableMetadata)";
       RServeClient.streamResult(connection, command, out);
     }); 
   }

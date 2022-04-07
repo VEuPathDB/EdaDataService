@@ -139,8 +139,8 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
       String command = "plot.data::box(vizData, map, '" +
           spec.getPoints().getValue() + "', " +
           showMean + ", " + 
-          computeStats + ", " + 
-          deprecatedShowMissingness + ", " +
+          computeStats + ", '" + 
+          deprecatedShowMissingness + "'', " +
           "computedVariableMetadata=attributes(alphaDivDT)$computedVariable$computedVariableMetadata)";
       RServeClient.streamResult(connection, command, out);
     });

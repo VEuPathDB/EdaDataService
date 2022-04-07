@@ -145,7 +145,7 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
                                         ", viewport" + 
                                         ", " + numeratorValues +
                                         ", " + denominatorValues + 
-                                        ", " + deprecatedShowMissingness + ")";                           
+                                        ", '" + deprecatedShowMissingness + "'')";                           
       streamResult(connection, cmd, out);
     }); 
   }

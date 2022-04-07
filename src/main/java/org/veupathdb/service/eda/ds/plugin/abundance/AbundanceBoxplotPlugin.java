@@ -134,8 +134,8 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
       String command = "plot.data::box(vizData, map, '" +
           spec.getPoints().getValue() + "', " +
           showMean + ", " + 
-          computeStats + ", " + 
-          deprecatedShowMissingness + ", " +
+          computeStats + ", '" + 
+          deprecatedShowMissingness + "'', " +
           "'xAxisVariable', computedVariableMetadata=attributes(abundanceDT)$computedVariable$computedVariableMetadata, TRUE)";
       RServeClient.streamResult(connection, command, out);
     });

@@ -147,8 +147,8 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
           "plot.data::histogram(" + DEFAULT_SINGLE_STREAM_NAME + ", map, binWidth, '" +
                spec.getValueSpec().getValue() + "', '" +
                binReportValue + "', '" +
-               barMode + "', viewport, " +
-               deprecatedShowMissingness + ")";
+               barMode + "', viewport, '" +
+               deprecatedShowMissingness + "'')";
       streamResult(connection, cmd, out);
     });
   }

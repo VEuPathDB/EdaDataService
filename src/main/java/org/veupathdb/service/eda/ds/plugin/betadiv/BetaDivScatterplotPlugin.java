@@ -103,7 +103,7 @@ public class BetaDivScatterplotPlugin extends AbstractPluginWithCompute<BetaDivS
           // spec.getYAxisVariable(), // Will come from CS
           spec.getOverlayVariable()));
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      String command = "plot.data::scattergl(data, map, '" + valueSpec + "', " + deprecatedShowMissingness + ")";
+      String command = "plot.data::scattergl(data, map, '" + valueSpec + "', '" + deprecatedShowMissingness + "'')";
       RServeClient.streamResult(connection, command, out);
     }); 
   }

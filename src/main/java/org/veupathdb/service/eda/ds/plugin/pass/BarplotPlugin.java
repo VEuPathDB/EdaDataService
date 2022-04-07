@@ -184,8 +184,8 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
         String cmd =
             "plot.data::bar(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" +
                 spec.getValueSpec().getValue() + "', '" +
-                barMode + "', " +
-                deprecatedShowMissingness + ")";
+                barMode + "', '" +
+                deprecatedShowMissingness + "'')";
         streamResult(connection, cmd, out);
       });
     }

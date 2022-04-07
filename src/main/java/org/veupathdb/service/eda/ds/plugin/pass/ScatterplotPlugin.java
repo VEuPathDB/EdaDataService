@@ -119,7 +119,7 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
     RFileSetProcessor filesProcessor = new RFileSetProcessor(dataStreams)
       .add(DEFAULT_SINGLE_STREAM_NAME, 
         spec.getMaxAllowedDataPoints(), 
-        showMissingness, 
+        deprecatedShowMissingness, 
         nonStrataVarColNames, 
         (name, conn) ->
         conn.voidEval(getVoidEvalFreadCommand(name,
@@ -134,8 +134,8 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       String cmd = 
           "plot.data::scattergl(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" + 
-              valueSpec + "', " + 
-              deprecatedShowMissingness + ")";
+              valueSpec + "', '" + 
+              deprecatedShowMissingness + "'')";
       streamResult(connection, cmd, out);
     }); 
   }

@@ -126,8 +126,8 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
           "plot.data::box(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" +
               showPoints + "', " +
               showMean + ", " +
-              computeStats + ", " +
-              showMissingness + ")";
+              computeStats + ", '" +
+              deprecatedShowMissingness + "'')";
       streamResult(connection, cmd, out);
     });
   }
