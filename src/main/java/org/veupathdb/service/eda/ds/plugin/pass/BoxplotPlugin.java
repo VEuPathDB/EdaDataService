@@ -127,7 +127,7 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
               showPoints + "', " +
               showMean + ", " +
               computeStats + ", '" +
-              deprecatedShowMissingness + "'')";
+              deprecatedShowMissingness + "')";
       streamResult(connection, cmd, out);
     });
   }

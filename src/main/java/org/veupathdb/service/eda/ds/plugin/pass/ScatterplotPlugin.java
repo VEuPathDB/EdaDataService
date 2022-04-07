@@ -135,7 +135,7 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
       String cmd = 
           "plot.data::scattergl(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" + 
               valueSpec + "', '" + 
-              deprecatedShowMissingness + "'')";
+              deprecatedShowMissingness + "')";
       streamResult(connection, cmd, out);
     }); 
   }

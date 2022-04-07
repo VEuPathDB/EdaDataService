@@ -134,7 +134,7 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithCompute<Abunda
                                                  "'dataShape'=attributes(abundanceDT)$computedVariable$computedVariableDetails$dataShape))");
       String command = "plot.data::scattergl(vizData, map, '" +
           valueSpec + "', '" + 
-          deprecatedShowMissingness + "'', " +
+          deprecatedShowMissingness + "', " +
           "'overlayVariable', computedVariableMetadata=attributes(abundanceDT)$computedVariable$computedVariableMetadata, TRUE)";
       RServeClient.streamResult(connection, command, out);
     }); 

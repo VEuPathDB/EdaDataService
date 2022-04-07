@@ -140,7 +140,7 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
           spec.getPoints().getValue() + "', " +
           showMean + ", " + 
           computeStats + ", '" + 
-          deprecatedShowMissingness + "'', " +
+          deprecatedShowMissingness + "', " +
           "computedVariableMetadata=attributes(alphaDivDT)$computedVariable$computedVariableMetadata)";
       RServeClient.streamResult(connection, command, out);
     });

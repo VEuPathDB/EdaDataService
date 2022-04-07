@@ -135,7 +135,7 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
           spec.getPoints().getValue() + "', " +
           showMean + ", " + 
           computeStats + ", '" + 
-          deprecatedShowMissingness + "'', " +
+          deprecatedShowMissingness + "', " +
           "'xAxisVariable', computedVariableMetadata=attributes(abundanceDT)$computedVariable$computedVariableMetadata, TRUE)";
       RServeClient.streamResult(connection, command, out);
     });

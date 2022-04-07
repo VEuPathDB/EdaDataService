@@ -148,7 +148,7 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
                spec.getValueSpec().getValue() + "', '" +
                binReportValue + "', '" +
                barMode + "', viewport, '" +
-               deprecatedShowMissingness + "'')";
+               deprecatedShowMissingness + "')";
       streamResult(connection, cmd, out);
     });
   }
