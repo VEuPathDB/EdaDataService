@@ -94,7 +94,8 @@ public class BetaDivScatterplotPlugin extends AbstractPluginWithCompute<BetaDivS
     // varMap.put("yAxisVariable", spec.getYAxisVariable());  // Will come from compute service
     varMap.put("overlayVariable", spec.getOverlayVariable());
     String valueSpec = "raw";
-    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
+    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
+    String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
     
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
@@ -102,7 +103,7 @@ public class BetaDivScatterplotPlugin extends AbstractPluginWithCompute<BetaDivS
           // spec.getYAxisVariable(), // Will come from CS
           spec.getOverlayVariable()));
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      String command = "plot.data::scattergl(data, map, '" + valueSpec + "', " + showMissingness + ")";
+      String command = "plot.data::scattergl(data, map, '" + valueSpec + "', '" + deprecatedShowMissingness + "')";
       RServeClient.streamResult(connection, command, out);
     }); 
   }

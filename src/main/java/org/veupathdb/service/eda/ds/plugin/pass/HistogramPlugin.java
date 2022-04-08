@@ -97,7 +97,8 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
     varMap.put("overlayVariable", spec.getOverlayVariable());
     varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
     varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
-    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
+    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
+    String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
     String barMode = spec.getBarMode().getValue();
     String xVar = toColNameOrEmpty(spec.getXAxisVariable());
     String xVarType = getVariableType(spec.getXAxisVariable());
@@ -146,8 +147,8 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
           "plot.data::histogram(" + DEFAULT_SINGLE_STREAM_NAME + ", map, binWidth, '" +
                spec.getValueSpec().getValue() + "', '" +
                binReportValue + "', '" +
-               barMode + "', viewport, " +
-               showMissingness + ")";
+               barMode + "', viewport, '" +
+               deprecatedShowMissingness + "')";
       streamResult(connection, cmd, out);
     });
   }

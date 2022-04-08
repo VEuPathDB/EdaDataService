@@ -14,8 +14,7 @@ types:
       outputEntityId:
         type: string
       showMissingness:
-        type: string
-        enum: ['TRUE', 'FALSE']
+        type: ShowMissingness
         required: false
       xAxisVariable: 
         type: VariableSpec
@@ -23,10 +22,16 @@ types:
         type: VariableSpec[]
         maxItems: 2
         required: false
+      valueSpec: 
+        type: ValueSpec
 
   PieplotConfig:
     type: PlotConfig
     properties:
+      rankedValues:
+        type: string[]
+        minItems: 1
+        maxItems: 8
       xVariableDetails:
         type: VariableSpec
 

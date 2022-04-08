@@ -94,7 +94,8 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
     varMap.put("overlayVariable", spec.getOverlayVariable());
     varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
     varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
-    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
+    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
+    String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
     String errorBars = spec.getErrorBars() != null ? spec.getErrorBars().getValue() : "FALSE";
     String valueSpec = spec.getValueSpec().getValue();
     String xVar = toColNameOrEmpty(spec.getXAxisVariable());
@@ -144,7 +145,7 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
                                         ", viewport" + 
                                         ", " + numeratorValues +
                                         ", " + denominatorValues + 
-                                        ", " + showMissingness + ")";                           
+                                        ", '" + deprecatedShowMissingness + "')";                           
       streamResult(connection, cmd, out);
     }); 
   }
