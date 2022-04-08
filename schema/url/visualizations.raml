@@ -69,6 +69,15 @@ types:
   SampleSize:
     type: SimpleSampleSize | ProportionSampleSize
 
+  # continue to allow deprecated values for now
+  ShowMissingness:
+    type: string
+    enum: ['allVariables', 'strataVariables', 'noVariables', 'TRUE', 'FALSE']
+
+  ShowMissingnessNoAxes:
+    type: string
+    enum: ['strataVariables', 'noVariables', 'TRUE', 'FALSE']
+
   # Assuming computed variable must be on y axis and that x axis may be determined by collection var or specified.
   BoxplotWith1ComputeSpec:
     additionalProperties: false
@@ -76,8 +85,7 @@ types:
       outputEntityId:
         type: string
       showMissingness:
-        type: string
-        enum: ['TRUE', 'FALSE']
+        type: ShowMissingnessNoAxes
         required: false
       points:
         type: string
@@ -106,8 +114,7 @@ types:
       outputEntityId:
         type: string
       showMissingness:
-        type: string
-        enum: ['TRUE', 'FALSE']
+        type: ShowMissingnessNoAxes
         required: false
       valueSpec:
         type: string
