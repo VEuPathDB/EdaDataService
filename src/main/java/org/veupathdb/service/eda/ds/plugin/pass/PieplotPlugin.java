@@ -68,7 +68,9 @@ public class PieplotPlugin extends AbstractPlugin<PieplotPostRequest, PieplotSpe
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
-        .addVars(pluginSpec.getFacetVariable()));
+        .addVars(pluginSpec.getFacetVariable())
+        .addVar(pluginSpec.getLatitudeVariable())
+        .addVar(pluginSpec.getLongitudeVariable()));
   }
 
   @Override
@@ -82,16 +84,24 @@ public class PieplotPlugin extends AbstractPlugin<PieplotPostRequest, PieplotSpe
     varMap.put("xAxisVariable", spec.getXAxisVariable());
     varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
     varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
+    varMap.put("latitudeVariable", spec.getLatitudeVariable());
+    varMap.put("longitudeVariable", spec.getLongitudeVariable());
       
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
           spec.getXAxisVariable(),
           getVariableSpecFromList(spec.getFacetVariable(), 0),
-          getVariableSpecFromList(spec.getFacetVariable(), 1)));
+          getVariableSpecFromList(spec.getFacetVariable(), 1),
+          spec.getLatitudeVariable(),
+          spec.getLongitudeVariable()));
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
+
+      String viewportRString = getViewportAsRString(spec.getViewport());
+      connection.voidEval(viewportRString);
+      
       String cmd =
           "plot.data::pie(" + DEFAULT_SINGLE_STREAM_NAME + ", map, " +
-              valueSpec + ", '" +
+              valueSpec + ", viewport, '" +
               deprecatedShowMissingness + "')";
       streamResult(connection, cmd, out);
     });

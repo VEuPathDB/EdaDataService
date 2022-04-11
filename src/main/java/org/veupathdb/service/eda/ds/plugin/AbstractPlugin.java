@@ -39,6 +39,7 @@ import org.veupathdb.service.eda.generated.model.APIFilter;
 import org.veupathdb.service.eda.generated.model.APIStudyDetail;
 import org.veupathdb.service.eda.generated.model.BinSpec;
 import org.veupathdb.service.eda.generated.model.DerivedVariable;
+import org.veupathdb.service.eda.generated.model.GeolocationViewport;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 import org.veupathdb.service.eda.generated.model.VisualizationRequestBase;
 import org.veupathdb.service.eda.generated.model.NumericViewport;
@@ -316,6 +317,17 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
       } else {
         return("viewport <- list('xMin'=" + singleQuote(viewport.getXMin()) + ", 'xMax'=" + singleQuote(viewport.getXMax()) + ")");
       }
+    } else {
+      return("viewport <- NULL");
+    }
+  }
+
+  protected String getViewportAsRString(GeolocationViewport viewport) {
+    if (viewport != null) {
+      return("viewport <- list('latitude'=list('xMin'= " + viewport.getLatitude().getXMin() + 
+                                            ", 'xMax'= " + viewport.getLatitude().getXMax() + 
+                           "), 'longitude'= list('left'= " + viewport.getLongitude().getLeft() + 
+                                              ", 'right' = " + viewport.getLongitude().getRight() + "))");
     } else {
       return("viewport <- NULL");
     }

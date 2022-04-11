@@ -18,12 +18,19 @@ types:
         required: false
       xAxisVariable: 
         type: VariableSpec
+      # TODO rename to geoAggregateVariable after b57
       facetVariable: 
         type: VariableSpec[]
         maxItems: 2
         required: false
       valueSpec: 
         type: ValueSpec
+      longitudeVariable?:
+        type: VariableSpec
+      latitudeVariable?:
+        type: VariableSpec
+      viewport?:
+        type: GeolocationViewport
 
   PieplotConfig:
     type: PlotConfig
