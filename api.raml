@@ -372,10 +372,6 @@ securitySchemes:
             body:
               application/json:
                 type: lib.RecordCountPostResponse
-          500:
-            body:
-              application/json:
-                type: error.ServerError
 
     /multi-stream:
       post:
@@ -388,7 +384,15 @@ securitySchemes:
             body:
               text/plain:
                 type: lib.EntityTabularPostResponse
-          500:
+
+    /test-collections:
+      post:
+        description: Returns a tabular response for the subset with all vars in the requested collection
+        body:
+          application/json:
+            type: lib.TestCollectionsPostRequest
+        responses:
+          200:
             body:
-              application/json:
-                type: error.ServerError
+              text/plain:
+                type: lib.EntityTabularPostResponse

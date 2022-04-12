@@ -1,0 +1,14 @@
+#%RAML 1.0 Library
+
+types:
+
+  TestCollectionsPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: TestCollectionsSpec
+
+  TestCollectionsSpec:
+    additionalProperties: false
+    type: object
+    properties:
+      collectionSpec: CollectionSpec
