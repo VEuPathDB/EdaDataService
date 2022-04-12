@@ -290,16 +290,19 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
       if (varName.equals("")) continue;
       String varType = getVariableType(var);
       String varShape = getVariableDataShape(var);
-      if (varShape.equals("CONTINUOUS") & !varType.equals("DATE")) {
-        varType = "double";
+      String rBaseType;
+      if (varType.equals("INTEGER")) {
+        rBaseType = "integer";
+      } else if (varShape.equals("CONTINUOUS") & !varType.equals("DATE")) {
+        rBaseType = "double";
       } else {
-        varType = "character";
+        rBaseType = "character";
       }
       if (first) {
         first = false;
-        namedTypes = singleQuote(varName) + "=" + singleQuote(varType);
+        namedTypes = singleQuote(varName) + "=" + singleQuote(rBaseType);
       } else {
-        namedTypes = namedTypes + "," + singleQuote(varName) + "=" + singleQuote(varType);
+        namedTypes = namedTypes + "," + singleQuote(varName) + "=" + singleQuote(rBaseType);
       }
     }
 
