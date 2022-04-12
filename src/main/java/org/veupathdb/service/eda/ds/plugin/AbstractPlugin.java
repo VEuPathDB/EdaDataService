@@ -290,7 +290,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
       if (varName.equals("")) continue;
       String varType = getVariableType(var);
       String varShape = getVariableDataShape(var);
-      if (varType.equals("NUMBER") & !varShape.equals("CATEGORICAL")) {
+      if (varShape.equals("CONTINUOUS") & !varType.equals("DATE")) {
         varType = "double";
       } else {
         varType = "character";
