@@ -23,6 +23,7 @@ import org.veupathdb.service.eda.ds.plugin.pass.TimeSeriesPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.MultiStreamPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.RecordCountPlugin;
+import org.veupathdb.service.eda.ds.plugin.sample.TestCollectionPlugin;
 import org.veupathdb.service.eda.generated.model.AppOverview;
 import org.veupathdb.service.eda.generated.model.AppOverviewImpl;
 import org.veupathdb.service.eda.generated.model.AppsGetResponse;
@@ -85,7 +86,8 @@ public class AppsMetadata {
       app("sample", "Sample", "Wrapper app for sample/test plugins", null,
           List.of(),
           viz("record-count", new RecordCountPlugin()),
-          viz("multi-stream", new MultiStreamPlugin()))
+          viz("multi-stream", new MultiStreamPlugin()),
+          viz("collections-test", new TestCollectionPlugin()))
   );
 
   //******************************************

@@ -192,8 +192,8 @@ public class AppsService implements Apps {
 
   @DisableJackson
   @Override
-  public PostAppsSampleVisualizationsTestCollectionsResponse postAppsSampleVisualizationsTestCollections(TestCollectionsPostRequest entity) {
-    return wrapPlugin(() -> PostAppsSampleVisualizationsTestCollectionsResponse.respond200WithTextPlain(
+  public PostAppsSampleVisualizationsCollectionsTestResponse postAppsSampleVisualizationsCollectionsTest(TestCollectionsPostRequest entity) {
+    return wrapPlugin(() -> PostAppsSampleVisualizationsCollectionsTestResponse.respond200WithTextPlain(
         new EntityTabularPostResponseStream(processRequest(new TestCollectionPlugin(), entity))));
   }
 
