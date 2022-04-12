@@ -36,11 +36,6 @@ public class PieplotPlugin extends AbstractPlugin<PieplotPostRequest, PieplotSpe
   }
   
   @Override
-  public List<String> getProjects() {
-    return List.of(CLINEPI_PROJECT, MICROBIOME_PROJECT);
-  }
-  
-  @Override
   protected Class<PieplotSpec> getVisualizationSpecClass() {
     return PieplotSpec.class;
   }
@@ -52,7 +47,7 @@ public class PieplotPlugin extends AbstractPlugin<PieplotPostRequest, PieplotSpe
       .pattern()
         .element("xAxisVariable")
           .maxValues(8)
-          .description("Variable must have 8 or fewer unique values.")
+          .description("Variables with more than 8 values will assign the top 7 values by count to their own categories and assign the additonal values into an 'other' category.")
         .element("facetVariable")
           .required(false)
           .maxVars(2)
@@ -79,7 +74,9 @@ public class PieplotPlugin extends AbstractPlugin<PieplotPostRequest, PieplotSpe
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PieplotSpec spec = getPluginSpec();
-    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
+    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
+    String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
+    String valueSpec = singleQuote(spec.getValueSpec().getValue());
 
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
     varMap.put("xAxisVariable", spec.getXAxisVariable());
@@ -93,9 +90,9 @@ public class PieplotPlugin extends AbstractPlugin<PieplotPostRequest, PieplotSpe
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       String cmd =
-          "plot.data::bar(" + DEFAULT_SINGLE_STREAM_NAME + ", map, " +
-              "'count', 'group', " +
-              showMissingness + ")";
+          "plot.data::pie(" + DEFAULT_SINGLE_STREAM_NAME + ", map, " +
+              valueSpec + ", '" +
+              deprecatedShowMissingness + "')";
       streamResult(connection, cmd, out);
     });
   }

@@ -109,7 +109,8 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
     varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
     varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
     String valueSpec = spec.getValueSpec().getValue();
-    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
+    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
+    String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
     String method = computeConfig.getAlphaDivMethod().getValue();
     VariableDef computeEntityIdVarSpec = getEntityIdVarSpec(computeConfig.getCollectionVariable().getEntityId());
     String computeEntityIdColName = toColNameOrEmpty(computeEntityIdVarSpec);
@@ -137,7 +138,7 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
                                                  "'plotRef'='yAxisVariable'," +
                                                  "'dataType'=attributes(alphaDivDT)$computedVariable$computedVariableDetails$dataType," +
                                                  "'dataShape'=attributes(alphaDivDT)$computedVariable$computedVariableDetails$dataShape))");
-      String command = "plot.data::scattergl(vizData, map, '" + valueSpec + "', " + showMissingness + ", computedVariableMetadata=attributes(alphaDivDT)$computedVariable$computedVariableMetadata)";
+      String command = "plot.data::scattergl(vizData, map, '" + valueSpec + "', '" + deprecatedShowMissingness + "', computedVariableMetadata=attributes(alphaDivDT)$computedVariable$computedVariableMetadata)";
       RServeClient.streamResult(connection, command, out);
     }); 
   }

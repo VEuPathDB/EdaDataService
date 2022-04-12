@@ -41,7 +41,7 @@ import org.veupathdb.service.eda.generated.model.BinSpec;
 import org.veupathdb.service.eda.generated.model.DerivedVariable;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 import org.veupathdb.service.eda.generated.model.VisualizationRequestBase;
-import org.veupathdb.service.eda.generated.model.XAxisViewport;
+import org.veupathdb.service.eda.generated.model.NumericViewport;
 
 /**
  * Base vizualization plugin for all other plugins.  Provides access to parts of
@@ -309,7 +309,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
         ", na.strings=c(''))";
   }
  
-  protected String getViewportAsRString(XAxisViewport viewport, String xVarType) {
+  protected String getViewportAsRString(NumericViewport viewport, String xVarType) {
     if (viewport != null) {
       // think if we just pass the string plot.data will convert it to the claimed type
       if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
