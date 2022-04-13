@@ -59,6 +59,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
 
   // shared stream name for plugins that need request only a single stream
   protected static final String DEFAULT_SINGLE_STREAM_NAME = "single_tabular_dataset";
+
   protected ReferenceMetadata _referenceMetadata;
   protected S _pluginSpec;
   protected List<StreamSpec> _requiredStreams;

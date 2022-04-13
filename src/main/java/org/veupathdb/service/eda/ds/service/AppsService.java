@@ -40,40 +40,9 @@ import org.veupathdb.service.eda.ds.plugin.pass.TimeSeriesPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.MultiStreamPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.RecordCountPlugin;
+import org.veupathdb.service.eda.ds.plugin.sample.TestCollectionPlugin;
 import org.veupathdb.service.eda.ds.util.NonEmptyResultStream.EmptyResultException;
-import org.veupathdb.service.eda.generated.model.AbundanceBoxplotPostRequest;
-import org.veupathdb.service.eda.generated.model.AbundanceScatterplotPostRequest;
-import org.veupathdb.service.eda.generated.model.AlphaDivBoxplotPostRequest;
-import org.veupathdb.service.eda.generated.model.AlphaDivScatterplotPostRequest;
-import org.veupathdb.service.eda.generated.model.BarplotPostRequest;
-import org.veupathdb.service.eda.generated.model.BarplotPostResponseStream;
-import org.veupathdb.service.eda.generated.model.BetaDivScatterplotPostRequest;
-import org.veupathdb.service.eda.generated.model.BoxplotPostRequest;
-import org.veupathdb.service.eda.generated.model.BoxplotPostResponseStream;
-import org.veupathdb.service.eda.generated.model.ContTablePostResponseStream;
-import org.veupathdb.service.eda.generated.model.DensityplotPostRequest;
-import org.veupathdb.service.eda.generated.model.DensityplotPostResponseStream;
-import org.veupathdb.service.eda.generated.model.EntityTabularPostResponseStream;
-import org.veupathdb.service.eda.generated.model.HeatmapPostRequest;
-import org.veupathdb.service.eda.generated.model.HeatmapPostResponseStream;
-import org.veupathdb.service.eda.generated.model.HistogramPostRequest;
-import org.veupathdb.service.eda.generated.model.HistogramPostResponseStream;
-import org.veupathdb.service.eda.generated.model.LineplotPostRequest;
-import org.veupathdb.service.eda.generated.model.LineplotPostResponseStream;
-import org.veupathdb.service.eda.generated.model.MapPostRequest;
-import org.veupathdb.service.eda.generated.model.MapPostResponseStream;
-import org.veupathdb.service.eda.generated.model.MosaicPostRequest;
-import org.veupathdb.service.eda.generated.model.MultiStreamPostRequest;
-import org.veupathdb.service.eda.generated.model.PieplotPostRequest;
-import org.veupathdb.service.eda.generated.model.PieplotPostResponseStream;
-import org.veupathdb.service.eda.generated.model.RecordCountPostRequest;
-import org.veupathdb.service.eda.generated.model.RecordCountPostResponseStream;
-import org.veupathdb.service.eda.generated.model.ScatterplotPostRequest;
-import org.veupathdb.service.eda.generated.model.ScatterplotPostResponseStream;
-import org.veupathdb.service.eda.generated.model.TablePostRequest;
-import org.veupathdb.service.eda.generated.model.TablePostResponseStream;
-import org.veupathdb.service.eda.generated.model.TwoByTwoPostResponseStream;
-import org.veupathdb.service.eda.generated.model.VisualizationRequestBase;
+import org.veupathdb.service.eda.generated.model.*;
 import org.veupathdb.service.eda.generated.resources.Apps;
 
 @Authenticated(allowGuests = true)
@@ -219,6 +188,13 @@ public class AppsService implements Apps {
   public PostAppsSampleVisualizationsMultiStreamResponse postAppsSampleVisualizationsMultiStream(MultiStreamPostRequest entity) {
     return wrapPlugin(() -> PostAppsSampleVisualizationsMultiStreamResponse.respond200WithTextPlain(
         new EntityTabularPostResponseStream(processRequest(new MultiStreamPlugin(), entity))));
+  }
+
+  @DisableJackson
+  @Override
+  public PostAppsSampleVisualizationsCollectionsTestResponse postAppsSampleVisualizationsCollectionsTest(TestCollectionsPostRequest entity) {
+    return wrapPlugin(() -> PostAppsSampleVisualizationsCollectionsTestResponse.respond200WithTextPlain(
+        new EntityTabularPostResponseStream(processRequest(new TestCollectionPlugin(), entity))));
   }
 
   @DisableJackson
