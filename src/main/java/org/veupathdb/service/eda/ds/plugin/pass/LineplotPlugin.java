@@ -53,7 +53,7 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
         .element("yAxisVariable")
         .element("xAxisVariable")
           .shapes(APIVariableDataShape.ORDINAL, APIVariableDataShape.CONTINUOUS)
-          .description("Variable must be a number or date and be of the same or a parent entity as the Y-axis variable.")
+          .description("Variable must be ordinal, a number, or a date and be of the same or a parent entity of the Y-axis variable.")
         .element("overlayVariable")
           .maxValues(8)
           .description("Variable must have 8 or fewer unique values and be of the same or a parent entity as the X-axis variable.")
@@ -145,7 +145,7 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
                                         ", viewport" + 
                                         ", " + numeratorValues +
                                         ", " + denominatorValues + 
-                                        ", '" + deprecatedShowMissingness + "')";                           
+                                        ", '" + deprecatedShowMissingness + "')";                          
       streamResult(connection, cmd, out);
     }); 
   }
