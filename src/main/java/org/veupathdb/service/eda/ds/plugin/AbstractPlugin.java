@@ -278,6 +278,10 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     return "'" + unquotedString + "'";
   }
 
+  protected String doubleQuote(String unquotedString) {
+    return "\"" + unquotedString + "\"";
+  }
+
   protected String getVoidEvalFreadCommand(String fileName, VariableSpec... vars) {  
     return getVoidEvalFreadCommand(fileName, new ListBuilder().addAll(vars).toList());
   }  
@@ -344,10 +348,10 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
 
     for (String value : values) {
       if (first) {
-        vector = vector + singleQuote(value);
+        vector = vector + doubleQuote(value);
         first = false;
       } else {
-        vector = vector + ", " + singleQuote(value);
+        vector = vector + ", " + doubleQuote(value);
       }
     }
 
