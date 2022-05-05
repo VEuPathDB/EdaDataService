@@ -3,12 +3,12 @@
 types:
   # Type name determines the name of the Java class that will be generated.
 
-  PieplotPostRequest:
+  MapMarkersOverlayPostRequest:
     type: VisualizationRequestBase
     properties:
-      config: PieplotSpec
+      config: MapMarkersOverlaySpec
   
-  PieplotSpec:
+  MapMarkersOverlaySpec:
     additionalProperties: false
     properties:
       outputEntityId:
@@ -18,21 +18,20 @@ types:
         required: false
       xAxisVariable: 
         type: VariableSpec
-      # TODO rename to geoAggregateVariable after b57
-      facetVariable: 
-        type: VariableSpec[]
-        maxItems: 2
-        required: false
+      geoAggregateVariable: 
+        type: VariableSpec
       valueSpec: 
         type: ValueSpec
       longitudeVariable?:
         type: VariableSpec
       latitudeVariable?:
         type: VariableSpec
+      binSpec:
+        type: BinSpec
       viewport?:
         type: GeolocationViewport
 
-  PieplotConfig:
+  MapMarkersOverlayConfig:
     type: PlotConfig
     properties:
       rankedValues:
@@ -44,19 +43,19 @@ types:
       viewport:
         type: GeolocationViewport
 
-  Pieplot:
+  MapMarkersOverlay:
     additionalProperties: false
     properties:
       data:
-        type: PieplotData[]
+        type: MapMarkersOverlayData[]
       config:
-        type: PieplotConfig
+        type: MapMarkersOverlayConfig
 
-  PieplotPostResponse:
+  MapMarkersOverlayPostResponse:
     additionalProperties: false
     properties:
-      Pieplot:
-        type: Pieplot
+      MapMarkersOverlay:
+        type: MapMarkersOverlay
       sampleSizeTable:
         type: SampleSizeTable[]
       completeCasesTable:

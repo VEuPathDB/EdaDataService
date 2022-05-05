@@ -159,17 +159,17 @@ securitySchemes:
               application/json:
                 type: lib.BarplotPostResponse
 
-    /pieplot:
+    /map-markers-overlay:
       post:
         description: Returns data required to create a pie plot visualization <br> Java impl- NA <br> R impl- working
         body:
           application/json:
-            type: lib.PieplotPostRequest
+            type: lib.MapMarkersOverlayPostRequest
         responses:
           200:
             body:
               application/json:
-                type: lib.PieplotPostResponse
+                type: lib.MapMarkersOverlayPostResponse
 
     /twobytwo:
       post:
