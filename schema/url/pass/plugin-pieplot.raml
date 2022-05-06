@@ -3,59 +3,60 @@
 types:
   # Type name determines the name of the Java class that will be generated.
 
-  ScatterplotPostRequest:
+  PieplotPostRequest:
     type: VisualizationRequestBase
     properties:
-      config: ScatterplotSpec
-
-  ScatterplotSpec:
+      config: PieplotSpec
+  
+  PieplotSpec:
     additionalProperties: false
     properties:
       outputEntityId:
         type: string
       showMissingness:
-        type: ShowMissingnessNoAxes
+        type: ShowMissingness
         required: false
-      valueSpec:
-        type: string
-        enum: ['raw', 'smoothedMeanWithRaw', 'bestFitLineWithRaw']
       xAxisVariable: 
         type: VariableSpec
-      yAxisVariable: 
-        type: VariableSpec
-      overlayVariable: 
-        type: VariableSpec
-        required: false
+      # TODO rename to geoAggregateVariable after b57
       facetVariable: 
         type: VariableSpec[]
         maxItems: 2
         required: false
-      maxAllowedDataPoints:
-        type: integer
-        format: int64
-        required: false
+      valueSpec: 
+        type: ValueSpec
+      longitudeVariable?:
+        type: VariableSpec
+      latitudeVariable?:
+        type: VariableSpec
+      viewport?:
+        type: GeolocationViewport
 
-  ScatterplotConfig:
+  PieplotConfig:
     type: PlotConfig
     properties:
+      rankedValues:
+        type: string[]
+        minItems: 1
+        maxItems: 8
       xVariableDetails:
         type: VariableSpec
-      yVariableDetails:
-        type: VariableSpec
+      viewport:
+        type: GeolocationViewport
 
-  Scatterplot:
+  Pieplot:
     additionalProperties: false
     properties:
       data:
-        type: ScatterplotData[]
+        type: PieplotData[]
       config:
-        type: ScatterplotConfig
+        type: PieplotConfig
 
-  ScatterplotPostResponse:
+  PieplotPostResponse:
     additionalProperties: false
     properties:
-      scatterplot:
-        type: Scatterplot
+      Pieplot:
+        type: Pieplot
       sampleSizeTable:
         type: SampleSizeTable[]
       completeCasesTable:

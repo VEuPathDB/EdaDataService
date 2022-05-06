@@ -39,10 +39,16 @@ FROM foxcapades/alpine-oracle:1.3
 
 LABEL service="eda-data"
 
+RUN apk add --no-cache tzdata \
+    && cp /usr/share/zoneinfo/America/New_York /etc/localtime \
+    && echo "America/New_York" > /etc/timezone
+
 ENV JAVA_HOME=/opt/jdk \
-    PATH=/opt/jdk/bin:$PATH
+    PATH=/opt/jdk/bin:$PATH \
+    JVM_MEM_ARGS="" \
+    JVM_ARGS=""
 
 COPY --from=prep /jlinked /opt/jdk
 COPY --from=prep /workspace/build/libs/service.jar /service.jar
 
-CMD java -jar /service.jar
+CMD java -jar -XX:+CrashOnOutOfMemoryError $JVM_MEM_ARGS $JVM_ARGS /service.jar

@@ -37,9 +37,12 @@ import org.veupathdb.service.eda.ds.constraints.DataElementValidator;
 import org.veupathdb.service.eda.ds.util.NonEmptyResultStream;
 import org.veupathdb.service.eda.generated.model.APIFilter;
 import org.veupathdb.service.eda.generated.model.APIStudyDetail;
+import org.veupathdb.service.eda.generated.model.BinSpec;
 import org.veupathdb.service.eda.generated.model.DerivedVariable;
+import org.veupathdb.service.eda.generated.model.GeolocationViewport;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 import org.veupathdb.service.eda.generated.model.VisualizationRequestBase;
+import org.veupathdb.service.eda.generated.model.NumericViewport;
 
 /**
  * Base vizualization plugin for all other plugins.  Provides access to parts of
@@ -56,6 +59,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
 
   // shared stream name for plugins that need request only a single stream
   protected static final String DEFAULT_SINGLE_STREAM_NAME = "single_tabular_dataset";
+
   protected ReferenceMetadata _referenceMetadata;
   protected S _pluginSpec;
   protected List<StreamSpec> _requiredStreams;
@@ -261,8 +265,21 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   //    return commaString;
   //  }
 
+  protected void validateBinSpec(BinSpec binSpec, String xVarType) {
+    if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
+      if (binSpec.getUnits() != null) {
+        LOG.warn("The `units` property of the `BinSpec` class is only used for DATE x-axis variables. It will be ignored.");
+      }
+    }
+    // need an error here if its a date and we dont have a unit?
+  }
+
   protected String singleQuote(String unquotedString) {
     return "'" + unquotedString + "'";
+  }
+
+  protected String doubleQuote(String unquotedString) {
+    return "\"" + unquotedString + "\"";
   }
 
   protected String getVoidEvalFreadCommand(String fileName, VariableSpec... vars) {  
@@ -278,16 +295,19 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
       if (varName.equals("")) continue;
       String varType = getVariableType(var);
       String varShape = getVariableDataShape(var);
-      if (varType.equals("NUMBER") & !varShape.equals("CATEGORICAL")) {
-        varType = "double";
+      String rBaseType;
+      if (varType.equals("INTEGER")) {
+        rBaseType = "integer";
+      } else if (varShape.equals("CONTINUOUS") & !varType.equals("DATE")) {
+        rBaseType = "double";
       } else {
-        varType = "character";
+        rBaseType = "character";
       }
       if (first) {
         first = false;
-        namedTypes = singleQuote(varName) + "=" + singleQuote(varType);
+        namedTypes = singleQuote(varName) + "=" + singleQuote(rBaseType);
       } else {
-        namedTypes = namedTypes + "," + singleQuote(varName) + "=" + singleQuote(varType);
+        namedTypes = namedTypes + "," + singleQuote(varName) + "=" + singleQuote(rBaseType);
       }
     }
 
@@ -296,7 +316,49 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
         ", select=c(" + namedTypes + ")" +
         ", na.strings=c(''))";
   }
-  
+ 
+  protected String getViewportAsRString(NumericViewport viewport, String xVarType) {
+    if (viewport != null) {
+      // think if we just pass the string plot.data will convert it to the claimed type
+      if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
+        return("viewport <- list('xMin'=" + viewport.getXMin() + ", 'xMax'=" + viewport.getXMax() + ")");
+      } else {
+        return("viewport <- list('xMin'=" + singleQuote(viewport.getXMin()) + ", 'xMax'=" + singleQuote(viewport.getXMax()) + ")");
+      }
+    } else {
+      return("viewport <- NULL");
+    }
+  }
+
+  protected String getViewportAsRString(GeolocationViewport viewport) {
+    if (viewport != null) {
+      return("viewport <- list('latitude'=list('xMin'= " + viewport.getLatitude().getXMin() + 
+                                            ", 'xMax'= " + viewport.getLatitude().getXMax() + 
+                           "), 'longitude'= list('left'= " + viewport.getLongitude().getLeft() + 
+                                              ", 'right' = " + viewport.getLongitude().getRight() + "))");
+    } else {
+      return("viewport <- NULL");
+    }
+  }
+
+  // there is probably some JRI util that would make this unnecessary if i were more clever??
+  protected String listToRVector(List<String> values) {
+    boolean first = true;
+    String vector = "c(";
+
+    for (String value : values) {
+      if (first) {
+        vector = vector + doubleQuote(value);
+        first = false;
+      } else {
+        vector = vector + ", " + doubleQuote(value);
+      }
+    }
+
+    vector = vector + ")";
+    return(vector);
+  }
+
   protected String getVoidEvalVarMetadataMap(String datasetName, Map<String, VariableSpec> vars) {
     boolean first = true;
     String plotRefVector = new String();

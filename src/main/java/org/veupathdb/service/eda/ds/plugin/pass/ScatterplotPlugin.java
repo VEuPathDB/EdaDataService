@@ -66,8 +66,8 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
         .element("facetVariable")
           .required(false)
           .maxVars(2)
-          .maxValues(7)
-          .description("Variable(s) must have 7 or fewer unique values and be of the same or a parent entity as the Overlay variable.")
+          .maxValues(10)
+          .description("Variable(s) must have 10 or fewer unique values and be of the same or a parent entity as the Overlay variable.")
       .done();
   }
   
@@ -104,7 +104,8 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
     varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
     varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
     String valueSpec = spec.getValueSpec().getValue();
-    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
+    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
+    String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
     String yVarType = getVariableType(spec.getYAxisVariable());
     
     if (yVarType.equals("DATE") && !valueSpec.equals("raw")) {
@@ -118,7 +119,7 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
     RFileSetProcessor filesProcessor = new RFileSetProcessor(dataStreams)
       .add(DEFAULT_SINGLE_STREAM_NAME, 
         spec.getMaxAllowedDataPoints(), 
-        showMissingness, 
+        deprecatedShowMissingness, 
         nonStrataVarColNames, 
         (name, conn) ->
         conn.voidEval(getVoidEvalFreadCommand(name,
@@ -133,8 +134,8 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       String cmd = 
           "plot.data::scattergl(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" + 
-              valueSpec + "', " + 
-              showMissingness + ")";
+              valueSpec + "', '" + 
+              deprecatedShowMissingness + "')";
       streamResult(connection, cmd, out);
     }); 
   }

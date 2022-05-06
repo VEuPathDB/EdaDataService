@@ -63,8 +63,8 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
         .element("facetVariable")
           .required(false)
           .maxVars(2)
-          .maxValues(7)
-          .description("Variable(s) must have 7 or fewer unique values and be of the same or a parent entity as the Overlay variable.")
+          .maxValues(10)
+          .description("Variable(s) must have 10 or fewer unique values and be of the same or a parent entity as the Overlay variable.")
       .done();
   }
   
@@ -97,7 +97,8 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
     varMap.put("overlayVariable", spec.getOverlayVariable());
     varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
     varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
-    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
+    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
+    String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
     String barMode = spec.getBarMode().getValue();
     String xVar = toColNameOrEmpty(spec.getXAxisVariable());
     String xVarType = getVariableType(spec.getXAxisVariable());
@@ -109,20 +110,13 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
           getVariableSpecFromList(spec.getFacetVariable(), 0),
           getVariableSpecFromList(spec.getFacetVariable(), 1)));
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      
-      if (spec.getViewport() != null) {
-        // think if we just pass the string plot.data will convert it to the claimed type
-        if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
-          connection.voidEval("viewport <- list('xMin'=" + spec.getViewport().getXMin() + ", 'xMax'=" + spec.getViewport().getXMax() + ")");
-        } else {
-          connection.voidEval("viewport <- list('xMin'=" + singleQuote(spec.getViewport().getXMin()) + ", 'xMax'=" + singleQuote(spec.getViewport().getXMax()) + ")");
-        }
-      } else {
-        connection.voidEval("viewport <- NULL");
-      }
+     
+      String viewportRString = getViewportAsRString(spec.getViewport(), xVarType);
+      connection.voidEval(viewportRString);
       
       BinSpec binSpec = spec.getBinSpec();
-      String binReportValue = binSpec.getType().getValue();
+      validateBinSpec(binSpec, xVarType);
+      String binReportValue = binSpec.getType().getValue() != null ? binSpec.getType().getValue() : "binWidth";
       
       //consider reorganizing conditions, move check for null value up a level ?
       if (binReportValue.equals("numBins")) {
@@ -143,9 +137,6 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
         String binWidth = "NULL";
         if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
           binWidth = binSpec.getValue() == null ? "NULL" : "as.numeric('" + binSpec.getValue() + "')";
-          if (binSpec.getUnits() != null) {
-            LOG.warn("The `units` property of the `BinSpec` class is only used for DATE x-axis variables. It will be ignored.");
-          }
         } else {
           binWidth = binSpec.getValue() == null ? "NULL" : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
         }
@@ -156,8 +147,8 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
           "plot.data::histogram(" + DEFAULT_SINGLE_STREAM_NAME + ", map, binWidth, '" +
                spec.getValueSpec().getValue() + "', '" +
                binReportValue + "', '" +
-               barMode + "', viewport, " +
-               showMissingness + ")";
+               barMode + "', viewport, '" +
+               deprecatedShowMissingness + "')";
       streamResult(connection, cmd, out);
     });
   }

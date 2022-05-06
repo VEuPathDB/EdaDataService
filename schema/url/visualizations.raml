@@ -19,6 +19,65 @@ types:
     properties:
       value: string
 
+  BinSpec:
+    additionalProperties: false
+    properties:
+      type?:
+        type: string
+        enum: ['binWidth','numBins']
+      value?: number
+      units?: BinUnits
+
+  NumericViewport:
+    additionalProperties: false
+    properties:
+      xMin:
+        type: string
+      xMax:
+        type: string
+
+  LongitudeViewport:
+    additionalProperties: false
+    properties: 
+      left: number
+      right: number
+
+  GeolocationViewport:
+    additionalProperties: false
+    properties:
+      latitude: NumericViewport
+      longitude: LongitudeViewport
+
+  ErrorBar:
+    additionalProperties: false
+    properties:
+      lowerBound: number
+      upperBound: number
+      error: string
+
+  SimpleSampleSize:
+    additionalProperties: false
+    properties:
+      N: number
+
+  ProportionSampleSize:
+    additionalProperties: false
+    properties:
+      numeratorN: number
+      denominatorN: number
+  
+  SampleSize:
+    type: SimpleSampleSize | ProportionSampleSize
+
+  # continue to allow deprecated values for now
+  ShowMissingness:
+    type: string
+    enum: ['allVariables', 'strataVariables', 'noVariables', 'TRUE', 'FALSE']
+
+  ShowMissingnessNoAxes:
+    type: string
+    enum: ['strataVariables', 'noVariables', 'TRUE', 'FALSE']
+
   # Assuming computed variable must be on y axis and that x axis may be determined by collection var or specified.
   BoxplotWith1ComputeSpec:
     additionalProperties: false
@@ -26,8 +85,7 @@ types:
       outputEntityId:
         type: string
       showMissingness:
-        type: string
-        enum: ['TRUE', 'FALSE']
+        type: ShowMissingnessNoAxes
         required: false
       points:
         type: string
@@ -56,8 +114,7 @@ types:
       outputEntityId:
         type: string
       showMissingness:
-        type: string
-        enum: ['TRUE', 'FALSE']
+        type: ShowMissingnessNoAxes
         required: false
       valueSpec:
         type: string

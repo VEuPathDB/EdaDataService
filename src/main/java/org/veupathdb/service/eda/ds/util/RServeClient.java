@@ -7,8 +7,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.WebApplicationException;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.WebApplicationException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.IoUtil;
@@ -85,10 +85,10 @@ public class RServeClient {
     });
   }
 
-  private static void checkMaxRows(RConnection connection, String name, Boolean showMissingness, List<String> nonStrataColNames, List<String> filesTooBig, Long maxRows) {
+  private static void checkMaxRows(RConnection connection, String name, String showMissingness, List<String> nonStrataColNames, List<String> filesTooBig, Long maxRows) {
     try {
       int numPlottableRows;
-      if (showMissingness) {
+      if (showMissingness.equals("strataVariables")) {
         String nonStrataColNamesAsRVector = "c(";
         Boolean first = true;
         for (String nonStrataColName : nonStrataColNames) {
@@ -96,7 +96,11 @@ public class RServeClient {
         }
         nonStrataColNamesAsRVector = nonStrataColNamesAsRVector + ")";
         numPlottableRows = connection.eval("sum(complete.cases(" + name + "[, " + nonStrataColNamesAsRVector + ", with=FALSE]))").asInteger();
-      } else {
+      } else if (showMissingness.equals("allVariables")) {
+        // this is an estimate at best. the allVariables option isnt consistent across vizs
+        // but its also the worst case estimate so thats something i guess...
+        numPlottableRows = connection.eval("nrow("+ name + ")").asInteger();
+      } else {  
         numPlottableRows = connection.eval("sum(complete.cases("+ name + "))").asInteger();
       }
         LOG.info("R found " + numPlottableRows + " plottable rows in file " + name);

@@ -14,13 +14,18 @@ types:
       outputEntityId:
         type: string
       showMissingness:
-        type: string
-        enum: ['TRUE', 'FALSE']
+        type: ShowMissingnessNoAxes
         required: false
       xAxisVariable: 
         type: VariableSpec
       yAxisVariable: 
         type: VariableSpec
+      yAxisNumeratorValues:
+        type: string[]
+        required: false
+      yAxisDenominatorValues:
+        type: string[]
+        required: false
       overlayVariable: 
         type: VariableSpec
         required: false
@@ -28,9 +33,19 @@ types:
         type: VariableSpec[]
         maxItems: 2
         required: false
+      binSpec:
+        type: BinSpec
+        required: false
       valueSpec:
         type: string
-        enum: ['median','mean']
+        enum: ['median','mean','proportion']
+      # for now assume 95 ci only, eventually values like 'se', 'sd', 'ci' etc
+      errorBars:
+        type: string
+        enum: ['TRUE', 'FALSE']
+      viewport:
+        type: NumericViewport
+        required: false
 
   LineplotConfig:
     type: PlotConfig
@@ -39,6 +54,12 @@ types:
         type: VariableSpec
       yVariableDetails:
         type: VariableSpec
+      binSlider?:
+        type: BinSlider
+      binSpec?:
+        type: BinSpec
+      viewport?:
+        type: NumericViewport
 
   Lineplot:
     additionalProperties: false

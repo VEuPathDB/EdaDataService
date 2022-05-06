@@ -19,6 +19,7 @@ import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.ds.constraints.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
+import org.veupathdb.service.eda.generated.model.GeolocationViewport;
 import org.veupathdb.service.eda.generated.model.MapPostRequest;
 import org.veupathdb.service.eda.generated.model.MapSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
@@ -99,6 +100,23 @@ public class MapPlugin extends AbstractPlugin<MapPostRequest, MapSpec> {
     }
   }
 
+  private Boolean withinViewport(GeolocationViewport viewport, Double latitude, Double longitude) {
+    Double latitudeMin = Double.valueOf(viewport.getLatitude().getXMin());
+    Double latitudeMax = Double.valueOf(viewport.getLatitude().getXMax());
+    Double longitudeLeft = viewport.getLongitude().getLeft().doubleValue();
+    Double longitudeRight = viewport.getLongitude().getRight().doubleValue();
+    Boolean viewportIncludesIntlDateLine = longitudeLeft > longitudeRight;
+
+    if (latitude < latitudeMin || latitude > latitudeMax) { return false; }
+    if (viewportIncludesIntlDateLine) {
+      if (longitude < longitudeLeft && longitude > longitudeRight) { return false; }
+    } else {
+      if (longitude < longitudeLeft || longitude > longitudeRight) { return false; }
+    }
+
+    return true;
+  }
+
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
 
@@ -113,12 +131,25 @@ public class MapPlugin extends AbstractPlugin<MapPostRequest, MapSpec> {
     int latIndex    = indexOf.apply(spec.getLatitudeVariable());
     int lonIndex    = indexOf.apply(spec.getLongitudeVariable());
 
+    GeolocationViewport viewport = spec.getViewport();
+    long entityRecordsWithGeoVar = 0;
+
     // loop through rows of data stream, aggregating stats into a map from aggregate value to stats object
     Map<String, GeoVarData> aggregator = new HashMap<>();
     while (s.hasNextLine()) {
       String[] row = parser.parseLineToArray(s.nextLine());
-      aggregator.putIfAbsent(row[geoVarIndex], new GeoVarData());
-      aggregator.get(row[geoVarIndex]).addRow(Double.valueOf(row[latIndex]), Double.valueOf(row[lonIndex]));
+      Double latitude = Double.valueOf(row[latIndex]);
+      Double longitude = Double.valueOf(row[lonIndex]);
+      
+      // entity records counts not impacted by viewport
+      if (!(row[geoVarIndex] == null || row[geoVarIndex].equals(""))) { 
+        entityRecordsWithGeoVar++;
+      
+        if (withinViewport(viewport, latitude, longitude)) {
+          aggregator.putIfAbsent(row[geoVarIndex], new GeoVarData());
+          aggregator.get(row[geoVarIndex]).addRow(Double.valueOf(row[latIndex]), Double.valueOf(row[lonIndex]));
+        }
+      }  
     }
 
     // begin output object and single property containing array of map elements
@@ -142,8 +173,9 @@ public class MapPlugin extends AbstractPlugin<MapPostRequest, MapSpec> {
         .getBytes()
       );
     }
-    // close array and enclosing object
-    out.write("]}".getBytes());
+    // add config and close
+    String config = "],\"config\":{\"completeCasesGeoVar\":" + entityRecordsWithGeoVar + "}}";
+    out.write(config.getBytes());
     out.flush();
   }
 }
