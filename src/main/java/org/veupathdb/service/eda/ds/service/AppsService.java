@@ -33,7 +33,7 @@ import org.veupathdb.service.eda.ds.plugin.pass.HeatmapPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.HistogramPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.LineplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.MapPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.PieplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.pass.MapMarkersOverlayPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TablePlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TimeSeriesPlugin;
@@ -143,9 +143,9 @@ public class AppsService implements Apps {
 
   @DisableJackson
   @Override
-  public PostAppsPassVisualizationsPieplotResponse postAppsPassVisualizationsPieplot(PieplotPostRequest entity) {
-    return wrapPlugin(() -> PostAppsPassVisualizationsPieplotResponse.respond200WithApplicationJson(
-        new PieplotPostResponseStream(processRequest(new PieplotPlugin(), entity))));
+  public PostAppsPassVisualizationsMapMarkersOverlayResponse postAppsPassVisualizationsMapMarkersOverlay(MapMarkersOverlayPostRequest entity) {
+    return wrapPlugin(() -> PostAppsPassVisualizationsMapMarkersOverlayResponse.respond200WithApplicationJson(
+        new MapMarkersOverlayPostResponseStream(processRequest(new MapMarkersOverlayPlugin(), entity))));
   }
 
   @DisableJackson

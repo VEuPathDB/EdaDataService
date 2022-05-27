@@ -14,8 +14,9 @@ import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
 import org.veupathdb.service.eda.ds.constraints.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.generated.model.PieplotPostRequest;
-import org.veupathdb.service.eda.generated.model.PieplotSpec;
+import org.veupathdb.service.eda.generated.model.BinSpec;
+import org.veupathdb.service.eda.generated.model.MapMarkersOverlayPostRequest;
+import org.veupathdb.service.eda.generated.model.MapMarkersOverlaySpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.CLINEPI_PROJECT;
@@ -23,75 +24,71 @@ import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.MICROBIOME_PROJ
 import static org.veupathdb.service.eda.ds.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class PieplotPlugin extends AbstractPlugin<PieplotPostRequest, PieplotSpec> {
+public class MapMarkersOverlayPlugin extends AbstractPlugin<MapMarkersOverlayPostRequest, MapMarkersOverlaySpec> {
 
   @Override
   public String getDisplayName() {
-    return "Pie plot";
+    return "Map Markers";
   }
 
   @Override
   public String getDescription() {
-    return "Visualize part-to-whole relationships across the categories of a variable";
+    return "Visualize counts and proportions of both categorical and continuous data overlaid on map markers.";
   }
   
   @Override
-  protected Class<PieplotSpec> getVisualizationSpecClass() {
-    return PieplotSpec.class;
+  protected Class<MapMarkersOverlaySpec> getVisualizationSpecClass() {
+    return MapMarkersOverlaySpec.class;
   }
 
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder("xAxisVariable", "facetVariable")
+      .dependencyOrder("xAxisVariable", "geoAggregateVariable")
       .pattern()
         .element("xAxisVariable")
-          .maxValues(8)
-          .description("Variables with more than 8 values will assign the top 7 values by count to their own categories and assign the additonal values into an 'other' category.")
-        .element("facetVariable")
-          .required(false)
-          .maxVars(2)
+          .description("Categorical variables with more than 8 values will assign the top 7 values by count to their own categories and assign the additonal values into an 'other' category. Continuous variables will be binned into by default 8 categories.")
+        .element("geoAggregateVariable")
           .description("Variable(s) must be of the same or a parent entity of the main variable.")
       .done();
   }
 
   @Override
-  protected void validateVisualizationSpec(PieplotSpec pluginSpec) throws ValidationException {
+  protected void validateVisualizationSpec(MapMarkersOverlaySpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
       .var("xAxisVariable", pluginSpec.getXAxisVariable())
-      .var("facetVariable", pluginSpec.getFacetVariable()));
+      .var("geoAggregateVariable", pluginSpec.getGeoAggregateVariable()));
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(PieplotSpec pluginSpec) {
+  protected List<StreamSpec> getRequestedStreams(MapMarkersOverlaySpec pluginSpec) {
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
-        .addVars(pluginSpec.getFacetVariable())
+        .addVar(pluginSpec.getGeoAggregateVariable())
         .addVar(pluginSpec.getLatitudeVariable())
         .addVar(pluginSpec.getLongitudeVariable()));
   }
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    PieplotSpec spec = getPluginSpec();
+    MapMarkersOverlaySpec spec = getPluginSpec();
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
     String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
     String valueSpec = singleQuote(spec.getValueSpec().getValue());
+    String xVarType = getVariableType(spec.getXAxisVariable());
 
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
     varMap.put("xAxisVariable", spec.getXAxisVariable());
-    varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
-    varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
+    varMap.put("geoAggregateVariable", spec.getGeoAggregateVariable());
     varMap.put("latitudeVariable", spec.getLatitudeVariable());
     varMap.put("longitudeVariable", spec.getLongitudeVariable());
       
     useRConnectionWithRemoteFiles(dataStreams, connection -> {
       connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
           spec.getXAxisVariable(),
-          getVariableSpecFromList(spec.getFacetVariable(), 0),
-          getVariableSpecFromList(spec.getFacetVariable(), 1),
+          spec.getGeoAggregateVariable(),
           spec.getLatitudeVariable(),
           spec.getLongitudeVariable()));
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
@@ -99,9 +96,27 @@ public class PieplotPlugin extends AbstractPlugin<PieplotPostRequest, PieplotSpe
       String viewportRString = getViewportAsRString(spec.getViewport());
       connection.voidEval(viewportRString);
       
+      String binReportValue = "NULL";
+      if (xVarType.equals("STRING")) {
+        // maybe i should have a warning here if they pass a BinSpec?
+        connection.voidEval("binWidth <- NULL");
+      } else {
+        BinSpec binSpec = spec.getBinSpec();
+        validateBinSpec(binSpec, xVarType);
+        binReportValue = binSpec.getType().getValue() != null ? binSpec.getType().getValue() : "binWidth";
+        String binWidth = connection.eval("numBinsToBinWidth(" + DEFAULT_SINGLE_STREAM_NAME + "[[map$variableId[map$plotRef == 'xAxisVariable']]], 8)").toString();
+        if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
+          binWidth = binSpec.getValue() == null ? binWidth : "as.numeric('" + binSpec.getValue() + "')";
+        } else {
+          binWidth = binSpec.getValue() == null ? binWidth : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
+        }
+        connection.voidEval("binWidth <- " + binWidth);
+      }
+
       String cmd =
-          "plot.data::pie(" + DEFAULT_SINGLE_STREAM_NAME + ", map, " +
-              valueSpec + ", viewport, '" +
+          "plot.data::mapMarkers(" + DEFAULT_SINGLE_STREAM_NAME + ", map, binWidth, " +
+              valueSpec + "', '" +
+              binReportValue + "', viewport, '" +
               deprecatedShowMissingness + "')";
       streamResult(connection, cmd, out);
     });
