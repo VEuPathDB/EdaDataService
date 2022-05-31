@@ -92,31 +92,34 @@ public class MapMarkersOverlayPlugin extends AbstractPlugin<MapMarkersOverlayPos
           spec.getLatitudeVariable(),
           spec.getLongitudeVariable()));
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-
       String viewportRString = getViewportAsRString(spec.getViewport());
       connection.voidEval(viewportRString);
-      
       String binReportValue = "NULL";
       if (xVarType.equals("STRING")) {
         // maybe i should have a warning here if they pass a BinSpec?
         connection.voidEval("binWidth <- NULL");
       } else {
         BinSpec binSpec = spec.getBinSpec();
-        validateBinSpec(binSpec, xVarType);
-        binReportValue = binSpec.getType().getValue() != null ? binSpec.getType().getValue() : "binWidth";
-        String binWidth = connection.eval("numBinsToBinWidth(" + DEFAULT_SINGLE_STREAM_NAME + "[[map$variableId[map$plotRef == 'xAxisVariable']]], 8)").toString();
-        if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
-          binWidth = binSpec.getValue() == null ? binWidth : "as.numeric('" + binSpec.getValue() + "')";
-        } else {
-          binWidth = binSpec.getValue() == null ? binWidth : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
+        connection.voidEval("xVals <- " + DEFAULT_SINGLE_STREAM_NAME + "[[map$id[map$plotRef == 'xAxisVariable']]]");
+        connection.voidEval("binWidth <- numBinsToBinWidth(xVals[complete.cases(xVals)], 8)");
+        binReportValue = "'binWidth'";
+        if (binSpec != null) {
+          validateBinSpec(binSpec, xVarType);
+          binReportValue = binSpec.getType() != null ? singleQuote(binSpec.getType().getValue()) : binReportValue;
+          String binWidth = "NULL";
+          if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
+            binWidth = binSpec.getValue() == null ? binWidth : "as.numeric('" + binSpec.getValue() + "')";
+          } else {
+            binWidth = binSpec.getValue() == null || binSpec.getUnits() == null ? binWidth : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
+          }
+          connection.voidEval("binWidth <- " + binWidth);
         }
-        connection.voidEval("binWidth <- " + binWidth);
       }
 
       String cmd =
           "plot.data::mapMarkers(" + DEFAULT_SINGLE_STREAM_NAME + ", map, binWidth, " +
-              valueSpec + "', '" +
-              binReportValue + "', viewport, '" +
+              valueSpec + ", " +
+              binReportValue + ", viewport, '" +
               deprecatedShowMissingness + "')";
       streamResult(connection, cmd, out);
     });
