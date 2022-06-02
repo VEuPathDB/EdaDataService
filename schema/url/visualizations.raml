@@ -27,6 +27,19 @@ types:
         enum: ['binWidth','numBins']
       value?: number
       units?: BinUnits
+      range?: NumberRange | DateRange
+
+  NumberRange:
+    additionalProperties: false
+    properties:
+      min: number
+      max: number
+
+  DateRange:
+    additionalProperties: false
+    properties:
+      min: string
+      max: string
 
   NumericViewport:
     additionalProperties: false

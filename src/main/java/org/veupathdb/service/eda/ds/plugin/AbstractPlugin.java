@@ -38,8 +38,11 @@ import org.veupathdb.service.eda.ds.util.NonEmptyResultStream;
 import org.veupathdb.service.eda.generated.model.APIFilter;
 import org.veupathdb.service.eda.generated.model.APIStudyDetail;
 import org.veupathdb.service.eda.generated.model.BinSpec;
+import org.veupathdb.service.eda.generated.model.BinSpec.RangeType;
+import org.veupathdb.service.eda.generated.model.DateRange;
 import org.veupathdb.service.eda.generated.model.DerivedVariable;
 import org.veupathdb.service.eda.generated.model.GeolocationViewport;
+import org.veupathdb.service.eda.generated.model.NumberRange;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 import org.veupathdb.service.eda.generated.model.VisualizationRequestBase;
 import org.veupathdb.service.eda.generated.model.NumericViewport;
@@ -315,6 +318,34 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
         " <- fread(" + singleQuote(fileName) +
         ", select=c(" + namedTypes + ")" +
         ", na.strings=c(''))";
+  }
+
+  protected String getBinRangeAsRString(RangeType binRange) {
+    if (binRange != null) {
+      if (binRange.isNumberRange()) {
+        return(getBinRangeAsRString(binRange.getNumberRange()));
+      } else {
+        return(getBinRangeAsRString(binRange.getDateRange()));
+      }
+    } else {
+      return("binRange <- NULL");
+    }
+  }
+
+  protected String getBinRangeAsRString(NumberRange binRange) { 
+    if (binRange != null) {
+      return("binRange <- list('min'=" + binRange.getMin().toString() + ", 'max'=" + binRange.getMax().toString() + ")");
+    } else {
+      return("binRange <- NULL");
+    }
+  }
+
+  protected String getBinRangeAsRString(DateRange binRange) {
+    if (binRange != null) {
+      return("binRange <- list('min'='" + binRange.getMin() + "', 'max'='" + binRange.getMax() + "')");
+    } else {
+      return("binRange <- NULL");
+    }
   }
  
   protected String getViewportAsRString(NumericViewport viewport, String xVarType) {

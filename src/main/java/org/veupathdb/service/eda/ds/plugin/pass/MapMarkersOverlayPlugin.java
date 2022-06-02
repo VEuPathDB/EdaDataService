@@ -95,6 +95,7 @@ public class MapMarkersOverlayPlugin extends AbstractPlugin<MapMarkersOverlayPos
       String viewportRString = getViewportAsRString(spec.getViewport());
       connection.voidEval(viewportRString);
       String binReportValue = "NULL";
+      connection.voidEval("binRange <- NULL");
       if (xVarType.equals("STRING")) {
         // maybe i should have a warning here if they pass a BinSpec?
         connection.voidEval("binWidth <- NULL");
@@ -113,13 +114,15 @@ public class MapMarkersOverlayPlugin extends AbstractPlugin<MapMarkersOverlayPos
             binWidth = binSpec.getValue() == null || binSpec.getUnits() == null ? binWidth : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
           }
           connection.voidEval("binWidth <- " + binWidth);
+          String binRangeRString = getBinRangeAsRString(binSpec.getRange());
+          connection.voidEval(binRangeRString);
         }
       }
 
       String cmd =
           "plot.data::mapMarkers(" + DEFAULT_SINGLE_STREAM_NAME + ", map, binWidth, " +
               valueSpec + ", " +
-              binReportValue + ", viewport, '" +
+              binReportValue + ", binRange, viewport, '" +
               deprecatedShowMissingness + "')";
       streamResult(connection, cmd, out);
     });
