@@ -117,7 +117,7 @@ public class MapMarkersOverlayPlugin extends AbstractPlugin<MapMarkersOverlayPos
           connection.voidEval("binWidth <- " + binWidth);
           String binRangeRString = getBinRangeAsRString(binSpec.getRange());
           connection.voidEval(binRangeRString);
-          connection.voidEval("xVP <- plot.data::adjustToViewport(xVals, viewport)");
+          connection.voidEval("xVP <- plot.data::adjustToViewport(xVals, binRange)");
           connection.voidEval("binWidth <- plot.data::numBinsToBinWidth(xVP, 8)");
         }
       }
