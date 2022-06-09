@@ -109,16 +109,18 @@ public class MapMarkersOverlayPlugin extends AbstractPlugin<MapMarkersOverlayPos
           validateBinSpec(binSpec, xVarType);
           binReportValue = binSpec.getType() != null ? singleQuote(binSpec.getType().getValue()) : binReportValue;
           String binWidth = "NULL";
+          String binRangeRString = getBinRangeAsRString(binSpec.getRange());
+          connection.voidEval(binRangeRString);
+          connection.voidEval("if (is.null(binRange)) { range <- plot.data::findViewport(xVals, " + singleQuote(xVarType) + ") } else { range <- plot.data::validateBinRange(xVals, binRange," + singleQuote(xVarType) + ", FALSE) }");
+          connection.voidEval("print(range)");
+          connection.voidEval("xVP <- plot.data::adjustToViewport(xVals, range)");
+          connection.voidEval("binWidth <- plot.data::numBinsToBinWidth(xVP, 8)");
           if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
             binWidth = binSpec.getValue() == null ? binWidth : "as.numeric('" + binSpec.getValue() + "')";
           } else {
             binWidth = binSpec.getValue() == null || binSpec.getUnits() == null ? binWidth : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
           }
           connection.voidEval("binWidth <- " + binWidth);
-          String binRangeRString = getBinRangeAsRString(binSpec.getRange());
-          connection.voidEval(binRangeRString);
-          connection.voidEval("xVP <- plot.data::adjustToViewport(xVals, binRange)");
-          connection.voidEval("binWidth <- plot.data::numBinsToBinWidth(xVP, 8)");
         }
       }
 
