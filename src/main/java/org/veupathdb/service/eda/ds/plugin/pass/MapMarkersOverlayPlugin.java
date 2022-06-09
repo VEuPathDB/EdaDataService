@@ -102,7 +102,8 @@ public class MapMarkersOverlayPlugin extends AbstractPlugin<MapMarkersOverlayPos
       } else {
         BinSpec binSpec = spec.getBinSpec();
         connection.voidEval("xVals <- " + DEFAULT_SINGLE_STREAM_NAME + "[[map$id[map$plotRef == 'xAxisVariable']]]");
-        connection.voidEval("binWidth <- numBinsToBinWidth(xVals[complete.cases(xVals)], 8)");
+        connection.voidEval("xVals <- xVals[complete.cases(xVals)]");
+        connection.voidEval("binWidth <- plot.data::numBinsToBinWidth(xVals, 8)");
         binReportValue = "'binWidth'";
         if (binSpec != null) {
           validateBinSpec(binSpec, xVarType);
@@ -116,6 +117,8 @@ public class MapMarkersOverlayPlugin extends AbstractPlugin<MapMarkersOverlayPos
           connection.voidEval("binWidth <- " + binWidth);
           String binRangeRString = getBinRangeAsRString(binSpec.getRange());
           connection.voidEval(binRangeRString);
+          connection.voidEval("xVP <- plot.data::adjustToViewport(xVals, viewport)");
+          connection.voidEval("binWidth <- plot.data::numBinsToBinWidth(xVP, 8)");
         }
       }
 
