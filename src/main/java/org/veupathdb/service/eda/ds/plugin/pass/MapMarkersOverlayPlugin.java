@@ -95,18 +95,26 @@ public class MapMarkersOverlayPlugin extends AbstractPlugin<MapMarkersOverlayPos
       String viewportRString = getViewportAsRString(spec.getViewport());
       connection.voidEval(viewportRString);
       String binReportValue = "NULL";
+      connection.voidEval("binRange <- NULL");
       if (xVarType.equals("STRING")) {
         // maybe i should have a warning here if they pass a BinSpec?
         connection.voidEval("binWidth <- NULL");
       } else {
         BinSpec binSpec = spec.getBinSpec();
         connection.voidEval("xVals <- " + DEFAULT_SINGLE_STREAM_NAME + "[[map$id[map$plotRef == 'xAxisVariable']]]");
-        connection.voidEval("binWidth <- numBinsToBinWidth(xVals[complete.cases(xVals)], 8)");
+        connection.voidEval("xVals <- xVals[complete.cases(xVals)]");
+        connection.voidEval("binWidth <- plot.data::numBinsToBinWidth(xVals, 8)");
         binReportValue = "'binWidth'";
         if (binSpec != null) {
           validateBinSpec(binSpec, xVarType);
           binReportValue = binSpec.getType() != null ? singleQuote(binSpec.getType().getValue()) : binReportValue;
           String binWidth = "NULL";
+          String binRangeRString = getBinRangeAsRString(binSpec.getRange());
+          connection.voidEval(binRangeRString);
+          connection.voidEval("if (is.null(binRange)) { range <- plot.data::findViewport(xVals, " + singleQuote(xVarType) + ") } else { range <- plot.data::validateBinRange(xVals, binRange," + singleQuote(xVarType) + ", FALSE) }");
+          connection.voidEval("print(range)");
+          connection.voidEval("xVP <- plot.data::adjustToViewport(xVals, range)");
+          connection.voidEval("binWidth <- plot.data::numBinsToBinWidth(xVP, 8)");
           if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
             binWidth = binSpec.getValue() == null ? binWidth : "as.numeric('" + binSpec.getValue() + "')";
           } else {
@@ -119,7 +127,7 @@ public class MapMarkersOverlayPlugin extends AbstractPlugin<MapMarkersOverlayPos
       String cmd =
           "plot.data::mapMarkers(" + DEFAULT_SINGLE_STREAM_NAME + ", map, binWidth, " +
               valueSpec + ", " +
-              binReportValue + ", viewport, '" +
+              binReportValue + ", binRange, viewport, '" +
               deprecatedShowMissingness + "')";
       streamResult(connection, cmd, out);
     });
