@@ -1,7 +1,7 @@
 package org.veupathdb.service.eda.ds.plugin.pass;
 
 import java.util.List;
-import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
+import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.CLINEPI_PROJECT;

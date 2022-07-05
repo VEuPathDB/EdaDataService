@@ -9,8 +9,10 @@ import java.util.Map;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
-import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
-import org.veupathdb.service.eda.ds.constraints.DataElementSet;
+import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
+import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
+import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
+import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.HeatmapPostRequest;
@@ -19,8 +21,8 @@ import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.CLINEPI_PROJECT;
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.MICROBIOME_PROJECT;
-import static org.veupathdb.service.eda.ds.util.RServeClient.streamResult;
-import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
+import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
+import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 
 public class HeatmapPlugin extends AbstractPlugin<HeatmapPostRequest, HeatmapSpec> {
 
@@ -92,20 +94,21 @@ public class HeatmapPlugin extends AbstractPlugin<HeatmapPostRequest, HeatmapSpe
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    useRConnectionWithRemoteFiles(dataStreams, connection -> {
+    useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
+      PluginUtil util = getUtil();
       HeatmapSpec spec = getPluginSpec();
       Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
       varMap.put("xAxisVariable", spec.getXAxisVariable());
       varMap.put("yAxisVariable", spec.getYAxisVariable());
       varMap.put("zAxisVariable", spec.getZAxisVariable());
-      varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
-      varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
-      connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
+      varMap.put("facetVariable1", util.getVariableSpecFromList(spec.getFacetVariable(), 0));
+      varMap.put("facetVariable2", util.getVariableSpecFromList(spec.getFacetVariable(), 1));
+      connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
           spec.getXAxisVariable(),
           spec.getYAxisVariable(),
           spec.getZAxisVariable(),
-          getVariableSpecFromList(spec.getFacetVariable(), 0),
-          getVariableSpecFromList(spec.getFacetVariable(), 1)));
+          util.getVariableSpecFromList(spec.getFacetVariable(), 0),
+          util.getVariableSpecFromList(spec.getFacetVariable(), 1)));
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       String cmd = "plot.data::heatmap(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" + spec.getValueSpec().toString().toLowerCase() + "')";
       streamResult(connection, cmd, out);

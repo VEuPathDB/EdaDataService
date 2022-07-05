@@ -15,8 +15,8 @@ import org.gusdb.fgputil.geo.LatLonAverager;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.json.JSONObject;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
-import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
-import org.veupathdb.service.eda.ds.constraints.DataElementSet;
+import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
+import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.GeolocationViewport;
@@ -126,7 +126,7 @@ public class MapPlugin extends AbstractPlugin<MapPostRequest, MapSpec> {
 
     // establish column header indexes
     MapSpec spec = getPluginSpec();
-    Function<VariableSpec,Integer> indexOf = var -> parser.indexOfColumn(toColNameOrEmpty(var)).orElseThrow();
+    Function<VariableSpec,Integer> indexOf = var -> parser.indexOfColumn(getUtil().toColNameOrEmpty(var)).orElseThrow();
     int geoVarIndex = indexOf.apply(spec.getGeoAggregateVariable());
     int latIndex    = indexOf.apply(spec.getLatitudeVariable());
     int lonIndex    = indexOf.apply(spec.getLongitudeVariable());
@@ -147,7 +147,7 @@ public class MapPlugin extends AbstractPlugin<MapPostRequest, MapSpec> {
       
         if (withinViewport(viewport, latitude, longitude)) {
           aggregator.putIfAbsent(row[geoVarIndex], new GeoVarData());
-          aggregator.get(row[geoVarIndex]).addRow(Double.valueOf(row[latIndex]), Double.valueOf(row[lonIndex]));
+          aggregator.get(row[geoVarIndex]).addRow(Double.parseDouble(row[latIndex]), Double.parseDouble(row[lonIndex]));
         }
       }  
     }

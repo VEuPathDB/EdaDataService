@@ -41,7 +41,7 @@ import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.MultiStreamPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.RecordCountPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.TestCollectionPlugin;
-import org.veupathdb.service.eda.ds.util.NonEmptyResultStream.EmptyResultException;
+import org.veupathdb.service.eda.common.client.NonEmptyResultStream.EmptyResultException;
 import org.veupathdb.service.eda.generated.model.*;
 import org.veupathdb.service.eda.generated.resources.Apps;
 

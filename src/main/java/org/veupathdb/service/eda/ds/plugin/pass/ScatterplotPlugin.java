@@ -12,18 +12,20 @@ import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
-import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
-import org.veupathdb.service.eda.ds.constraints.DataElementSet;
+import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
+import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
+import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
+import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.ds.util.RFileSetProcessor;
+import org.veupathdb.service.eda.common.plugin.util.RFileSetProcessor;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.ScatterplotPostRequest;
 import org.veupathdb.service.eda.generated.model.ScatterplotSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.CLINEPI_PROJECT;
-import static org.veupathdb.service.eda.ds.util.RServeClient.streamResult;
-import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithProcessedRemoteFiles;
+import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
+import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithProcessedRemoteFiles;
 
 public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, ScatterplotSpec> {
 
@@ -96,25 +98,26 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
+    PluginUtil util = getUtil();
     ScatterplotSpec spec = getPluginSpec();
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
     varMap.put("xAxisVariable", spec.getXAxisVariable());
     varMap.put("yAxisVariable", spec.getYAxisVariable());
     varMap.put("overlayVariable", spec.getOverlayVariable());
-    varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
-    varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
+    varMap.put("facetVariable1", util.getVariableSpecFromList(spec.getFacetVariable(), 0));
+    varMap.put("facetVariable2", util.getVariableSpecFromList(spec.getFacetVariable(), 1));
     String valueSpec = spec.getValueSpec().getValue();
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
     String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
-    String yVarType = getVariableType(spec.getYAxisVariable());
+    String yVarType = util.getVariableType(spec.getYAxisVariable());
     
     if (yVarType.equals("DATE") && !valueSpec.equals("raw")) {
       LOG.error("Cannot calculate trend lines for y-axis date variables. The `valueSpec` property must be set to `raw`.");
     }
     
     List<String> nonStrataVarColNames = new ArrayList<String>();
-    nonStrataVarColNames.add(toColNameOrEmpty(spec.getXAxisVariable()));
-    nonStrataVarColNames.add(toColNameOrEmpty(spec.getYAxisVariable()));
+    nonStrataVarColNames.add(util.toColNameOrEmpty(spec.getXAxisVariable()));
+    nonStrataVarColNames.add(util.toColNameOrEmpty(spec.getYAxisVariable()));
 
     RFileSetProcessor filesProcessor = new RFileSetProcessor(dataStreams)
       .add(DEFAULT_SINGLE_STREAM_NAME, 
@@ -122,15 +125,15 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
         deprecatedShowMissingness, 
         nonStrataVarColNames, 
         (name, conn) ->
-        conn.voidEval(getVoidEvalFreadCommand(name,
+        conn.voidEval(util.getVoidEvalFreadCommand(name,
           spec.getXAxisVariable(),
           spec.getYAxisVariable(),
           spec.getOverlayVariable(),
-          getVariableSpecFromList(spec.getFacetVariable(), 0),
-          getVariableSpecFromList(spec.getFacetVariable(), 1)))
+          util.getVariableSpecFromList(spec.getFacetVariable(), 0),
+          util.getVariableSpecFromList(spec.getFacetVariable(), 1)))
       );
 
-    useRConnectionWithProcessedRemoteFiles(filesProcessor, connection -> {
+    useRConnectionWithProcessedRemoteFiles(Resources.RSERVE_URL, filesProcessor, connection -> {
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       String cmd = 
           "plot.data::scattergl(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" + 

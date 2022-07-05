@@ -6,23 +6,23 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
+
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
-import org.json.JSONObject;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
-import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
-import org.veupathdb.service.eda.ds.constraints.DataElementSet;
+import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
+import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
+import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
+import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.BinSpec;
 import org.veupathdb.service.eda.generated.model.MapMarkersOverlayPostRequest;
 import org.veupathdb.service.eda.generated.model.MapMarkersOverlaySpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
-import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.CLINEPI_PROJECT;
-import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.MICROBIOME_PROJECT;
-import static org.veupathdb.service.eda.ds.util.RServeClient.streamResult;
-import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
+import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuote;
+import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
+import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 
 public class MapMarkersOverlayPlugin extends AbstractPlugin<MapMarkersOverlayPostRequest, MapMarkersOverlaySpec> {
 
@@ -73,20 +73,21 @@ public class MapMarkersOverlayPlugin extends AbstractPlugin<MapMarkersOverlayPos
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
+    PluginUtil util = getUtil();
     MapMarkersOverlaySpec spec = getPluginSpec();
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
     String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
     String valueSpec = singleQuote(spec.getValueSpec().getValue());
-    String xVarType = getVariableType(spec.getXAxisVariable());
+    String xVarType = util.getVariableType(spec.getXAxisVariable());
 
-    Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
+    Map<String, VariableSpec> varMap = new HashMap<>();
     varMap.put("xAxisVariable", spec.getXAxisVariable());
     varMap.put("geoAggregateVariable", spec.getGeoAggregateVariable());
     varMap.put("latitudeVariable", spec.getLatitudeVariable());
     varMap.put("longitudeVariable", spec.getLongitudeVariable());
       
-    useRConnectionWithRemoteFiles(dataStreams, connection -> {
-      connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
+    useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
+      connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
           spec.getXAxisVariable(),
           spec.getGeoAggregateVariable(),
           spec.getLatitudeVariable(),

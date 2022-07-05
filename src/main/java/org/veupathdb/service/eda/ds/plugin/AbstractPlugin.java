@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -13,28 +12,25 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.Timer;
 import org.gusdb.fgputil.client.ResponseFuture;
 import org.gusdb.fgputil.functional.FunctionalInterfaces.ConsumerWithException;
 import org.gusdb.fgputil.functional.Functions;
-import org.gusdb.fgputil.functional.TreeNode;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.EdaMergingClient;
 import org.veupathdb.service.eda.common.client.EdaSubsettingClient;
 import org.veupathdb.service.eda.common.client.StreamingDataClient;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
-import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.model.ReferenceMetadata;
-import org.veupathdb.service.eda.common.model.VariableDef;
+import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
-import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
-import org.veupathdb.service.eda.ds.constraints.DataElementSet;
-import org.veupathdb.service.eda.ds.constraints.DataElementValidator;
-import org.veupathdb.service.eda.ds.util.NonEmptyResultStream;
+import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
+import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
+import org.veupathdb.service.eda.common.plugin.constraint.DataElementValidator;
+import org.veupathdb.service.eda.common.client.NonEmptyResultStream;
 import org.veupathdb.service.eda.generated.model.APIFilter;
 import org.veupathdb.service.eda.generated.model.APIStudyDetail;
 import org.veupathdb.service.eda.generated.model.BinSpec;
@@ -46,6 +42,9 @@ import org.veupathdb.service.eda.generated.model.NumberRange;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 import org.veupathdb.service.eda.generated.model.VisualizationRequestBase;
 import org.veupathdb.service.eda.generated.model.NumericViewport;
+
+import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.doubleQuote;
+import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuote;
 
 /**
  * Base vizualization plugin for all other plugins.  Provides access to parts of
@@ -89,7 +88,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   private List<APIFilter> _subset;
   private List<DerivedVariable> _derivedVariables;
   private EdaSubsettingClient _subsettingClient;
-  private StreamingDataClient _mergingClient;
+  private EdaMergingClient _mergingClient;
 
   public final AbstractPlugin<T,S> processRequest(String appName, T request, Entry<String,String> authHeader) throws ValidationException {
 
@@ -168,6 +167,9 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     return _referenceMetadata;
   }
 
+  protected PluginUtil getUtil() {
+    return new PluginUtil(getReferenceMetadata(), _mergingClient);
+  }
   protected void validateInputs(DataElementSet values) throws ValidationException {
     new DataElementValidator(getReferenceMetadata(), getConstraintSpec()).validate(values);
   }
@@ -194,79 +196,9 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     }
   }
 
-  protected String toColNameOrEmpty(VariableSpec var) {
-    return var == null ? "" : _mergingClient.varToColumnHeader(var);
-  }
-
-  protected String toColNameOrEmpty(List<VariableSpec> vars, int index) {
-    VariableSpec var = getVariableSpecFromList(vars, index);
-    return toColNameOrEmpty(var);
-  }
-
   /*****************************************************************
-   *** Metadata access utilities for subclasses
+   *** Shared plugin-specific utilities
    ****************************************************************/
-
-  protected VariableDef getEntityIdVarSpec(String entityId) {
-    return getReferenceMetadata().getEntity(entityId).orElseThrow().getIdColumnDef();
-  }
-
-  protected VariableSpec getVariableSpecFromList(List<VariableSpec> vars, int index) {
-    return vars == null || vars.size() <= index ? null : vars.get(index);
-  }
-
-  protected String getVariableEntityId(VariableSpec var) {
-    return var == null ? null : var.getEntityId();
-  }
-
-  protected String getVariableEntityId(List<VariableSpec> vars, int index) {
-    return getVariableEntityId(getVariableSpecFromList(vars, index));
-  }
-
-  private String getVariableAttribute(Function<VariableDef, ?> getter, VariableSpec var) {
-    return var == null ? "" : getter.apply(getReferenceMetadata().getVariable(var).orElseThrow()).toString();
-  }
-
-  protected String getVariableType(VariableSpec var) {
-    return getVariableAttribute(VariableDef::getType, var);
-  }
-
-  protected String getVariableType(List<VariableSpec> vars, int index) {
-    return getVariableType(getVariableSpecFromList(vars, index));
-  }
-
-  protected String getVariableDataShape(VariableSpec var) {
-    return getVariableAttribute(VariableDef::getDataShape, var);
-  }
-
-  protected String getVariableDataShape(List<VariableSpec> vars, int index) {
-    return getVariableDataShape(getVariableSpecFromList(vars, index));
-  }
-
-  protected List<VariableDef> getChildrenVariables(VariableSpec collectionVar) {
-    EntityDef collectionVarEntityDef = getReferenceMetadata().getEntity(collectionVar.getEntityId()).orElseThrow();
-    TreeNode<VariableDef> childVarsTree = collectionVarEntityDef.getNativeVariableTreeNode(collectionVar);
-    // TODO: for now assume we only have leaves as children; revisit if that turns out to not be true
-    return childVarsTree.findAndMap(TreeNode::isLeaf, v -> true, v -> v);
-  }
-
-  /*****************************************************************
-   *** RServe command utilities for subclasses
-   ****************************************************************/
-
-  // Suggested helper to take array of var names, entities, types, or shapes, and rewrite them into one comma separated string.
-  //  public static String toCommaSepString(String[] stringArray) {
-  //    String commaString = "";
-  //    for (int i = 0; i < stringArray.length; i++) {
-  //      //Do your stuff here
-  //      if (i < stringArray.length - 1){
-  //        commaString += ("'" + stringArray[i] + "', ");
-  //      } else {
-  //        commaString += ("'" + stringArray[i] + "'");
-  //      }
-  //    }
-  //    return commaString;
-  //  }
 
   protected void validateBinSpec(BinSpec binSpec, String xVarType) {
     if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
@@ -277,50 +209,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     // need an error here if its a date and we dont have a unit?
   }
 
-  protected String singleQuote(String unquotedString) {
-    return "'" + unquotedString + "'";
-  }
-
-  protected String doubleQuote(String unquotedString) {
-    return "\"" + unquotedString + "\"";
-  }
-
-  protected String getVoidEvalFreadCommand(String fileName, VariableSpec... vars) {  
-    return getVoidEvalFreadCommand(fileName, new ListBuilder().addAll(vars).toList());
-  }  
-
-  protected String getVoidEvalFreadCommand(String fileName, List<VariableSpec> vars) {
-    boolean first = true;
-    String namedTypes = new String();
-
-    for(VariableSpec var : vars) {
-      String varName = toColNameOrEmpty(var);
-      if (varName.equals("")) continue;
-      String varType = getVariableType(var);
-      String varShape = getVariableDataShape(var);
-      String rBaseType;
-      if (varType.equals("INTEGER")) {
-        rBaseType = "integer";
-      } else if (varShape.equals("CONTINUOUS") & !varType.equals("DATE")) {
-        rBaseType = "double";
-      } else {
-        rBaseType = "character";
-      }
-      if (first) {
-        first = false;
-        namedTypes = singleQuote(varName) + "=" + singleQuote(rBaseType);
-      } else {
-        namedTypes = namedTypes + "," + singleQuote(varName) + "=" + singleQuote(rBaseType);
-      }
-    }
-
-    return fileName +
-        " <- fread(" + singleQuote(fileName) +
-        ", select=c(" + namedTypes + ")" +
-        ", na.strings=c(''))";
-  }
-
-  protected String getBinRangeAsRString(RangeType binRange) {
+  public static String getBinRangeAsRString(RangeType binRange) {
     if (binRange != null) {
       if (binRange.isNumberRange()) {
         return(getBinRangeAsRString(binRange.getNumberRange()));
@@ -332,7 +221,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     }
   }
 
-  protected String getBinRangeAsRString(NumberRange binRange) { 
+  public static String getBinRangeAsRString(NumberRange binRange) {
     if (binRange != null) {
       return("binRange <- list('min'=" + binRange.getMin().toString() + ", 'max'=" + binRange.getMax().toString() + ")");
     } else {
@@ -340,15 +229,15 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     }
   }
 
-  protected String getBinRangeAsRString(DateRange binRange) {
+  public static String getBinRangeAsRString(DateRange binRange) {
     if (binRange != null) {
       return("binRange <- list('min'='" + binRange.getMin() + "', 'max'='" + binRange.getMax() + "')");
     } else {
       return("binRange <- NULL");
     }
   }
- 
-  protected String getViewportAsRString(NumericViewport viewport, String xVarType) {
+
+  public static String getViewportAsRString(NumericViewport viewport, String xVarType) {
     if (viewport != null) {
       // think if we just pass the string plot.data will convert it to the claimed type
       if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
@@ -361,19 +250,19 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     }
   }
 
-  protected String getViewportAsRString(GeolocationViewport viewport) {
+  public static String getViewportAsRString(GeolocationViewport viewport) {
     if (viewport != null) {
-      return("viewport <- list('latitude'=list('xMin'= " + viewport.getLatitude().getXMin() + 
-                                            ", 'xMax'= " + viewport.getLatitude().getXMax() + 
-                           "), 'longitude'= list('left'= " + viewport.getLongitude().getLeft() + 
-                                              ", 'right' = " + viewport.getLongitude().getRight() + "))");
+      return("viewport <- list('latitude'=list('xMin'= " + viewport.getLatitude().getXMin() +
+          ", 'xMax'= " + viewport.getLatitude().getXMax() +
+          "), 'longitude'= list('left'= " + viewport.getLongitude().getLeft() +
+          ", 'right' = " + viewport.getLongitude().getRight() + "))");
     } else {
       return("viewport <- NULL");
     }
   }
 
   // there is probably some JRI util that would make this unnecessary if i were more clever??
-  protected String listToRVector(List<String> values) {
+  public static String listToRVector(List<String> values) {
     boolean first = true;
     String vector = "c(";
 
@@ -390,20 +279,21 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     return(vector);
   }
 
-  protected String getVoidEvalVarMetadataMap(String datasetName, Map<String, VariableSpec> vars) {
+  public String getVoidEvalVarMetadataMap(String datasetName, Map<String, VariableSpec> vars) {
     boolean first = true;
     String plotRefVector = new String();
     String varColNameVector = new String();
     String varTypeVector = new String();
     String varShapeVector = new String();
-    
-    for(Entry<String, VariableSpec> entry : vars.entrySet()) {
+
+    PluginUtil util = getUtil();
+    for(Map.Entry<String, VariableSpec> entry : vars.entrySet()) {
       String plotRef = entry.getKey();
       VariableSpec var = entry.getValue();
-      String varName = toColNameOrEmpty(var);
+      String varName = util.toColNameOrEmpty(var);
       if (varName.equals("")) continue;
-      String varType = getVariableType(var);
-      String varShape = getVariableDataShape(var);
+      String varType = util.getVariableType(var);
+      String varShape = util.getVariableDataShape(var);
       if (first) {
         first = false;
         plotRefVector = singleQuote(plotRef);
@@ -417,13 +307,14 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
         varShapeVector = varShapeVector + "," + singleQuote(varShape);
       }
     }
-        
+
     String varMetadataMapString = "map <- data.frame("
         + "'plotRef'=c(" + plotRefVector + "), "
         + "'id'=c(" + varColNameVector + "), "
         + "'dataType'=c("+ varTypeVector + "), "
         + "'dataShape'=c(" + varShapeVector + "), stringsAsFactors=FALSE)";
-    
+
     return varMetadataMapString;
   }
+
 }

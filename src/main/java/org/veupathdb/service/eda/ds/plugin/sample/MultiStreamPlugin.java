@@ -70,14 +70,14 @@ public class MultiStreamPlugin extends AbstractPlugin<MultiStreamPostRequest, Mu
     List<VariableDef> varsToRequest = getVars(entity);
     // ask for up to three streams, named for the vars they will provide
     return varsToRequest.stream()
-      .map(var -> new StreamSpec(toColNameOrEmpty(var), entity.getId()).addVar(var))
+      .map(var -> new StreamSpec(getUtil().toColNameOrEmpty(var), entity.getId()).addVar(var))
       .collect(Collectors.toList());
   }
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     EntityDef entity = getReferenceMetadata().getEntity(getPluginSpec().getEntityId()).orElseThrow();
-    String idColumn = toColNameOrEmpty(entity.getIdColumnDef());
+    String idColumn = getUtil().toColNameOrEmpty(entity.getIdColumnDef());
     try (Writer writer = new BufferedWriter(new OutputStreamWriter(out))) {
       // write header
       writer.write(idColumn + TAB + join(dataStreams.keySet(), TAB) + NL);
