@@ -56,6 +56,7 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
           .maxValues(10)
           .description("Variable must have 10 or fewer unique values.")
         .element("overlayVariable")
+          .required(false)
           .maxValues(8)
           .description("Variable must have 8 or fewer unique values and be of the same or a parent entity as the X-axis variable.")
         .element("facetVariable")

@@ -35,6 +35,7 @@ public class TimeSeriesPlugin extends LineplotPlugin {
           .temporal(true)
           .description("Variable must be temporal and be of the same or a parent entity as the Y-axis variable.")
         .element("overlayVariable")
+          .required(false)
           .maxValues(8)
           .description("Variable must have 8 or fewer unique values and be of the same or a parent entity as the X-axis variable.")
         .element("facetVariable")
