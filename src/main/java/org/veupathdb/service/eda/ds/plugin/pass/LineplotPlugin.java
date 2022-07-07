@@ -57,6 +57,7 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
           .shapes(APIVariableDataShape.ORDINAL, APIVariableDataShape.CONTINUOUS)
           .description("Variable must be ordinal, a number, or a date and be of the same or a parent entity of the Y-axis variable.")
         .element("overlayVariable")
+          .required(false)
           .maxValues(8)
           .description("Variable must have 8 or fewer unique values and be of the same or a parent entity as the X-axis variable.")
         .element("facetVariable")

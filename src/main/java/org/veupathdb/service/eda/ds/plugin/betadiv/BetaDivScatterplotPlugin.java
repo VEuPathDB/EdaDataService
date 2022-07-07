@@ -65,6 +65,8 @@ public class BetaDivScatterplotPlugin extends AbstractPluginWithCompute<BetaDivS
         //   .types(APIVariableType.NUMBER, APIVariableType.DATE)
         //   .description("Variable must be a number or date and be of the same or a parent entity as the Y-axis variable.")
         .element("overlayVariable")
+          .required(false)
+          .maxValues(8)
           .description("Variable must be of the same or a parent entity as the X-axis variable.")
       .done();
   }

@@ -61,6 +61,7 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
           .maxValues(10)
           .description("Variable must have 10 or fewer unique values and be the same or a parent entity of the Y-axis variable.") // Of taxa entity?
         .element("overlayVariable")
+          .required(false)
           .maxValues(8)
           .description("Variable must have 8 or fewer unique values and be the same or a parent entity of the X-axis variable.")
         .element("facetVariable")

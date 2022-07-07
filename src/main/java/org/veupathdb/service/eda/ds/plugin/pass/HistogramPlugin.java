@@ -60,6 +60,7 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
           .types(APIVariableType.NUMBER, APIVariableType.DATE, APIVariableType.INTEGER)
           .description("Variable must be a number or date.")
         .element("overlayVariable")
+          .required(false)
           .maxValues(8)
           .description("Variable must have 8 or fewer unique values and be of the same or a parent entity as the X-axis variable.")
         .element("facetVariable")
