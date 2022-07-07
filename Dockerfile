@@ -42,7 +42,7 @@ RUN make jar
 #   Run the service
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-FROM foxcapades/alpine-oracle:1.6
+FROM alpine:3.16
 
 LABEL service="eda-data"
 
