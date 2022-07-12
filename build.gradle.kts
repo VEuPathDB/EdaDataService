@@ -10,7 +10,7 @@ plugins {
 containerBuild {
 
   // Change if debugging the build process is necessary.
-  logLevel = Level.Trace
+  logLevel = Level.Info
 
   // General project level configuration.
   project {
