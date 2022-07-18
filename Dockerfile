@@ -3,7 +3,7 @@
 #   Build Service & Dependencies
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-FROM veupathdb/alpine-dev-base:jdk-17 AS prep
+FROM veupathdb/alpine-dev-base:jdk-18 AS prep
 
 LABEL service="eda-data-build"
 
