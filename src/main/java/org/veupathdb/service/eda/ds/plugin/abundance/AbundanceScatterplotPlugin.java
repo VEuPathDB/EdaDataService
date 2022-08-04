@@ -63,7 +63,7 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithCompute<Abunda
       .dependencyOrder("xAxisVariable", "facetVariable")
       .pattern()
         .element("xAxisVariable")
-          .types(APIVariableType.NUMBER, APIVariableType.DATE)
+          .types(APIVariableType.NUMBER, APIVariableType.DATE, APIVariableType.INTEGER)
           .description("Variable must be a number or date and be of the same or a parent entity as the Y-axis variable.")
         .element("facetVariable")
           .required(false)

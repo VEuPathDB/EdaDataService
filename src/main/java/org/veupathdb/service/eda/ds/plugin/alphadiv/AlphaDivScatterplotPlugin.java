@@ -63,7 +63,7 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
       .dependencyOrder("xAxisVariable", "overlayVariable", "facetVariable")
       .pattern()
         .element("xAxisVariable")
-          .types(APIVariableType.NUMBER, APIVariableType.DATE)
+          .types(APIVariableType.NUMBER, APIVariableType.DATE, APIVariableType.INTEGER)
           .description("Variable must be a number or date and be of the same or a parent entity as the Y-axis variable.")
         .element("overlayVariable")
           .required(false)
