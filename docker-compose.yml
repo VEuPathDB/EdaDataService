@@ -11,12 +11,20 @@ services:
       external:
       monitoring-ext:
       traefik:
+    volumes:
+      - type: bind
+        source: ${MACHINE_BINARY_FILES_DIR:-/tmp/edaBinaryFiles}
+        target: ${SERVICE_BINARY_FILES_DIR:-/binaryFiles}
+        read_only: true
     environment:
       # port providing the service
       SERVER_PORT: ${SUBSETTING_SERVER_PORT:-8080}
 
       # URLs of required services
       DATASET_ACCESS_SERVICE_URL: ${DATASET_ACCESS_SERVICE_URL:-http://dataset-access-internal}:${DATASET_ACCESS_SERVER_PORT:-8080}
+
+      # Map-reduce subsetting method configuraton
+      BINARY_FILES_DIR: ${SERVICE_BINARY_FILES_DIR:-/binaryFiles}
 
       # LDAP values to look up DBs
       LDAP_SERVER: ${LDAP_SERVER}
