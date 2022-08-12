@@ -148,8 +148,8 @@ public class MapPlugin extends AbstractPlugin<MapPostRequest, MapSpec> {
 	    row[lonIndex].equals(""))) {
         entityRecordsWithGeoVar++;
       
-	Double latitude = Double.valueOf(row[latIndex]);
-	Double longitude = Double.valueOf(row[lonIndex]);
+        Double latitude = Double.valueOf(row[latIndex]);
+        Double longitude = Double.valueOf(row[lonIndex]);
         if (withinViewport(viewport, latitude, longitude)) {
           aggregator.putIfAbsent(row[geoVarIndex], new GeoVarData());
           aggregator.get(row[geoVarIndex]).addRow(Double.parseDouble(row[latIndex]), Double.parseDouble(row[lonIndex]));
