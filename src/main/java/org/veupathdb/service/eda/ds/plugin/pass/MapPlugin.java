@@ -138,13 +138,18 @@ public class MapPlugin extends AbstractPlugin<MapPostRequest, MapSpec> {
     Map<String, GeoVarData> aggregator = new HashMap<>();
     while (s.hasNextLine()) {
       String[] row = parser.parseLineToArray(s.nextLine());
-      Double latitude = Double.valueOf(row[latIndex]);
-      Double longitude = Double.valueOf(row[lonIndex]);
       
       // entity records counts not impacted by viewport
-      if (!(row[geoVarIndex] == null || row[geoVarIndex].equals(""))) { 
+      if (!(row[geoVarIndex] == null ||
+	    row[geoVarIndex].equals("") ||
+	    row[latIndex] == null ||
+	    row[latIndex].equals("") ||
+	    row[lonIndex] == null ||
+	    row[lonIndex].equals(""))) {
         entityRecordsWithGeoVar++;
       
+	Double latitude = Double.valueOf(row[latIndex]);
+	Double longitude = Double.valueOf(row[lonIndex]);
         if (withinViewport(viewport, latitude, longitude)) {
           aggregator.putIfAbsent(row[geoVarIndex], new GeoVarData());
           aggregator.get(row[geoVarIndex]).addRow(Double.parseDouble(row[latIndex]), Double.parseDouble(row[lonIndex]));
