@@ -141,11 +141,11 @@ public class MapPlugin extends AbstractPlugin<MapPostRequest, MapSpec> {
       
       // entity records counts not impacted by viewport
       if (!(row[geoVarIndex] == null ||
-	    row[geoVarIndex].equals("") ||
-	    row[latIndex] == null ||
-	    row[latIndex].equals("") ||
-	    row[lonIndex] == null ||
-	    row[lonIndex].equals(""))) {
+            row[geoVarIndex].equals("") ||
+            row[latIndex] == null ||
+            row[latIndex].equals("") ||
+            row[lonIndex] == null ||
+            row[lonIndex].equals(""))) {
         entityRecordsWithGeoVar++;
       
         Double latitude = Double.valueOf(row[latIndex]);
