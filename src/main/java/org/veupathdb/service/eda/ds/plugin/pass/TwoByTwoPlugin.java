@@ -27,7 +27,7 @@ public class TwoByTwoPlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpec
 
   @Override
   public String getDisplayName() {
-    return "Mosaic Plot, 2x2 Table";
+    return "Mosaic plot, 2x2 table";
   }
 
   @Override
