@@ -1,1 +1,0 @@
-{"buildTargets":["build/libs/service.jar","clean","compile","default","docker","gen-docs","gen-jaxrs","install-dev-env","jar","merge-raml","test"],"launchTargets":[],"customConfigurationProvider":{"workspaceBrowse":{"browsePath":[],"compilerArgs":[]},"fileIndex":[]}}
