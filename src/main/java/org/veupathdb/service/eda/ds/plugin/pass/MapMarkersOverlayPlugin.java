@@ -28,7 +28,7 @@ public class MapMarkersOverlayPlugin extends AbstractPlugin<MapMarkersOverlayPos
 
   @Override
   public String getDisplayName() {
-    return "Map Markers";
+    return "Map markers";
   }
 
   @Override

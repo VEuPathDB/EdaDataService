@@ -26,7 +26,7 @@ public class ContTablePlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpe
 
   @Override
   public String getDisplayName() {
-    return "Mosaic Plot, RxC Table";
+    return "Mosaic plot, RxC table";
   }
 
   @Override

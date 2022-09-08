@@ -29,7 +29,7 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
 
   @Override
   public String getDisplayName() {
-    return "Line Plot";
+    return "Line plot";
   }
 
   @Override
