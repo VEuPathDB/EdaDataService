@@ -36,13 +36,14 @@ public class AppsMetadata {
   public static final String CLINEPI_PROJECT = "ClinEpiDB";
   public static final String ALLCLINEPI_PROJECT = "AllClinEpiDB";
   public static final String MICROBIOME_PROJECT = "MicrobiomeDB";
+  public static final String VECTORBASE_PROJECT = "VectorBase";
 
   // NOTE: these names must match the url segments defined in the api.raml
   // Pass vizs are now different based on mbio vs clinepi so we need to adjust the below array?
   public static final AppsGetResponse APPS = apps(
       app("pass", "Pass-Through", null,
           "A collection of visualizations designed to support the unbiased exploration of relationships between variables",
-          Arrays.asList(CLINEPI_PROJECT, ALLCLINEPI_PROJECT),
+          Arrays.asList(CLINEPI_PROJECT, ALLCLINEPI_PROJECT, VECTORBASE_PROJECT),
           viz("histogram", new HistogramPlugin()),
           viz("barplot", new BarplotPlugin()),
           viz("scatterplot", new ScatterplotPlugin()),
