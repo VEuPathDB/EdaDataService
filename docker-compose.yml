@@ -172,6 +172,9 @@ services:
       PROJECT_SPECIFIC_PROP_MB_PROJECT_ID: MicrobiomeDB
       PROJECT_SPECIFIC_PROP_MB_USER_SCHEMA: edausermb
 
+      PROJECT_SPECIFIC_PROP_VB_PROJECT_ID: VectorBase
+      PROJECT_SPECIFIC_PROP_VB_USER_SCHEMA: edauservb
+
     labels:
     - "prometheus.scrape_enabled=true"
     - "com.centurylinklabs.watchtower.enable=${USER_WATCHTOWER:-false}"
