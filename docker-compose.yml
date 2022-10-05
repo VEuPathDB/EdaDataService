@@ -26,7 +26,7 @@ services:
       # Map-reduce subsetting method configuraton
       BINARY_FILES_DIR: ${SERVICE_BINARY_FILES_DIR:-/binaryFiles}
       DB_BUILD: ${DB_BUILD}
-      AVAILABLE_BINARY_FILES_PATHS: ${AVAILABLE_BINARY_FILES_PATHS}
+      AVAILABLE_BINARY_FILES_PATHS: ${AVAILABLE_BINARY_FILES_PATHS:-ClinEpiDB/%DB_BUILD%/eda-studies-binary;MicrobiomeDB/%DB_BUILD%/eda-studies-binary;*/%DB_BUILD%/*/eda-studies-binary}
 
       # LDAP values to look up DBs
       LDAP_SERVER: ${LDAP_SERVER}
