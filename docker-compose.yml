@@ -13,7 +13,7 @@ services:
       traefik:
     volumes:
       - type: bind
-        source: ${MACHINE_BINARY_FILES_DIR:-/tmp/edaBinaryFiles}
+        source: ${MACHINE_BINARY_FILES_DIR:-/var/www/Common/apiSiteFilesMirror/webServices}
         target: ${SERVICE_BINARY_FILES_DIR:-/binaryFiles}
         read_only: true
     environment:
@@ -25,6 +25,8 @@ services:
 
       # Map-reduce subsetting method configuraton
       BINARY_FILES_DIR: ${SERVICE_BINARY_FILES_DIR:-/binaryFiles}
+      DB_BUILD: ${DB_BUILD}
+      AVAILABLE_BINARY_FILES_PATHS: ${AVAILABLE_BINARY_FILES_PATHS}
 
       # LDAP values to look up DBs
       LDAP_SERVER: ${LDAP_SERVER}
