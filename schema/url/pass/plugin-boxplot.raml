@@ -41,22 +41,13 @@ types:
         format: int64
         required: false
       
-
-  BoxplotConfig:
-    type: PlotConfig
-    properties:
-      xVariableDetails:
-        type: VariableSpec
-      yVariableDetails:
-        type: VariableSpec
-
   Boxplot:
     additionalProperties: false
     properties:
       data:
         type: BoxplotData[]
       config:
-        type: BoxplotConfig
+        type: PlotConfig
 
   BoxplotPostResponse:
     additionalProperties: false

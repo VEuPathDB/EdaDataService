@@ -26,19 +26,13 @@ types:
         maxItems: 2
         required: false
 
-  DensityplotConfig:
-    type: PlotConfig
-    properties:
-      xVariableDetails:
-        type: VariableSpec
-
   Densityplot:
     additionalProperties: false
     properties:
       data:
         type: DensityplotData[]
       config:
-        type: DensityplotConfig
+        type: PlotConfig
 
   DensityplotPostResponse:
     additionalProperties: false

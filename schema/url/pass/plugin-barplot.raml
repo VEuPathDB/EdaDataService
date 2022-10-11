@@ -31,19 +31,13 @@ types:
         maxItems: 2
         required: false
 
-  BarplotConfig:
-    type: PlotConfig
-    properties:
-      xVariableDetails:
-        type: VariableSpec
-
   Barplot:
     additionalProperties: false
     properties:
       data:
         type: BarplotData[]
       config:
-        type: BarplotConfig
+        type: PlotConfig
 
   BarplotPostResponse:
     additionalProperties: false

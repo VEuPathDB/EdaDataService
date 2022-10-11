@@ -35,21 +35,13 @@ types:
         format: int64
         required: false
 
-  ScatterplotConfig:
-    type: PlotConfig
-    properties:
-      xVariableDetails:
-        type: VariableSpec
-      yVariableDetails:
-        type: VariableSpec
-
   Scatterplot:
     additionalProperties: false
     properties:
       data:
         type: ScatterplotData[]
       config:
-        type: ScatterplotConfig
+        type: PlotConfig
 
   ScatterplotPostResponse:
     additionalProperties: false

@@ -178,14 +178,6 @@ types:
         maxItems: 2
         required: false
 
-  MosaicConfig:
-    type: PlotConfig
-    properties:
-      xVariableDetails:
-        type: VariableSpec
-      yVariableDetails:
-        type: VariableSpec
-
   MosaicData:
     additionalProperties: false
     properties:
@@ -212,7 +204,7 @@ types:
       data:
         type: MosaicData[]
       config:
-        type: MosaicConfig
+        type: PlotConfig
 
   ScatterplotData:
     additionalProperties: false
@@ -307,9 +299,7 @@ types:
     properties:
       completeCasesAllVars: number
       completeCasesAxesVars: number
-      computedVariableMetadata:
-        type: ComputedVariableMetadata
-        required: false
+      variables: VariableMetadata[]
 
   SampleSizeTable:
     additionalProperties: false
