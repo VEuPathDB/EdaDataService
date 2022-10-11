@@ -32,7 +32,7 @@ public class MapPlugin extends AbstractPlugin<MapPostRequest, MapSpec> {
 
   @Override
   public String getDisplayName() {
-    return "Geolocation map";
+    return "Point map";
   }
 
   @Override
