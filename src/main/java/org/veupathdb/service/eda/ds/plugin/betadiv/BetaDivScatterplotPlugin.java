@@ -58,12 +58,6 @@ public class BetaDivScatterplotPlugin extends AbstractPluginWithCompute<BetaDivS
     return new ConstraintSpec()
       .dependencyOrder("overlayVariable")
       .pattern()
-        // .element("yAxisVariable")
-        //   .types(APIVariableType.NUMBER, APIVariableType.DATE) 
-        //   .description("Variable must be a number or date.")
-        // .element("xAxisVariable")
-        //   .types(APIVariableType.NUMBER, APIVariableType.DATE)
-        //   .description("Variable must be a number or date and be of the same or a parent entity as the Y-axis variable.")
         .element("overlayVariable")
           .required(false)
           .maxValues(8)
@@ -75,8 +69,6 @@ public class BetaDivScatterplotPlugin extends AbstractPluginWithCompute<BetaDivS
   protected void validateVisualizationSpec(BetaDivScatterplotSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
-      // .var("xAxisVariable", pluginSpec.getXAxisVariable())
-      // .var("yAxisVariable", pluginSpec.getYAxisVariable())
       .var("overlayVariable", pluginSpec.getOverlayVariable()));
   }
 
@@ -84,8 +76,6 @@ public class BetaDivScatterplotPlugin extends AbstractPluginWithCompute<BetaDivS
   protected List<StreamSpec> getRequestedStreams(BetaDivScatterplotSpec pluginSpec, BetaDivComputeConfig computeConfig) {
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
-        // .addVar(pluginSpec.getXAxisVariable())
-        // .addVar(pluginSpec.getYAxisVariable())
         .addVar(pluginSpec.getOverlayVariable()));
   }
 
@@ -93,8 +83,8 @@ public class BetaDivScatterplotPlugin extends AbstractPluginWithCompute<BetaDivS
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     BetaDivScatterplotSpec spec = getPluginSpec();
     Map<String, VariableSpec> varMap = new HashMap<>();
-    // varMap.put("xAxisVariable", spec.getXAxisVariable()); // Will come from compute service
-    // varMap.put("yAxisVariable", spec.getYAxisVariable());  // Will come from compute service
+    // varMap.put("xAxisVariable", spec.getXAxisVariable()); // Will come from compute service meta endpoint
+    // varMap.put("yAxisVariable", spec.getYAxisVariable());  // Will come from compute service meta endpoint
     varMap.put("overlayVariable", spec.getOverlayVariable());
     String valueSpec = "raw";
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
@@ -102,8 +92,8 @@ public class BetaDivScatterplotPlugin extends AbstractPluginWithCompute<BetaDivS
     
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(getUtil().getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
-          // spec.getXAxisVariable(), // Will come from CS
-          // spec.getYAxisVariable(), // Will come from CS
+          // spec.getXAxisVariable(), // Will come from compute service meta endpoint
+          // spec.getYAxisVariable(), // Will come from compute service meta endpoint
           spec.getOverlayVariable()));
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
       String command = "plot.data::scattergl(data, map, '" + valueSpec + "', '" + deprecatedShowMissingness + "')";
