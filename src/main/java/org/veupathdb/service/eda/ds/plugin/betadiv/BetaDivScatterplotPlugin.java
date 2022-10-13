@@ -56,7 +56,7 @@ public class BetaDivScatterplotPlugin extends AbstractPluginWithCompute<BetaDivS
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder("overlayVariable")
+      .dependencyOrder(new String[] {"overlayVariable"})
       .pattern()
         // .element("yAxisVariable")
         //   .types(APIVariableType.NUMBER, APIVariableType.DATE) 

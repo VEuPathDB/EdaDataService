@@ -49,7 +49,7 @@ public class DensityplotPlugin extends AbstractPlugin<DensityplotPostRequest, De
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder("xAxisVariable", "overlayVariable", "facetVariable")
+      .dependencyOrder(new String[] {"xAxisVariable"}, new String[] {"overlayVariable", "facetVariable"})
       .pattern()
         .element("xAxisVariable")
           .types(APIVariableType.NUMBER, APIVariableType.INTEGER)

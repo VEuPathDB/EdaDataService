@@ -48,7 +48,7 @@ public class TwoByTwoPlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpec
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder("yAxisVariable", "xAxisVariable", "facetVariable")
+      .dependencyOrder(new String[] {"yAxisVariable", "xAxisVariable"}, new String[] {"facetVariable"})
       .pattern()
         .element("yAxisVariable")
           .shapes(APIVariableDataShape.BINARY)

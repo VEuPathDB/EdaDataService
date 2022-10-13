@@ -55,7 +55,7 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder("overlayVariable", "facetVariable")
+      .dependencyOrder(new String[] {"overlayVariable", "facetVariable"})
       .pattern()
         .element("overlayVariable")
           .required(false)

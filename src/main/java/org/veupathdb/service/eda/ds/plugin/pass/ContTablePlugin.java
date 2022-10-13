@@ -47,7 +47,7 @@ public class ContTablePlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpe
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder("yAxisVariable", "xAxisVariable", "facetVariable")
+      .dependencyOrder(new String[] {"yAxisVariable", "xAxisVariable"}, new String[] {"facetVariable"})
       .pattern()
         .element("yAxisVariable")
           .maxValues(8)

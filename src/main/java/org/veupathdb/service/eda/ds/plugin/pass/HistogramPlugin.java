@@ -54,7 +54,7 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder("xAxisVariable", "overlayVariable", "facetVariable")
+      .dependencyOrder(new String[] {"xAxisVariable"}, new String[] {"overlayVariable", "facetVariable"})
       .pattern()
         .element("xAxisVariable")
           .types(APIVariableType.NUMBER, APIVariableType.DATE, APIVariableType.INTEGER)

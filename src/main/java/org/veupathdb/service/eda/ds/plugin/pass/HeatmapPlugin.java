@@ -49,7 +49,7 @@ public class HeatmapPlugin extends AbstractPlugin<HeatmapPostRequest, HeatmapSpe
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder("zAxisVariable", "yAxisVariable", "xAxisVariable", "facetVariable")
+      .dependencyOrder(new String[] {"zAxisVariable"}, new String[] {"yAxisVariable"}, new String[] {"xAxisVariable"}, new String[] {"facetVariable"})
       .pattern()
         .element("zAxisVariable")
           .types(APIVariableType.NUMBER, APIVariableType.INTEGER)

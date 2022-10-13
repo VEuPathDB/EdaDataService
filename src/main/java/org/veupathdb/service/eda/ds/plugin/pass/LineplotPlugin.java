@@ -50,7 +50,7 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder("yAxisVariable", "xAxisVariable", "overlayVariable", "facetVariable")
+      .dependencyOrder(new String[] {"yAxisVariable"}, new String[] {"xAxisVariable"}, new String[] {"overlayVariable", "facetVariable"})
       .pattern()
         .element("yAxisVariable")
         .element("xAxisVariable")
