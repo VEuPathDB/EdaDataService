@@ -89,7 +89,7 @@ repositories {
 
 // versions
 val coreLib       = "6.8.0"         // Container core lib version
-val edaCommon     = "9.1.0"         // EDA Common version
+val edaCommon     = "9.3.0pre"         // EDA Common version
 val fgputil       = "2.7.1-jakarta" // FgpUtil version
 
 val jersey        = "3.0.4"       // Jersey/JaxRS version
