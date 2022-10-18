@@ -60,7 +60,7 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithCompute<Abunda
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder(new String[] {"xAxisVariable"}, new String[] {"facetVariable"})
+      .dependencyOrder(List.of("xAxisVariable"), List.of("facetVariable"))
       .pattern()
         .element("xAxisVariable")
           .types(APIVariableType.NUMBER, APIVariableType.DATE, APIVariableType.INTEGER)

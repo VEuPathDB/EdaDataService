@@ -44,7 +44,7 @@ public class MapMarkersOverlayPlugin extends AbstractPlugin<MapMarkersOverlayPos
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder(new String[] {"xAxisVariable"}, new String[] {"geoAggregateVariable"})
+      .dependencyOrder(List.of("xAxisVariable"), List.of("geoAggregateVariable"))
       .pattern()
         .element("xAxisVariable")
           .description("Categorical variables with more than 8 values will assign the top 7 values by count to their own categories and assign the additonal values into an 'other' category. Continuous variables will be binned into by default 8 categories.")
