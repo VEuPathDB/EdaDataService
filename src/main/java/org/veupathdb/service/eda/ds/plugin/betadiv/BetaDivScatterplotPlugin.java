@@ -15,7 +15,7 @@ import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
-import org.veupathdb.service.eda.ds.plugin.AbstractPluginWithCompute;
+import org.veupathdb.service.eda.ds.plugin.AbstractPluginWithSynchronousCompute;
 import org.veupathdb.service.eda.common.plugin.util.RServeClient;
 import org.veupathdb.service.eda.generated.model.BetaDivComputeConfig;
 import org.veupathdb.service.eda.generated.model.BetaDivScatterplotPostRequest;
@@ -24,7 +24,7 @@ import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class BetaDivScatterplotPlugin extends AbstractPluginWithCompute<BetaDivScatterplotPostRequest, BetaDivScatterplotSpec, BetaDivComputeConfig> {
+public class BetaDivScatterplotPlugin extends AbstractPluginWithSynchronousCompute<BetaDivScatterplotPostRequest, BetaDivScatterplotSpec, BetaDivComputeConfig> {
 
   private static final Logger LOG = LogManager.getLogger(BetaDivScatterplotPlugin.class);
   

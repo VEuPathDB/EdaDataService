@@ -1,6 +1,7 @@
 import org.veupathdb.lib.gradle.container.util.Logger.Level
 
 plugins {
+  kotlin("jvm") version "1.7.0" // needed for local compute import
   java
   id("org.veupathdb.lib.gradle.container.container-utils") version "4.0.0"
   id("com.github.johnrengelman.shadow") version "7.1.2"
@@ -90,6 +91,7 @@ repositories {
 // versions
 val coreLib       = "6.8.0"         // Container core lib version
 val edaCommon     = "9.1.0"         // EDA Common version
+val edaCompute    = "0.3.0"         // EDA Compute version (used to pull in compute plugin RAML)
 val fgputil       = "2.7.1-jakarta" // FgpUtil version
 
 val jersey        = "3.0.4"       // Jersey/JaxRS version
@@ -110,6 +112,18 @@ val edaCommonSchemaFetch =
 
 // register a task that prints the command to fetch EdaCommon schema; used to pull down raml lib
 tasks.register("print-eda-common-schema-fetch") { print(edaCommonSchemaFetch) }
+
+// use local EdaCompute compiled schema if project exists, else use released version;
+//    this mirrors the way we use local EdaCompute code if available
+val edaComputeLocalProjectDir = findProject(":edaCompute")?.projectDir
+val edaComputeSchemaFetch =
+  if (edaComputeLocalProjectDir != null)
+    "cat ${edaComputeLocalProjectDir}/schema/library.raml"
+  else
+    "curl https://raw.githubusercontent.com/VEuPathDB/service-eda-compute/v${edaCompute}/schema/library.raml"
+
+// register a task that prints the command to fetch EdaCommon schema; used to pull down raml lib
+tasks.register("print-eda-compute-schema-fetch") { print(edaComputeSchemaFetch) }
 
 // ensures changing modules are never cached
 configurations.all {

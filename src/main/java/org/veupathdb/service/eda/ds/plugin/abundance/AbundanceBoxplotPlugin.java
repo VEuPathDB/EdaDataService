@@ -15,7 +15,7 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
-import org.veupathdb.service.eda.ds.plugin.AbstractPluginWithCompute;
+import org.veupathdb.service.eda.ds.plugin.AbstractPluginWithSynchronousCompute;
 import org.veupathdb.service.eda.common.plugin.util.RServeClient;
 import org.veupathdb.service.eda.generated.model.AbundanceBoxplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BoxplotWith1ComputeSpec;
@@ -25,7 +25,7 @@ import org.veupathdb.service.eda.generated.model.VariableSpec;
 import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuote;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceBoxplotPostRequest, BoxplotWith1ComputeSpec, AbundanceComputeConfig> {
+public class AbundanceBoxplotPlugin extends AbstractPluginWithSynchronousCompute<AbundanceBoxplotPostRequest, BoxplotWith1ComputeSpec, AbundanceComputeConfig> {
 
   @Override
   public String getDisplayName() {

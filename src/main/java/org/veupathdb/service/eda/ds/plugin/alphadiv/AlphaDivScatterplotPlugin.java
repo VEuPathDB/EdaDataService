@@ -17,7 +17,7 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
-import org.veupathdb.service.eda.ds.plugin.AbstractPluginWithCompute;
+import org.veupathdb.service.eda.ds.plugin.AbstractPluginWithSynchronousCompute;
 import org.veupathdb.service.eda.common.plugin.util.RServeClient;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.AlphaDivComputeConfig;
@@ -28,7 +28,7 @@ import org.veupathdb.service.eda.generated.model.VariableSpec;
 import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuote;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDivScatterplotPostRequest, ScatterplotWith1ComputeSpec, AlphaDivComputeConfig> {
+public class AlphaDivScatterplotPlugin extends AbstractPluginWithSynchronousCompute<AlphaDivScatterplotPostRequest, ScatterplotWith1ComputeSpec, AlphaDivComputeConfig> {
 
   private static final Logger LOG = LogManager.getLogger(AlphaDivScatterplotPlugin.class);
   

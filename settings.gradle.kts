@@ -25,3 +25,9 @@ if (edaCommon.exists()) {
   include(":edaCommon")
   project(":edaCommon").projectDir = edaCommon
 }
+
+val edaCompute = file("../service-eda-compute");
+if (edaCompute.exists()) {
+  include(":edaCompute")
+  project(":edaCompute").projectDir = edaCompute
+}
