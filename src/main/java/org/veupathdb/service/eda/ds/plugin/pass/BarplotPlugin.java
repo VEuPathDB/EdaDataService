@@ -184,9 +184,9 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
             spec.getOverlayVariable(),
             util.getVariableSpecFromList(spec.getFacetVariable(), 0),
             util.getVariableSpecFromList(spec.getFacetVariable(), 1)));
-        connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
+        connection.voidEval(getVoidEvalVariableMetadataList(varMap));
         String cmd =
-            "plot.data::bar(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" +
+            "plot.data::bar(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, '" +
                 spec.getValueSpec().getValue() + "', '" +
                 barMode + "', '" +
                 deprecatedShowMissingness + "')";

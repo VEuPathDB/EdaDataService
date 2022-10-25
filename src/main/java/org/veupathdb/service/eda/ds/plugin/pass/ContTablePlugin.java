@@ -99,8 +99,8 @@ public class ContTablePlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpe
           spec.getYAxisVariable(),
           util.getVariableSpecFromList(spec.getFacetVariable(), 0),
           util.getVariableSpecFromList(spec.getFacetVariable(), 1)));
-      connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      String cmd = "plot.data::mosaic(" + DEFAULT_SINGLE_STREAM_NAME + ", map, 'chiSq', '" + deprecatedShowMissingness + "')";
+      connection.voidEval(getVoidEvalVariableMetadataList(varMap));
+      String cmd = "plot.data::mosaic(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, 'chiSq', '" + deprecatedShowMissingness + "')";
       streamResult(connection, cmd, out);
     });
   }

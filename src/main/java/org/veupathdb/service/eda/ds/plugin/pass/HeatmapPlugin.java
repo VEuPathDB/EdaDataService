@@ -109,8 +109,8 @@ public class HeatmapPlugin extends AbstractPlugin<HeatmapPostRequest, HeatmapSpe
           spec.getZAxisVariable(),
           util.getVariableSpecFromList(spec.getFacetVariable(), 0),
           util.getVariableSpecFromList(spec.getFacetVariable(), 1)));
-      connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      String cmd = "plot.data::heatmap(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" + spec.getValueSpec().toString().toLowerCase() + "')";
+      connection.voidEval(getVoidEvalVariableMetadataList(varMap));
+      String cmd = "plot.data::heatmap(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, '" + spec.getValueSpec().toString().toLowerCase() + "')";
       streamResult(connection, cmd, out);
     });
   }

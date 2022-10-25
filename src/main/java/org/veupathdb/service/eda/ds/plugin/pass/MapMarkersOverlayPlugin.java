@@ -92,7 +92,7 @@ public class MapMarkersOverlayPlugin extends AbstractPlugin<MapMarkersOverlayPos
           spec.getGeoAggregateVariable(),
           spec.getLatitudeVariable(),
           spec.getLongitudeVariable()));
-      connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
+      connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String viewportRString = getViewportAsRString(spec.getViewport());
       connection.voidEval(viewportRString);
       String binReportValue = "NULL";
@@ -126,7 +126,7 @@ public class MapMarkersOverlayPlugin extends AbstractPlugin<MapMarkersOverlayPos
       }
 
       String cmd =
-          "plot.data::mapMarkers(" + DEFAULT_SINGLE_STREAM_NAME + ", map, binWidth, " +
+          "plot.data::mapMarkers(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, binWidth, " +
               valueSpec + ", " +
               binReportValue + ", binRange, viewport, '" +
               deprecatedShowMissingness + "')";

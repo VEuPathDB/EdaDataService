@@ -135,9 +135,9 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
       );
 
     useRConnectionWithProcessedRemoteFiles(Resources.RSERVE_URL, filesProcessor, connection -> {
-      connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
+      connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String cmd = 
-          "plot.data::scattergl(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" + 
+          "plot.data::scattergl(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, '" + 
               valueSpec + "', '" + 
               deprecatedShowMissingness + "')";
       streamResult(connection, cmd, out);

@@ -113,7 +113,7 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
           spec.getOverlayVariable(),
           util.getVariableSpecFromList(spec.getFacetVariable(), 0),
           util.getVariableSpecFromList(spec.getFacetVariable(), 1)));
-      connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
+      connection.voidEval(getVoidEvalVariableMetadataList(varMap));
      
       String viewportRString = getViewportAsRString(spec.getViewport(), xVarType);
       connection.voidEval(viewportRString);
@@ -148,7 +148,7 @@ public class HistogramPlugin extends AbstractPlugin<HistogramPostRequest, Histog
       }
 
       String cmd =
-          "plot.data::histogram(" + DEFAULT_SINGLE_STREAM_NAME + ", map, binWidth, '" +
+          "plot.data::histogram(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, binWidth, '" +
                spec.getValueSpec().getValue() + "', '" +
                binReportValue + "', '" +
                barMode + "', viewport, '" +

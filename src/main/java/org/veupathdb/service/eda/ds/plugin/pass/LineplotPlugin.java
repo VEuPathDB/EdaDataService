@@ -114,7 +114,7 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
           spec.getOverlayVariable(),
           util.getVariableSpecFromList(spec.getFacetVariable(), 0),
           util.getVariableSpecFromList(spec.getFacetVariable(), 1)));
-      connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
+      connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String viewportRString = getViewportAsRString(spec.getViewport(), xVarType);
       connection.voidEval(viewportRString);
       BinSpec binSpec = spec.getBinSpec();
@@ -143,7 +143,7 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
         connection.voidEval("binWidth <- " + binWidth);
       }
       String cmd = "plot.data::lineplot(" + DEFAULT_SINGLE_STREAM_NAME + 
-                                        ", map, binWidth, " + 
+                                        ", variables, binWidth, " + 
                                         singleQuote(valueSpec) + 
                                         ", " + errorBars + 
                                         ", viewport" + 

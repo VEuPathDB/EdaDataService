@@ -125,9 +125,9 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
       );
 
     useRConnectionWithProcessedRemoteFiles(Resources.RSERVE_URL, filesProcessor, connection -> {
-      connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
+      connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String cmd =
-          "plot.data::box(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" +
+          "plot.data::box(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, '" +
               showPoints + "', " +
               showMean + ", " +
               computeStats + ", '" +

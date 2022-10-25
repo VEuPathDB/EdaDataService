@@ -102,8 +102,8 @@ public class DensityplotPlugin extends AbstractPlugin<DensityplotPostRequest, De
           spec.getOverlayVariable(),
           util.getVariableSpecFromList(spec.getFacetVariable(), 0),
           util.getVariableSpecFromList(spec.getFacetVariable(), 1)));
-      connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      String cmd = "plot.data::scattergl(" + DEFAULT_SINGLE_STREAM_NAME + ", map, 'density','" + deprecatedShowMissingness + "')";
+      connection.voidEval(getVoidEvalVariableMetadataList(varMap));
+      String cmd = "plot.data::scattergl(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, 'density','" + deprecatedShowMissingness + "')";
       streamResult(connection, cmd, out);
     }); 
   }
