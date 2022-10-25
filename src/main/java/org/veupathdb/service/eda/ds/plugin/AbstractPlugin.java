@@ -279,6 +279,35 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     return(vector);
   }
 
+  public String getVariableMetadataRObjectAsString(VariableSpec var) {
+    PluginUtil util = getUtil();
+
+    return("new('VariableMetadata'," + 
+                  "variableClass=new('VariableClass',value='native')," + 
+                  "variableSpec=new('VariableSpec', variableId=" + singleQuote(var.getVariableId()) + ",entityId=" + singleQuote(var.getEntityId()) + "," +
+                  "dataType=" + singleQuote(util.getVariableType(var)) + "," +
+                  "dataShape=" + singleQuote(util.getVariableDataShape(var)) + ")");
+  }
+
+  public String getVoidEvalVariableMetadataList(Map<String, VariableSpec> vars) {
+    boolean first = true;
+    String variableMetadataList = new String("new('VariableMetadataList',");
+    for(Map.Entry<String, VariableSpec> entry : vars.entrySet()) {
+      VariableSpec var = entry.getValue();
+      String variableMetadata = getVariableMetadataRObjectAsString(var);
+      if (first) {
+        first = false;
+        variableMetadataList = variableMetadata;
+      } else {
+        variableMetadataList = variableMetadataList + "," + variableMetadata;
+      }
+    }
+    variableMetadataList = variableMetadataList + ")";
+
+    return(variableMetadataList);
+  }
+
+  // replacing this data.frame map w a dedicated VariableMetadataList S4 object
   public String getVoidEvalVarMetadataMap(String datasetName, Map<String, VariableSpec> vars) {
     boolean first = true;
     String plotRefVector = new String();
