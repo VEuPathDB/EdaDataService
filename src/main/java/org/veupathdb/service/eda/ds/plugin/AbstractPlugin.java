@@ -289,9 +289,12 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
                   "dataShape=" + singleQuote(util.getVariableDataShape(var)) + ")");
   }
 
+  // TODO need to add plotRef here and in veupathUtils class def
+  // TODO need to update pass app plugins now
+  // TODO need to update compute plugins once i hear back from ryan
   public String getVoidEvalVariableMetadataList(Map<String, VariableSpec> vars) {
     boolean first = true;
-    String variableMetadataList = new String("new('VariableMetadataList',");
+    String variableMetadataList = new String("variables <- new('VariableMetadataList',");
     for(Map.Entry<String, VariableSpec> entry : vars.entrySet()) {
       VariableSpec var = entry.getValue();
       String variableMetadata = getVariableMetadataRObjectAsString(var);
