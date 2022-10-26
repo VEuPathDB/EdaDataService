@@ -25,6 +25,7 @@ import org.veupathdb.service.eda.common.client.EdaSubsettingClient;
 import org.veupathdb.service.eda.common.client.StreamingDataClient;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.model.ReferenceMetadata;
+import org.veupathdb.service.eda.common.model.VariableDef;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
@@ -35,6 +36,7 @@ import org.veupathdb.service.eda.generated.model.APIFilter;
 import org.veupathdb.service.eda.generated.model.APIStudyDetail;
 import org.veupathdb.service.eda.generated.model.BinSpec;
 import org.veupathdb.service.eda.generated.model.BinSpec.RangeType;
+import org.veupathdb.service.eda.generated.model.CollectionSpec;
 import org.veupathdb.service.eda.generated.model.DateRange;
 import org.veupathdb.service.eda.generated.model.DerivedVariable;
 import org.veupathdb.service.eda.generated.model.GeolocationViewport;
@@ -279,8 +281,43 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     return(vector);
   }
 
-  // TODO need to get imputeZero and isCollection here as well
-  // need to check for helpers in util/ EdaCommon classes
+  public String getVariableSpecRObjectAsString(VariableDef var) {
+    return("new('VariableSpec',variableId=" + singleQuote(var.getVariableId()) + ",entityId=" + singleQuote(var.getEntityId()) + ")");
+  }
+
+  public String getVariableSpecListRObjectAsString(List<VariableDef> vars) {
+    boolean first = true;
+    String variableSpecList = new String("new('VariableSpecList',SimpleList(");
+
+    for (VariableDef var : vars) {
+      if (first) {
+        first = false;
+        variableSpecList = variableSpecList + getVariableSpecRObjectAsString(var);
+      } else {
+        variableSpecList = variableSpecList + "," + getVariableSpecRObjectAsString(var);
+      }
+    }
+    variableSpecList = variableSpecList + "))";
+
+    return(variableSpecList);
+  }
+  
+  public String getVariableMetadataRObjectAsString(CollectionSpec collection, String plotReference) {
+    PluginUtil util = getUtil();
+    
+    String membersList = getVariableSpecListRObjectAsString(util.getCollectionMembers(collection));
+
+    return("new('VariableMetadata'," + 
+                  "variableClass=new('VariableClass',value='native')," + 
+                  "variableSpec=new('VariableSpec', variableId=" + singleQuote(collection.getCollectionId()) + ",entityId=" + singleQuote(collection.getEntityId()) + ")," +
+                  "plotReference=new('PlotReference', value=" + singleQuote(plotReference) + ")," +
+                  "dataType=" + singleQuote(util.getCollectionType(collection)) + "," +
+                  "dataShape=" + singleQuote(util.getCollectionDataShape(collection)) + "," +
+                  "imputeZero=" + util.getCollectionImputeZero(collection).toUpperCase() + "," +
+                  "isCollection=TRUE," + 
+                  "members=" + membersList + ")");
+  }
+
   public String getVariableMetadataRObjectAsString(VariableSpec var, String plotReference) {
     PluginUtil util = getUtil();
     
@@ -289,17 +326,18 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
                   "variableSpec=new('VariableSpec', variableId=" + singleQuote(var.getVariableId()) + ",entityId=" + singleQuote(var.getEntityId()) + ")," +
                   "plotReference=new('PlotReference', value=" + singleQuote(plotReference) + ")," +
                   "dataType=" + singleQuote(util.getVariableType(var)) + "," +
-                  "dataShape=" + singleQuote(util.getVariableDataShape(var)) + ")");
+                  "dataShape=" + singleQuote(util.getVariableDataShape(var)) + "," +
+                  "imputeZero=" + util.getVariableImputeZero(var).toUpperCase() + ")");
   }
 
   // TODO make sure all R packages are passing tests after the update for plotRef
   // TODO need to do similar for computed var metadata and update compute plugins once i hear back from ryan
-  public String getVoidEvalVariableMetadataList(Map<String, VariableSpec> vars) {
+  public String getVoidEvalVariableMetadataList(Map<String, VariableSpec> vars, String plotReference) {
     boolean first = true;
     String variableMetadataList = new String("variables <- new('VariableMetadataList',");
     for(Map.Entry<String, VariableSpec> entry : vars.entrySet()) {
       VariableSpec var = entry.getValue();
-      String variableMetadata = getVariableMetadataRObjectAsString(var);
+      String variableMetadata = getVariableMetadataRObjectAsString(var, plotReference);
       if (first) {
         first = false;
         variableMetadataList = variableMetadata;
