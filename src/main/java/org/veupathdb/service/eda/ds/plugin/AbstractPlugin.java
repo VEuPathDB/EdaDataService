@@ -332,10 +332,11 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
 
   // TODO make sure all R packages are passing tests after the update for plotRef
   // TODO need to do similar for computed var metadata and update compute plugins once i hear back from ryan
-  public String getVoidEvalVariableMetadataList(Map<String, VariableSpec> vars, String plotReference) {
+  public String getVoidEvalVariableMetadataList(Map<String, VariableSpec> vars) {
     boolean first = true;
     String variableMetadataList = new String("variables <- new('VariableMetadataList',");
     for(Map.Entry<String, VariableSpec> entry : vars.entrySet()) {
+      String plotReference = entry.getKey();
       VariableSpec var = entry.getValue();
       String variableMetadata = getVariableMetadataRObjectAsString(var, plotReference);
       if (first) {
