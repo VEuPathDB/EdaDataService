@@ -82,10 +82,8 @@ gen-docs: api.raml merge-raml
 .PHONY: merge-raml
 merge-raml:
 	@echo "Downloading dependencies..."
-#	$(FETCH_EDA_COMMON_SCHEMA) > schema/url/eda-common-lib.raml
 	$(FETCH_EDA_COMPUTE_SCHEMA) > schema/url/eda-compute-lib.raml
 	$(BIN_DIR)/merge-raml schema > schema/library.raml
-#	rm schema/url/eda-common-lib.raml
 	rm schema/url/eda-compute-lib.raml
 
 #

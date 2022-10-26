@@ -50,7 +50,7 @@ public class BoxplotPlugin extends AbstractPlugin<BoxplotPostRequest, BoxplotSpe
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder("yAxisVariable", "xAxisVariable", "overlayVariable", "facetVariable")
+      .dependencyOrder(List.of("yAxisVariable"), List.of("xAxisVariable"), List.of("overlayVariable", "facetVariable"))
       .pattern()
         .element("yAxisVariable")
           .types(APIVariableType.NUMBER, APIVariableType.INTEGER)

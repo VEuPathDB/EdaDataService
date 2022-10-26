@@ -55,7 +55,7 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithSynchronousCompute<
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder("xAxisVariable", "overlayVariable", "facetVariable")
+      .dependencyOrder(List.of("xAxisVariable"), List.of("overlayVariable", "facetVariable"))
       .pattern()
         .element("xAxisVariable")
           .maxValues(10)

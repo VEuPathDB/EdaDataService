@@ -54,7 +54,7 @@ public class ScatterplotPlugin extends AbstractPlugin<ScatterplotPostRequest, Sc
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder("yAxisVariable", "xAxisVariable", "overlayVariable", "facetVariable")
+      .dependencyOrder(List.of("yAxisVariable", "xAxisVariable"), List.of("overlayVariable", "facetVariable"))
       .pattern()
         .element("yAxisVariable")
           .types(APIVariableType.NUMBER, APIVariableType.DATE, APIVariableType.INTEGER) 

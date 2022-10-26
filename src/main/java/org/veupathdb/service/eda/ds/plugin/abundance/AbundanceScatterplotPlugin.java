@@ -60,7 +60,7 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithSynchronousCom
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder("xAxisVariable", "facetVariable")
+      .dependencyOrder(List.of("xAxisVariable"), List.of("facetVariable"))
       .pattern()
         .element("xAxisVariable")
           .types(APIVariableType.NUMBER, APIVariableType.DATE, APIVariableType.INTEGER)

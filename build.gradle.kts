@@ -3,7 +3,7 @@ import org.veupathdb.lib.gradle.container.util.Logger.Level
 plugins {
   kotlin("jvm") version "1.7.0" // needed for local compute import
   java
-  id("org.veupathdb.lib.gradle.container.container-utils") version "4.0.0"
+  id("org.veupathdb.lib.gradle.container.container-utils") version "4.5.2"
   id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
@@ -90,9 +90,9 @@ repositories {
 
 // versions
 val coreLib       = "6.8.0"         // Container core lib version
-val edaCommon     = "9.1.0"         // EDA Common version
+val edaCommon     = "9.3.0"         // EDA Common version
 val edaCompute    = "0.3.0"         // EDA Compute version (used to pull in compute plugin RAML)
-val fgputil       = "2.7.1-jakarta" // FgpUtil version
+val fgputil       = "2.7.4-jakarta" // FgpUtil version
 
 val jersey        = "3.0.4"       // Jersey/JaxRS version
 val jackson       = "2.13.3"      // FasterXML Jackson version
