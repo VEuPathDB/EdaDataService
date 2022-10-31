@@ -396,3 +396,15 @@ securitySchemes:
             body:
               text/plain:
                 type: lib.EntityTabularPostResponse
+
+    /viz-with-compute:
+      post:
+        description: Sample visualization plugin that uses data from a compute
+        body:
+          application/json:
+            type: lib.ExampleComputeVizPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.ExampleComputeVizPostResponse

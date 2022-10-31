@@ -15,8 +15,8 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
-import org.veupathdb.service.eda.ds.plugin.AbstractPluginWithSynchronousCompute;
 import org.veupathdb.service.eda.common.plugin.util.RServeClient;
+import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.AlphaDivBoxplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BoxplotWith1ComputeSpec;
 import org.veupathdb.service.eda.generated.model.AlphaDivComputeConfig;
@@ -25,7 +25,7 @@ import org.veupathdb.service.eda.generated.model.VariableSpec;
 import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuote;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class AlphaDivBoxplotPlugin extends AbstractPluginWithSynchronousCompute<AlphaDivBoxplotPostRequest, BoxplotWith1ComputeSpec, AlphaDivComputeConfig> {
+public class AlphaDivBoxplotPlugin extends AbstractPlugin<AlphaDivBoxplotPostRequest, BoxplotWith1ComputeSpec, AlphaDivComputeConfig> {
 
   @Override
   public String getDisplayName() {
@@ -48,7 +48,7 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithSynchronousCompute<
   }
 
   @Override
-  protected Class<AlphaDivComputeConfig> getComputeSpecClass() {
+  protected Class<AlphaDivComputeConfig> getComputeConfigClass() {
     return AlphaDivComputeConfig.class;
   }
 
@@ -82,22 +82,25 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithSynchronousCompute<
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(BoxplotWith1ComputeSpec pluginSpec, AlphaDivComputeConfig computeConfig) {
-    List<StreamSpec> requestedStreamsList = ListBuilder.asList(
+  protected List<StreamSpec> getRequestedStreams(BoxplotWith1ComputeSpec pluginSpec) {
+    AlphaDivComputeConfig computeConfig = getComputeConfig();
+    return List.of(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
         .addVar(pluginSpec.getOverlayVariable())
-        .addVars(pluginSpec.getFacetVariable())
-      );
-    requestedStreamsList.add(
+        .addVars(pluginSpec.getFacetVariable()),
       new StreamSpec(COMPUTE_STREAM_NAME, computeConfig.getCollectionVariable().getEntityId())
-        .addVars(getUtil().getChildrenVariables(computeConfig.getCollectionVariable())
-      ));
-    return requestedStreamsList;
+        .addVars(getUtil().getChildrenVariables(computeConfig.getCollectionVariable()))
+    );
   }
 
   @Override
- protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
+  protected boolean includeComputedVarsInStream() {
+    return false;
+  }
+
+  @Override
+  protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     AlphaDivComputeConfig computeConfig = getComputeConfig();
     BoxplotWith1ComputeSpec spec = getPluginSpec();
     PluginUtil util = getUtil();

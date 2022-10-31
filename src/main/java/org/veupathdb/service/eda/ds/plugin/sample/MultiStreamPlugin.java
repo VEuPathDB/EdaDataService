@@ -19,6 +19,7 @@ import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.model.VariableDef;
 import org.veupathdb.service.eda.common.model.VariableSource;
+import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.MultiStreamPostRequest;
 import org.veupathdb.service.eda.generated.model.MultiStreamSpec;
@@ -28,7 +29,7 @@ import static org.gusdb.fgputil.FormatUtil.TAB;
 import static org.gusdb.fgputil.FormatUtil.join;
 import static org.gusdb.fgputil.functional.Functions.getMapFromKeys;
 
-public class MultiStreamPlugin extends AbstractPlugin<MultiStreamPostRequest, MultiStreamSpec> {
+public class MultiStreamPlugin extends AbstractEmptyComputePlugin<MultiStreamPostRequest, MultiStreamSpec> {
 
   private static final Logger LOG = LogManager.getLogger(MultiStreamPlugin.class);
 

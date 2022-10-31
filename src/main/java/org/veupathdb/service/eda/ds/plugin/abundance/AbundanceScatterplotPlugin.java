@@ -17,18 +17,14 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
-import org.veupathdb.service.eda.ds.plugin.AbstractPluginWithSynchronousCompute;
 import org.veupathdb.service.eda.common.plugin.util.RServeClient;
-import org.veupathdb.service.eda.generated.model.APIVariableType;
-import org.veupathdb.service.eda.generated.model.AbundanceComputeConfig;
-import org.veupathdb.service.eda.generated.model.AbundanceScatterplotPostRequest;
-import org.veupathdb.service.eda.generated.model.ScatterplotWith1ComputeSpec;
-import org.veupathdb.service.eda.generated.model.VariableSpec;
+import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.generated.model.*;
 
 import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuote;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class AbundanceScatterplotPlugin extends AbstractPluginWithSynchronousCompute<AbundanceScatterplotPostRequest, ScatterplotWith1ComputeSpec, AbundanceComputeConfig> {
+public class AbundanceScatterplotPlugin extends AbstractPlugin<AbundanceScatterplotPostRequest, ScatterplotWith1ComputeSpec, RankedAbundanceComputeConfig> {
 
   private static final Logger LOG = LogManager.getLogger(AbundanceScatterplotPlugin.class);
   
@@ -53,8 +49,8 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithSynchronousCom
   }
 
   @Override
-  protected Class<AbundanceComputeConfig> getComputeSpecClass() {
-    return AbundanceComputeConfig.class;
+  protected Class<RankedAbundanceComputeConfig> getComputeConfigClass() {
+    return RankedAbundanceComputeConfig.class;
   }
 
   @Override
@@ -82,7 +78,8 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithSynchronousCom
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(ScatterplotWith1ComputeSpec pluginSpec, AbundanceComputeConfig computeConfig) {
+  protected List<StreamSpec> getRequestedStreams(ScatterplotWith1ComputeSpec pluginSpec) {
+    RankedAbundanceComputeConfig computeConfig = getComputeConfig();
     List<StreamSpec> requestedStreamsList = ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
@@ -92,13 +89,17 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithSynchronousCom
       new StreamSpec(COMPUTE_STREAM_NAME, computeConfig.getCollectionVariable().getEntityId())
         .addVars(getUtil().getChildrenVariables(computeConfig.getCollectionVariable())
       ));
-    
     return requestedStreamsList;
   }
 
   @Override
+  protected boolean includeComputedVarsInStream() {
+    return false;
+  }
+
+  @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    AbundanceComputeConfig computeConfig = getComputeConfig();
+    RankedAbundanceComputeConfig computeConfig = getComputeConfig();
     ScatterplotWith1ComputeSpec spec = getPluginSpec();
     PluginUtil util = getUtil();
     Map<String, VariableSpec> varMap = new HashMap<>();

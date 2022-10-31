@@ -1,12 +1,5 @@
 package org.veupathdb.service.eda.ds.plugin.pass;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
@@ -14,17 +7,24 @@ import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
-import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.generated.model.BinSpec;
 import org.veupathdb.service.eda.generated.model.MapMarkersOverlayPostRequest;
 import org.veupathdb.service.eda.generated.model.MapMarkersOverlaySpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuote;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class MapMarkersOverlayPlugin extends AbstractPlugin<MapMarkersOverlayPostRequest, MapMarkersOverlaySpec> {
+public class MapMarkersOverlayPlugin extends AbstractEmptyComputePlugin<MapMarkersOverlayPostRequest, MapMarkersOverlaySpec> {
 
   @Override
   public String getDisplayName() {

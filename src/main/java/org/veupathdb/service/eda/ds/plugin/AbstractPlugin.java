@@ -5,11 +5,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -20,9 +17,7 @@ import org.gusdb.fgputil.client.ResponseFuture;
 import org.gusdb.fgputil.functional.FunctionalInterfaces.ConsumerWithException;
 import org.gusdb.fgputil.functional.Functions;
 import org.gusdb.fgputil.validation.ValidationException;
-import org.veupathdb.service.eda.common.client.EdaMergingClient;
-import org.veupathdb.service.eda.common.client.EdaSubsettingClient;
-import org.veupathdb.service.eda.common.client.StreamingDataClient;
+import org.veupathdb.service.eda.common.client.*;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.model.ReferenceMetadata;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
@@ -30,46 +25,44 @@ import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementValidator;
-import org.veupathdb.service.eda.common.client.NonEmptyResultStream;
-import org.veupathdb.service.eda.generated.model.APIFilter;
-import org.veupathdb.service.eda.generated.model.APIStudyDetail;
-import org.veupathdb.service.eda.generated.model.BinSpec;
+import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
+import org.veupathdb.service.eda.generated.model.*;
 import org.veupathdb.service.eda.generated.model.BinSpec.RangeType;
-import org.veupathdb.service.eda.generated.model.DateRange;
-import org.veupathdb.service.eda.generated.model.DerivedVariable;
-import org.veupathdb.service.eda.generated.model.GeolocationViewport;
-import org.veupathdb.service.eda.generated.model.NumberRange;
-import org.veupathdb.service.eda.generated.model.VariableSpec;
-import org.veupathdb.service.eda.generated.model.VisualizationRequestBase;
-import org.veupathdb.service.eda.generated.model.NumericViewport;
 
 import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.doubleQuote;
 import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuote;
 
 /**
- * Base vizualization plugin for all other plugins.  Provides access to parts of
+ * Base visualization plugin for all other plugins.  Provides access to parts of
  * the request object, manages logic flow over the course of the request, and
  * provides streaming merged data to subclasses for processing per specs provided
  * by those subclasses.
  *
  * @param <T> type of request (must extend VisualizationRequestBase)
  * @param <S> plugin's spec class (must be or extend the generated spec class for this plugin)
+ * @param <R> plugin's compute spec class (must be or extend the generated compute spec class for this plugin)
  */
-public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> implements Consumer<OutputStream> {
+public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R extends ComputeConfigBase> implements Consumer<OutputStream> {
 
   private static final Logger LOG = LogManager.getLogger(AbstractPlugin.class);
 
   // shared stream name for plugins that need request only a single stream
   protected static final String DEFAULT_SINGLE_STREAM_NAME = "single_tabular_dataset";
 
-  protected ReferenceMetadata _referenceMetadata;
-  protected S _pluginSpec;
-  protected List<StreamSpec> _requiredStreams;
+  // to be deleted; kept for now to enable compilation of synchronous plugins
+  protected static final String COMPUTE_STREAM_NAME = "computed_dataset";
 
   // methods that need to be implemented
   protected abstract Class<S> getVisualizationSpecClass();
+  protected abstract Class<R> getComputeConfigClass();
   protected abstract void validateVisualizationSpec(S pluginSpec) throws ValidationException;
   protected abstract List<StreamSpec> getRequestedStreams(S pluginSpec);
+
+  // return true to include computed vars as part of the tabular stream
+  //   for the entity under which they were computed.  If true, a runtime
+  //   error will occur if no stream spec exists for that entity.
+  protected abstract boolean includeComputedVarsInStream();
+
   protected abstract void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException;
 
   // methods that should probably be overridden
@@ -83,21 +76,31 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   // option for subclass to load any additional information (e.g. compute spec) from the request
   protected void loadAdditionalConfig(String appName, T request) throws ValidationException {}
 
+  protected ReferenceMetadata _referenceMetadata;
+  protected S _pluginSpec;
+  protected Optional<String> _computeName;
+  // stored and typed value of the passed compute config object
+  protected Optional<R> _computeConfig;
+  protected List<StreamSpec> _requiredStreams;
+
   private Timer _timer;
   private boolean _requestProcessed = false;
   private List<APIFilter> _subset;
   private List<DerivedVariable> _derivedVariables;
   private EdaSubsettingClient _subsettingClient;
   private EdaMergingClient _mergingClient;
+  private EdaComputeClient _computeClient;
 
-  public final AbstractPlugin<T,S> processRequest(String appName, T request, Entry<String,String> authHeader) throws ValidationException {
+  public final AbstractPlugin<T,S,R> processRequest(String appName, T request, Entry<String,String> authHeader) throws ValidationException {
 
     // start request timer (used to profile request performance dynamics)
     _timer = new Timer();
     logRequestTime("Starting timer");
 
-    // validate config type matches class provided by subclass
-    _pluginSpec = getSpecObject(request, "getConfig", getVisualizationSpecClass());
+    // validate config types match classes provided by subclass
+    _pluginSpec = getSpecObject(request, "getConfig", getVisualizationSpecClass(), true).get();
+    _computeName = findComputeName(appName);
+    _computeConfig = getSpecObject(request, "getComputeConfig", getComputeConfigClass(), _computeName.isPresent());
 
     // check for subset and derived entity properties of request
     _subset = Optional.ofNullable(request.getFilters()).orElse(Collections.emptyList());
@@ -106,6 +109,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     // build clients for required services
     _subsettingClient = new EdaSubsettingClient(Resources.SUBSETTING_SERVICE_URL, authHeader);
     _mergingClient = new EdaMergingClient(Resources.MERGING_SERVICE_URL, authHeader);
+    _computeClient = new EdaComputeClient(Resources.COMPUTE_SERVICE_URL, authHeader);
 
     // get study
     APIStudyDetail study = _subsettingClient.getStudy(request.getStudyId())
@@ -163,6 +167,14 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     return _pluginSpec;
   }
 
+  /**
+   * @return the compute config for this plugin; should only be called if plugin requires a compute
+   * @throws NoSuchElementException if no compute config is present
+   */
+  protected R getComputeConfig() {
+    return _computeConfig.orElseThrow();
+  }
+
   protected ReferenceMetadata getReferenceMetadata() {
     return _referenceMetadata;
   }
@@ -175,12 +187,12 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   }
 
   @SuppressWarnings("unchecked")
-  protected <Q> Q getSpecObject(T request, String methodName, Class<Q> specClass) {
+  protected <Q> Optional<Q> getSpecObject(T request, String methodName, Class<Q> specClass, boolean errorOnMissingMethod) {
     try {
       Method configGetter = request.getClass().getMethod(methodName);
       Object config = configGetter.invoke(request);
       if (specClass.isAssignableFrom(config.getClass())) {
-        return (Q)config;
+        return Optional.of((Q)config);
       }
       throw new RuntimeException("Plugin class " + getClass().getName() +
           " declares spec class "  + specClass.getName() +
@@ -188,12 +200,23 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
           " returned " + config.getClass().getName() + ". The second must be a subclass of the first.");
     }
     catch (NoSuchMethodException noSuchMethodException) {
-      throw new RuntimeException("Generated class " + request.getClass().getName() +
-          " must implement a no-arg method " + methodName + "() which returns an instance of " + specClass.getName());
+      if (errorOnMissingMethod) {
+        throw new RuntimeException("Generated class " + request.getClass().getName() +
+            " must implement a no-arg method " + methodName + "() which returns an instance of " + specClass.getName());
+      }
+      return Optional.empty();
     }
     catch (IllegalAccessException | InvocationTargetException e) {
       throw new RuntimeException("Misconfiguration of visualization plugin: " + getClass().getName(), e);
     }
+  }
+
+  private static Optional<String> findComputeName(String appName) {
+    return AppsMetadata.APPS.getApps().stream()
+        // find this app by name
+        .filter(app -> app.getName().equals(appName)).findFirst()
+        // look up compute associated with this app
+        .map(AppOverview::getComputeName);
   }
 
   /*****************************************************************

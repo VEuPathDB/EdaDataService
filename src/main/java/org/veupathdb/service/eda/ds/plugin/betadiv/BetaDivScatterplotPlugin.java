@@ -8,15 +8,14 @@ import java.util.List;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
-import org.veupathdb.service.eda.ds.plugin.AbstractPluginWithSynchronousCompute;
 import org.veupathdb.service.eda.common.plugin.util.RServeClient;
+import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.BetaDivComputeConfig;
 import org.veupathdb.service.eda.generated.model.BetaDivScatterplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BetaDivScatterplotSpec;
@@ -24,7 +23,7 @@ import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class BetaDivScatterplotPlugin extends AbstractPluginWithSynchronousCompute<BetaDivScatterplotPostRequest, BetaDivScatterplotSpec, BetaDivComputeConfig> {
+public class BetaDivScatterplotPlugin extends AbstractPlugin<BetaDivScatterplotPostRequest, BetaDivScatterplotSpec, BetaDivComputeConfig> {
 
   private static final Logger LOG = LogManager.getLogger(BetaDivScatterplotPlugin.class);
   
@@ -49,7 +48,7 @@ public class BetaDivScatterplotPlugin extends AbstractPluginWithSynchronousCompu
   }
 
   @Override
-  protected Class<BetaDivComputeConfig> getComputeSpecClass() {
+  protected Class<BetaDivComputeConfig> getComputeConfigClass() {
     return BetaDivComputeConfig.class;
   }
 
@@ -81,12 +80,18 @@ public class BetaDivScatterplotPlugin extends AbstractPluginWithSynchronousCompu
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(BetaDivScatterplotSpec pluginSpec, BetaDivComputeConfig computeConfig) {
-    return ListBuilder.asList(
+  protected List<StreamSpec> getRequestedStreams(BetaDivScatterplotSpec pluginSpec) {
+    BetaDivComputeConfig computeConfig = getComputeConfig();
+    return List.of(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         // .addVar(pluginSpec.getXAxisVariable())
         // .addVar(pluginSpec.getYAxisVariable())
         .addVar(pluginSpec.getOverlayVariable()));
+  }
+
+  @Override
+  protected boolean includeComputedVarsInStream() {
+    return false;
   }
 
   @Override

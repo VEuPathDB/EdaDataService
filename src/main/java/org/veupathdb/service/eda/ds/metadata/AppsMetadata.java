@@ -24,12 +24,7 @@ import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.MultiStreamPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.RecordCountPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.TestCollectionPlugin;
-import org.veupathdb.service.eda.generated.model.AppOverview;
-import org.veupathdb.service.eda.generated.model.AppOverviewImpl;
-import org.veupathdb.service.eda.generated.model.AppsGetResponse;
-import org.veupathdb.service.eda.generated.model.AppsGetResponseImpl;
-import org.veupathdb.service.eda.generated.model.VisualizationOverview;
-import org.veupathdb.service.eda.generated.model.VisualizationOverviewImpl;
+import org.veupathdb.service.eda.generated.model.*;
 
 public class AppsMetadata {
 
@@ -113,7 +108,7 @@ public class AppsMetadata {
     return app;
   }
 
-  private static VisualizationOverview viz(String urlSegment, AbstractPlugin<?,?> visualizationPlugin) {
+  private static <T extends VisualizationRequestBase, S, R extends ComputeConfigBase> VisualizationOverview viz(String urlSegment, AbstractPlugin<T, S, R> visualizationPlugin) {
     ConstraintSpec constraints = visualizationPlugin.getConstraintSpec();
     VisualizationOverviewImpl viz = new VisualizationOverviewImpl();
     viz.setName(urlSegment);

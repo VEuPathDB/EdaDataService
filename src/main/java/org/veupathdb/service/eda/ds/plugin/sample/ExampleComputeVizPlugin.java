@@ -2,19 +2,22 @@ package org.veupathdb.service.eda.ds.plugin.sample;
 
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
-import org.veupathdb.service.eda.ds.plugin.AbstractPluginWithCompute;
+import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.generated.model.ExampleComputeConfig;
 import org.veupathdb.service.eda.generated.model.ExampleComputeVizPostRequest;
 import org.veupathdb.service.eda.generated.model.ExampleComputeVizSpec;
-import org.veupathdb.service.eda.generated.model.ExamplePluginConfig;
-import org.veupathdb.service.eda.generated.model.ExamplePluginRequest;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
+import java.util.Map;
 
-public class ExampleComputeVizPlugin extends AbstractPluginWithCompute<ExampleComputeVizPostRequest, ExampleComputeVizSpec, ExamplePluginConfig>  {
+public class ExampleComputeVizPlugin extends AbstractPlugin<ExampleComputeVizPostRequest, ExampleComputeVizSpec, ExampleComputeConfig> {
 
   @Override
-  protected Class<ExamplePluginConfig> getComputeSpecClass() {
-    return ExamplePluginConfig.class;
+  protected Class<ExampleComputeConfig> getComputeConfigClass() {
+    return ExampleComputeConfig.class;
   }
 
   @Override
@@ -40,5 +43,9 @@ public class ExampleComputeVizPlugin extends AbstractPluginWithCompute<ExampleCo
         .setIncludeComputedVars(true));
   }
 
+  @Override
+  protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
+    // TODO
+  }
 
 }

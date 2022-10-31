@@ -15,17 +15,17 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
-import org.veupathdb.service.eda.ds.plugin.AbstractPluginWithSynchronousCompute;
 import org.veupathdb.service.eda.common.plugin.util.RServeClient;
+import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.AbundanceBoxplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BoxplotWith1ComputeSpec;
-import org.veupathdb.service.eda.generated.model.AbundanceComputeConfig;
+import org.veupathdb.service.eda.generated.model.RankedAbundanceComputeConfig;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuote;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class AbundanceBoxplotPlugin extends AbstractPluginWithSynchronousCompute<AbundanceBoxplotPostRequest, BoxplotWith1ComputeSpec, AbundanceComputeConfig> {
+public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostRequest, BoxplotWith1ComputeSpec, RankedAbundanceComputeConfig> {
 
   @Override
   public String getDisplayName() {
@@ -48,8 +48,8 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithSynchronousCompute
   }
 
   @Override
-  protected Class<AbundanceComputeConfig> getComputeSpecClass() {
-    return AbundanceComputeConfig.class;
+  protected Class<RankedAbundanceComputeConfig> getComputeConfigClass() {
+    return RankedAbundanceComputeConfig.class;
   }
 
   @Override
@@ -78,7 +78,8 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithSynchronousCompute
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(BoxplotWith1ComputeSpec pluginSpec, AbundanceComputeConfig computeConfig) {
+  protected List<StreamSpec> getRequestedStreams(BoxplotWith1ComputeSpec pluginSpec) {
+    RankedAbundanceComputeConfig computeConfig = getComputeConfig();
     List<StreamSpec> requestedStreamsList = ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getOverlayVariable())
@@ -88,13 +89,17 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithSynchronousCompute
       new StreamSpec(COMPUTE_STREAM_NAME, computeConfig.getCollectionVariable().getEntityId())
         .addVars(getUtil().getChildrenVariables(computeConfig.getCollectionVariable())
       ));
-    
     return requestedStreamsList;
   }
 
   @Override
+  protected boolean includeComputedVarsInStream() {
+    return false;
+  }
+
+  @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    AbundanceComputeConfig computeConfig = getComputeConfig();
+    RankedAbundanceComputeConfig computeConfig = getComputeConfig();
     BoxplotWith1ComputeSpec spec = getPluginSpec();
     PluginUtil util = getUtil();
     Map<String, VariableSpec> varMap = new HashMap<>();
