@@ -9,15 +9,19 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
+import jakarta.ws.rs.BadRequestException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.Timer;
+import org.gusdb.fgputil.Tuples.TwoTuple;
 import org.gusdb.fgputil.client.ResponseFuture;
 import org.gusdb.fgputil.functional.FunctionalInterfaces.ConsumerWithException;
 import org.gusdb.fgputil.functional.Functions;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.*;
+import org.veupathdb.service.eda.common.client.EdaComputeClient.ComputeRequestBody;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.model.ReferenceMetadata;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
@@ -73,14 +77,10 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
   public Integer getMaxPanels() { return 1; }
   public ConstraintSpec getConstraintSpec() { return new ConstraintSpec(); }
 
-  // option for subclass to load any additional information (e.g. compute spec) from the request
-  protected void loadAdditionalConfig(String appName, T request) throws ValidationException {}
-
   protected ReferenceMetadata _referenceMetadata;
   protected S _pluginSpec;
-  protected Optional<String> _computeName;
-  // stored and typed value of the passed compute config object
-  protected Optional<R> _computeConfig;
+  // stored compute name and typed value of the passed compute config object (if plugin requires compute)
+  protected Optional<TwoTuple<String,R>> _computeInfo;
   protected List<StreamSpec> _requiredStreams;
 
   private Timer _timer;
@@ -98,9 +98,12 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
     logRequestTime("Starting timer");
 
     // validate config types match classes provided by subclass
-    _pluginSpec = getSpecObject(request, "getConfig", getVisualizationSpecClass(), true).get();
-    _computeName = findComputeName(appName);
-    _computeConfig = getSpecObject(request, "getComputeConfig", getComputeConfigClass(), _computeName.isPresent());
+    _pluginSpec = getSpecObject(request, "getConfig", getVisualizationSpecClass());
+
+    // find compute name if required by this viz plugin; if present, then look up compute config
+    //   and create an optional tuple of name+config (empty optional if viz does not require compute)
+    _computeInfo = findComputeName(appName).map(name -> new TwoTuple<>(name,
+        getSpecObject(request, "getComputeConfig", getComputeConfigClass())));
 
     // check for subset and derived entity properties of request
     _subset = Optional.ofNullable(request.getFilters()).orElse(Collections.emptyList());
@@ -118,8 +121,10 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
     // construct available variables for each entity from metadata and derived variable config
     _referenceMetadata = new ReferenceMetadata(study, _derivedVariables);
 
-    // ask subclass to load any additional information (e.g. compute spec)
-    loadAdditionalConfig(appName, request);
+    // if plugin requires a compute, check if compute results are available
+    if (_computeInfo.isPresent() && !isComputeResultsAvailable()) {
+      throw new BadRequestException("Compute results are not available for the requested job.");
+    }
 
     // ask subclass to validate the configuration
     validateVisualizationSpec(_pluginSpec);
@@ -147,8 +152,9 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
     }
 
     // create stream generator
+    Optional<TwoTuple<String,ComputeConfigBase>> typedTuple = _computeInfo.map(info -> new TwoTuple<>(info.getFirst(), info.getSecond()));
     Function<StreamSpec, ResponseFuture> streamGenerator = spec -> _mergingClient
-        .getTabularDataStream(_referenceMetadata, _subset, spec);
+        .getTabularDataStream(_referenceMetadata, _subset, typedTuple, spec);
 
     // create stream processor
     // TODO: might make disallowing empty results optional in the future; this is the original implementation
@@ -167,14 +173,6 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
     return _pluginSpec;
   }
 
-  /**
-   * @return the compute config for this plugin; should only be called if plugin requires a compute
-   * @throws NoSuchElementException if no compute config is present
-   */
-  protected R getComputeConfig() {
-    return _computeConfig.orElseThrow();
-  }
-
   protected ReferenceMetadata getReferenceMetadata() {
     return _referenceMetadata;
   }
@@ -182,17 +180,18 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
   protected PluginUtil getUtil() {
     return new PluginUtil(getReferenceMetadata(), _mergingClient);
   }
+
   protected void validateInputs(DataElementSet values) throws ValidationException {
     new DataElementValidator(getReferenceMetadata(), getConstraintSpec()).validate(values);
   }
 
   @SuppressWarnings("unchecked")
-  protected <Q> Optional<Q> getSpecObject(T request, String methodName, Class<Q> specClass, boolean errorOnMissingMethod) {
+  protected <Q> Q getSpecObject(T request, String methodName, Class<Q> specClass) {
     try {
       Method configGetter = request.getClass().getMethod(methodName);
       Object config = configGetter.invoke(request);
       if (specClass.isAssignableFrom(config.getClass())) {
-        return Optional.of((Q)config);
+        return (Q)config;
       }
       throw new RuntimeException("Plugin class " + getClass().getName() +
           " declares spec class "  + specClass.getName() +
@@ -200,16 +199,17 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
           " returned " + config.getClass().getName() + ". The second must be a subclass of the first.");
     }
     catch (NoSuchMethodException noSuchMethodException) {
-      if (errorOnMissingMethod) {
-        throw new RuntimeException("Generated class " + request.getClass().getName() +
-            " must implement a no-arg method " + methodName + "() which returns an instance of " + specClass.getName());
-      }
-      return Optional.empty();
+      throw new RuntimeException("Generated class " + request.getClass().getName() +
+          " must implement a no-arg method " + methodName + "() which returns an instance of " + specClass.getName());
     }
     catch (IllegalAccessException | InvocationTargetException e) {
       throw new RuntimeException("Misconfiguration of visualization plugin: " + getClass().getName(), e);
     }
   }
+
+  /*****************************************************************
+   *** Compute-related methods
+   ****************************************************************/
 
   private static Optional<String> findComputeName(String appName) {
     return AppsMetadata.APPS.getApps().stream()
@@ -217,6 +217,46 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
         .filter(app -> app.getName().equals(appName)).findFirst()
         // look up compute associated with this app
         .map(AppOverview::getComputeName);
+  }
+
+  private final Supplier<RuntimeException> NO_COMPUTE_EXCEPTION = () ->
+      new UnsupportedOperationException("This visualization plugin [" +
+          getClass().getSimpleName() + "] is not associated with a compute plugin");
+
+  /**
+   * @return the compute name used by this plugin; should only be called if plugin requires a compute
+   * @throws NoSuchElementException if not associated with a compute
+   */
+  protected String getComputeName() {
+    return _computeInfo.map(TwoTuple::getFirst).orElseThrow(NO_COMPUTE_EXCEPTION);
+  }
+
+  /**
+   * @return the compute config for this plugin; should only be called if plugin requires a compute
+   * @throws NoSuchElementException if no compute config is present
+   */
+  protected R getComputeConfig() {
+    return _computeInfo.map(TwoTuple::getSecond).orElseThrow(NO_COMPUTE_EXCEPTION);
+  }
+
+  protected boolean isComputeResultsAvailable() {
+    return _computeClient.isJobResultsAvailable(getComputeName(), createComputeRequestBody());
+  }
+
+  protected <Q> Q getComputeResultStats(Class<Q> expectedStatsClass) {
+    return _computeClient.getJobStatistics(getComputeName(), createComputeRequestBody(), expectedStatsClass);
+  }
+
+  protected ComputedVariableMetadata getComputedVariableMetadata() {
+    return _computeClient.getJobVariableMetadata(getComputeName(), createComputeRequestBody());
+  }
+
+  private ComputeRequestBody createComputeRequestBody() {
+    return new ComputeRequestBody(
+        _referenceMetadata.getStudyId(),
+        _subset,
+        _derivedVariables,
+        _computeInfo.map(TwoTuple::getSecond).orElseThrow(NO_COMPUTE_EXCEPTION));
   }
 
   /*****************************************************************

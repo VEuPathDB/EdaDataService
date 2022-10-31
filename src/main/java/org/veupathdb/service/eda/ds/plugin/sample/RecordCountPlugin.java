@@ -13,7 +13,6 @@ import org.json.JSONObject;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.model.VariableSource;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.RecordCountPostRequest;
 import org.veupathdb.service.eda.generated.model.RecordCountSpec;
 

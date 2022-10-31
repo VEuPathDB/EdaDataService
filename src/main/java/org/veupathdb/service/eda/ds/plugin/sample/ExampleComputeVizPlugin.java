@@ -3,9 +3,7 @@ package org.veupathdb.service.eda.ds.plugin.sample;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.generated.model.ExampleComputeConfig;
-import org.veupathdb.service.eda.generated.model.ExampleComputeVizPostRequest;
-import org.veupathdb.service.eda.generated.model.ExampleComputeVizSpec;
+import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,7 +43,12 @@ public class ExampleComputeVizPlugin extends AbstractPlugin<ExampleComputeVizPos
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    // TODO
+    // get stats
+    ExamplePluginStats stats = getComputeResultStats(ExamplePluginStats.class);
+    // get metadata
+    ComputedVariableMetadata metadata = getComputedVariableMetadata();
+
+    // TODO: figure out what to do here
   }
 
 }
