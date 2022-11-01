@@ -11,8 +11,10 @@ import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.json.JSONObject;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
-import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
-import org.veupathdb.service.eda.ds.constraints.DataElementSet;
+import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
+import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
+import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
+import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.BarplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BarplotSpec;
@@ -20,8 +22,8 @@ import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.CLINEPI_PROJECT;
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.MICROBIOME_PROJECT;
-import static org.veupathdb.service.eda.ds.util.RServeClient.streamResult;
-import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
+import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
+import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 
 public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpec> {
 
@@ -48,19 +50,20 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder("xAxisVariable", "overlayVariable", "facetVariable")
+      .dependencyOrder(List.of("xAxisVariable"), List.of("overlayVariable", "facetVariable"))
       .pattern()
         .element("xAxisVariable")
           .maxValues(10)
           .description("Variable must have 10 or fewer unique values.")
         .element("overlayVariable")
+          .required(false)
           .maxValues(8)
           .description("Variable must have 8 or fewer unique values and be of the same or a parent entity as the X-axis variable.")
         .element("facetVariable")
           .required(false)
           .maxVars(2)
-          .maxValues(7)
-          .description("Variable(s) must have 7 or fewer unique values and be of the same or a parent entity of the Overlay variable.")
+          .maxValues(10)
+          .description("Variable(s) must have 10 or fewer unique values and be of the same or a parent entity of the Overlay variable.")
       .done();
   }
 
@@ -88,6 +91,7 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     BarplotSpec spec = getPluginSpec();
+    PluginUtil util = getUtil();
     
     boolean simpleBar = true;
     // TODO consider adding facets to simpleBar ?
@@ -105,10 +109,10 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
       
       Integer groupVarIndex = null;
       int xVarIndex = 0;
-      String xVar = toColNameOrEmpty(getReferenceMetadata()
+      String xVar = util.toColNameOrEmpty(getReferenceMetadata()
           .getVariable(spec.getXAxisVariable()).orElseThrow());
       if (spec.getOverlayVariable() != null) {
-        String groupVar = toColNameOrEmpty(spec.getOverlayVariable());
+        String groupVar = util.toColNameOrEmpty(spec.getOverlayVariable());
         // expect two cols ordered by overlayVar and then xAxisVar
         // TODO will be ordered by entity id
         String[] header = s.nextLine().split("\t");
@@ -164,27 +168,28 @@ public class BarplotPlugin extends AbstractPlugin<BarplotPostRequest, BarplotSpe
       out.flush();
     }
     else {
-      String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
+      String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
+      String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
       String barMode = spec.getBarMode().getValue();
 
       Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
       varMap.put("xAxisVariable", spec.getXAxisVariable());
       varMap.put("overlayVariable", spec.getOverlayVariable());
-      varMap.put("facetVariable1", getVariableSpecFromList(spec.getFacetVariable(), 0));
-      varMap.put("facetVariable2", getVariableSpecFromList(spec.getFacetVariable(), 1));
+      varMap.put("facetVariable1", util.getVariableSpecFromList(spec.getFacetVariable(), 0));
+      varMap.put("facetVariable2", util.getVariableSpecFromList(spec.getFacetVariable(), 1));
       
-      useRConnectionWithRemoteFiles(dataStreams, connection -> {
-        connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
+      useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
+        connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
             spec.getXAxisVariable(),
             spec.getOverlayVariable(),
-            getVariableSpecFromList(spec.getFacetVariable(), 0),
-            getVariableSpecFromList(spec.getFacetVariable(), 1)));
+            util.getVariableSpecFromList(spec.getFacetVariable(), 0),
+            util.getVariableSpecFromList(spec.getFacetVariable(), 1)));
         connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
         String cmd =
             "plot.data::bar(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" +
                 spec.getValueSpec().getValue() + "', '" +
-                barMode + "', " +
-                showMissingness + ")";
+                barMode + "', '" +
+                deprecatedShowMissingness + "')";
         streamResult(connection, cmd, out);
       });
     }

@@ -16,32 +16,6 @@ types:
       computeName?: string
       visualizations: VisualizationOverview[]
 
-  VisualizationDataElementConstraint:
-    additionalProperties: false
-    properties:
-      isRequired:
-        type: boolean
-      isTemporal:
-        type: boolean
-      minNumVars:
-        type: number
-      maxNumVars:
-        type: number
-      maxNumValues:
-        type: number
-      allowedTypes:
-        type: API_VariableType[]
-        required: false
-      allowedShapes:
-        type: API_VariableDataShape[]
-        required: false
-      description:
-        type: string
-
-  VisualizationDataElementConstraintPattern:
-    properties:
-      //: VisualizationDataElementConstraint
-
   VisualizationOverview:
     additionalProperties: false
     properties:
@@ -54,7 +28,7 @@ types:
         type: VisualizationDataElementConstraintPattern[]
         required: false
       dataElementDependencyOrder:
-        type: string[]
+        type: string[][]
         required: false
       # inputSchema: object  (TBD)
       # outputSchema: object (TBD)

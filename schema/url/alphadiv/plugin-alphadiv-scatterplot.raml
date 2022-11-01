@@ -7,29 +7,4 @@ types:
     type: VisualizationRequestBase
     properties:
       computeConfig: AlphaDivComputeConfig
-      config: AlphaDivScatterplotSpec
-
-  # y-axis is alpha diversity. No listvars allowed. Cont overlay allowed.
-  AlphaDivScatterplotSpec:
-    additionalProperties: false
-    properties:
-      outputEntityId:
-        type: string
-      showMissingness:
-        type: string
-        enum: ['TRUE', 'FALSE']
-        required: false
-      valueSpec:
-        type: string
-        enum: ['raw', 'smoothedMeanWithRaw', 'bestFitLineWithRaw']
-      xAxisVariable:
-        type: VariableSpec
-      overlayVariable:
-        type: VariableSpec
-        required: false
-      facetVariable:
-        type: VariableSpec[]
-        maxItems: 2
-        required: false
-      alphaDivMethod:
-        type: AlphaDivMethod
+      config: ScatterplotWith1ComputeSpec

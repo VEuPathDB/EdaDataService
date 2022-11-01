@@ -3,19 +3,19 @@ package org.veupathdb.service.eda.ds.service;
 import java.io.OutputStream;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ServerErrorException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.ServerErrorException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.glassfish.jersey.server.ContainerRequest;
 import org.gusdb.fgputil.functional.FunctionalInterfaces.SupplierWithException;
 import org.gusdb.fgputil.validation.ValidationException;
+import org.veupathdb.lib.container.jaxrs.providers.UserProvider;
 import org.veupathdb.lib.container.jaxrs.server.annotations.Authenticated;
 import org.veupathdb.lib.container.jaxrs.server.annotations.DisableJackson;
-import org.veupathdb.lib.container.jaxrs.utils.RequestKeys;
 import org.veupathdb.service.eda.common.auth.StudyAccess;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
@@ -33,44 +33,16 @@ import org.veupathdb.service.eda.ds.plugin.pass.HeatmapPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.HistogramPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.LineplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.MapPlugin;
+import org.veupathdb.service.eda.ds.plugin.pass.MapMarkersOverlayPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TablePlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TimeSeriesPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.MultiStreamPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.RecordCountPlugin;
-import org.veupathdb.service.eda.ds.util.NonEmptyResultStream.EmptyResultException;
-import org.veupathdb.service.eda.generated.model.AbundanceBoxplotPostRequest;
-import org.veupathdb.service.eda.generated.model.AbundanceScatterplotPostRequest;
-import org.veupathdb.service.eda.generated.model.AlphaDivBoxplotPostRequest;
-import org.veupathdb.service.eda.generated.model.AlphaDivScatterplotPostRequest;
-import org.veupathdb.service.eda.generated.model.BarplotPostRequest;
-import org.veupathdb.service.eda.generated.model.BarplotPostResponseStream;
-import org.veupathdb.service.eda.generated.model.BetaDivScatterplotPostRequest;
-import org.veupathdb.service.eda.generated.model.BoxplotPostRequest;
-import org.veupathdb.service.eda.generated.model.BoxplotPostResponseStream;
-import org.veupathdb.service.eda.generated.model.ContTablePostResponseStream;
-import org.veupathdb.service.eda.generated.model.DensityplotPostRequest;
-import org.veupathdb.service.eda.generated.model.DensityplotPostResponseStream;
-import org.veupathdb.service.eda.generated.model.EntityTabularPostResponseStream;
-import org.veupathdb.service.eda.generated.model.HeatmapPostRequest;
-import org.veupathdb.service.eda.generated.model.HeatmapPostResponseStream;
-import org.veupathdb.service.eda.generated.model.HistogramPostRequest;
-import org.veupathdb.service.eda.generated.model.HistogramPostResponseStream;
-import org.veupathdb.service.eda.generated.model.LineplotPostRequest;
-import org.veupathdb.service.eda.generated.model.LineplotPostResponseStream;
-import org.veupathdb.service.eda.generated.model.MapPostRequest;
-import org.veupathdb.service.eda.generated.model.MapPostResponseStream;
-import org.veupathdb.service.eda.generated.model.MosaicPostRequest;
-import org.veupathdb.service.eda.generated.model.MultiStreamPostRequest;
-import org.veupathdb.service.eda.generated.model.RecordCountPostRequest;
-import org.veupathdb.service.eda.generated.model.RecordCountPostResponseStream;
-import org.veupathdb.service.eda.generated.model.ScatterplotPostRequest;
-import org.veupathdb.service.eda.generated.model.ScatterplotPostResponseStream;
-import org.veupathdb.service.eda.generated.model.TablePostRequest;
-import org.veupathdb.service.eda.generated.model.TablePostResponseStream;
-import org.veupathdb.service.eda.generated.model.TwoByTwoPostResponseStream;
-import org.veupathdb.service.eda.generated.model.VisualizationRequestBase;
+import org.veupathdb.service.eda.ds.plugin.sample.TestCollectionPlugin;
+import org.veupathdb.service.eda.common.client.NonEmptyResultStream.EmptyResultException;
+import org.veupathdb.service.eda.generated.model.*;
 import org.veupathdb.service.eda.generated.resources.Apps;
 
 @Authenticated(allowGuests = true)
@@ -79,7 +51,7 @@ public class AppsService implements Apps {
   private static final Logger LOG = LogManager.getLogger(AppsService.class);
 
   @Context
-  private ContainerRequestContext _request;
+  private ContainerRequest _request;
 
   @Override
   public GetAppsResponse getApps() {
@@ -106,7 +78,7 @@ public class AppsService implements Apps {
   }
 
   private <T extends VisualizationRequestBase> Consumer<OutputStream> processRequest(AbstractPlugin<T,?> plugin, T entity) throws ValidationException {
-    Entry<String,String> authHeader = StudyAccess.readAuthHeader(_request, RequestKeys.AUTH_HEADER);
+    Entry<String,String> authHeader = UserProvider.getSubmittedAuth(_request).orElseThrow();
     StudyAccess.confirmPermission(authHeader, Resources.DATASET_ACCESS_SERVICE_URL,
         entity.getStudyId(), StudyAccess::allowVisualizations);
     String appName = _request.getUriInfo().getPathSegments().get(1).getPath();
@@ -171,6 +143,13 @@ public class AppsService implements Apps {
 
   @DisableJackson
   @Override
+  public PostAppsPassVisualizationsMapMarkersOverlayResponse postAppsPassVisualizationsMapMarkersOverlay(MapMarkersOverlayPostRequest entity) {
+    return wrapPlugin(() -> PostAppsPassVisualizationsMapMarkersOverlayResponse.respond200WithApplicationJson(
+        new MapMarkersOverlayPostResponseStream(processRequest(new MapMarkersOverlayPlugin(), entity))));
+  }
+
+  @DisableJackson
+  @Override
   public PostAppsPassVisualizationsBoxplotResponse postAppsPassVisualizationsBoxplot(BoxplotPostRequest entity) {
     return wrapPlugin(() -> PostAppsPassVisualizationsBoxplotResponse.respond200WithApplicationJson(
         new BoxplotPostResponseStream(processRequest(new BoxplotPlugin(), entity))));
@@ -213,6 +192,13 @@ public class AppsService implements Apps {
 
   @DisableJackson
   @Override
+  public PostAppsSampleVisualizationsCollectionsTestResponse postAppsSampleVisualizationsCollectionsTest(TestCollectionsPostRequest entity) {
+    return wrapPlugin(() -> PostAppsSampleVisualizationsCollectionsTestResponse.respond200WithTextPlain(
+        new EntityTabularPostResponseStream(processRequest(new TestCollectionPlugin(), entity))));
+  }
+
+  @DisableJackson
+  @Override
   public PostAppsAlphadivVisualizationsBoxplotResponse postAppsAlphadivVisualizationsBoxplot(AlphaDivBoxplotPostRequest entity) {
     return wrapPlugin(() -> PostAppsAlphadivVisualizationsBoxplotResponse.respond200WithApplicationJson(
         new BoxplotPostResponseStream(processRequest(new AlphaDivBoxplotPlugin(), entity))));
@@ -244,6 +230,55 @@ public class AppsService implements Apps {
   public PostAppsAbundanceVisualizationsScatterplotResponse postAppsAbundanceVisualizationsScatterplot(AbundanceScatterplotPostRequest entity) {
     return wrapPlugin(() -> PostAppsAbundanceVisualizationsScatterplotResponse.respond200WithApplicationJson(
         new ScatterplotPostResponseStream(processRequest(new AbundanceScatterplotPlugin(), entity))));
+  }
+
+  @DisableJackson
+  @Override
+  public PostAppsDistributionsVisualizationsBoxplotResponse postAppsDistributionsVisualizationsBoxplot(BoxplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsDistributionsVisualizationsBoxplotResponse.respond200WithApplicationJson(
+        new BoxplotPostResponseStream(processRequest(new BoxplotPlugin(), entity))));
+  }
+
+  @DisableJackson
+  @Override
+  public PostAppsDistributionsVisualizationsHistogramResponse postAppsDistributionsVisualizationsHistogram(HistogramPostRequest entity) {
+    return wrapPlugin(() -> PostAppsDistributionsVisualizationsHistogramResponse.respond200WithApplicationJson(
+        new HistogramPostResponseStream(processRequest(new HistogramPlugin(), entity))));
+  }
+
+  @DisableJackson
+  @Override
+  public PostAppsCountsandproportionsVisualizationsBarplotResponse postAppsCountsandproportionsVisualizationsBarplot(BarplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsCountsandproportionsVisualizationsBarplotResponse.respond200WithApplicationJson(
+        new BarplotPostResponseStream(processRequest(new BarplotPlugin(), entity))));
+  }
+
+  @DisableJackson
+  @Override
+  public PostAppsCountsandproportionsVisualizationsTwobytwoResponse postAppsCountsandproportionsVisualizationsTwobytwo(MosaicPostRequest entity) {
+    return wrapPlugin(() -> PostAppsCountsandproportionsVisualizationsTwobytwoResponse.respond200WithApplicationJson(
+        new TwoByTwoPostResponseStream(processRequest(new TwoByTwoPlugin(), entity))));
+  }
+  
+  @DisableJackson
+  @Override
+  public PostAppsCountsandproportionsVisualizationsConttableResponse postAppsCountsandproportionsVisualizationsConttable(MosaicPostRequest entity) {
+    return wrapPlugin(() -> PostAppsCountsandproportionsVisualizationsConttableResponse.respond200WithApplicationJson(
+        new ContTablePostResponseStream(processRequest(new ContTablePlugin(), entity))));
+  }
+
+  @DisableJackson
+  @Override
+  public PostAppsXyrelationshipsVisualizationsLineplotResponse postAppsXyrelationshipsVisualizationsLineplot(LineplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsXyrelationshipsVisualizationsLineplotResponse.respond200WithApplicationJson(
+        new LineplotPostResponseStream(processRequest(new LineplotPlugin(), entity))));
+  }
+
+  @DisableJackson
+  @Override
+  public PostAppsXyrelationshipsVisualizationsScatterplotResponse postAppsXyrelationshipsVisualizationsScatterplot(ScatterplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsXyrelationshipsVisualizationsScatterplotResponse.respond200WithApplicationJson(
+        new ScatterplotPostResponseStream(processRequest(new ScatterplotPlugin(), entity))));
   }
 
 }

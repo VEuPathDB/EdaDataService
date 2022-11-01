@@ -1,0 +1,70 @@
+#%RAML 1.0 Library
+
+types:
+  # Type name determines the name of the Java class that will be generated.
+
+  MapMarkersOverlayPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: MapMarkersOverlaySpec
+  
+  MapMarkersOverlaySpec:
+    additionalProperties: false
+    properties:
+      outputEntityId:
+        type: string
+      showMissingness:
+        type: ShowMissingness
+        required: false
+      xAxisVariable: 
+        type: VariableSpec
+      geoAggregateVariable: 
+        type: VariableSpec
+      valueSpec: 
+        type: ValueSpec
+      longitudeVariable?:
+        type: VariableSpec
+      latitudeVariable?:
+        type: VariableSpec
+      binSpec:
+        type: BinSpec
+      viewport?:
+        type: GeolocationViewport
+
+  MapMarkersOverlayConfig:
+    type: PlotConfig
+    properties:
+      rankedValues:
+        type: string[]
+        minItems: 1
+        maxItems: 20
+      overlayValues:
+        type: string[]
+        minItems: 1
+        maxItems: 20
+      binSlider?:
+        type: BinSlider
+      binSpec?:
+        type: BinSpec
+      xVariableDetails:
+        type: VariableSpec
+      viewport:
+        type: GeolocationViewport
+
+  MapMarkersOverlay:
+    additionalProperties: false
+    properties:
+      data:
+        type: MapMarkersOverlayData[]
+      config:
+        type: MapMarkersOverlayConfig
+
+  MapMarkersOverlayPostResponse:
+    additionalProperties: false
+    properties:
+      mapMarkers:
+        type: MapMarkersOverlay
+      sampleSizeTable:
+        type: SampleSizeTable[]
+      completeCasesTable:
+        type: VariableCompleteCases[]

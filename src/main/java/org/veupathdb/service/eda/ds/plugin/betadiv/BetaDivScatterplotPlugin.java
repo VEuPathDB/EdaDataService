@@ -11,17 +11,18 @@ import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
-import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
-import org.veupathdb.service.eda.ds.constraints.DataElementSet;
+import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
+import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
+import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
 import org.veupathdb.service.eda.ds.plugin.AbstractPluginWithCompute;
-import org.veupathdb.service.eda.ds.util.RServeClient;
+import org.veupathdb.service.eda.common.plugin.util.RServeClient;
 import org.veupathdb.service.eda.generated.model.BetaDivComputeConfig;
 import org.veupathdb.service.eda.generated.model.BetaDivScatterplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BetaDivScatterplotSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
-import static org.veupathdb.service.eda.ds.util.RServeClient.useRConnectionWithRemoteFiles;
+import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 
 public class BetaDivScatterplotPlugin extends AbstractPluginWithCompute<BetaDivScatterplotPostRequest, BetaDivScatterplotSpec, BetaDivComputeConfig> {
 
@@ -55,7 +56,7 @@ public class BetaDivScatterplotPlugin extends AbstractPluginWithCompute<BetaDivS
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder("overlayVariable")
+      .dependencyOrder(List.of("overlayVariable"))
       .pattern()
         // .element("yAxisVariable")
         //   .types(APIVariableType.NUMBER, APIVariableType.DATE) 
@@ -64,6 +65,8 @@ public class BetaDivScatterplotPlugin extends AbstractPluginWithCompute<BetaDivS
         //   .types(APIVariableType.NUMBER, APIVariableType.DATE)
         //   .description("Variable must be a number or date and be of the same or a parent entity as the Y-axis variable.")
         .element("overlayVariable")
+          .required(false)
+          .maxValues(8)
           .description("Variable must be of the same or a parent entity as the X-axis variable.")
       .done();
   }
@@ -94,15 +97,16 @@ public class BetaDivScatterplotPlugin extends AbstractPluginWithCompute<BetaDivS
     // varMap.put("yAxisVariable", spec.getYAxisVariable());  // Will come from compute service
     varMap.put("overlayVariable", spec.getOverlayVariable());
     String valueSpec = "raw";
-    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "FALSE";
+    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
+    String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
     
-    useRConnectionWithRemoteFiles(dataStreams, connection -> {
-      connection.voidEval(getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, 
+    useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
+      connection.voidEval(getUtil().getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
           // spec.getXAxisVariable(), // Will come from CS
           // spec.getYAxisVariable(), // Will come from CS
           spec.getOverlayVariable()));
       connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      String command = "plot.data::scattergl(data, map, '" + valueSpec + "', " + showMissingness + ")";
+      String command = "plot.data::scattergl(data, map, '" + valueSpec + "', '" + deprecatedShowMissingness + "')";
       RServeClient.streamResult(connection, command, out);
     }); 
   }

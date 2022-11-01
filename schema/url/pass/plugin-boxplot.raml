@@ -14,8 +14,7 @@ types:
       outputEntityId:
         type: string
       showMissingness:
-        type: string
-        enum: ['TRUE', 'FALSE']
+        type: ShowMissingnessNoAxes
         required: false
       points:
         type: string
@@ -39,6 +38,7 @@ types:
         required: false
       maxAllowedDataPoints:
         type: integer
+        format: int64
         required: false
       
 

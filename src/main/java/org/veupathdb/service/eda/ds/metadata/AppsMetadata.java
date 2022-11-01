@@ -2,7 +2,8 @@ package org.veupathdb.service.eda.ds.metadata;
 
 import java.util.Arrays;
 import java.util.List;
-import org.veupathdb.service.eda.ds.constraints.ConstraintSpec;
+
+import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivBoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivScatterplotPlugin;
@@ -17,11 +18,12 @@ import org.veupathdb.service.eda.ds.plugin.pass.HeatmapPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.HistogramPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.LineplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.MapPlugin;
+import org.veupathdb.service.eda.ds.plugin.pass.MapMarkersOverlayPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ScatterplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.TimeSeriesPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.MultiStreamPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.RecordCountPlugin;
+import org.veupathdb.service.eda.ds.plugin.sample.TestCollectionPlugin;
 import org.veupathdb.service.eda.generated.model.AppOverview;
 import org.veupathdb.service.eda.generated.model.AppOverviewImpl;
 import org.veupathdb.service.eda.generated.model.AppsGetResponse;
@@ -32,14 +34,16 @@ import org.veupathdb.service.eda.generated.model.VisualizationOverviewImpl;
 public class AppsMetadata {
 
   public static final String CLINEPI_PROJECT = "ClinEpiDB";
+  public static final String ALLCLINEPI_PROJECT = "AllClinEpiDB";
   public static final String MICROBIOME_PROJECT = "MicrobiomeDB";
+  public static final String VECTORBASE_PROJECT = "VectorBase";
 
   // NOTE: these names must match the url segments defined in the api.raml
   // Pass vizs are now different based on mbio vs clinepi so we need to adjust the below array?
   public static final AppsGetResponse APPS = apps(
       app("pass", "Pass-Through", null,
           "A collection of visualizations designed to support the unbiased exploration of relationships between variables",
-          Arrays.asList(CLINEPI_PROJECT, MICROBIOME_PROJECT),
+          Arrays.asList(CLINEPI_PROJECT, ALLCLINEPI_PROJECT, VECTORBASE_PROJECT),
           viz("histogram", new HistogramPlugin()),
           viz("barplot", new BarplotPlugin()),
           viz("scatterplot", new ScatterplotPlugin()),
@@ -49,25 +53,43 @@ public class AppsMetadata {
           viz("lineplot", new LineplotPlugin()),
           viz("densityplot", new DensityplotPlugin()),
           viz("heatmap", new HeatmapPlugin()),
-          viz("map-markers", new MapPlugin())),
+          viz("map-markers", new MapPlugin()),
+          viz("map-markers-overlay", new MapMarkersOverlayPlugin())),
       app("alphadiv", "Alpha Diversity", "AlphaDivComputation",
-          "A collection of visualizations designed to support the unbiased exploration of relationships between variables and Alpha Diversity.",
+          "Visualize within-sample (alpha) microbial diversity based on field-standard metrics, such as the Shannon Diversity Index, Simpson's Diversity Index, and Pielou's Evenness.",
           List.of(MICROBIOME_PROJECT),
           viz("boxplot", new AlphaDivBoxplotPlugin()),
           viz("scatterplot", new AlphaDivScatterplotPlugin())),
-      app("abundance", "Relative Abundance", "RelativeAbundanceComputation",
-          "A collection of visualizations designed to support the unbiased exploration of relationships between variables and abundance data.",
+      app("abundance", "Ranked Abundance", "RankedAbundanceComputation",
+          "Plot the top n taxa, pathways, or genes from any study, ranked by either the median, maximum, variance, or third quartile of the relative abundance values.",
           List.of(MICROBIOME_PROJECT),
           viz("boxplot", new AbundanceBoxplotPlugin()),
           viz("scatterplot", new AbundanceScatterplotPlugin())),
       app("betadiv", "Beta Diversity", "BetaDivComputation",
-          "A collection of visualizations designed to support the unbiased exploration of relationships between variables and Beta Diversity.",
+          "Visualize between-sample (beta) comparisons in microbial diversity, using Bray-Curtis dissimilarity, Jensen-Shannon Divergence, or the Jaccard Index",
           List.of(MICROBIOME_PROJECT),
           viz("scatterplot", new BetaDivScatterplotPlugin())),
+      app("distributions", "Distributions", "null",
+          "Plot simple distributions for any continuous variable, including metadata (e.g. age, height, etc.) or microbial assay results.",
+          List.of(MICROBIOME_PROJECT),
+          viz("histogram", new HistogramPlugin()),
+          viz("boxplot", new BoxplotPlugin())),
+      app("countsandproportions", "Counts and Proportions", "null",
+          "Use standard bar plots and 'row by column' (RxC) or 2x2 contingency tables to examine and compare frequencies in the data.",
+          List.of(MICROBIOME_PROJECT),
+          viz("barplot", new BarplotPlugin()),
+          viz("twobytwo", new TwoByTwoPlugin()),
+          viz("conttable", new ContTablePlugin())),
+      app("xyrelationships", "X-Y Relationships", "null",
+          "Interested in creating your own X-Y visualizations of any study variables?  Look no further!  Click on one of the plot types on the right and get ready to be creative.",
+          List.of(MICROBIOME_PROJECT),
+          viz("scatterplot", new ScatterplotPlugin()),
+          viz("lineplot", new LineplotPlugin())),
       app("sample", "Sample", "Wrapper app for sample/test plugins", null,
           List.of(),
           viz("record-count", new RecordCountPlugin()),
-          viz("multi-stream", new MultiStreamPlugin()))
+          viz("multi-stream", new MultiStreamPlugin()),
+          viz("collections-test", new TestCollectionPlugin()))
   );
 
   //******************************************
