@@ -1,13 +1,15 @@
 package org.veupathdb.service.eda.ds.plugin.sample;
 
+import org.gusdb.fgputil.DelimitedDataParser;
+import org.gusdb.fgputil.json.JsonUtil;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
+import org.veupathdb.service.eda.common.model.VariableDef;
+import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.*;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.List;
 import java.util.Map;
 
@@ -31,24 +33,64 @@ public class ExampleComputeVizPlugin extends AbstractPlugin<ExampleComputeVizPos
 
   @Override
   protected void validateVisualizationSpec(ExampleComputeVizSpec pluginSpec) throws ValidationException {
-    // TODO
+    String computeEntityId = getComputeConfig().getOutputEntityId();
+    if (!pluginSpec.getPrefixVar().getEntityId().equals(computeEntityId)) {
+      throw new ValidationException("The prefix variable must be native to the same entity as the example compute");
+    }
   }
 
   @Override
   protected List<StreamSpec> getRequestedStreams(ExampleComputeVizSpec pluginSpec) {
-    return List.of(new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getEntityId())
+    return List.of(new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, getComputeConfig().getOutputEntityId())
         .addVar(pluginSpec.getPrefixVar())
         .setIncludeComputedVars(true));
   }
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    // get stats
-    ExamplePluginStats stats = getComputeResultStats(ExamplePluginStats.class);
-    // get metadata
-    ComputedVariableMetadata metadata = getComputedVariableMetadata();
 
-    // TODO: figure out what to do here
+    // get compute stats
+    ExamplePluginStats stats = getComputeResultStats(ExamplePluginStats.class);
+    int numComputedEmptyValues = stats.getNumEmptyValues();
+
+    // get metadata to find computed column
+    ComputedVariableMetadata metadata = getComputedVariableMetadata();
+    String computedVariableId = metadata.getPlotReferences().stream()
+        .filter(pr -> pr.getVariablePlotRef().equals("appendedValue"))
+        .findFirst().orElseThrow().getComputedVariableId();
+    VariableSpec computedVarSpec = VariableDef.newVariableSpec(getComputeConfig().getOutputEntityId(), computedVariableId);
+
+    // loop through computed var to find longest and average size of concatenated values
+    PluginUtil util = getUtil();
+    String longestValue = "";
+    int numValues = 0;
+    double sumOfLengths = 0;
+    String prefixVarColumnName = util.toColNameOrEmpty(getPluginSpec().getPrefixVar());
+    String computedVarColumnName = util.toColNameOrEmpty(computedVarSpec);
+    try (BufferedReader in = new BufferedReader(new InputStreamReader(dataStreams.get(DEFAULT_SINGLE_STREAM_NAME)))) {
+      if (!in.ready())
+        throw new IllegalStateException("Incoming stream has no header/no data");
+      DelimitedDataParser parser = new DelimitedDataParser(in.readLine(), "\t", true);
+      while (in.ready()) {
+        Map<String,String> row = parser.parseLine(in.readLine());
+        String prefixValue = row.get(prefixVarColumnName);
+        String computedValue = row.get(computedVarColumnName);
+        String concatenation = prefixValue + computedValue;
+        numValues++;
+        sumOfLengths += concatenation.length();
+        if (longestValue.length() < concatenation.length()) {
+          longestValue = concatenation;
+        }
+      }
+    }
+
+    // write response (use buffering for larger responses)
+    ExampleComputeVizPostResponse response = new ExampleComputeVizPostResponseImpl();
+    response.setNumEmptyValues(numComputedEmptyValues);
+    response.setLongestConcatenatedValue(longestValue);
+    response.setAvgConcatenatedLength(numValues == 0 ? 0 : sumOfLengths / numValues);
+    out.write(JsonUtil.serializeObject(response).getBytes());
+    out.flush();
   }
 
 }

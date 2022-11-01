@@ -12,11 +12,11 @@ types:
     additionalProperties: false
     type: object
     properties:
-      entityId: string
       prefixVar: VariableSpec
 
   ExampleComputeVizPostResponse:
     additionalProperties: false
     properties:
-      longestValue: string
-      avgConcatenatedLength: integer
+      numEmptyValues: integer
+      longestConcatenatedValue: string
+      avgConcatenatedLength: number
