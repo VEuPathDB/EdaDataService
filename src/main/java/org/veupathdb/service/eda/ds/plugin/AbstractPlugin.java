@@ -282,12 +282,12 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   }
 
   public String getVariableSpecRObjectAsString(VariableDef var) {
-    return("new('VariableSpec',variableId=" + singleQuote(var.getVariableId()) + ",entityId=" + singleQuote(var.getEntityId()) + ")");
+    return("veupathUtils::VariableSpec(variableId=" + singleQuote(var.getVariableId()) + ",entityId=" + singleQuote(var.getEntityId()) + ")");
   }
 
   public String getVariableSpecListRObjectAsString(List<VariableDef> vars) {
     boolean first = true;
-    String variableSpecList = new String("new('VariableSpecList',SimpleList(");
+    String variableSpecList = new String("veupathUtils::VariableSpecList(S4Vectors::SimpleList(");
 
     for (VariableDef var : vars) {
       if (first) {
@@ -307,10 +307,10 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     
     String membersList = getVariableSpecListRObjectAsString(util.getCollectionMembers(collection));
 
-    return("new('VariableMetadata'," + 
-                  "variableClass=new('VariableClass',value='native')," + 
-                  "variableSpec=new('VariableSpec', variableId=" + singleQuote(collection.getCollectionId()) + ",entityId=" + singleQuote(collection.getEntityId()) + ")," +
-                  "plotReference=new('PlotReference', value=" + singleQuote(plotReference) + ")," +
+    return("veupathUtils::VariableMetadata(" + 
+                  "variableClass=veupathUtils::VariableClass(value='native')," + 
+                  "variableSpec=veupathUtils::VariableSpec(variableId=" + singleQuote(collection.getCollectionId()) + ",entityId=" + singleQuote(collection.getEntityId()) + ")," +
+                  "plotReference=veupathUtils::PlotReference(value=" + singleQuote(plotReference) + ")," +
                   "dataType=" + singleQuote(util.getCollectionType(collection)) + "," +
                   "dataShape=" + singleQuote(util.getCollectionDataShape(collection)) + "," +
                   "imputeZero=" + util.getCollectionImputeZero(collection).toUpperCase() + "," +
@@ -321,20 +321,18 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   public String getVariableMetadataRObjectAsString(VariableSpec var, String plotReference) {
     PluginUtil util = getUtil();
     
-    return("new('VariableMetadata'," + 
-                  "variableClass=new('VariableClass',value='native')," + 
-                  "variableSpec=new('VariableSpec', variableId=" + singleQuote(var.getVariableId()) + ",entityId=" + singleQuote(var.getEntityId()) + ")," +
-                  "plotReference=new('PlotReference', value=" + singleQuote(plotReference) + ")," +
+    return("veupathUtils::VariableMetadata(" + 
+                  "variableClass=veupathUtils::VariableClass(value='native')," + 
+                  "variableSpec=veupathUtils::VariableSpec(variableId=" + singleQuote(var.getVariableId()) + ",entityId=" + singleQuote(var.getEntityId()) + ")," +
+                  "plotReference=veupathUtils::PlotReference(value=" + singleQuote(plotReference) + ")," +
                   "dataType=" + singleQuote(util.getVariableType(var)) + "," +
                   "dataShape=" + singleQuote(util.getVariableDataShape(var)) + "," +
                   "imputeZero=" + util.getVariableImputeZero(var).toUpperCase() + ")");
   }
 
-  // TODO make sure all R packages are passing tests after the update for plotRef
-  // TODO need to do similar for computed var metadata and update compute plugins once i hear back from ryan
   public String getVoidEvalVariableMetadataList(Map<String, VariableSpec> vars) {
     boolean first = true;
-    String variableMetadataList = new String("variables <- new('VariableMetadataList',");
+    String variableMetadataList = new String("variables <- veupathUtils::VariableMetadataList(");
     for(Map.Entry<String, VariableSpec> entry : vars.entrySet()) {
       String plotReference = entry.getKey();
       VariableSpec var = entry.getValue();
