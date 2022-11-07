@@ -130,16 +130,13 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithCompute<Abunda
       connection.voidEval("vizData <- merge(abundanceDT, " + 
           DEFAULT_SINGLE_STREAM_NAME + 
        ", by=" + singleQuote(computeEntityIdColName) +")");
-      connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-
-      connection.voidEval("map <- rbind(map, list('id'=veupathUtils::toColNameOrNull(attributes(abundanceDT)$computedVariable$computedVariableDetails)," +
-                                                 "'plotRef'=rep('overlayVariable', length(attributes(abundanceDT)$computedVariable$computedVariableDetails$variableId))," +
-                                                 "'dataType'=attributes(abundanceDT)$computedVariable$computedVariableDetails$dataType," +
-                                                 "'dataShape'=attributes(abundanceDT)$computedVariable$computedVariableDetails$dataShape))");
-      String command = "plot.data::scattergl(vizData, map, '" +
+      connection.voidEval(getVoidEvalVariableMetadataList(varMap));
+      //there should only be a single computed collection for ranked abundance
+      connection.voidEval("variables[[length(variables) + 1]] <- attributes(abundanceDT)$computedVariable[[1]]");
+      String command = "plot.data::scattergl(vizData, variables, '" +
           valueSpec + "', '" + 
           deprecatedShowMissingness + "', " +
-          "'overlayVariable', computedVariableMetadata=attributes(abundanceDT)$computedVariable$computedVariableMetadata, TRUE)";
+          "TRUE)";
       RServeClient.streamResult(connection, command, out);
     }); 
   }

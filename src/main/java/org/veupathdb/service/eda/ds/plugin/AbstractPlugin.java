@@ -282,10 +282,12 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   }
 
   public String getVariableSpecRObjectAsString(VariableDef var) {
+    if (var == null) return(null);
     return("veupathUtils::VariableSpec(variableId=" + singleQuote(var.getVariableId()) + ",entityId=" + singleQuote(var.getEntityId()) + ")");
   }
 
   public String getVariableSpecListRObjectAsString(List<VariableDef> vars) {
+    if (vars == null) return(null);
     boolean first = true;
     String variableSpecList = new String("veupathUtils::VariableSpecList(S4Vectors::SimpleList(");
 
@@ -303,6 +305,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   }
   
   public String getVariableMetadataRObjectAsString(CollectionSpec collection, String plotReference) {
+    if (collection == null) return(null);
     PluginUtil util = getUtil();
     
     String membersList = getVariableSpecListRObjectAsString(util.getCollectionMembers(collection));
@@ -319,6 +322,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   }
 
   public String getVariableMetadataRObjectAsString(VariableSpec var, String plotReference) {
+    if (var == null) return(null);
     PluginUtil util = getUtil();
     
     return("veupathUtils::VariableMetadata(" + 
@@ -337,12 +341,15 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
       String plotReference = entry.getKey();
       VariableSpec var = entry.getValue();
       String variableMetadata = getVariableMetadataRObjectAsString(var, plotReference);
-      if (first) {
-        first = false;
-        variableMetadataList = variableMetadata;
-      } else {
-        variableMetadataList = variableMetadataList + "," + variableMetadata;
+      if (variableMetadata != null) {
+        if (first) {
+          first = false;
+          variableMetadataList = variableMetadata;
+        } else {
+          variableMetadataList = variableMetadataList + "," + variableMetadata;
+        }
       }
+      
     }
     variableMetadataList = variableMetadataList + ")";
 
