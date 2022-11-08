@@ -331,12 +331,12 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
                   "plotReference=veupathUtils::PlotReference(value=" + singleQuote(plotReference) + ")," +
                   "dataType=veupathUtils::DataType(value=" + singleQuote(util.getVariableType(var)) + ")," +
                   "dataShape=veupathUtils::DataShape(value=" + singleQuote(util.getVariableDataShape(var)) + ")," +
-                  "imputeZero=" + util.getVariableImputeZero(var).toUpperCase());
+                  "imputeZero=" + util.getVariableImputeZero(var).toUpperCase() + ")");
   }
 
   public String getVoidEvalVariableMetadataList(Map<String, VariableSpec> vars) {
     boolean first = true;
-    String variableMetadataList = new String("variables <- veupathUtils::VariableMetadataList(");
+    String variableMetadataList = new String("variables <- veupathUtils::VariableMetadataList(S4Vectors::SimpleList(");
     for(Map.Entry<String, VariableSpec> entry : vars.entrySet()) {
       String plotReference = entry.getKey();
       VariableSpec var = entry.getValue();
@@ -344,14 +344,14 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
       if (variableMetadata != null) {
         if (first) {
           first = false;
-          variableMetadataList = variableMetadata;
+          variableMetadataList = variableMetadataList + variableMetadata;
         } else {
           variableMetadataList = variableMetadataList + "," + variableMetadata;
         }
       }
       
     }
-    variableMetadataList = variableMetadataList + ")";
+    variableMetadataList = variableMetadataList + "))";
 
     return(variableMetadataList);
   }
