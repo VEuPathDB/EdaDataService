@@ -47,14 +47,14 @@ public class ContTablePlugin extends AbstractPlugin<MosaicPostRequest, MosaicSpe
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder("yAxisVariable", "xAxisVariable", "facetVariable")
+      .dependencyOrder(List.of("yAxisVariable", "xAxisVariable"), List.of("facetVariable"))
       .pattern()
         .element("yAxisVariable")
           .maxValues(8)
-          .description("Variable must have 8 or fewer unique values.")
+          .description("Variable must have 8 or fewer unique values and be from the same branch of the dataset diagram as the X-axis variable.")
         .element("xAxisVariable")
           .maxValues(10)
-          .description("Variable must have 10 or fewer unique values and be of the same or a parent entity of the Y-axis variable.")
+          .description("Variable must have 10 or fewer unique values and be from the same branch of the dataset diagram as the Y-axis variable.")
         .element("facetVariable")
           .required(false)
           .maxVars(2)

@@ -56,7 +56,7 @@ public class BetaDivScatterplotPlugin extends AbstractPluginWithCompute<BetaDivS
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder("overlayVariable")
+      .dependencyOrder(List.of("overlayVariable"))
       .pattern()
         .element("overlayVariable")
           .required(false)

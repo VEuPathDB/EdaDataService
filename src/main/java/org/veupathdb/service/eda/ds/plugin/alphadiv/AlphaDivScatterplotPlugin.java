@@ -60,7 +60,7 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder("xAxisVariable", "overlayVariable", "facetVariable")
+      .dependencyOrder(List.of("xAxisVariable"), List.of("overlayVariable", "facetVariable"))
       .pattern()
         .element("xAxisVariable")
           .types(APIVariableType.NUMBER, APIVariableType.DATE, APIVariableType.INTEGER)

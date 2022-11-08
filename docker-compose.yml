@@ -13,7 +13,7 @@ services:
       traefik:
     volumes:
       - type: bind
-        source: ${MACHINE_BINARY_FILES_DIR:-/tmp/edaBinaryFiles}
+        source: ${MACHINE_BINARY_FILES_DIR:-/var/www/Common/apiSiteFilesMirror/webServices}
         target: ${SERVICE_BINARY_FILES_DIR:-/binaryFiles}
         read_only: true
     environment:
@@ -25,6 +25,8 @@ services:
 
       # Map-reduce subsetting method configuraton
       BINARY_FILES_DIR: ${SERVICE_BINARY_FILES_DIR:-/binaryFiles}
+      DB_BUILD: ${DB_BUILD}
+      AVAILABLE_BINARY_FILES_PATHS: ${AVAILABLE_BINARY_FILES_PATHS:-ClinEpiDB/%DB_BUILD%/eda-studies-binary;MicrobiomeDB/%DB_BUILD%/eda-studies-binary;*/%DB_BUILD%/*/eda-studies-binary}
 
       # LDAP values to look up DBs
       LDAP_SERVER: ${LDAP_SERVER}
@@ -171,6 +173,9 @@ services:
 
       PROJECT_SPECIFIC_PROP_MB_PROJECT_ID: MicrobiomeDB
       PROJECT_SPECIFIC_PROP_MB_USER_SCHEMA: edausermb
+
+      PROJECT_SPECIFIC_PROP_VB_PROJECT_ID: VectorBase
+      PROJECT_SPECIFIC_PROP_VB_USER_SCHEMA: edauservb
 
     labels:
     - "prometheus.scrape_enabled=true"
