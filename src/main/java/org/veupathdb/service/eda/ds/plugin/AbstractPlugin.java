@@ -323,15 +323,15 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
 
   public String getVariableMetadataRObjectAsString(VariableSpec var, String plotReference) {
     if (var == null) return(null);
-    PluginUtil util = getUtil();
-    
+    PluginUtil util = getUtil();  
+
     return("veupathUtils::VariableMetadata(" + 
                   "variableClass=veupathUtils::VariableClass(value='native')," + 
                   "variableSpec=veupathUtils::VariableSpec(variableId=" + singleQuote(var.getVariableId()) + ",entityId=" + singleQuote(var.getEntityId()) + ")," +
                   "plotReference=veupathUtils::PlotReference(value=" + singleQuote(plotReference) + ")," +
-                  "dataType=" + singleQuote(util.getVariableType(var)) + "," +
-                  "dataShape=" + singleQuote(util.getVariableDataShape(var)) + "," +
-                  "imputeZero=" + util.getVariableImputeZero(var).toUpperCase() + ")");
+                  "dataType=veupathUtils::DataType(value=" + singleQuote(util.getVariableType(var)) + ")," +
+                  "dataShape=veupathUtils::DataShape(value=" + singleQuote(util.getVariableDataShape(var)) + ")," +
+                  "imputeZero=" + util.getVariableImputeZero(var).toUpperCase());
   }
 
   public String getVoidEvalVariableMetadataList(Map<String, VariableSpec> vars) {

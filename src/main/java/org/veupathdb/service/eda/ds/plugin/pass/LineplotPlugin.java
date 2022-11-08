@@ -93,11 +93,11 @@ public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, Lineplot
     PluginUtil util = getUtil();
     LineplotSpec spec = getPluginSpec();
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
-    varMap.put("xAxisVariable", spec.getXAxisVariable());
-    varMap.put("yAxisVariable", spec.getYAxisVariable());
-    varMap.put("overlayVariable", spec.getOverlayVariable());
-    varMap.put("facetVariable1", util.getVariableSpecFromList(spec.getFacetVariable(), 0));
-    varMap.put("facetVariable2", util.getVariableSpecFromList(spec.getFacetVariable(), 1));
+    varMap.put("xAxis", spec.getXAxisVariable());
+    varMap.put("yAxis", spec.getYAxisVariable());
+    varMap.put("overlay", spec.getOverlayVariable());
+    varMap.put("facet1", util.getVariableSpecFromList(spec.getFacetVariable(), 0));
+    varMap.put("facet2", util.getVariableSpecFromList(spec.getFacetVariable(), 1));
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
     String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
     String errorBars = spec.getErrorBars() != null ? spec.getErrorBars().getValue() : "FALSE";

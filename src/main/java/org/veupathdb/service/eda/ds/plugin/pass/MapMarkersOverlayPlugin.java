@@ -81,10 +81,10 @@ public class MapMarkersOverlayPlugin extends AbstractPlugin<MapMarkersOverlayPos
     String xVarType = util.getVariableType(spec.getXAxisVariable());
 
     Map<String, VariableSpec> varMap = new HashMap<>();
-    varMap.put("xAxisVariable", spec.getXAxisVariable());
-    varMap.put("geoAggregateVariable", spec.getGeoAggregateVariable());
-    varMap.put("latitudeVariable", spec.getLatitudeVariable());
-    varMap.put("longitudeVariable", spec.getLongitudeVariable());
+    varMap.put("xAxis", spec.getXAxisVariable());
+    varMap.put("geo", spec.getGeoAggregateVariable());
+    varMap.put("latitude", spec.getLatitudeVariable());
+    varMap.put("longitude", spec.getLongitudeVariable());
       
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
