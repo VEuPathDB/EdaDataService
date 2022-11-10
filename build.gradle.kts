@@ -90,9 +90,9 @@ repositories {
 
 // versions
 val coreLib       = "6.8.0"         // Container core lib version
-val edaCommon     = "9.3.0"         // EDA Common version
+val edaCommon     = "9.4.0"         // EDA Common version
 val edaCompute    = "0.3.0"         // EDA Compute version (used to pull in compute plugin RAML)
-val fgputil       = "2.7.4-jakarta" // FgpUtil version
+val fgputil       = "2.8.1-jakarta" // FgpUtil version
 
 val jersey        = "3.0.4"       // Jersey/JaxRS version
 val jackson       = "2.13.3"      // FasterXML Jackson version

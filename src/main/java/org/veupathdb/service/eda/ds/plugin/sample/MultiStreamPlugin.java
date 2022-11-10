@@ -77,6 +77,7 @@ public class MultiStreamPlugin extends AbstractEmptyComputePlugin<MultiStreamPos
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
+    LOG.info("Writing multi-stream plugin results...");
     EntityDef entity = getReferenceMetadata().getEntity(getPluginSpec().getEntityId()).orElseThrow();
     String idColumn = getUtil().toColNameOrEmpty(entity.getIdColumnDef());
     try (Writer writer = new BufferedWriter(new OutputStreamWriter(out))) {

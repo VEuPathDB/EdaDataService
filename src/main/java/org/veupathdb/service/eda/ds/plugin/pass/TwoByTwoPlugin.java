@@ -52,16 +52,18 @@ public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<MosaicPostRequest
       .dependencyOrder(List.of("yAxisVariable", "xAxisVariable"), List.of("facetVariable"))
       .pattern()
         .element("yAxisVariable")
-          .shapes(APIVariableDataShape.BINARY)
-          .description("Variable must have exactly 2 unique values.")
+          .minValues(2)
+	  .maxValues(2)
+	  .description("Variable must have exactly 2 unique values.")
         .element("xAxisVariable")
-          .shapes(APIVariableDataShape.BINARY)
-          .description("Variable must have exactly 2 unique values and be of the same or a parent entity as the Y-axis variable.")
+	  .minValues(2)
+	  .maxValues(2)
+          .description("Variable must have exactly 2 unique values.")
         .element("facetVariable")
           .required(false)
           .maxVars(2)
           .maxValues(10)
-          .description("Variable(s) must have 10 or fewer unique values and be of the same or a parent entity as the X-axis variable.")
+          .description("Variable(s) must have 10 or fewer unique values and be of the same or a parent entity as the axes variables.")
       .done();
   }
   
