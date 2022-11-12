@@ -137,7 +137,7 @@ public class AlphaDivBoxplotPlugin extends AbstractPluginWithCompute<AlphaDivBox
                                          ", by=" + singleQuote(computeEntityIdColName) +")");
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       //there should only be a single computed var for alpha div
-      connection.voidEval("variables[[length(variables) + 1]] <- attributes(abundanceDT)$computedVariable[[1]]");
+      connection.voidEval("variables[[length(variables) + 1]] <- attributes(alphaDivDT)$computedVariable[[1]]");
       String command = "plot.data::box(vizData, variables, '" +
           spec.getPoints().getValue() + "', " +
           showMean + ", " + 
