@@ -132,6 +132,7 @@ public class AbundanceScatterplotPlugin extends AbstractPluginWithCompute<Abunda
        ", by=" + singleQuote(computeEntityIdColName) +")");
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       //there should only be a single computed collection for ranked abundance
+      connection.voidEval("attributes(abundanceDT)$computedVariable[[1]]@plotReference@value <- 'overlay'");
       connection.voidEval("variables[[length(variables) + 1]] <- attributes(abundanceDT)$computedVariable[[1]]");
       String command = "plot.data::scattergl(vizData, variables, '" +
           valueSpec + "', '" + 
