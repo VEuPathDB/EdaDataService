@@ -142,7 +142,7 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
        connection.voidEval(getVoidEvalVariableMetadataList(varMap));
        //there should only be a single computed var for alpha div
        connection.voidEval("variables[[length(variables) + 1]] <- attributes(alphaDivDT)$computedVariable[[1]]");
-      String command = "plot.data::scattergl(vizData, variables, '" + valueSpec + "', '" + deprecatedShowMissingness + ")";
+      String command = "plot.data::scattergl(vizData, variables, '" + valueSpec + "', '" + deprecatedShowMissingness + "')";
       RServeClient.streamResult(connection, command, out);
     }); 
   }
