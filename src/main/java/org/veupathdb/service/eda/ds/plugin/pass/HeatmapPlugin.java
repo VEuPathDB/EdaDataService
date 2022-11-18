@@ -98,19 +98,19 @@ public class HeatmapPlugin extends AbstractPlugin<HeatmapPostRequest, HeatmapSpe
       PluginUtil util = getUtil();
       HeatmapSpec spec = getPluginSpec();
       Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
-      varMap.put("xAxisVariable", spec.getXAxisVariable());
-      varMap.put("yAxisVariable", spec.getYAxisVariable());
-      varMap.put("zAxisVariable", spec.getZAxisVariable());
-      varMap.put("facetVariable1", util.getVariableSpecFromList(spec.getFacetVariable(), 0));
-      varMap.put("facetVariable2", util.getVariableSpecFromList(spec.getFacetVariable(), 1));
+      varMap.put("xAxis", spec.getXAxisVariable());
+      varMap.put("yAxis", spec.getYAxisVariable());
+      varMap.put("zAxis", spec.getZAxisVariable());
+      varMap.put("facet1", util.getVariableSpecFromList(spec.getFacetVariable(), 0));
+      varMap.put("facet2", util.getVariableSpecFromList(spec.getFacetVariable(), 1));
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
           spec.getXAxisVariable(),
           spec.getYAxisVariable(),
           spec.getZAxisVariable(),
           util.getVariableSpecFromList(spec.getFacetVariable(), 0),
           util.getVariableSpecFromList(spec.getFacetVariable(), 1)));
-      connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      String cmd = "plot.data::heatmap(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" + spec.getValueSpec().toString().toLowerCase() + "')";
+      connection.voidEval(getVoidEvalVariableMetadataList(varMap));
+      String cmd = "plot.data::heatmap(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, '" + spec.getValueSpec().toString().toLowerCase() + "')";
       streamResult(connection, cmd, out);
     });
   }

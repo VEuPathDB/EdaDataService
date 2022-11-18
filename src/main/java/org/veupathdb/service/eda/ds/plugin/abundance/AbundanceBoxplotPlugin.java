@@ -98,9 +98,9 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
     BoxplotWith1ComputeSpec spec = getPluginSpec();
     PluginUtil util = getUtil();
     Map<String, VariableSpec> varMap = new HashMap<>();
-    varMap.put("overlayVariable", spec.getOverlayVariable());
-    varMap.put("facetVariable1", util.getVariableSpecFromList(spec.getFacetVariable(), 0));
-    varMap.put("facetVariable2", util.getVariableSpecFromList(spec.getFacetVariable(), 1));
+    varMap.put("overlay", spec.getOverlayVariable());
+    varMap.put("facet1", util.getVariableSpecFromList(spec.getFacetVariable(), 0));
+    varMap.put("facet2", util.getVariableSpecFromList(spec.getFacetVariable(), 1));
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
     String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
     String computeStats = spec.getComputeStats() != null ? spec.getComputeStats().getValue() : "TRUE";
@@ -129,18 +129,15 @@ public class AbundanceBoxplotPlugin extends AbstractPluginWithCompute<AbundanceB
           DEFAULT_SINGLE_STREAM_NAME + 
           ", by=" + singleQuote(computeEntityIdColName) +")");
 
-      connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      connection.voidEval("map <- rbind(map, list('id'=veupathUtils::toColNameOrNull(attributes(abundanceDT)$computedVariable$computedVariableDetails)," +
-                                                 "'plotRef'=rep('xAxisVariable', length(attributes(abundanceDT)$computedVariable$computedVariableDetails$variableId))," +
-                                                 "'dataType'=attributes(abundanceDT)$computedVariable$computedVariableDetails$dataType," +
-                                                 "'dataShape'=attributes(abundanceDT)$computedVariable$computedVariableDetails$dataShape))");
-
-      String command = "plot.data::box(vizData, map, '" +
+      connection.voidEval(getVoidEvalVariableMetadataList(varMap));
+      //there should only be a single computed collection for ranked abundance
+      connection.voidEval("variables[[length(variables) + 1]] <- attributes(abundanceDT)$computedVariable[[1]]");
+      String command = "plot.data::box(vizData, variables, '" +
           spec.getPoints().getValue() + "', " +
           showMean + ", " + 
           computeStats + ", '" + 
           deprecatedShowMissingness + "', " +
-          "'xAxisVariable', computedVariableMetadata=attributes(abundanceDT)$computedVariable$computedVariableMetadata, TRUE)";
+          "TRUE)";
       RServeClient.streamResult(connection, command, out);
     });
   }

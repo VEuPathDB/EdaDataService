@@ -110,10 +110,10 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
     ScatterplotWith1ComputeSpec spec = getPluginSpec();
     PluginUtil util = getUtil();
     Map<String, VariableSpec> varMap = new HashMap<>();
-    varMap.put("xAxisVariable", spec.getXAxisVariable());
-    varMap.put("overlayVariable", spec.getOverlayVariable());
-    varMap.put("facetVariable1", util.getVariableSpecFromList(spec.getFacetVariable(), 0));
-    varMap.put("facetVariable2", util.getVariableSpecFromList(spec.getFacetVariable(), 1));
+    varMap.put("xAxis", spec.getXAxisVariable());
+    varMap.put("overlay", spec.getOverlayVariable());
+    varMap.put("facet1", util.getVariableSpecFromList(spec.getFacetVariable(), 0));
+    varMap.put("facet2", util.getVariableSpecFromList(spec.getFacetVariable(), 1));
     String valueSpec = spec.getValueSpec().getValue();
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
     String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
@@ -139,12 +139,10 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
       connection.voidEval("vizData <- merge(alphaDivDT, " + 
           DEFAULT_SINGLE_STREAM_NAME + 
        ", by=" + singleQuote(computeEntityIdColName) +")");
-      connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      connection.voidEval("map <- rbind(map, list('id'=veupathUtils::toColNameOrNull(attributes(alphaDivDT)$computedVariable$computedVariableDetails)," +
-                                                 "'plotRef'='yAxisVariable'," +
-                                                 "'dataType'=attributes(alphaDivDT)$computedVariable$computedVariableDetails$dataType," +
-                                                 "'dataShape'=attributes(alphaDivDT)$computedVariable$computedVariableDetails$dataShape))");
-      String command = "plot.data::scattergl(vizData, map, '" + valueSpec + "', '" + deprecatedShowMissingness + "', computedVariableMetadata=attributes(alphaDivDT)$computedVariable$computedVariableMetadata)";
+       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
+       //there should only be a single computed var for alpha div
+       connection.voidEval("variables[[length(variables) + 1]] <- attributes(alphaDivDT)$computedVariable[[1]]");
+      String command = "plot.data::scattergl(vizData, variables, '" + valueSpec + "', '" + deprecatedShowMissingness + "')";
       RServeClient.streamResult(connection, command, out);
     }); 
   }

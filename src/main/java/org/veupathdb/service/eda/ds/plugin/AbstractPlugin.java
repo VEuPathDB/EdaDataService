@@ -25,6 +25,7 @@ import org.veupathdb.service.eda.common.client.EdaSubsettingClient;
 import org.veupathdb.service.eda.common.client.StreamingDataClient;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.model.ReferenceMetadata;
+import org.veupathdb.service.eda.common.model.VariableDef;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
@@ -35,6 +36,7 @@ import org.veupathdb.service.eda.generated.model.APIFilter;
 import org.veupathdb.service.eda.generated.model.APIStudyDetail;
 import org.veupathdb.service.eda.generated.model.BinSpec;
 import org.veupathdb.service.eda.generated.model.BinSpec.RangeType;
+import org.veupathdb.service.eda.generated.model.CollectionSpec;
 import org.veupathdb.service.eda.generated.model.DateRange;
 import org.veupathdb.service.eda.generated.model.DerivedVariable;
 import org.veupathdb.service.eda.generated.model.GeolocationViewport;
@@ -279,6 +281,82 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     return(vector);
   }
 
+  public String getVariableSpecRObjectAsString(VariableDef var) {
+    if (var == null) return(null);
+    return("veupathUtils::VariableSpec(variableId=" + singleQuote(var.getVariableId()) + ",entityId=" + singleQuote(var.getEntityId()) + ")");
+  }
+
+  public String getVariableSpecListRObjectAsString(List<VariableDef> vars) {
+    if (vars == null) return(null);
+    boolean first = true;
+    String variableSpecList = new String("veupathUtils::VariableSpecList(S4Vectors::SimpleList(");
+
+    for (VariableDef var : vars) {
+      if (first) {
+        first = false;
+        variableSpecList = variableSpecList + getVariableSpecRObjectAsString(var);
+      } else {
+        variableSpecList = variableSpecList + "," + getVariableSpecRObjectAsString(var);
+      }
+    }
+    variableSpecList = variableSpecList + "))";
+
+    return(variableSpecList);
+  }
+  
+  public String getVariableMetadataRObjectAsString(CollectionSpec collection, String plotReference) {
+    if (collection == null) return(null);
+    PluginUtil util = getUtil();
+    
+    String membersList = getVariableSpecListRObjectAsString(util.getCollectionMembers(collection));
+
+    return("veupathUtils::VariableMetadata(" + 
+                  "variableClass=veupathUtils::VariableClass(value='native')," + 
+                  "variableSpec=veupathUtils::VariableSpec(variableId=" + singleQuote(collection.getCollectionId()) + ",entityId=" + singleQuote(collection.getEntityId()) + ")," +
+                  "plotReference=veupathUtils::PlotReference(value=" + singleQuote(plotReference) + ")," +
+                  "dataType=" + singleQuote(util.getCollectionType(collection)) + "," +
+                  "dataShape=" + singleQuote(util.getCollectionDataShape(collection)) + "," +
+                  "imputeZero=" + util.getCollectionImputeZero(collection).toUpperCase() + "," +
+                  "isCollection=TRUE," + 
+                  "members=" + membersList + ")");
+  }
+
+  public String getVariableMetadataRObjectAsString(VariableSpec var, String plotReference) {
+    if (var == null) return(null);
+    PluginUtil util = getUtil();  
+
+    return("veupathUtils::VariableMetadata(" + 
+                  "variableClass=veupathUtils::VariableClass(value='native')," + 
+                  "variableSpec=veupathUtils::VariableSpec(variableId=" + singleQuote(var.getVariableId()) + ",entityId=" + singleQuote(var.getEntityId()) + ")," +
+                  "plotReference=veupathUtils::PlotReference(value=" + singleQuote(plotReference) + ")," +
+                  "dataType=veupathUtils::DataType(value=" + singleQuote(util.getVariableType(var)) + ")," +
+                  "dataShape=veupathUtils::DataShape(value=" + singleQuote(util.getVariableDataShape(var)) + ")," +
+                  "imputeZero=" + util.getVariableImputeZero(var).toUpperCase() + ")");
+  }
+
+  public String getVoidEvalVariableMetadataList(Map<String, VariableSpec> vars) {
+    boolean first = true;
+    String variableMetadataList = new String("variables <- veupathUtils::VariableMetadataList(S4Vectors::SimpleList(");
+    for(Map.Entry<String, VariableSpec> entry : vars.entrySet()) {
+      String plotReference = entry.getKey();
+      VariableSpec var = entry.getValue();
+      String variableMetadata = getVariableMetadataRObjectAsString(var, plotReference);
+      if (variableMetadata != null) {
+        if (first) {
+          first = false;
+          variableMetadataList = variableMetadataList + variableMetadata;
+        } else {
+          variableMetadataList = variableMetadataList + "," + variableMetadata;
+        }
+      }
+      
+    }
+    variableMetadataList = variableMetadataList + "))";
+
+    return(variableMetadataList);
+  }
+
+  // replacing this data.frame map w a dedicated VariableMetadataList S4 object
   public String getVoidEvalVarMetadataMap(String datasetName, Map<String, VariableSpec> vars) {
     boolean first = true;
     String plotRefVector = new String();
