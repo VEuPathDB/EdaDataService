@@ -20,6 +20,7 @@ import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.AlphaDivBoxplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BoxplotWith1ComputeSpec;
 import org.veupathdb.service.eda.generated.model.AlphaDivComputeConfig;
+import org.veupathdb.service.eda.generated.model.ComputedVariableMetadata;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuote;
@@ -53,6 +54,11 @@ public class AlphaDivBoxplotPlugin extends AbstractPlugin<AlphaDivBoxplotPostReq
   }
 
   @Override
+  protected boolean includeComputedVarsInStream() {
+    return true;
+  }
+
+  @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
       .dependencyOrder(List.of("xAxisVariable"), List.of("overlayVariable", "facetVariable"))
@@ -83,25 +89,16 @@ public class AlphaDivBoxplotPlugin extends AbstractPlugin<AlphaDivBoxplotPostReq
 
   @Override
   protected List<StreamSpec> getRequestedStreams(BoxplotWith1ComputeSpec pluginSpec) {
-    AlphaDivComputeConfig computeConfig = getComputeConfig();
     return List.of(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
         .addVar(pluginSpec.getOverlayVariable())
-        .addVars(pluginSpec.getFacetVariable()),
-      new StreamSpec(COMPUTE_STREAM_NAME, computeConfig.getCollectionVariable().getEntityId())
-        .addVars(getUtil().getChildrenVariables(computeConfig.getCollectionVariable()))
+        .addVars(pluginSpec.getFacetVariable())
     );
   }
 
   @Override
-  protected boolean includeComputedVarsInStream() {
-    return false;
-  }
-
-  @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    AlphaDivComputeConfig computeConfig = getComputeConfig();
     BoxplotWith1ComputeSpec spec = getPluginSpec();
     PluginUtil util = getUtil();
     Map<String, VariableSpec> varMap = new HashMap<>();
@@ -113,43 +110,32 @@ public class AlphaDivBoxplotPlugin extends AbstractPlugin<AlphaDivBoxplotPostReq
     String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
     String computeStats = spec.getComputeStats() != null ? spec.getComputeStats().getValue() : "TRUE";
     String showMean = spec.getMean() != null ? spec.getMean().getValue() : "FALSE";
-    String method = computeConfig.getAlphaDivMethod().getValue();
-    VariableDef computeEntityIdVarSpec = util.getEntityIdVarSpec(computeConfig.getCollectionVariable().getEntityId());
-    String computeEntityIdColName = util.toColNameOrEmpty(computeEntityIdVarSpec);
+
+    // get metadata to find computed column
+    ComputedVariableMetadata metadata = getComputedVariableMetadata();
+    // TODO will probably do this a lot, make helper to find varspec from plot ref?
+    VariableSpec computedVarSpec = metadata.getVariables().stream()
+        .filter(var -> var.getPlotReference().getValue().equals("yAxis"))
+        .findFirst().orElseThrow().getVariableSpec();
     
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      List<VariableSpec> computeInputVars = ListBuilder.asList(computeEntityIdVarSpec);
-      computeInputVars.addAll(util.getChildrenVariables(computeConfig.getCollectionVariable()));
-      connection.voidEval(util.getVoidEvalFreadCommand(COMPUTE_STREAM_NAME,
-        computeInputVars
-      ));
-      connection.voidEval("print("+ COMPUTE_STREAM_NAME + ")");
-      connection.voidEval("alphaDivDT <- alphaDiv(" + COMPUTE_STREAM_NAME + ", " + 
-                                                      singleQuote(computeEntityIdColName) + ", " + 
-                                                      singleQuote(method) + ")");
+      // TODO this needs to add the computed vars now as well
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
-          computeEntityIdVarSpec,
+          computedVarSpec,
           spec.getXAxisVariable(),
           spec.getOverlayVariable(),
           util.getVariableSpecFromList(spec.getFacetVariable(), 0),
           util.getVariableSpecFromList(spec.getFacetVariable(), 1)));
       
-      // merge alpha div and other viz stream data as input to boxplot
-      connection.voidEval("vizData <- merge(alphaDivDT, " + 
-                                            DEFAULT_SINGLE_STREAM_NAME + 
-                                         ", by=" + singleQuote(computeEntityIdColName) +")");
-      connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      // update the new map obj in R to add alphaDiv
-      connection.voidEval("map <- rbind(map, list('id'=veupathUtils::toColNameOrNull(attributes(alphaDivDT)$computedVariable$computedVariableDetails)," +
-                                                 "'plotRef'='yAxisVariable'," +
-                                                 "'dataType'=attributes(alphaDivDT)$computedVariable$computedVariableDetails$dataType," +
-                                                 "'dataShape'=attributes(alphaDivDT)$computedVariable$computedVariableDetails$dataShape))");
-      String command = "plot.data::box(vizData, map, '" +
+      connection.voidEval(getVoidEvalVariableMetadataList(varMap));
+      connection.voidEval(getVoidEvalComputedVariableMetadataList(metadata));
+      connection.voidEval("variables <- veupathUtils::merge(variables, computedVariables)");
+
+      String command = "plot.data::box(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, '" +
           spec.getPoints().getValue() + "', " +
           showMean + ", " + 
           computeStats + ", '" + 
-          deprecatedShowMissingness + "', " +
-          "computedVariableMetadata=attributes(alphaDivDT)$computedVariable$computedVariableMetadata)";
+          deprecatedShowMissingness +"')";
       RServeClient.streamResult(connection, command, out);
     });
   }

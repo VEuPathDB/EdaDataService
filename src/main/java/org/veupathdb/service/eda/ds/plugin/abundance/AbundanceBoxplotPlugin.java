@@ -19,6 +19,7 @@ import org.veupathdb.service.eda.common.plugin.util.RServeClient;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.AbundanceBoxplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BoxplotWith1ComputeSpec;
+import org.veupathdb.service.eda.generated.model.ComputedVariableMetadata;
 import org.veupathdb.service.eda.generated.model.RankedAbundanceComputeConfig;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
@@ -53,6 +54,11 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
   }
 
   @Override
+  protected boolean includeComputedVarsInStream() {
+    return true;
+  }
+
+  @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
       .dependencyOrder(List.of("overlayVariable", "facetVariable"))
@@ -79,27 +85,16 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
 
   @Override
   protected List<StreamSpec> getRequestedStreams(BoxplotWith1ComputeSpec pluginSpec) {
-    RankedAbundanceComputeConfig computeConfig = getComputeConfig();
     List<StreamSpec> requestedStreamsList = ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getOverlayVariable())
         .addVars(pluginSpec.getFacetVariable())
       );
-    requestedStreamsList.add(
-      new StreamSpec(COMPUTE_STREAM_NAME, computeConfig.getCollectionVariable().getEntityId())
-        .addVars(getUtil().getChildrenVariables(computeConfig.getCollectionVariable())
-      ));
     return requestedStreamsList;
   }
 
   @Override
-  protected boolean includeComputedVarsInStream() {
-    return false;
-  }
-
-  @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    RankedAbundanceComputeConfig computeConfig = getComputeConfig();
     BoxplotWith1ComputeSpec spec = getPluginSpec();
     PluginUtil util = getUtil();
     Map<String, VariableSpec> varMap = new HashMap<>();
@@ -110,42 +105,28 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
     String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
     String computeStats = spec.getComputeStats() != null ? spec.getComputeStats().getValue() : "TRUE";
     String showMean = spec.getMean() != null ? spec.getMean().getValue() : "FALSE";
-    String method = computeConfig.getRankingMethod().getValue();
-    VariableDef computeEntityIdVarSpec = util.getEntityIdVarSpec(computeConfig.getCollectionVariable().getEntityId());
-    String computeEntityIdColName = util.toColNameOrEmpty(computeEntityIdVarSpec);
+
+    ComputedVariableMetadata metadata = getComputedVariableMetadata();
+    VariableSpec computedVarSpec = metadata.getVariables().stream()
+        .filter(var -> var.getPlotReference().getValue().equals("yAxis"))
+        .findFirst().orElseThrow().getVariableSpec();
 
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      List<VariableSpec> computeInputVars = ListBuilder.asList(computeEntityIdVarSpec);
-      computeInputVars.addAll(util.getChildrenVariables(computeConfig.getCollectionVariable()));
-      connection.voidEval(util.getVoidEvalFreadCommand(COMPUTE_STREAM_NAME,
-        computeInputVars
-      ));
-
-      connection.voidEval("abundanceDT <- rankedAbundance(" + COMPUTE_STREAM_NAME + ", " + 
-                                                      singleQuote(computeEntityIdColName) + ", " +
-                                                      singleQuote(method) + ")");
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
-          computeEntityIdVarSpec,
+          computedVarSpec,
           spec.getOverlayVariable(),
           util.getVariableSpecFromList(spec.getFacetVariable(), 0),
           util.getVariableSpecFromList(spec.getFacetVariable(), 1)));
 
-      connection.voidEval("vizData <- merge(abundanceDT, " + 
-          DEFAULT_SINGLE_STREAM_NAME + 
-          ", by=" + singleQuote(computeEntityIdColName) +")");
+      connection.voidEval(getVoidEvalVariableMetadataList(varMap));
+      connection.voidEval(getVoidEvalComputedVariableMetadataList(metadata));
+      connection.voidEval("variables <- veupathUtils::merge(variables, computedVariables)");
 
-      connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      connection.voidEval("map <- rbind(map, list('id'=veupathUtils::toColNameOrNull(attributes(abundanceDT)$computedVariable$computedVariableDetails)," +
-                                                 "'plotRef'=rep('xAxisVariable', length(attributes(abundanceDT)$computedVariable$computedVariableDetails$variableId))," +
-                                                 "'dataType'=attributes(abundanceDT)$computedVariable$computedVariableDetails$dataType," +
-                                                 "'dataShape'=attributes(abundanceDT)$computedVariable$computedVariableDetails$dataShape))");
-
-      String command = "plot.data::box(vizData, map, '" +
+      String command = "plot.data::box(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, '" +
           spec.getPoints().getValue() + "', " +
           showMean + ", " + 
           computeStats + ", '" + 
-          deprecatedShowMissingness + "', " +
-          "'xAxisVariable', computedVariableMetadata=attributes(abundanceDT)$computedVariable$computedVariableMetadata, TRUE)";
+          deprecatedShowMissingness + "')";
       RServeClient.streamResult(connection, command, out);
     });
   }
