@@ -87,7 +87,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
   private Timer _timer;
   private boolean _requestProcessed = false;
   private List<APIFilter> _subset;
-  private List<DerivedVariable> _derivedVariables;
+  private List<DerivedVariableSpec> _derivedVariableSpecs;
   private EdaSubsettingClient _subsettingClient;
   private EdaMergingClient _mergingClient;
   private EdaComputeClient _computeClient;
@@ -108,7 +108,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
 
     // check for subset and derived entity properties of request
     _subset = Optional.ofNullable(request.getFilters()).orElse(Collections.emptyList());
-    _derivedVariables = Optional.ofNullable(request.getDerivedVariables()).orElse(Collections.emptyList());
+    _derivedVariableSpecs = Optional.ofNullable(request.getDerivedVariables()).orElse(Collections.emptyList());
 
     // build clients for required services
     _subsettingClient = new EdaSubsettingClient(Resources.SUBSETTING_SERVICE_URL, authHeader);
@@ -120,7 +120,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
         .orElseThrow(() -> new ValidationException("Study '" + request.getStudyId() + "' does not exist."));
 
     // construct available variables for each entity from metadata and derived variable config
-    _referenceMetadata = new ReferenceMetadata(study, _derivedVariables);
+    _referenceMetadata = new ReferenceMetadata(study, _derivedVariableSpecs);
 
     // if plugin requires a compute, check if compute results are available
     if (_computeInfo.isPresent() && !isComputeResultsAvailable()) {
@@ -256,7 +256,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
     return new ComputeRequestBody(
         _referenceMetadata.getStudyId(),
         _subset,
-        _derivedVariables,
+        _derivedVariableSpecs,
         _computeInfo.map(TwoTuple::getSecond).orElseThrow(NO_COMPUTE_EXCEPTION));
   }
 
