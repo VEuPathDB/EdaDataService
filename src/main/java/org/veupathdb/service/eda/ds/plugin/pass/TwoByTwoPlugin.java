@@ -90,10 +90,10 @@ public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<MosaicPostRequest
     PluginUtil util = getUtil();
     MosaicSpec spec = getPluginSpec();
     Map<String, VariableSpec> varMap = new HashMap<>();
-    varMap.put("xAxisVariable", spec.getXAxisVariable());
-    varMap.put("yAxisVariable", spec.getYAxisVariable());
-    varMap.put("facetVariable1", util.getVariableSpecFromList(spec.getFacetVariable(), 0));
-    varMap.put("facetVariable2", util.getVariableSpecFromList(spec.getFacetVariable(), 1));
+    varMap.put("xAxis", spec.getXAxisVariable());
+    varMap.put("yAxis", spec.getYAxisVariable());
+    varMap.put("facet1", util.getVariableSpecFromList(spec.getFacetVariable(), 0));
+    varMap.put("facet2", util.getVariableSpecFromList(spec.getFacetVariable(), 1));
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
     String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
 
@@ -103,8 +103,8 @@ public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<MosaicPostRequest
           spec.getYAxisVariable(),
           util.getVariableSpecFromList(spec.getFacetVariable(), 0),
           util.getVariableSpecFromList(spec.getFacetVariable(), 1)));
-      connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      String cmd = "plot.data::mosaic(" + DEFAULT_SINGLE_STREAM_NAME + ", map, 'bothRatios', '" + deprecatedShowMissingness + "')";
+      connection.voidEval(getVoidEvalVariableMetadataList(varMap));
+      String cmd = "plot.data::mosaic(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, 'bothRatios', '" + deprecatedShowMissingness + "')";
       streamResult(connection, cmd, out);
     });
   }

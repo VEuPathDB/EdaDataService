@@ -33,6 +33,17 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementValidator;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
 import org.veupathdb.service.eda.generated.model.*;
 import org.veupathdb.service.eda.generated.model.BinSpec.RangeType;
+<<<<<<< HEAD
+=======
+import org.veupathdb.service.eda.generated.model.CollectionSpec;
+import org.veupathdb.service.eda.generated.model.DateRange;
+import org.veupathdb.service.eda.generated.model.DerivedVariable;
+import org.veupathdb.service.eda.generated.model.GeolocationViewport;
+import org.veupathdb.service.eda.generated.model.NumberRange;
+import org.veupathdb.service.eda.generated.model.VariableSpec;
+import org.veupathdb.service.eda.generated.model.VisualizationRequestBase;
+import org.veupathdb.service.eda.generated.model.NumericViewport;
+>>>>>>> master
 
 import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.doubleQuote;
 import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuote;
@@ -343,6 +354,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
     return(vector);
   }
 
+<<<<<<< HEAD
   public List<VariableDef> getVariableDefList(List<VariableSpec> varSpecs) {
     if (varSpecs == null) return(null);
 
@@ -375,6 +387,105 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
       String ranges = new String();
       if (var.getDataType().toString().equals("DATE")) {
         ranges = ",displayRangeMin=" + singleQuote(var.getDisplayRangeMin().toString()) + ",displayRangeMax=" + singleQuote(var.getDisplayRangeMax().toString());
+=======
+  public String getVariableSpecRObjectAsString(VariableDef var) {
+    if (var == null) return(null);
+    return("veupathUtils::VariableSpec(variableId=" + singleQuote(var.getVariableId()) + ",entityId=" + singleQuote(var.getEntityId()) + ")");
+  }
+
+  public String getVariableSpecListRObjectAsString(List<VariableDef> vars) {
+    if (vars == null) return(null);
+    boolean first = true;
+    String variableSpecList = new String("veupathUtils::VariableSpecList(S4Vectors::SimpleList(");
+
+    for (VariableDef var : vars) {
+      if (first) {
+        first = false;
+        variableSpecList = variableSpecList + getVariableSpecRObjectAsString(var);
+      } else {
+        variableSpecList = variableSpecList + "," + getVariableSpecRObjectAsString(var);
+      }
+    }
+    variableSpecList = variableSpecList + "))";
+
+    return(variableSpecList);
+  }
+  
+  public String getVariableMetadataRObjectAsString(CollectionSpec collection, String plotReference) {
+    if (collection == null) return(null);
+    PluginUtil util = getUtil();
+    
+    String membersList = getVariableSpecListRObjectAsString(util.getCollectionMembers(collection));
+
+    return("veupathUtils::VariableMetadata(" + 
+                  "variableClass=veupathUtils::VariableClass(value='native')," + 
+                  "variableSpec=veupathUtils::VariableSpec(variableId=" + singleQuote(collection.getCollectionId()) + ",entityId=" + singleQuote(collection.getEntityId()) + ")," +
+                  "plotReference=veupathUtils::PlotReference(value=" + singleQuote(plotReference) + ")," +
+                  "dataType=" + singleQuote(util.getCollectionType(collection)) + "," +
+                  "dataShape=" + singleQuote(util.getCollectionDataShape(collection)) + "," +
+                  "imputeZero=" + util.getCollectionImputeZero(collection).toUpperCase() + "," +
+                  "isCollection=TRUE," + 
+                  "members=" + membersList + ")");
+  }
+
+  public String getVariableMetadataRObjectAsString(VariableSpec var, String plotReference) {
+    if (var == null) return(null);
+    PluginUtil util = getUtil();  
+
+    return("veupathUtils::VariableMetadata(" + 
+                  "variableClass=veupathUtils::VariableClass(value='native')," + 
+                  "variableSpec=veupathUtils::VariableSpec(variableId=" + singleQuote(var.getVariableId()) + ",entityId=" + singleQuote(var.getEntityId()) + ")," +
+                  "plotReference=veupathUtils::PlotReference(value=" + singleQuote(plotReference) + ")," +
+                  "dataType=veupathUtils::DataType(value=" + singleQuote(util.getVariableType(var)) + ")," +
+                  "dataShape=veupathUtils::DataShape(value=" + singleQuote(util.getVariableDataShape(var)) + ")," +
+                  "imputeZero=" + util.getVariableImputeZero(var).toUpperCase() + ")");
+  }
+
+  public String getVoidEvalVariableMetadataList(Map<String, VariableSpec> vars) {
+    boolean first = true;
+    String variableMetadataList = new String("variables <- veupathUtils::VariableMetadataList(S4Vectors::SimpleList(");
+    for(Map.Entry<String, VariableSpec> entry : vars.entrySet()) {
+      String plotReference = entry.getKey();
+      VariableSpec var = entry.getValue();
+      String variableMetadata = getVariableMetadataRObjectAsString(var, plotReference);
+      if (variableMetadata != null) {
+        if (first) {
+          first = false;
+          variableMetadataList = variableMetadataList + variableMetadata;
+        } else {
+          variableMetadataList = variableMetadataList + "," + variableMetadata;
+        }
+      }
+      
+    }
+    variableMetadataList = variableMetadataList + "))";
+
+    return(variableMetadataList);
+  }
+
+  // replacing this data.frame map w a dedicated VariableMetadataList S4 object
+  public String getVoidEvalVarMetadataMap(String datasetName, Map<String, VariableSpec> vars) {
+    boolean first = true;
+    String plotRefVector = new String();
+    String varColNameVector = new String();
+    String varTypeVector = new String();
+    String varShapeVector = new String();
+
+    PluginUtil util = getUtil();
+    for(Map.Entry<String, VariableSpec> entry : vars.entrySet()) {
+      String plotRef = entry.getKey();
+      VariableSpec var = entry.getValue();
+      String varName = util.toColNameOrEmpty(var);
+      if (varName.equals("")) continue;
+      String varType = util.getVariableType(var);
+      String varShape = util.getVariableDataShape(var);
+      if (first) {
+        first = false;
+        plotRefVector = singleQuote(plotRef);
+        varColNameVector = singleQuote(varName);
+        varTypeVector = singleQuote(varType);
+        varShapeVector = singleQuote(varShape);
+>>>>>>> master
       } else {
         ranges = ",displayRangeMin=" + var.getDisplayRangeMin().toString() + ",displayRangeMax=" + var.getDisplayRangeMax().toString();
       }

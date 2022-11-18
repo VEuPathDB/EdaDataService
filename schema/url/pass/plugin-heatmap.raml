@@ -31,21 +31,13 @@ types:
         maxItems: 2
         required: false
         
-  HeatmapConfig:
-    type: PlotConfig
-    properties:
-      xVariableDetails:
-        type: VariableSpec
-      yVariableDetails:
-        type: VariableSpec
-
   Heatmap:
     additionalProperties: false
     properties:
       data:
         type: HeatmapData[]
       config:
-        type: HeatmapConfig
+        type: PlotConfig
 
   HeatmapPostResponse:
     additionalProperties: false

@@ -174,10 +174,10 @@ public class BarplotPlugin extends AbstractEmptyComputePlugin<BarplotPostRequest
       String barMode = spec.getBarMode().getValue();
 
       Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
-      varMap.put("xAxisVariable", spec.getXAxisVariable());
-      varMap.put("overlayVariable", spec.getOverlayVariable());
-      varMap.put("facetVariable1", util.getVariableSpecFromList(spec.getFacetVariable(), 0));
-      varMap.put("facetVariable2", util.getVariableSpecFromList(spec.getFacetVariable(), 1));
+      varMap.put("xAxis", spec.getXAxisVariable());
+      varMap.put("overlay", spec.getOverlayVariable());
+      varMap.put("facet1", util.getVariableSpecFromList(spec.getFacetVariable(), 0));
+      varMap.put("facet2", util.getVariableSpecFromList(spec.getFacetVariable(), 1));
       
       useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
         connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
@@ -185,9 +185,9 @@ public class BarplotPlugin extends AbstractEmptyComputePlugin<BarplotPostRequest
             spec.getOverlayVariable(),
             util.getVariableSpecFromList(spec.getFacetVariable(), 0),
             util.getVariableSpecFromList(spec.getFacetVariable(), 1)));
-        connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
+        connection.voidEval(getVoidEvalVariableMetadataList(varMap));
         String cmd =
-            "plot.data::bar(" + DEFAULT_SINGLE_STREAM_NAME + ", map, '" +
+            "plot.data::bar(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, '" +
                 spec.getValueSpec().getValue() + "', '" +
                 barMode + "', '" +
                 deprecatedShowMissingness + "')";
