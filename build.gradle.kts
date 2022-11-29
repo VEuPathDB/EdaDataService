@@ -115,10 +115,10 @@ tasks.register("print-eda-common-schema-fetch") { print(edaCommonSchemaFetch) }
 
 // use local EdaCompute compiled schema if project exists, else use released version;
 //    this mirrors the way we use local EdaCompute code if available
-val edaComputeLocalProjectDir = findProject(":edaCompute")?.projectDir
+val edaComputeProject = file("../service-eda-compute");
 val edaComputeSchemaFetch =
-  if (edaComputeLocalProjectDir != null)
-    "cat ${edaComputeLocalProjectDir}/schema/library.raml"
+  if (edaComputeProject.exists())
+    "cat ../service-eda-compute/schema/library.raml"
   else
     "curl https://raw.githubusercontent.com/VEuPathDB/service-eda-compute/v${edaCompute}/schema/library.raml"
 
