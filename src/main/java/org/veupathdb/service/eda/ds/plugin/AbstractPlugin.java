@@ -213,11 +213,11 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
    ****************************************************************/
 
   private static Optional<String> findComputeName(String appName) {
-    return AppsMetadata.APPS.getApps().stream()
+    return Optional.ofNullable(AppsMetadata.APPS.getApps().stream()
         // find this app by name
-        .filter(app -> app.getName().equals(appName)).findFirst()
+        .filter(app -> app.getName().equals(appName)).findFirst().orElseThrow()
         // look up compute associated with this app
-        .map(AppOverview::getComputeName);
+        .getComputeName());
   }
 
   private final Supplier<RuntimeException> NO_COMPUTE_EXCEPTION = () ->

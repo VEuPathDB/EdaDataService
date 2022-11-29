@@ -21,6 +21,7 @@ import org.veupathdb.service.eda.ds.plugin.pass.MapPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.MapMarkersOverlayPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
+import org.veupathdb.service.eda.ds.plugin.sample.ExampleComputeVizPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.MultiStreamPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.RecordCountPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.TestCollectionPlugin;
@@ -64,27 +65,32 @@ public class AppsMetadata {
           "Visualize between-sample (beta) comparisons in microbial diversity, using Bray-Curtis dissimilarity, Jensen-Shannon Divergence, or the Jaccard Index",
           List.of(MICROBIOME_PROJECT),
           viz("scatterplot", new BetaDivScatterplotPlugin())),
-      app("distributions", "Distributions", "null",
+      app("distributions", "Distributions", null,
           "Plot simple distributions for any continuous variable, including metadata (e.g. age, height, etc.) or microbial assay results.",
           List.of(MICROBIOME_PROJECT),
           viz("histogram", new HistogramPlugin()),
           viz("boxplot", new BoxplotPlugin())),
-      app("countsandproportions", "Counts and Proportions", "null",
+      app("countsandproportions", "Counts and Proportions", null,
           "Use standard bar plots and 'row by column' (RxC) or 2x2 contingency tables to examine and compare frequencies in the data.",
           List.of(MICROBIOME_PROJECT),
           viz("barplot", new BarplotPlugin()),
           viz("twobytwo", new TwoByTwoPlugin()),
           viz("conttable", new ContTablePlugin())),
-      app("xyrelationships", "X-Y Relationships", "null",
+      app("xyrelationships", "X-Y Relationships", null,
           "Interested in creating your own X-Y visualizations of any study variables?  Look no further!  Click on one of the plot types on the right and get ready to be creative.",
           List.of(MICROBIOME_PROJECT),
           viz("scatterplot", new ScatterplotPlugin()),
           viz("lineplot", new LineplotPlugin())),
-      app("sample", "Sample", "Wrapper app for sample/test plugins", null,
+      app("sample", "Sample", null,
+          "Wrapper app for sample/test plugins",
           List.of(),
           viz("record-count", new RecordCountPlugin()),
           viz("multi-stream", new MultiStreamPlugin()),
-          viz("collections-test", new TestCollectionPlugin()))
+          viz("collections-test", new TestCollectionPlugin())),
+      app("samplewithcompute", "Sample With Compute", "example",
+          "Wrapper app for sample/test plugins that have associated computes",
+          List.of(),
+          viz("viz-with-compute", new ExampleComputeVizPlugin()))
   );
 
   //******************************************

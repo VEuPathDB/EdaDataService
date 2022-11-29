@@ -199,8 +199,8 @@ public class AppsService implements Apps {
   }
 
   @Override
-  public PostAppsSampleVisualizationsVizWithComputeResponse postAppsSampleVisualizationsVizWithCompute(ExampleComputeVizPostRequest entity) {
-    return wrapPlugin(() -> PostAppsSampleVisualizationsVizWithComputeResponse.respond200WithApplicationJson(
+  public PostAppsSamplewithcomputeVisualizationsVizWithComputeResponse postAppsSamplewithcomputeVisualizationsVizWithCompute(ExampleComputeVizPostRequest entity) {
+    return wrapPlugin(() -> PostAppsSamplewithcomputeVisualizationsVizWithComputeResponse.respond200WithApplicationJson(
         new ExampleComputeVizPostResponseStream(processRequest(new ExampleComputeVizPlugin(), entity))));
   }
 
