@@ -56,7 +56,7 @@ public class ExampleComputeVizPlugin extends AbstractPlugin<ExampleComputeVizPos
     // get metadata to find computed column
     ComputedVariableMetadata metadata = getComputedVariableMetadata();
     VariableSpec computedVarSpec = metadata.getVariables().stream()
-        .filter(var -> var.getPlotReference().getValue().equals("xAxis"))
+        .filter(var -> var.getPlotReference() == PlotReferenceValue.XAXIS)
         .findFirst().orElseThrow().getVariableSpec();
 
     // loop through computed var to find longest and average size of concatenated values

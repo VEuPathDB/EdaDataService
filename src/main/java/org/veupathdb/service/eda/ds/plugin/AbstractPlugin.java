@@ -86,6 +86,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
 
   private Timer _timer;
   private boolean _requestProcessed = false;
+  private String _studyId;
   private List<APIFilter> _subset;
   private List<DerivedVariableSpec> _derivedVariableSpecs;
   private EdaSubsettingClient _subsettingClient;
@@ -118,14 +119,20 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
     // get study
     APIStudyDetail study = _subsettingClient.getStudy(request.getStudyId())
         .orElseThrow(() -> new ValidationException("Study '" + request.getStudyId() + "' does not exist."));
-
-    // construct available variables for each entity from metadata and derived variable config
-    _referenceMetadata = new ReferenceMetadata(study, _derivedVariableSpecs);
+    _studyId = study.getId();
 
     // if plugin requires a compute, check if compute results are available
     if (_computeInfo.isPresent() && !isComputeResultsAvailable()) {
       throw new BadRequestException("Compute results are not available for the requested job.");
     }
+
+    // if plugin requires a compute, get computed var metadata
+    List<VariableMapping> computedVars = _computeInfo.isPresent()
+        ? getComputedVariableMetadata().getVariables()
+        : Collections.emptyList();
+
+    // construct available variables for each entity from metadata and derived variable config
+    _referenceMetadata = new ReferenceMetadata(study, computedVars, _derivedVariableSpecs);
 
     // ask subclass to validate the configuration
     validateVisualizationSpec(_pluginSpec);
@@ -254,7 +261,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
 
   private ComputeRequestBody createComputeRequestBody() {
     return new ComputeRequestBody(
-        _referenceMetadata.getStudyId(),
+        _studyId,
         _subset,
         _derivedVariableSpecs,
         _computeInfo.map(TwoTuple::getSecond).orElseThrow(NO_COMPUTE_EXCEPTION));
@@ -372,7 +379,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
     variableMetadata = var.getDisplayName() == null ? variableMetadata : variableMetadata + ",displayName=" + singleQuote(var.getDisplayName());
 
     if (var.getDisplayRangeMax() != null && var.getDisplayRangeMin() != null) {
-      String ranges = new String();
+      String ranges;
       if (var.getDataType().toString().equals("DATE")) {
         ranges = ",displayRangeMin=" + singleQuote(var.getDisplayRangeMin().toString()) + ",displayRangeMax=" + singleQuote(var.getDisplayRangeMax().toString());
       } else {
