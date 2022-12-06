@@ -88,6 +88,7 @@ public class AbundanceScatterplotPlugin extends AbstractPlugin<AbundanceScatterp
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
         .addVars(pluginSpec.getFacetVariable())
+        .setIncludeComputedVars(true)
       );
     return requestedStreamsList;
   }
