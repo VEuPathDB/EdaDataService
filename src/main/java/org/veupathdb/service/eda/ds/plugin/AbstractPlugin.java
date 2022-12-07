@@ -107,6 +107,12 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
     _computeInfo = findComputeName(appName).map(name -> new TwoTuple<>(name,
         getSpecObject(request, "getComputeConfig", getComputeConfigClass())));
 
+    // make sure any produced compute object contains a target entity
+    _computeInfo.ifPresent(info -> {
+      if (info.getSecond().getOutputEntityId() == null)
+        throw new BadRequestException("computeConfig object missing required property: 'outputEntityId'");
+    });
+
     // check for subset and derived entity properties of request
     _subset = Optional.ofNullable(request.getFilters()).orElse(Collections.emptyList());
     _derivedVariableSpecs = Optional.ofNullable(request.getDerivedVariables()).orElse(Collections.emptyList());
@@ -194,7 +200,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
   }
 
   @SuppressWarnings("unchecked")
-  protected <Q> Q getSpecObject(T request, String methodName, Class<Q> specClass) {
+  private <Q> Q getSpecObject(T request, String methodName, Class<Q> specClass) {
     try {
       Method configGetter = request.getClass().getMethod(methodName);
       Object config = configGetter.invoke(request);
