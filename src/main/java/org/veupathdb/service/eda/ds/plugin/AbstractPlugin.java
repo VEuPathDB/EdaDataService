@@ -397,7 +397,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
   }
 
   public String getVoidEvalComputedVariableMetadataList(ComputedVariableMetadata metadata) {
-    String variableMetadataList = new String("veupathUtils::VariableMetadataList(S4Vectors::SimpleList(");
+    String variableMetadataList = new String("computedVariables <- veupathUtils::VariableMetadataList(S4Vectors::SimpleList(");
     boolean first = true;
 
     for (VariableMapping var : metadata.getVariables()) {
@@ -415,6 +415,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
     variableMetadataList = variableMetadataList + "))";
     return (variableMetadataList);
   }
+
   public String getVariableSpecRObjectAsString(VariableDef var) {
     if (var == null) return(null);
     return("veupathUtils::VariableSpec(variableId=" + singleQuote(var.getVariableId()) + ",entityId=" + singleQuote(var.getEntityId()) + ")");
