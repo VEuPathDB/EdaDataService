@@ -78,7 +78,9 @@ public class BetaDivScatterplotPlugin extends AbstractPlugin<BetaDivScatterplotP
     BetaDivComputeConfig computeConfig = getComputeConfig();
     return List.of(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
-        .addVar(pluginSpec.getOverlayVariable()));
+        .addVar(pluginSpec.getOverlayVariable())
+        .setIncludeComputedVars(true)
+    );
   }
 
   @Override

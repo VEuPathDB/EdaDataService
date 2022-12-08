@@ -99,6 +99,7 @@ public class AlphaDivScatterplotPlugin extends AbstractPlugin<AlphaDivScatterplo
         .addVar(pluginSpec.getXAxisVariable())
         .addVar(pluginSpec.getOverlayVariable())
         .addVars(pluginSpec.getFacetVariable())
+        .setIncludeComputedVars(true)
     );
     return requestedStreamsList;
   }
