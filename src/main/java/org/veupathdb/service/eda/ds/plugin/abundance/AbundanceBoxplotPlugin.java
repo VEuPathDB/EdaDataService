@@ -17,11 +17,7 @@ import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
 import org.veupathdb.service.eda.common.plugin.util.RServeClient;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.generated.model.AbundanceBoxplotPostRequest;
-import org.veupathdb.service.eda.generated.model.BoxplotWith1ComputeSpec;
-import org.veupathdb.service.eda.generated.model.ComputedVariableMetadata;
-import org.veupathdb.service.eda.generated.model.RankedAbundanceComputeConfig;
-import org.veupathdb.service.eda.generated.model.VariableSpec;
+import org.veupathdb.service.eda.generated.model.*;
 
 import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuote;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
@@ -109,7 +105,7 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
 
     ComputedVariableMetadata metadata = getComputedVariableMetadata();
     List<VariableSpec> inputVarSpecs = metadata.getVariables().stream()
-        .filter(var -> var.getPlotReference().getValue().equals("xAxis"))
+        .filter(var -> var.getPlotReference() == PlotReferenceValue.XAXIS)
         .findFirst().orElseThrow().getMembers();
     inputVarSpecs.add(spec.getOverlayVariable());
     inputVarSpecs.add(util.getVariableSpecFromList(spec.getFacetVariable(), 0));
