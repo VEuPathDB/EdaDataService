@@ -395,7 +395,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
     } 
     
     variableMetadata = var.getVocabulary() == null ? variableMetadata : variableMetadata + ",vocabulary=" + listToRVector(var.getVocabulary());
-
+   
     variableMetadata = var.getMembers() == null ? variableMetadata : variableMetadata + ",members=" + getVariableSpecListRObjectAsString(getVariableDefList(var.getMembers()));
 
     variableMetadata = variableMetadata + ")";
