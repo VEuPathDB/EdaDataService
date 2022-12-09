@@ -106,17 +106,15 @@ public class AbundanceScatterplotPlugin extends AbstractPlugin<AbundanceScatterp
     String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
 
     ComputedVariableMetadata metadata = getComputedVariableMetadata();
-    VariableSpec computedVarSpec = metadata.getVariables().stream()
+    List<VariableSpec> inputVarSpecs = metadata.getVariables().stream()
         .filter(var -> var.getPlotReference().getValue().equals("yAxis"))
-        .findFirst().orElseThrow().getVariableSpec();
+        .findFirst().orElseThrow().getMembers();
+    inputVarSpecs.add(spec.getXAxisVariable());
+    inputVarSpecs.add(util.getVariableSpecFromList(spec.getFacetVariable(), 0));
+    inputVarSpecs.add(util.getVariableSpecFromList(spec.getFacetVariable(), 1));
 
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
-          computedVarSpec,
-          spec.getXAxisVariable(),
-          util.getVariableSpecFromList(spec.getFacetVariable(), 0),
-          util.getVariableSpecFromList(spec.getFacetVariable(), 1)));
-      
+      connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, inputVarSpecs));
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       connection.voidEval(getVoidEvalComputedVariableMetadataList(metadata));
       connection.voidEval("variables <- veupathUtils::merge(variables, computedVariables)");
