@@ -362,7 +362,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
     List<VariableDef> varDefs = new ArrayList<>();
 
     for (VariableSpec varSpec : varSpecs) {
-      varDefs.add(_referenceMetadata.getVariable(varSpec).orElseThrow());
+      if (varSpec != null) varDefs.add(_referenceMetadata.getVariable(varSpec).orElseThrow());
     }
     
     return(varDefs);
@@ -476,6 +476,10 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
   }
 
   public String getVoidEvalVariableMetadataList(Map<String, VariableSpec> vars) {
+    if (vars == null) return("variables <- veupathUtils::VariableMetadataList()");
+    boolean allValuesAreNull = vars.values().stream().allMatch(Objects::isNull);
+    if (allValuesAreNull) return("variables <- veupathUtils::VariableMetadataList()");
+
     boolean first = true;
     String variableMetadataList = new String("variables <- veupathUtils::VariableMetadataList(S4Vectors::SimpleList(");
     for(Map.Entry<String, VariableSpec> entry : vars.entrySet()) {

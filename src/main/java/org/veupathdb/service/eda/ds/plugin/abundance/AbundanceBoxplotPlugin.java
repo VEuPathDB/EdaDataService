@@ -109,7 +109,7 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
 
     ComputedVariableMetadata metadata = getComputedVariableMetadata();
     List<VariableSpec> inputVarSpecs = metadata.getVariables().stream()
-        .filter(var -> var.getPlotReference().getValue().equals("yAxis"))
+        .filter(var -> var.getPlotReference().getValue().equals("xAxis"))
         .findFirst().orElseThrow().getMembers();
     inputVarSpecs.add(spec.getOverlayVariable());
     inputVarSpecs.add(util.getVariableSpecFromList(spec.getFacetVariable(), 0));
@@ -126,7 +126,6 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
           showMean + ", " + 
           computeStats + ", '" + 
           deprecatedShowMissingness + "')";
-          connection.voidEval("print(head(" + command + "@data))");
       RServeClient.streamResult(connection, command, out);
     });
   }

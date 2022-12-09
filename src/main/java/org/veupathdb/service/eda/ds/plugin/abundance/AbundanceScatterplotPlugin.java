@@ -107,7 +107,7 @@ public class AbundanceScatterplotPlugin extends AbstractPlugin<AbundanceScatterp
 
     ComputedVariableMetadata metadata = getComputedVariableMetadata();
     List<VariableSpec> inputVarSpecs = metadata.getVariables().stream()
-        .filter(var -> var.getPlotReference().getValue().equals("yAxis"))
+        .filter(var -> var.getPlotReference().getValue().equals("xAxis"))
         .findFirst().orElseThrow().getMembers();
     inputVarSpecs.add(spec.getXAxisVariable());
     inputVarSpecs.add(util.getVariableSpecFromList(spec.getFacetVariable(), 0));
@@ -118,6 +118,8 @@ public class AbundanceScatterplotPlugin extends AbstractPlugin<AbundanceScatterp
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       connection.voidEval(getVoidEvalComputedVariableMetadataList(metadata));
       connection.voidEval("variables <- veupathUtils::merge(variables, computedVariables)");
+      connection.voidEval("index <- veupathUtils::findIndexFromPlotRef(variables, 'xAxis')");
+      connection.voidEval("variables[[index]]@plotReference@value <- 'overlay'");
 
       String command = "plot.data::scattergl(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, '" +
           valueSpec + "', '" + 
