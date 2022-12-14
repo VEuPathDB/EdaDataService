@@ -1,17 +1,5 @@
 package org.veupathdb.service.eda.ds.plugin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-
 import jakarta.ws.rs.BadRequestException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,17 +13,27 @@ import org.veupathdb.service.eda.common.client.*;
 import org.veupathdb.service.eda.common.client.EdaComputeClient.ComputeRequestBody;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.model.ReferenceMetadata;
-import org.veupathdb.service.eda.common.model.VariableDef;
-import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
-import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementValidator;
+import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
+import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
 import org.veupathdb.service.eda.generated.model.*;
 import org.veupathdb.service.eda.generated.model.BinSpec.RangeType;
 
-import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.doubleQuote;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
 import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuote;
 
 /**
@@ -369,7 +367,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
           : ",displayRangeMin=" + var.getDisplayRangeMin().toString() + ",displayRangeMax=" + var.getDisplayRangeMax().toString()
       );
     } 
-    
+
     if (var.getVocabulary() != null)
       variableMetadata.append(",vocabulary=" + listToRVector(var.getVocabulary()));
 
@@ -382,14 +380,13 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
   }
 
   public String getVoidEvalComputedVariableMetadataList(ComputedVariableMetadata metadata) {
-    return new StringBuilder()
-        .append("computedVariables <- veupathUtils::VariableMetadataList(S4Vectors::SimpleList(")
-        .append(metadata.getVariables().stream()
+    return
+        "computedVariables <- veupathUtils::VariableMetadataList(S4Vectors::SimpleList(" +
+        metadata.getVariables().stream()
             .map(this::getVariableMetadataRObjectAsString)
             .filter(Objects::nonNull) // really needed??
-            .collect(Collectors.joining(",")))
-        .append("))")
-        .toString();
+            .collect(Collectors.joining(",")) +
+        "))";
   }
 
   public String getVariableSpecRObjectAsString(VariableSpec var) {
@@ -397,13 +394,12 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
   }
 
   public String getVariableSpecListRObjectAsString(List<? extends VariableSpec> vars) {
-    return new StringBuffer()
-        .append("veupathUtils::VariableSpecList(S4Vectors::SimpleList(")
-        .append(vars.stream()
+    return
+        "veupathUtils::VariableSpecList(S4Vectors::SimpleList(" +
+        vars.stream()
             .map(this::getVariableSpecRObjectAsString)
-            .collect(Collectors.joining(",")))
-        .append("))")
-        .toString();
+            .collect(Collectors.joining(",")) +
+        "))";
   }
   
   public String getVariableMetadataRObjectAsString(CollectionSpec collection, String plotReference) {
@@ -436,17 +432,19 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
   }
 
   public String getVoidEvalVariableMetadataList(Map<String, VariableSpec> vars) {
-    return new StringBuilder()
-        .append("variables <- veupathUtils::VariableMetadataList(S4Vectors::SimpleList(")
-        .append(vars.entrySet().stream()
+    return
+        // special case if vars is null or all var values inside are null
+        vars == null || vars.values().stream().allMatch(Objects::isNull)
+        ? "variables <- veupathUtils::VariableMetadataList()"
+        : "variables <- veupathUtils::VariableMetadataList(S4Vectors::SimpleList(" +
+          vars.entrySet().stream()
             .map(entry -> getVariableMetadataRObjectAsString(
                 entry.getValue(), // plot reference
                 entry.getKey()    // variable spec
             ))
             .filter(Objects::nonNull)
-            .collect(Collectors.joining(",")))
-        .append("))")
-        .toString();
+            .collect(Collectors.joining(",")) +
+          "))";
   }
 
 }

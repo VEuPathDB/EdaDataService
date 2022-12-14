@@ -3,6 +3,7 @@ package org.veupathdb.service.eda.ds.plugin.abundance;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -104,9 +105,11 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
     String showMean = spec.getMean() != null ? spec.getMean().getValue() : "FALSE";
 
     ComputedVariableMetadata metadata = getComputedVariableMetadata();
-    List<VariableSpec> inputVarSpecs = metadata.getVariables().stream()
-        .filter(var -> var.getPlotReference() == PlotReferenceValue.XAXIS)
-        .findFirst().orElseThrow().getMembers();
+    
+    List<VariableSpec> inputVarSpecs = new ArrayList<VariableSpec>();
+    inputVarSpecs.addAll(metadata.getVariables().stream()
+        .filter(var -> var.getPlotReference().getValue().equals("xAxis"))
+        .findFirst().orElseThrow().getMembers());
     inputVarSpecs.add(spec.getOverlayVariable());
     inputVarSpecs.add(util.getVariableSpecFromList(spec.getFacetVariable(), 0));
     inputVarSpecs.add(util.getVariableSpecFromList(spec.getFacetVariable(), 1));
@@ -122,7 +125,6 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
           showMean + ", " + 
           computeStats + ", '" + 
           deprecatedShowMissingness + "')";
-          connection.voidEval("print(head(" + command + "@data))");
       RServeClient.streamResult(connection, command, out);
     });
   }
