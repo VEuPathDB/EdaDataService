@@ -339,15 +339,19 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
 
   // there is probably some JRI util that would make this unnecessary if i were more clever??
   public static String listToRVector(List<String> values) {
-    String joinedValues = values.stream()
-        .map(PluginUtil::doubleQuote)
-        .collect(Collectors.joining(", "));
-    return "c(" + joinedValues + ")";
+    return
+        "c(" +
+        values.stream()
+            .map(PluginUtil::doubleQuote)
+            .collect(Collectors.joining(", ")) +
+        ")";
   }
 
   public String getVariableMetadataRObjectAsString(VariableMapping var) {
+    if (var == null) return null;
 
-    StringBuilder variableMetadata = new StringBuilder("veupathUtils::VariableMetadata(" +
+    StringBuilder variableMetadata = new StringBuilder(
+      "veupathUtils::VariableMetadata(" +
       "variableClass=veupathUtils::VariableClass(value='computed')," +
       "variableSpec=veupathUtils::VariableSpec(variableId=" + singleQuote(var.getVariableSpec().getVariableId()) + ",entityId=" + singleQuote(var.getVariableSpec().getEntityId()) + ")," +
       "plotReference=veupathUtils::PlotReference(value=" + singleQuote(var.getPlotReference().getValue()) + ")," +
@@ -358,7 +362,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
     );
 
     if (var.getDisplayName() != null)
-      variableMetadata.append(variableMetadata + ",displayName=" + singleQuote(var.getDisplayName()));
+      variableMetadata.append(",displayName=" + singleQuote(var.getDisplayName()));
 
     if (var.getDisplayRangeMax() != null && var.getDisplayRangeMin() != null) {
       variableMetadata.append(
@@ -366,17 +370,15 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
           ? ",displayRangeMin=" + singleQuote(var.getDisplayRangeMin().toString()) + ",displayRangeMax=" + singleQuote(var.getDisplayRangeMax().toString())
           : ",displayRangeMin=" + var.getDisplayRangeMin().toString() + ",displayRangeMax=" + var.getDisplayRangeMax().toString()
       );
-    } 
+    }
 
     if (var.getVocabulary() != null)
       variableMetadata.append(",vocabulary=" + listToRVector(var.getVocabulary()));
 
-    if (var.getIsCollection())
+    if (var.getMembers() != null)
       variableMetadata.append(",members=" + getVariableSpecListRObjectAsString(var.getMembers()));
 
-    variableMetadata.append(")");
-
-    return variableMetadata.toString();
+    return variableMetadata.append(")").toString();
   }
 
   public String getVoidEvalComputedVariableMetadataList(ComputedVariableMetadata metadata) {
@@ -384,24 +386,25 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
         "computedVariables <- veupathUtils::VariableMetadataList(S4Vectors::SimpleList(" +
         metadata.getVariables().stream()
             .map(this::getVariableMetadataRObjectAsString)
-            .filter(Objects::nonNull) // really needed??
+            .filter(Objects::nonNull)
             .collect(Collectors.joining(",")) +
         "))";
   }
 
   public String getVariableSpecRObjectAsString(VariableSpec var) {
-    return "veupathUtils::VariableSpec(variableId=" + singleQuote(var.getVariableId()) + ",entityId=" + singleQuote(var.getEntityId()) + ")";
+    return var == null ? null :
+        "veupathUtils::VariableSpec(variableId=" + singleQuote(var.getVariableId()) + ",entityId=" + singleQuote(var.getEntityId()) + ")";
   }
 
   public String getVariableSpecListRObjectAsString(List<? extends VariableSpec> vars) {
-    return
+    return vars == null ? null :
         "veupathUtils::VariableSpecList(S4Vectors::SimpleList(" +
         vars.stream()
             .map(this::getVariableSpecRObjectAsString)
             .collect(Collectors.joining(",")) +
         "))";
   }
-  
+
   public String getVariableMetadataRObjectAsString(CollectionSpec collection, String plotReference) {
     if (collection == null) return null;
     PluginUtil util = getUtil();
@@ -433,15 +436,18 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
 
   public String getVoidEvalVariableMetadataList(Map<String, VariableSpec> vars) {
     return
-        // special case if vars is null or all var values inside are null
+        // special case if vars is null or all var values are null
         vars == null || vars.values().stream().allMatch(Objects::isNull)
         ? "variables <- veupathUtils::VariableMetadataList()"
+
+        // otherwise build R-friendly var list
         : "variables <- veupathUtils::VariableMetadataList(S4Vectors::SimpleList(" +
           vars.entrySet().stream()
-            .map(entry -> getVariableMetadataRObjectAsString(
-                entry.getValue(), // plot reference
-                entry.getKey()    // variable spec
-            ))
+            .map(entry -> {
+              String plotReference = entry.getKey();
+              VariableSpec var = entry.getValue();
+              return getVariableMetadataRObjectAsString(var, plotReference);
+            })
             .filter(Objects::nonNull)
             .collect(Collectors.joining(",")) +
           "))";
