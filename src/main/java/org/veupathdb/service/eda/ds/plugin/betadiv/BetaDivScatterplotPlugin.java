@@ -62,7 +62,12 @@ public class BetaDivScatterplotPlugin extends AbstractPlugin<BetaDivScatterplotP
         .element("overlayVariable")
           .required(false)
           .maxValues(8)
-          .description("Variable must be of the same or a parent entity as the X-axis variable.")
+          .description("Variable must be a number, or have 8 or fewer values, and be of the same or a parent entity as the X-axis variable.")
+      .pattern()
+        .element("overlayVariable")
+          .required(false)
+          .types(APIVariableType.NUMBER, APIVariableType.INTEGER) 
+          .description("Variable must be a number, or have 8 or fewer values, and be of the same or a parent entity as the X-axis variable.")
       .done();
   }
   
@@ -87,7 +92,7 @@ public class BetaDivScatterplotPlugin extends AbstractPlugin<BetaDivScatterplotP
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     BetaDivScatterplotSpec spec = getPluginSpec();
     Map<String, VariableSpec> varMap = new HashMap<>();
-    varMap.put("overlayVariable", spec.getOverlayVariable());
+    varMap.put("overlay", spec.getOverlayVariable());
     String valueSpec = "raw";
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
     String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
