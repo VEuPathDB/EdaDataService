@@ -2,6 +2,7 @@ GEN_PACKAGE  := $(shell ./gradlew -q print-gen-package)
 BIN_DIR      := .tools/bin
 
 FETCH_EDA_COMMON_SCHEMA := $(shell ./gradlew -q "print-eda-common-schema-fetch")
+FETCH_EDA_COMPUTE_SCHEMA := $(shell ./gradlew -q "print-eda-compute-schema-fetch")
 
 C_BLUE := "\\033[94m"
 C_NONE := "\\033[0m"
@@ -81,9 +82,9 @@ gen-docs: api.raml merge-raml
 .PHONY: merge-raml
 merge-raml:
 	@echo "Downloading dependencies..."
-	$(FETCH_EDA_COMMON_SCHEMA) > schema/url/eda-common-lib.raml
+	$(FETCH_EDA_COMPUTE_SCHEMA) > schema/url/eda-compute-lib.raml
 	$(BIN_DIR)/merge-raml schema > schema/library.raml
-	rm schema/url/eda-common-lib.raml
+	rm schema/url/eda-compute-lib.raml
 
 #
 # File based targets

@@ -6,6 +6,7 @@ import org.gusdb.fgputil.json.JsonUtil;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.model.CollectionDef;
+import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.CollectionSpec;
 import org.veupathdb.service.eda.generated.model.TestCollectionsPostRequest;
@@ -16,7 +17,7 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
-public class TestCollectionPlugin extends AbstractPlugin<TestCollectionsPostRequest, CollectionSpec> {
+public class TestCollectionPlugin extends AbstractEmptyComputePlugin<TestCollectionsPostRequest, CollectionSpec> {
 
   @Override
   protected Class<CollectionSpec> getVisualizationSpecClass() {

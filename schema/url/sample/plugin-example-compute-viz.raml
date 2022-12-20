@@ -1,0 +1,22 @@
+#%RAML 1.0 Library
+
+types:
+
+  ExampleComputeVizPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: ExampleComputeVizSpec
+      computeConfig: ExampleComputeConfig
+
+  ExampleComputeVizSpec:
+    additionalProperties: false
+    type: object
+    properties:
+      prefixVar: VariableSpec
+
+  ExampleComputeVizPostResponse:
+    additionalProperties: false
+    properties:
+      numEmptyValues: integer
+      longestConcatenatedValue: string
+      avgConcatenatedLength: number

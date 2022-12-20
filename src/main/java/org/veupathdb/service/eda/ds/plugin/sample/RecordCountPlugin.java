@@ -12,11 +12,11 @@ import org.gusdb.fgputil.validation.ValidationException;
 import org.json.JSONObject;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.model.VariableSource;
-import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.generated.model.RecordCountPostRequest;
 import org.veupathdb.service.eda.generated.model.RecordCountSpec;
 
-public class RecordCountPlugin extends AbstractPlugin<RecordCountPostRequest, RecordCountSpec> {
+public class RecordCountPlugin extends AbstractEmptyComputePlugin<RecordCountPostRequest, RecordCountSpec> {
 
   @Override
   public String getDisplayName() {

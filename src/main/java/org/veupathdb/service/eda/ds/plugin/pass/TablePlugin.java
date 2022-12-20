@@ -1,13 +1,5 @@
 package org.veupathdb.service.eda.ds.plugin.pass;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
 import org.gusdb.fgputil.DelimitedDataParser;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
@@ -16,16 +8,21 @@ import org.json.JSONObject;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
-import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.generated.model.TablePostRequest;
 import org.veupathdb.service.eda.generated.model.TableSpec;
+
+import java.io.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 
 import static org.gusdb.fgputil.FormatUtil.NL;
 import static org.gusdb.fgputil.FormatUtil.TAB;
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.CLINEPI_PROJECT;
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.MICROBIOME_PROJECT;
 
-public class TablePlugin extends AbstractPlugin<TablePostRequest, TableSpec> {
+public class TablePlugin extends AbstractEmptyComputePlugin<TablePostRequest, TableSpec> {
 
   @Override
   public String getDisplayName() {

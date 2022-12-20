@@ -38,6 +38,7 @@ import org.veupathdb.service.eda.ds.plugin.pass.ScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TablePlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TimeSeriesPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
+import org.veupathdb.service.eda.ds.plugin.sample.ExampleComputeVizPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.MultiStreamPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.RecordCountPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.TestCollectionPlugin;
@@ -77,7 +78,7 @@ public class AppsService implements Apps {
     }
   }
 
-  private <T extends VisualizationRequestBase> Consumer<OutputStream> processRequest(AbstractPlugin<T,?> plugin, T entity) throws ValidationException {
+  private <T extends VisualizationRequestBase> Consumer<OutputStream> processRequest(AbstractPlugin<T,?,?> plugin, T entity) throws ValidationException {
     Entry<String,String> authHeader = UserProvider.getSubmittedAuth(_request).orElseThrow();
     StudyAccess.confirmPermission(authHeader, Resources.DATASET_ACCESS_SERVICE_URL,
         entity.getStudyId(), StudyAccess::allowVisualizations);
@@ -195,6 +196,12 @@ public class AppsService implements Apps {
   public PostAppsSampleVisualizationsCollectionsTestResponse postAppsSampleVisualizationsCollectionsTest(TestCollectionsPostRequest entity) {
     return wrapPlugin(() -> PostAppsSampleVisualizationsCollectionsTestResponse.respond200WithTextPlain(
         new EntityTabularPostResponseStream(processRequest(new TestCollectionPlugin(), entity))));
+  }
+
+  @Override
+  public PostAppsSamplewithcomputeVisualizationsVizWithComputeResponse postAppsSamplewithcomputeVisualizationsVizWithCompute(ExampleComputeVizPostRequest entity) {
+    return wrapPlugin(() -> PostAppsSamplewithcomputeVisualizationsVizWithComputeResponse.respond200WithApplicationJson(
+        new ExampleComputeVizPostResponseStream(processRequest(new ExampleComputeVizPlugin(), entity))));
   }
 
   @DisableJackson

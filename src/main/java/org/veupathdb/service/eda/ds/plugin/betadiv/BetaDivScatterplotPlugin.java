@@ -8,23 +8,19 @@ import java.util.List;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
-import org.veupathdb.service.eda.ds.plugin.AbstractPluginWithCompute;
 import org.veupathdb.service.eda.common.plugin.util.RServeClient;
-import org.veupathdb.service.eda.generated.model.BetaDivComputeConfig;
-import org.veupathdb.service.eda.generated.model.BetaDivScatterplotPostRequest;
-import org.veupathdb.service.eda.generated.model.BetaDivScatterplotSpec;
-import org.veupathdb.service.eda.generated.model.VariableSpec;
+import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.generated.model.*;
 
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class BetaDivScatterplotPlugin extends AbstractPluginWithCompute<BetaDivScatterplotPostRequest, BetaDivScatterplotSpec, BetaDivComputeConfig> {
+public class BetaDivScatterplotPlugin extends AbstractPlugin<BetaDivScatterplotPostRequest, BetaDivScatterplotSpec, BetaDivComputeConfig> {
 
   private static final Logger LOG = LogManager.getLogger(BetaDivScatterplotPlugin.class);
   
@@ -49,8 +45,13 @@ public class BetaDivScatterplotPlugin extends AbstractPluginWithCompute<BetaDivS
   }
 
   @Override
-  protected Class<BetaDivComputeConfig> getComputeSpecClass() {
+  protected Class<BetaDivComputeConfig> getComputeConfigClass() {
     return BetaDivComputeConfig.class;
+  }
+
+  @Override
+  protected boolean includeComputedVarsInStream() {
+    return true;
   }
 
   @Override
@@ -61,7 +62,12 @@ public class BetaDivScatterplotPlugin extends AbstractPluginWithCompute<BetaDivS
         .element("overlayVariable")
           .required(false)
           .maxValues(8)
-          .description("Variable must be of the same or a parent entity as the X-axis variable.")
+          .description("Variable must be a number, or have 8 or fewer values, and be of the same or a parent entity as the X-axis variable.")
+      .pattern()
+        .element("overlayVariable")
+          .required(false)
+          .types(APIVariableType.NUMBER, APIVariableType.INTEGER) 
+          .description("Variable must be a number, or have 8 or fewer values, and be of the same or a parent entity as the X-axis variable.")
       .done();
   }
   
@@ -73,30 +79,43 @@ public class BetaDivScatterplotPlugin extends AbstractPluginWithCompute<BetaDivS
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(BetaDivScatterplotSpec pluginSpec, BetaDivComputeConfig computeConfig) {
-    return ListBuilder.asList(
+  protected List<StreamSpec> getRequestedStreams(BetaDivScatterplotSpec pluginSpec) {
+    BetaDivComputeConfig computeConfig = getComputeConfig();
+    return List.of(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
-        .addVar(pluginSpec.getOverlayVariable()));
+        .addVar(pluginSpec.getOverlayVariable())
+        .setIncludeComputedVars(true)
+    );
   }
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     BetaDivScatterplotSpec spec = getPluginSpec();
     Map<String, VariableSpec> varMap = new HashMap<>();
-    // varMap.put("xAxisVariable", spec.getXAxisVariable()); // Will come from compute service meta endpoint
-    // varMap.put("yAxisVariable", spec.getYAxisVariable());  // Will come from compute service meta endpoint
-    varMap.put("overlayVariable", spec.getOverlayVariable());
+    varMap.put("overlay", spec.getOverlayVariable());
     String valueSpec = "raw";
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
     String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
-    
+   
+    ComputedVariableMetadata metadata = getComputedVariableMetadata();
+    VariableSpec xComputedVarSpec = metadata.getVariables().stream()
+        .filter(var -> var.getPlotReference().getValue().equals("xAxis"))
+        .findFirst().orElseThrow().getVariableSpec();
+    VariableSpec yComputedVarSpec = metadata.getVariables().stream()
+        .filter(var -> var.getPlotReference().getValue().equals("yAxis"))
+        .findFirst().orElseThrow().getVariableSpec();
+
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(getUtil().getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
-          // spec.getXAxisVariable(), // Will come from compute service meta endpoint
-          // spec.getYAxisVariable(), // Will come from compute service meta endpoint
+          xComputedVarSpec,
+          yComputedVarSpec,
           spec.getOverlayVariable()));
-      connection.voidEval(getVoidEvalVarMetadataMap(DEFAULT_SINGLE_STREAM_NAME, varMap));
-      String command = "plot.data::scattergl(data, map, '" + valueSpec + "', '" + deprecatedShowMissingness + "')";
+
+      connection.voidEval(getVoidEvalVariableMetadataList(varMap));
+      connection.voidEval(getVoidEvalComputedVariableMetadataList(metadata));
+      connection.voidEval("variables <- veupathUtils::merge(variables, computedVariables)");
+
+      String command = "plot.data::scattergl(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, '" + valueSpec + "', '" + deprecatedShowMissingness + "')";
       RServeClient.streamResult(connection, command, out);
     }); 
   }

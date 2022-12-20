@@ -1,77 +1,72 @@
 package org.veupathdb.service.eda.ds.plugin;
 
+import jakarta.ws.rs.BadRequestException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.gusdb.fgputil.Timer;
+import org.gusdb.fgputil.Tuples.TwoTuple;
+import org.gusdb.fgputil.client.ResponseFuture;
+import org.gusdb.fgputil.functional.FunctionalInterfaces.ConsumerWithException;
+import org.gusdb.fgputil.functional.Functions;
+import org.gusdb.fgputil.validation.ValidationException;
+import org.veupathdb.service.eda.common.client.*;
+import org.veupathdb.service.eda.common.client.EdaComputeClient.ComputeRequestBody;
+import org.veupathdb.service.eda.common.client.spec.StreamSpec;
+import org.veupathdb.service.eda.common.model.ReferenceMetadata;
+import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
+import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
+import org.veupathdb.service.eda.common.plugin.constraint.DataElementValidator;
+import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
+import org.veupathdb.service.eda.ds.Resources;
+import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
+import org.veupathdb.service.eda.generated.model.*;
+import org.veupathdb.service.eda.generated.model.BinSpec.RangeType;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.gusdb.fgputil.Timer;
-import org.gusdb.fgputil.client.ResponseFuture;
-import org.gusdb.fgputil.functional.FunctionalInterfaces.ConsumerWithException;
-import org.gusdb.fgputil.functional.Functions;
-import org.gusdb.fgputil.validation.ValidationException;
-import org.veupathdb.service.eda.common.client.EdaMergingClient;
-import org.veupathdb.service.eda.common.client.EdaSubsettingClient;
-import org.veupathdb.service.eda.common.client.StreamingDataClient;
-import org.veupathdb.service.eda.common.client.spec.StreamSpec;
-import org.veupathdb.service.eda.common.model.ReferenceMetadata;
-import org.veupathdb.service.eda.common.model.VariableDef;
-import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
-import org.veupathdb.service.eda.ds.Resources;
-import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
-import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
-import org.veupathdb.service.eda.common.plugin.constraint.DataElementValidator;
-import org.veupathdb.service.eda.common.client.NonEmptyResultStream;
-import org.veupathdb.service.eda.generated.model.APIFilter;
-import org.veupathdb.service.eda.generated.model.APIStudyDetail;
-import org.veupathdb.service.eda.generated.model.BinSpec;
-import org.veupathdb.service.eda.generated.model.BinSpec.RangeType;
-import org.veupathdb.service.eda.generated.model.CollectionSpec;
-import org.veupathdb.service.eda.generated.model.DateRange;
-import org.veupathdb.service.eda.generated.model.DerivedVariable;
-import org.veupathdb.service.eda.generated.model.GeolocationViewport;
-import org.veupathdb.service.eda.generated.model.NumberRange;
-import org.veupathdb.service.eda.generated.model.VariableSpec;
-import org.veupathdb.service.eda.generated.model.VisualizationRequestBase;
-import org.veupathdb.service.eda.generated.model.NumericViewport;
-
-import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.doubleQuote;
 import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuote;
 
 /**
- * Base vizualization plugin for all other plugins.  Provides access to parts of
+ * Base visualization plugin for all other plugins.  Provides access to parts of
  * the request object, manages logic flow over the course of the request, and
  * provides streaming merged data to subclasses for processing per specs provided
  * by those subclasses.
  *
  * @param <T> type of request (must extend VisualizationRequestBase)
  * @param <S> plugin's spec class (must be or extend the generated spec class for this plugin)
+ * @param <R> plugin's compute spec class (must be or extend the generated compute spec class for this plugin)
  */
-public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> implements Consumer<OutputStream> {
+public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R extends ComputeConfigBase> implements Consumer<OutputStream> {
 
   private static final Logger LOG = LogManager.getLogger(AbstractPlugin.class);
 
   // shared stream name for plugins that need request only a single stream
   protected static final String DEFAULT_SINGLE_STREAM_NAME = "single_tabular_dataset";
 
-  protected ReferenceMetadata _referenceMetadata;
-  protected S _pluginSpec;
-  protected List<StreamSpec> _requiredStreams;
+  // to be deleted; kept for now to enable compilation of synchronous plugins
+  protected static final String COMPUTE_STREAM_NAME = "computed_dataset";
 
   // methods that need to be implemented
   protected abstract Class<S> getVisualizationSpecClass();
+  protected abstract Class<R> getComputeConfigClass();
   protected abstract void validateVisualizationSpec(S pluginSpec) throws ValidationException;
   protected abstract List<StreamSpec> getRequestedStreams(S pluginSpec);
+
+  // return true to include computed vars as part of the tabular stream
+  //   for the entity under which they were computed.  If true, a runtime
+  //   error will occur if no stream spec exists for that entity.
+  protected abstract boolean includeComputedVarsInStream();
+
   protected abstract void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException;
 
   // methods that should probably be overridden
@@ -82,42 +77,67 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   public Integer getMaxPanels() { return 1; }
   public ConstraintSpec getConstraintSpec() { return new ConstraintSpec(); }
 
-  // option for subclass to load any additional information (e.g. compute spec) from the request
-  protected void loadAdditionalConfig(String appName, T request) throws ValidationException {}
+  protected ReferenceMetadata _referenceMetadata;
+  protected S _pluginSpec;
+  // stored compute name and typed value of the passed compute config object (if plugin requires compute)
+  protected Optional<TwoTuple<String,R>> _computeInfo;
+  protected List<StreamSpec> _requiredStreams;
 
   private Timer _timer;
   private boolean _requestProcessed = false;
+  private String _studyId;
   private List<APIFilter> _subset;
-  private List<DerivedVariable> _derivedVariables;
+  private List<DerivedVariableSpec> _derivedVariableSpecs;
   private EdaSubsettingClient _subsettingClient;
   private EdaMergingClient _mergingClient;
+  private EdaComputeClient _computeClient;
 
-  public final AbstractPlugin<T,S> processRequest(String appName, T request, Entry<String,String> authHeader) throws ValidationException {
+  public final AbstractPlugin<T,S,R> processRequest(String appName, T request, Entry<String,String> authHeader) throws ValidationException {
 
     // start request timer (used to profile request performance dynamics)
     _timer = new Timer();
     logRequestTime("Starting timer");
 
-    // validate config type matches class provided by subclass
+    // validate config types match classes provided by subclass
     _pluginSpec = getSpecObject(request, "getConfig", getVisualizationSpecClass());
+
+    // find compute name if required by this viz plugin; if present, then look up compute config
+    //   and create an optional tuple of name+config (empty optional if viz does not require compute)
+    _computeInfo = findComputeName(appName).map(name -> new TwoTuple<>(name,
+        getSpecObject(request, "getComputeConfig", getComputeConfigClass())));
+
+    // make sure any produced compute object contains a target entity
+    _computeInfo.ifPresent(info -> {
+      if (info.getSecond().getOutputEntityId() == null)
+        throw new BadRequestException("computeConfig object missing required property: 'outputEntityId'");
+    });
 
     // check for subset and derived entity properties of request
     _subset = Optional.ofNullable(request.getFilters()).orElse(Collections.emptyList());
-    _derivedVariables = Optional.ofNullable(request.getDerivedVariables()).orElse(Collections.emptyList());
+    _derivedVariableSpecs = Optional.ofNullable(request.getDerivedVariables()).orElse(Collections.emptyList());
 
     // build clients for required services
     _subsettingClient = new EdaSubsettingClient(Resources.SUBSETTING_SERVICE_URL, authHeader);
     _mergingClient = new EdaMergingClient(Resources.MERGING_SERVICE_URL, authHeader);
+    _computeClient = new EdaComputeClient(Resources.COMPUTE_SERVICE_URL, authHeader);
 
     // get study
     APIStudyDetail study = _subsettingClient.getStudy(request.getStudyId())
         .orElseThrow(() -> new ValidationException("Study '" + request.getStudyId() + "' does not exist."));
+    _studyId = study.getId();
+
+    // if plugin requires a compute, check if compute results are available
+    if (_computeInfo.isPresent() && !isComputeResultsAvailable()) {
+      throw new BadRequestException("Compute results are not available for the requested job.");
+    }
+
+    // if plugin requires a compute, get computed var metadata
+    List<VariableMapping> computedVars = _computeInfo.isPresent()
+        ? getComputedVariableMetadata().getVariables()
+        : Collections.emptyList();
 
     // construct available variables for each entity from metadata and derived variable config
-    _referenceMetadata = new ReferenceMetadata(study, _derivedVariables);
-
-    // ask subclass to load any additional information (e.g. compute spec)
-    loadAdditionalConfig(appName, request);
+    _referenceMetadata = new ReferenceMetadata(study, computedVars, _derivedVariableSpecs);
 
     // ask subclass to validate the configuration
     validateVisualizationSpec(_pluginSpec);
@@ -145,8 +165,9 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
     }
 
     // create stream generator
+    Optional<TwoTuple<String,ComputeConfigBase>> typedTuple = _computeInfo.map(info -> new TwoTuple<>(info.getFirst(), info.getSecond()));
     Function<StreamSpec, ResponseFuture> streamGenerator = spec -> _mergingClient
-        .getTabularDataStream(_referenceMetadata, _subset, spec);
+        .getTabularDataStream(_referenceMetadata, _subset, typedTuple, spec);
 
     // create stream processor
     // TODO: might make disallowing empty results optional in the future; this is the original implementation
@@ -172,12 +193,13 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   protected PluginUtil getUtil() {
     return new PluginUtil(getReferenceMetadata(), _mergingClient);
   }
+
   protected void validateInputs(DataElementSet values) throws ValidationException {
     new DataElementValidator(getReferenceMetadata(), getConstraintSpec()).validate(values);
   }
 
   @SuppressWarnings("unchecked")
-  protected <Q> Q getSpecObject(T request, String methodName, Class<Q> specClass) {
+  private <Q> Q getSpecObject(T request, String methodName, Class<Q> specClass) {
     try {
       Method configGetter = request.getClass().getMethod(methodName);
       Object config = configGetter.invoke(request);
@@ -199,6 +221,58 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
   }
 
   /*****************************************************************
+   *** Compute-related methods
+   ****************************************************************/
+
+  private static Optional<String> findComputeName(String appName) {
+    return Optional.ofNullable(AppsMetadata.APPS.getApps().stream()
+        // find this app by name
+        .filter(app -> app.getName().equals(appName)).findFirst().orElseThrow()
+        // look up compute associated with this app
+        .getComputeName());
+  }
+
+  private final Supplier<RuntimeException> NO_COMPUTE_EXCEPTION = () ->
+      new UnsupportedOperationException("This visualization plugin [" +
+          getClass().getSimpleName() + "] is not associated with a compute plugin");
+
+  /**
+   * @return the compute name used by this plugin; should only be called if plugin requires a compute
+   * @throws NoSuchElementException if not associated with a compute
+   */
+  protected String getComputeName() {
+    return _computeInfo.map(TwoTuple::getFirst).orElseThrow(NO_COMPUTE_EXCEPTION);
+  }
+
+  /**
+   * @return the compute config for this plugin; should only be called if plugin requires a compute
+   * @throws NoSuchElementException if no compute config is present
+   */
+  protected R getComputeConfig() {
+    return _computeInfo.map(TwoTuple::getSecond).orElseThrow(NO_COMPUTE_EXCEPTION);
+  }
+
+  protected boolean isComputeResultsAvailable() {
+    return _computeClient.isJobResultsAvailable(getComputeName(), createComputeRequestBody());
+  }
+
+  protected <Q> Q getComputeResultStats(Class<Q> expectedStatsClass) {
+    return _computeClient.getJobStatistics(getComputeName(), createComputeRequestBody(), expectedStatsClass);
+  }
+
+  protected ComputedVariableMetadata getComputedVariableMetadata() {
+    return _computeClient.getJobVariableMetadata(getComputeName(), createComputeRequestBody());
+  }
+
+  private ComputeRequestBody createComputeRequestBody() {
+    return new ComputeRequestBody(
+        _studyId,
+        _subset,
+        _derivedVariableSpecs,
+        _computeInfo.map(TwoTuple::getSecond).orElseThrow(NO_COMPUTE_EXCEPTION));
+  }
+
+  /*****************************************************************
    *** Shared plugin-specific utilities
    ****************************************************************/
 
@@ -208,7 +282,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
         LOG.warn("The `units` property of the `BinSpec` class is only used for DATE x-axis variables. It will be ignored.");
       }
     }
-    // need an error here if its a date and we dont have a unit?
+    // need an error here if it's a date and we don't have a unit?
   }
 
   public static String getBinRangeAsRString(RangeType binRange) {
@@ -265,134 +339,118 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S> impl
 
   // there is probably some JRI util that would make this unnecessary if i were more clever??
   public static String listToRVector(List<String> values) {
-    boolean first = true;
-    String vector = "c(";
+    return
+        "c(" +
+        values.stream()
+            .map(PluginUtil::doubleQuote)
+            .collect(Collectors.joining(", ")) +
+        ")";
+  }
 
-    for (String value : values) {
-      if (first) {
-        vector = vector + doubleQuote(value);
-        first = false;
-      } else {
-        vector = vector + ", " + doubleQuote(value);
-      }
+  public String getVariableMetadataRObjectAsString(VariableMapping var) {
+    if (var == null) return null;
+
+    StringBuilder variableMetadata = new StringBuilder(
+      "veupathUtils::VariableMetadata(" +
+      "variableClass=veupathUtils::VariableClass(value='computed')," +
+      "variableSpec=veupathUtils::VariableSpec(variableId=" + singleQuote(var.getVariableSpec().getVariableId()) + ",entityId=" + singleQuote(var.getVariableSpec().getEntityId()) + ")," +
+      "plotReference=veupathUtils::PlotReference(value=" + singleQuote(var.getPlotReference().getValue()) + ")," +
+      "dataType=veupathUtils::DataType(value=" + singleQuote(var.getDataType().toString()) + ")," +
+      "dataShape=veupathUtils::DataShape(value=" + singleQuote(var.getDataShape().toString()) + ")," +
+      "imputeZero=" + var.getImputeZero().toString().toUpperCase() + "," +
+      "isCollection=" + var.getIsCollection().toString().toUpperCase()
+    );
+
+    if (var.getDisplayName() != null)
+      variableMetadata.append(",displayName=" + singleQuote(var.getDisplayName()));
+
+    if (var.getDisplayRangeMax() != null && var.getDisplayRangeMin() != null) {
+      variableMetadata.append(
+          var.getDataType() == APIVariableType.DATE
+          ? ",displayRangeMin=" + singleQuote(var.getDisplayRangeMin().toString()) + ",displayRangeMax=" + singleQuote(var.getDisplayRangeMax().toString())
+          : ",displayRangeMin=" + var.getDisplayRangeMin().toString() + ",displayRangeMax=" + var.getDisplayRangeMax().toString()
+      );
     }
 
-    vector = vector + ")";
-    return(vector);
+    if (var.getVocabulary() != null)
+      variableMetadata.append(",vocabulary=" + listToRVector(var.getVocabulary()));
+
+    if (var.getMembers() != null)
+      variableMetadata.append(",members=" + getVariableSpecListRObjectAsString(var.getMembers()));
+
+    return variableMetadata.append(")").toString();
   }
 
-  public String getVariableSpecRObjectAsString(VariableDef var) {
-    if (var == null) return(null);
-    return("veupathUtils::VariableSpec(variableId=" + singleQuote(var.getVariableId()) + ",entityId=" + singleQuote(var.getEntityId()) + ")");
+  public String getVoidEvalComputedVariableMetadataList(ComputedVariableMetadata metadata) {
+    return
+        "computedVariables <- veupathUtils::VariableMetadataList(S4Vectors::SimpleList(" +
+        metadata.getVariables().stream()
+            .map(this::getVariableMetadataRObjectAsString)
+            .filter(Objects::nonNull)
+            .collect(Collectors.joining(",")) +
+        "))";
   }
 
-  public String getVariableSpecListRObjectAsString(List<VariableDef> vars) {
-    if (vars == null) return(null);
-    boolean first = true;
-    String variableSpecList = new String("veupathUtils::VariableSpecList(S4Vectors::SimpleList(");
-
-    for (VariableDef var : vars) {
-      if (first) {
-        first = false;
-        variableSpecList = variableSpecList + getVariableSpecRObjectAsString(var);
-      } else {
-        variableSpecList = variableSpecList + "," + getVariableSpecRObjectAsString(var);
-      }
-    }
-    variableSpecList = variableSpecList + "))";
-
-    return(variableSpecList);
+  public String getVariableSpecRObjectAsString(VariableSpec var) {
+    return var == null ? null :
+        "veupathUtils::VariableSpec(variableId=" + singleQuote(var.getVariableId()) + ",entityId=" + singleQuote(var.getEntityId()) + ")";
   }
-  
+
+  public String getVariableSpecListRObjectAsString(List<? extends VariableSpec> vars) {
+    return vars == null ? null :
+        "veupathUtils::VariableSpecList(S4Vectors::SimpleList(" +
+        vars.stream()
+            .map(this::getVariableSpecRObjectAsString)
+            .collect(Collectors.joining(",")) +
+        "))";
+  }
+
   public String getVariableMetadataRObjectAsString(CollectionSpec collection, String plotReference) {
-    if (collection == null) return(null);
+    if (collection == null) return null;
     PluginUtil util = getUtil();
-    
     String membersList = getVariableSpecListRObjectAsString(util.getCollectionMembers(collection));
-
-    return("veupathUtils::VariableMetadata(" + 
-                  "variableClass=veupathUtils::VariableClass(value='native')," + 
-                  "variableSpec=veupathUtils::VariableSpec(variableId=" + singleQuote(collection.getCollectionId()) + ",entityId=" + singleQuote(collection.getEntityId()) + ")," +
-                  "plotReference=veupathUtils::PlotReference(value=" + singleQuote(plotReference) + ")," +
-                  "dataType=" + singleQuote(util.getCollectionType(collection)) + "," +
-                  "dataShape=" + singleQuote(util.getCollectionDataShape(collection)) + "," +
-                  "imputeZero=" + util.getCollectionImputeZero(collection).toUpperCase() + "," +
-                  "isCollection=TRUE," + 
-                  "members=" + membersList + ")");
+    return
+        "veupathUtils::VariableMetadata(" +
+        "variableClass=veupathUtils::VariableClass(value='native')," +
+        "variableSpec=veupathUtils::VariableSpec(variableId=" + singleQuote(collection.getCollectionId()) + ",entityId=" + singleQuote(collection.getEntityId()) + ")," +
+        "plotReference=veupathUtils::PlotReference(value=" + singleQuote(plotReference) + ")," +
+        "dataType=" + singleQuote(util.getCollectionType(collection)) + "," +
+        "dataShape=" + singleQuote(util.getCollectionDataShape(collection)) + "," +
+        "imputeZero=" + util.getCollectionImputeZero(collection).toUpperCase() + "," +
+        "isCollection=TRUE," +
+        "members=" + membersList + ")";
   }
 
   public String getVariableMetadataRObjectAsString(VariableSpec var, String plotReference) {
-    if (var == null) return(null);
-    PluginUtil util = getUtil();  
-
-    return("veupathUtils::VariableMetadata(" + 
-                  "variableClass=veupathUtils::VariableClass(value='native')," + 
-                  "variableSpec=veupathUtils::VariableSpec(variableId=" + singleQuote(var.getVariableId()) + ",entityId=" + singleQuote(var.getEntityId()) + ")," +
-                  "plotReference=veupathUtils::PlotReference(value=" + singleQuote(plotReference) + ")," +
-                  "dataType=veupathUtils::DataType(value=" + singleQuote(util.getVariableType(var)) + ")," +
-                  "dataShape=veupathUtils::DataShape(value=" + singleQuote(util.getVariableDataShape(var)) + ")," +
-                  "imputeZero=" + util.getVariableImputeZero(var).toUpperCase() + ")");
+    if (var == null) return null;
+    PluginUtil util = getUtil();
+    return
+        "veupathUtils::VariableMetadata(" +
+        "variableClass=veupathUtils::VariableClass(value='native')," +
+        "variableSpec=veupathUtils::VariableSpec(variableId=" + singleQuote(var.getVariableId()) + ",entityId=" + singleQuote(var.getEntityId()) + ")," +
+        "plotReference=veupathUtils::PlotReference(value=" + singleQuote(plotReference) + ")," +
+        "dataType=veupathUtils::DataType(value=" + singleQuote(util.getVariableType(var)) + ")," +
+        "dataShape=veupathUtils::DataShape(value=" + singleQuote(util.getVariableDataShape(var)) + ")," +
+        "imputeZero=" + util.getVariableImputeZero(var).toUpperCase() + ")";
   }
 
   public String getVoidEvalVariableMetadataList(Map<String, VariableSpec> vars) {
-    boolean first = true;
-    String variableMetadataList = new String("variables <- veupathUtils::VariableMetadataList(S4Vectors::SimpleList(");
-    for(Map.Entry<String, VariableSpec> entry : vars.entrySet()) {
-      String plotReference = entry.getKey();
-      VariableSpec var = entry.getValue();
-      String variableMetadata = getVariableMetadataRObjectAsString(var, plotReference);
-      if (variableMetadata != null) {
-        if (first) {
-          first = false;
-          variableMetadataList = variableMetadataList + variableMetadata;
-        } else {
-          variableMetadataList = variableMetadataList + "," + variableMetadata;
-        }
-      }
-      
-    }
-    variableMetadataList = variableMetadataList + "))";
+    return
+        // special case if vars is null or all var values are null
+        vars == null || vars.values().stream().allMatch(Objects::isNull)
+        ? "variables <- veupathUtils::VariableMetadataList()"
 
-    return(variableMetadataList);
-  }
-
-  // replacing this data.frame map w a dedicated VariableMetadataList S4 object
-  public String getVoidEvalVarMetadataMap(String datasetName, Map<String, VariableSpec> vars) {
-    boolean first = true;
-    String plotRefVector = new String();
-    String varColNameVector = new String();
-    String varTypeVector = new String();
-    String varShapeVector = new String();
-
-    PluginUtil util = getUtil();
-    for(Map.Entry<String, VariableSpec> entry : vars.entrySet()) {
-      String plotRef = entry.getKey();
-      VariableSpec var = entry.getValue();
-      String varName = util.toColNameOrEmpty(var);
-      if (varName.equals("")) continue;
-      String varType = util.getVariableType(var);
-      String varShape = util.getVariableDataShape(var);
-      if (first) {
-        first = false;
-        plotRefVector = singleQuote(plotRef);
-        varColNameVector = singleQuote(varName);
-        varTypeVector = singleQuote(varType);
-        varShapeVector = singleQuote(varShape);
-      } else {
-        plotRefVector = plotRefVector + "," + singleQuote(plotRef);
-        varColNameVector = varColNameVector + "," + singleQuote(varName);
-        varTypeVector = varTypeVector + "," + singleQuote(varType);
-        varShapeVector = varShapeVector + "," + singleQuote(varShape);
-      }
-    }
-
-    String varMetadataMapString = "map <- data.frame("
-        + "'plotRef'=c(" + plotRefVector + "), "
-        + "'id'=c(" + varColNameVector + "), "
-        + "'dataType'=c("+ varTypeVector + "), "
-        + "'dataShape'=c(" + varShapeVector + "), stringsAsFactors=FALSE)";
-
-    return varMetadataMapString;
+        // otherwise build R-friendly var list
+        : "variables <- veupathUtils::VariableMetadataList(S4Vectors::SimpleList(" +
+          vars.entrySet().stream()
+            .map(entry -> {
+              String plotReference = entry.getKey();
+              VariableSpec var = entry.getValue();
+              return getVariableMetadataRObjectAsString(var, plotReference);
+            })
+            .filter(Objects::nonNull)
+            .collect(Collectors.joining(",")) +
+          "))";
   }
 
 }

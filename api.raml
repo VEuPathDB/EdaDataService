@@ -357,7 +357,6 @@ securitySchemes:
               application/json:
                 type: lib.LineplotPostResponse
 
-
   /sample/visualizations:
     displayName: Sample visualizations demonstrating/testing service capabilities
 
@@ -396,3 +395,18 @@ securitySchemes:
             body:
               text/plain:
                 type: lib.EntityTabularPostResponse
+
+  /samplewithcompute/visualizations:
+    displayName: Sample visualizations with computes demonstrating/testing service capabilities
+
+    /viz-with-compute:
+      post:
+        description: Sample visualization plugin that uses data from a compute
+        body:
+          application/json:
+            type: lib.ExampleComputeVizPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.ExampleComputeVizPostResponse

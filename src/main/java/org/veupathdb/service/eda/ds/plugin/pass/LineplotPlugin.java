@@ -1,11 +1,5 @@
 package org.veupathdb.service.eda.ds.plugin.pass;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
@@ -13,19 +7,22 @@ import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
-import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
-import org.veupathdb.service.eda.generated.model.BinSpec;
-import org.veupathdb.service.eda.generated.model.LineplotPostRequest;
-import org.veupathdb.service.eda.generated.model.LineplotSpec;
-import org.veupathdb.service.eda.generated.model.VariableSpec;
+import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
+import org.veupathdb.service.eda.generated.model.*;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuote;
-import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.MICROBIOME_PROJECT;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
+import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.MICROBIOME_PROJECT;
 
-public class LineplotPlugin extends AbstractPlugin<LineplotPostRequest, LineplotSpec> {
+public class LineplotPlugin extends AbstractEmptyComputePlugin<LineplotPostRequest, LineplotSpec> {
 
   @Override
   public String getDisplayName() {

@@ -22,6 +22,7 @@ public class Resources extends ContainerResources {
 
   public static final String SUBSETTING_SERVICE_URL = getRequiredVar("SUBSETTING_SERVICE_URL");
   public static final String MERGING_SERVICE_URL = getRequiredVar("MERGING_SERVICE_URL");
+  public static final String COMPUTE_SERVICE_URL = getRequiredVar("COMPUTE_SERVICE_URL");
   public static final String DATASET_ACCESS_SERVICE_URL = getRequiredVar("DATASET_ACCESS_SERVICE_URL");
   public static final String RSERVE_URL = getRequiredVar("RSERVE_URL");
 

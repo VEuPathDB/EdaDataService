@@ -17,18 +17,19 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
-import org.veupathdb.service.eda.ds.plugin.AbstractPluginWithCompute;
 import org.veupathdb.service.eda.common.plugin.util.RServeClient;
+import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.AlphaDivComputeConfig;
 import org.veupathdb.service.eda.generated.model.AlphaDivScatterplotPostRequest;
+import org.veupathdb.service.eda.generated.model.ComputedVariableMetadata;
 import org.veupathdb.service.eda.generated.model.ScatterplotWith1ComputeSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuote;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDivScatterplotPostRequest, ScatterplotWith1ComputeSpec, AlphaDivComputeConfig> {
+public class AlphaDivScatterplotPlugin extends AbstractPlugin<AlphaDivScatterplotPostRequest, ScatterplotWith1ComputeSpec, AlphaDivComputeConfig> {
 
   private static final Logger LOG = LogManager.getLogger(AlphaDivScatterplotPlugin.class);
   
@@ -53,8 +54,13 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
   }
 
   @Override
-  protected Class<AlphaDivComputeConfig> getComputeSpecClass() {
+  protected Class<AlphaDivComputeConfig> getComputeConfigClass() {
     return AlphaDivComputeConfig.class;
+  }
+
+  @Override
+  protected boolean includeComputedVarsInStream() {
+    return true;
   }
 
   @Override
@@ -87,26 +93,19 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(ScatterplotWith1ComputeSpec pluginSpec, AlphaDivComputeConfig computeConfig) {
-    List<StreamSpec> requestedStreamsList = ListBuilder.asList(
+  protected List<StreamSpec> getRequestedStreams(ScatterplotWith1ComputeSpec pluginSpec) {
+    List<StreamSpec> requestedStreamsList = List.of(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
         .addVar(pluginSpec.getOverlayVariable())
         .addVars(pluginSpec.getFacetVariable())
-      );
-    requestedStreamsList.add(
-      new StreamSpec(COMPUTE_STREAM_NAME, computeConfig.getCollectionVariable().getEntityId())
-        .addVars(getUtil().getChildrenVariables(computeConfig.getCollectionVariable())
-      ));
-    
+        .setIncludeComputedVars(true)
+    );
     return requestedStreamsList;
   }
 
-  
-
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    AlphaDivComputeConfig computeConfig = getComputeConfig();
     ScatterplotWith1ComputeSpec spec = getPluginSpec();
     PluginUtil util = getUtil();
     Map<String, VariableSpec> varMap = new HashMap<>();
@@ -117,32 +116,25 @@ public class AlphaDivScatterplotPlugin extends AbstractPluginWithCompute<AlphaDi
     String valueSpec = spec.getValueSpec().getValue();
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
     String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
-    String method = computeConfig.getAlphaDivMethod().getValue();
-    VariableDef computeEntityIdVarSpec = util.getEntityIdVarSpec(computeConfig.getCollectionVariable().getEntityId());
-    String computeEntityIdColName = util.toColNameOrEmpty(computeEntityIdVarSpec);
-    
+   
+    ComputedVariableMetadata metadata = getComputedVariableMetadata();
+    VariableSpec computedVarSpec = metadata.getVariables().stream()
+        .filter(var -> var.getPlotReference().getValue().equals("yAxis"))
+        .findFirst().orElseThrow().getVariableSpec();
+
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      List<VariableSpec> computeInputVars = ListBuilder.asList(computeEntityIdVarSpec);
-      computeInputVars.addAll(util.getChildrenVariables(computeConfig.getCollectionVariable()));
-      connection.voidEval(util.getVoidEvalFreadCommand(COMPUTE_STREAM_NAME,
-        computeInputVars
-      ));
-      connection.voidEval("alphaDivDT <- alphaDiv(" + COMPUTE_STREAM_NAME + ", " + 
-                                                      singleQuote(computeEntityIdColName) + ", " + 
-                                                      singleQuote(method) + ")");
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
-          computeEntityIdVarSpec,
+          computedVarSpec,
           spec.getXAxisVariable(),
           spec.getOverlayVariable(),
           util.getVariableSpecFromList(spec.getFacetVariable(), 0),
           util.getVariableSpecFromList(spec.getFacetVariable(), 1)));
-      connection.voidEval("vizData <- merge(alphaDivDT, " + 
-          DEFAULT_SINGLE_STREAM_NAME + 
-       ", by=" + singleQuote(computeEntityIdColName) +")");
-       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
-       //there should only be a single computed var for alpha div
-       connection.voidEval("variables[[length(variables) + 1]] <- attributes(alphaDivDT)$computedVariable[[1]]");
-      String command = "plot.data::scattergl(vizData, variables, '" + valueSpec + "', '" + deprecatedShowMissingness + "')";
+      
+      connection.voidEval(getVoidEvalVariableMetadataList(varMap));
+      connection.voidEval(getVoidEvalComputedVariableMetadataList(metadata));
+      connection.voidEval("variables <- veupathUtils::merge(variables, computedVariables)");
+      
+      String command = "plot.data::scattergl(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, '" + valueSpec + "', '" + deprecatedShowMissingness + "')";
       RServeClient.streamResult(connection, command, out);
     }); 
   }
