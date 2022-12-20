@@ -3,7 +3,7 @@ import org.veupathdb.lib.gradle.container.util.Logger.Level
 plugins {
   kotlin("jvm") version "1.7.0" // needed for local compute import
   java
-  id("org.veupathdb.lib.gradle.container.container-utils") version "4.5.2"
+  id("org.veupathdb.lib.gradle.container.container-utils") version "4.6.0"
   id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
@@ -89,17 +89,10 @@ repositories {
 //
 
 // versions
-val coreLib       = "6.8.0"         // Container core lib version
-val edaCompute    = "0.4.2-pre"     // EDA Compute version (used to pull in compute plugin RAML)
-val edaCommon     = "10.0.0-beta1"  // EDA Common version
-val fgputil       = "2.8.1-jakarta" // FgpUtil version
-
-val jersey        = "3.0.4"       // Jersey/JaxRS version
-val jackson       = "2.13.3"      // FasterXML Jackson version
-val junit         = "5.8.2"       // JUnit version
-val log4j         = "2.17.2"      // Log4J version
-val metrics       = "0.15.0"      // Prometheus lib version
-
+val coreLib       = "6.13.0"        // Container core lib version
+val edaCompute    = "1.0.0"         // EDA Compute version (used to pull in compute plugin RAML)
+val edaCommon     = "10.0.0"        // EDA Common version
+val fgputil       = "2.9.3-jakarta" // FgpUtil version
 
 // use local EdaCommon compiled schema if project exists, else use released version;
 //    this mirrors the way we use local EdaCommon code if available
@@ -115,7 +108,7 @@ tasks.register("print-eda-common-schema-fetch") { print(edaCommonSchemaFetch) }
 
 // use local EdaCompute compiled schema if project exists, else use released version;
 //    this mirrors the way we use local EdaCompute code if available
-val edaComputeProject = file("../service-eda-compute");
+val edaComputeProject = file("../service-eda-compute")
 val edaComputeSchemaFetch =
   if (edaComputeProject.exists())
     "cat ../service-eda-compute/schema/library.raml"
@@ -146,28 +139,28 @@ dependencies {
   implementation("org.gusdb:fgputil-db:${fgputil}")
 
   // Jersey
-  implementation("org.glassfish.jersey.core:jersey-server:${jersey}")
+  implementation("org.glassfish.jersey.core:jersey-server:3.1.0")
 
   // Jackson
-  implementation("com.fasterxml.jackson.core:jackson-databind:${jackson}")
-  implementation("com.fasterxml.jackson.core:jackson-annotations:${jackson}")
+  implementation("com.fasterxml.jackson.core:jackson-databind:2.14.0")
+  implementation("com.fasterxml.jackson.core:jackson-annotations:2.14.0")
 
   // Log4J
-  implementation("org.apache.logging.log4j:log4j-api:${log4j}")
-  implementation("org.apache.logging.log4j:log4j-core:${log4j}")
+  implementation("org.apache.logging.log4j:log4j-api:2.19.0")
+  implementation("org.apache.logging.log4j:log4j-core:2.19.0")
 
   // Metrics
-  implementation("io.prometheus:simpleclient:${metrics}")
-  implementation("io.prometheus:simpleclient_common:${metrics}")
+  implementation("io.prometheus:simpleclient:0.16.0")
+  implementation("io.prometheus:simpleclient_common:0.16.0")
 
   // Utils
   implementation("io.vulpine.lib:Jackfish:1.1.0")
   implementation("com.devskiller.friendly-id:friendly-id:1.1.0")
 
   // Unit Testing
-  testImplementation("org.junit.jupiter:junit-jupiter-api:${junit}")
-  testImplementation("org.mockito:mockito-core:4.6.1")
-  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junit}")
+  testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
+  testImplementation("org.mockito:mockito-core:4.8.0")
+  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
 }
 
 val test by tasks.getting(Test::class) {
