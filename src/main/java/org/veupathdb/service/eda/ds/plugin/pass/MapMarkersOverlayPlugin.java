@@ -102,7 +102,7 @@ public class MapMarkersOverlayPlugin extends AbstractEmptyComputePlugin<MapMarke
         connection.voidEval("binWidth <- NULL");
       } else {
         BinSpec binSpec = spec.getBinSpec();
-        connection.voidEval("xVals <- " + DEFAULT_SINGLE_STREAM_NAME + "[[map$id[map$plotRef == 'xAxisVariable']]]");
+        connection.voidEval("xVals <- " + DEFAULT_SINGLE_STREAM_NAME + "[[veupathUtils::findColNamesFromPlotRef(variables, 'xAxis')]]");
         connection.voidEval("xVals <- xVals[complete.cases(xVals)]");
         connection.voidEval("binWidth <- plot.data::numBinsToBinWidth(xVals, 8)");
         binReportValue = "'binWidth'";
