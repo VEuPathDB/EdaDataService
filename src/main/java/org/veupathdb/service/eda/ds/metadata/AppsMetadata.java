@@ -114,7 +114,7 @@ public class AppsMetadata {
     return app;
   }
 
-  private static <T extends VisualizationRequestBase, S, R extends ComputeConfigBase> VisualizationOverview viz(String urlSegment, AbstractPlugin<T, S, R> visualizationPlugin) {
+  private static <T extends VisualizationRequestBase, S, R> VisualizationOverview viz(String urlSegment, AbstractPlugin<T, S, R> visualizationPlugin) {
     ConstraintSpec constraints = visualizationPlugin.getConstraintSpec();
     VisualizationOverviewImpl viz = new VisualizationOverviewImpl();
     viz.setName(urlSegment);

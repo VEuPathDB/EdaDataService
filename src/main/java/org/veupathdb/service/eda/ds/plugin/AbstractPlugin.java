@@ -46,7 +46,7 @@ import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuot
  * @param <S> plugin's spec class (must be or extend the generated spec class for this plugin)
  * @param <R> plugin's compute spec class (must be or extend the generated compute spec class for this plugin)
  */
-public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R extends ComputeConfigBase> implements Consumer<OutputStream> {
+public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R> implements Consumer<OutputStream> {
 
   private static final Logger LOG = LogManager.getLogger(AbstractPlugin.class);
 
@@ -106,12 +106,6 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
     _computeInfo = findComputeName(appName).map(name -> new TwoTuple<>(name,
         getSpecObject(request, "getComputeConfig", getComputeConfigClass())));
 
-    // make sure any produced compute object contains a target entity
-    _computeInfo.ifPresent(info -> {
-      if (info.getSecond().getOutputEntityId() == null)
-        throw new BadRequestException("computeConfig object missing required property: 'outputEntityId'");
-    });
-
     // check for subset and derived entity properties of request
     _subset = Optional.ofNullable(request.getFilters()).orElse(Collections.emptyList());
     _derivedVariableSpecs = Optional.ofNullable(request.getDerivedVariables()).orElse(Collections.emptyList());
@@ -165,7 +159,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R ex
     }
 
     // create stream generator
-    Optional<TwoTuple<String,ComputeConfigBase>> typedTuple = _computeInfo.map(info -> new TwoTuple<>(info.getFirst(), info.getSecond()));
+    Optional<TwoTuple<String,Object>> typedTuple = _computeInfo.map(info -> new TwoTuple<>(info.getFirst(), info.getSecond()));
     Function<StreamSpec, ResponseFuture> streamGenerator = spec -> _mergingClient
         .getTabularDataStream(_referenceMetadata, _subset, typedTuple, spec);
 

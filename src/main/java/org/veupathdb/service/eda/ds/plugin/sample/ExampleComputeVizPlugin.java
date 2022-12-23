@@ -4,7 +4,6 @@ import org.gusdb.fgputil.DelimitedDataParser;
 import org.gusdb.fgputil.json.JsonUtil;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
-import org.veupathdb.service.eda.common.model.VariableDef;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.*;
@@ -33,7 +32,7 @@ public class ExampleComputeVizPlugin extends AbstractPlugin<ExampleComputeVizPos
 
   @Override
   protected void validateVisualizationSpec(ExampleComputeVizSpec pluginSpec) throws ValidationException {
-    String computeEntityId = getComputeConfig().getOutputEntityId();
+    String computeEntityId = getComputeConfig().getInputVariable().getEntityId();
     if (!pluginSpec.getPrefixVar().getEntityId().equals(computeEntityId)) {
       throw new ValidationException("The prefix variable must be native to the same entity as the example compute");
     }
@@ -41,7 +40,7 @@ public class ExampleComputeVizPlugin extends AbstractPlugin<ExampleComputeVizPos
 
   @Override
   protected List<StreamSpec> getRequestedStreams(ExampleComputeVizSpec pluginSpec) {
-    return List.of(new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, getComputeConfig().getOutputEntityId())
+    return List.of(new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, getComputeConfig().getInputVariable().getEntityId())
         .addVar(pluginSpec.getPrefixVar())
         .setIncludeComputedVars(true));
   }

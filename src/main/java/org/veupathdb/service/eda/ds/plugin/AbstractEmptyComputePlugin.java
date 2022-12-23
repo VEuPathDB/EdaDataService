@@ -9,11 +9,11 @@ import org.veupathdb.service.eda.generated.model.VisualizationRequestBase;
  * @param <T> type of request (must extend VisualizationRequestBase)
  * @param <S> plugin's spec class (must be or extend the generated spec class for this plugin)
  */
-public abstract class AbstractEmptyComputePlugin<T extends VisualizationRequestBase, S> extends AbstractPlugin<T, S, EmptyComputeConfig> {
+public abstract class AbstractEmptyComputePlugin<T extends VisualizationRequestBase, S> extends AbstractPlugin<T, S, Void> {
 
   @Override
-  protected Class<EmptyComputeConfig> getComputeConfigClass() {
-    return EmptyComputeConfig.class;
+  protected Class<Void> getComputeConfigClass() {
+    return Void.class;
   }
 
   @Override
