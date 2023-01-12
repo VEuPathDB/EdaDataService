@@ -3,7 +3,7 @@ import org.veupathdb.lib.gradle.container.util.Logger.Level
 plugins {
   kotlin("jvm") version "1.7.0" // needed for local compute import
   java
-  id("org.veupathdb.lib.gradle.container.container-utils") version "4.6.0"
+  id("org.veupathdb.lib.gradle.container.container-utils") version "4.7.1"
   id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
@@ -89,10 +89,10 @@ repositories {
 //
 
 // versions
-val coreLib       = "6.13.1"        // Container core lib version
-val edaCompute    = "1.1.0"         // EDA Compute version (used to pull in compute plugin RAML)
-val edaCommon     = "10.2.1"        // EDA Common version
-val fgputil       = "2.9.3-jakarta" // FgpUtil version
+val coreLib       = "6.13.2"         // Container core lib version
+val edaCompute    = "1.2.0"          // EDA Compute version (used to pull in compute plugin RAML)
+val edaCommon     = "10.2.2"         // EDA Common version
+val fgputil       = "2.12.0-jakarta" // FgpUtil version
 
 // use local EdaCommon compiled schema if project exists, else use released version;
 //    this mirrors the way we use local EdaCommon code if available
@@ -158,9 +158,9 @@ dependencies {
   implementation("com.devskiller.friendly-id:friendly-id:1.1.0")
 
   // Unit Testing
-  testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
-  testImplementation("org.mockito:mockito-core:4.8.0")
-  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
+  testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.2")
+  testImplementation("org.mockito:mockito-core:4.11.0")
+  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.2")
 }
 
 val test by tasks.getting(Test::class) {
