@@ -20,8 +20,6 @@ RUN jlink --compress=2 --module-path /opt/jdk/jmods \
 
 RUN npm install -gs raml2html raml2html-modern-theme
 
-ENV DOCKER=build
-
 # download gradle
 COPY gradlew ./
 COPY gradle gradle
