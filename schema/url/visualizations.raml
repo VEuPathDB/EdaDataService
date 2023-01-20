@@ -14,6 +14,10 @@ types:
         required: false
         type: DerivedVariableSpec[]
 
+  StringBoolean:
+    type: string
+    enum: [ 'TRUE', 'FALSE' ]
+
   StrataVariableDetails:
     type: VariableSpec
     properties:
@@ -78,9 +82,9 @@ types:
     properties:
       numeratorN: number
       denominatorN: number
-  
-  SampleSize:
-    type: SimpleSampleSize | ProportionSampleSize
+
+  #SampleSize:
+  #  type: SimpleSampleSize | ProportionSampleSize
 
   # continue to allow deprecated values for now
   ShowMissingness:
@@ -104,11 +108,9 @@ types:
         type: string
         enum: ['outliers', 'all']
       mean:
-        type: string
-        enum: ['TRUE', 'FALSE']
+        type: StringBoolean
       computeStats:
-        type: string
-        enum: ['TRUE', 'FALSE']
+        type: StringBoolean
       xAxisVariable:
         type: VariableSpec
         required: false
