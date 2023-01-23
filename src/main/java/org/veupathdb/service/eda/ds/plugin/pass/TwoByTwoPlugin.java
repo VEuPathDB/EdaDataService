@@ -33,7 +33,7 @@ public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<MosaicPostRequest
 
   @Override
   public String getDescription() {
-    return "Visualize the frequency distribution, relative risk and odds ratio for two dichotomous variables";
+    return "Visualize the frequency distribution and associated statistics for two dichotomous variables";
   }
   
   @Override
@@ -104,7 +104,10 @@ public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<MosaicPostRequest
           util.getVariableSpecFromList(spec.getFacetVariable(), 0),
           util.getVariableSpecFromList(spec.getFacetVariable(), 1)));
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
-      String cmd = "plot.data::mosaic(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, 'bothRatios', '" + deprecatedShowMissingness + "')";
+      String cmd = "plot.data::mosaic(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, 'all', '" + 
+                                          spec.getXAxisReferenceValue() + "','" + 
+                                          spec.getYAxisReferenceValue() + "','" + 
+                                          deprecatedShowMissingness + "')";
       streamResult(connection, cmd, out);
     });
   }

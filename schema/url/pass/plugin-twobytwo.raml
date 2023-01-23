@@ -3,6 +3,26 @@
 types:
   # Type name determines the name of the Java class that will be generated.
 
+  TwoByTwoSpec:
+    type: MosaicSpec
+    properties:
+      xAxisReferenceValue: string
+      yAxisReferenceValue: string
+
+  TwoByTwoPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: TwoByTwoSpec
+
+  # TODO once we get the other stats tables on this path we can add df, configuration notes, error msg etc
+  Statistic:
+    additionalProperties: false
+    properties:
+      value: number
+      confidenceInterval?: string
+      confidenceLevel?: number
+      pvalue: number
+
   TwoByTwoStatsTable:
     additionalProperties: false
     properties:
@@ -10,16 +30,25 @@ types:
         type: StrataVariableDetails[]
         maxItems: 2
         required: false
+      chisq:
+        type: Statistic
+      fisher:
+        type: Statistic
+      prevalence:
+        type: Statistic
       oddsratio:
-        type: number
-      pvalue:
-        type: number
-      orInterval:
-        type: string
+        type: Statistic
       relativerisk:
-        type: number
-      rrInterval:
-        type: string
+        type: Statistic
+      sensitivity:
+        type: Statistic
+      specificity:
+        type: Statistic
+      posPredictiveValue:
+        type: Statistic
+      negPredictiveValue:
+        type: Statistic
+      
         
   TwoByTwoPostResponse:
     additionalProperties: false
