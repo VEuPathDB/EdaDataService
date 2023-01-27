@@ -133,7 +133,7 @@ public class MapPlugin extends AbstractEmptyComputePlugin<MapPostRequest, MapSpe
         double longitude = Double.parseDouble(row[lonIndex]);
         if (viewport.containsCoordinates(latitude, longitude)) {
           aggregator.putIfAbsent(row[geoVarIndex], new GeoVarData());
-          aggregator.get(row[geoVarIndex]).addRow(Double.parseDouble(row[latIndex]), Double.parseDouble(row[lonIndex]));
+          aggregator.get(row[geoVarIndex]).addRow(latitude, longitude);
         }
       }  
     }
@@ -164,57 +164,38 @@ public class MapPlugin extends AbstractEmptyComputePlugin<MapPostRequest, MapSpe
     out.write(config.getBytes());
     out.flush();
   }
-
-  private static class ParsedNumericViewport {
+  private static class ParsedGeolocationViewport {
     private double xMin;
     private double xMax;
+    private double yMin;
+    private double yMax;
+    private boolean viewportIncludesIntlDateLine;
 
-    public ParsedNumericViewport(double xMin, double xMax) {
+    public ParsedGeolocationViewport(double xMin, double xMax,
+                                     double yMin, double yMax) {
       this.xMin = xMin;
       this.xMax = xMax;
-    }
-  }
-
-  private static class ParsedGeolocationViewport {
-    private ParsedNumericViewport latitude;
-    private LongitudeViewport longitude;
-
-    public ParsedGeolocationViewport(ParsedNumericViewport latitude, LongitudeViewport longitude) {
-      this.latitude = latitude;
-      this.longitude = longitude;
+      this.yMin = yMin;
+      this.yMax = yMax;
+      this.viewportIncludesIntlDateLine = yMin > yMax;
     }
 
 
     public static ParsedGeolocationViewport fromApiViewport(GeolocationViewport viewport) {
       return new ParsedGeolocationViewport(
-          new ParsedNumericViewport(
-              Double.parseDouble(viewport.getLatitude().getXMin()),
-              Double.parseDouble(viewport.getLatitude().getXMax())
-          ),
-          viewport.getLongitude()
+          Double.parseDouble(viewport.getLatitude().getXMin()),
+          Double.parseDouble(viewport.getLatitude().getXMax()),
+          viewport.getLongitude().getLeft().doubleValue(),
+          viewport.getLongitude().getRight().doubleValue()
       );
     }
 
-    ParsedNumericViewport getLatitude() {
-      return latitude;
-    }
-
-    LongitudeViewport getLongitude() {
-      return longitude;
-    }
-
     public Boolean containsCoordinates(double latitude, double longitude) {
-      double latitudeMin = getLatitude().xMin;
-      double latitudeMax = getLatitude().xMax;
-      double longitudeLeft = getLongitude().getLeft().doubleValue();
-      double longitudeRight =getLongitude().getRight().doubleValue();
-      boolean viewportIncludesIntlDateLine = longitudeLeft > longitudeRight;
-
-      if (latitude < latitudeMin || latitude > latitudeMax) { return false; }
+      if (latitude < xMin || latitude > xMax) { return false; }
       if (viewportIncludesIntlDateLine) {
-        if (longitude < longitudeLeft && longitude > longitudeRight) { return false; }
+        if (longitude < yMin && longitude > yMax) { return false; }
       } else {
-        if (longitude < longitudeLeft || longitude > longitudeRight) { return false; }
+        if (longitude < yMin || longitude > yMax) { return false; }
       }
       return true;
     }
