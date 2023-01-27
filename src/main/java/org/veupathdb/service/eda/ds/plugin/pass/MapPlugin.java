@@ -1,5 +1,15 @@
 package org.veupathdb.service.eda.ds.plugin.pass;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.function.Function;
+
 import org.gusdb.fgputil.DelimitedDataParser;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.geo.GeographyUtil.GeographicPoint;
@@ -11,15 +21,6 @@ import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.generated.model.*;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.function.Function;
 
 import static org.gusdb.fgputil.FormatUtil.NL;
 import static org.gusdb.fgputil.FormatUtil.TAB;
@@ -97,23 +98,6 @@ public class MapPlugin extends AbstractEmptyComputePlugin<MapPostRequest, MapSpe
     }
   }
 
-  private Boolean withinViewport(GeolocationViewport viewport, Double latitude, Double longitude) {
-    Double latitudeMin = Double.valueOf(viewport.getLatitude().getXMin());
-    Double latitudeMax = Double.valueOf(viewport.getLatitude().getXMax());
-    Double longitudeLeft = viewport.getLongitude().getLeft().doubleValue();
-    Double longitudeRight = viewport.getLongitude().getRight().doubleValue();
-    Boolean viewportIncludesIntlDateLine = longitudeLeft > longitudeRight;
-
-    if (latitude < latitudeMin || latitude > latitudeMax) { return false; }
-    if (viewportIncludesIntlDateLine) {
-      if (longitude < longitudeLeft && longitude > longitudeRight) { return false; }
-    } else {
-      if (longitude < longitudeLeft || longitude > longitudeRight) { return false; }
-    }
-
-    return true;
-  }
-
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
 
@@ -128,7 +112,7 @@ public class MapPlugin extends AbstractEmptyComputePlugin<MapPostRequest, MapSpe
     int latIndex    = indexOf.apply(spec.getLatitudeVariable());
     int lonIndex    = indexOf.apply(spec.getLongitudeVariable());
 
-    GeolocationViewport viewport = spec.getViewport();
+    ParsedGeolocationViewport viewport = ParsedGeolocationViewport.fromApiViewport(spec.getViewport());
     long entityRecordsWithGeoVar = 0;
 
     // loop through rows of data stream, aggregating stats into a map from aggregate value to stats object
@@ -138,16 +122,16 @@ public class MapPlugin extends AbstractEmptyComputePlugin<MapPostRequest, MapSpe
       
       // entity records counts not impacted by viewport
       if (!(row[geoVarIndex] == null ||
-            row[geoVarIndex].equals("") ||
+            row[geoVarIndex].isEmpty() ||
             row[latIndex] == null ||
-            row[latIndex].equals("") ||
+            row[latIndex].isEmpty() ||
             row[lonIndex] == null ||
-            row[lonIndex].equals(""))) {
+            row[lonIndex].isEmpty())) {
         entityRecordsWithGeoVar++;
       
-        Double latitude = Double.valueOf(row[latIndex]);
-        Double longitude = Double.valueOf(row[lonIndex]);
-        if (withinViewport(viewport, latitude, longitude)) {
+        double latitude = Double.parseDouble(row[latIndex]);
+        double longitude = Double.parseDouble(row[lonIndex]);
+        if (viewport.containsCoordinates(latitude, longitude)) {
           aggregator.putIfAbsent(row[geoVarIndex], new GeoVarData());
           aggregator.get(row[geoVarIndex]).addRow(Double.parseDouble(row[latIndex]), Double.parseDouble(row[lonIndex]));
         }
@@ -155,11 +139,11 @@ public class MapPlugin extends AbstractEmptyComputePlugin<MapPostRequest, MapSpe
     }
 
     // begin output object and single property containing array of map elements
-    out.write("{\"mapElements\":[".getBytes());
+    out.write("{\"mapElements\":[".getBytes(StandardCharsets.UTF_8));
     boolean first = true;
     for (String key : aggregator.keySet()) {
       // write commas between elements
-      if (first) first = false; else out.write(",".getBytes());
+      if (first) first = false; else out.write(',');
       GeoVarData data = aggregator.get(key);
       GeographicPoint avgLatLon = data.latLonAvg.getCurrentAverage();
       out.write(new JSONObject()
@@ -172,12 +156,67 @@ public class MapPlugin extends AbstractEmptyComputePlugin<MapPostRequest, MapSpe
         .put("maxLat", data.maxLat)
         .put("maxLon", data.maxLon)
         .toString()
-        .getBytes()
+        .getBytes(StandardCharsets.UTF_8)
       );
     }
     // add config and close
     String config = "],\"config\":{\"completeCasesGeoVar\":" + entityRecordsWithGeoVar + "}}";
     out.write(config.getBytes());
     out.flush();
+  }
+
+  private static class ParsedNumericViewport {
+    private double xMin;
+    private double xMax;
+
+    public ParsedNumericViewport(double xMin, double xMax) {
+      this.xMin = xMin;
+      this.xMax = xMax;
+    }
+  }
+
+  private static class ParsedGeolocationViewport {
+    private ParsedNumericViewport latitude;
+    private LongitudeViewport longitude;
+
+    public ParsedGeolocationViewport(ParsedNumericViewport latitude, LongitudeViewport longitude) {
+      this.latitude = latitude;
+      this.longitude = longitude;
+    }
+
+
+    public static ParsedGeolocationViewport fromApiViewport(GeolocationViewport viewport) {
+      return new ParsedGeolocationViewport(
+          new ParsedNumericViewport(
+              Double.parseDouble(viewport.getLatitude().getXMin()),
+              Double.parseDouble(viewport.getLatitude().getXMax())
+          ),
+          viewport.getLongitude()
+      );
+    }
+
+    ParsedNumericViewport getLatitude() {
+      return latitude;
+    }
+
+    LongitudeViewport getLongitude() {
+      return longitude;
+    }
+
+    public Boolean containsCoordinates(double latitude, double longitude) {
+      double latitudeMin = getLatitude().xMin;
+      double latitudeMax = getLatitude().xMax;
+      double longitudeLeft = getLongitude().getLeft().doubleValue();
+      double longitudeRight =getLongitude().getRight().doubleValue();
+      boolean viewportIncludesIntlDateLine = longitudeLeft > longitudeRight;
+
+      if (latitude < latitudeMin || latitude > latitudeMax) { return false; }
+      if (viewportIncludesIntlDateLine) {
+        if (longitude < longitudeLeft && longitude > longitudeRight) { return false; }
+      } else {
+        if (longitude < longitudeLeft || longitude > longitudeRight) { return false; }
+      }
+      return true;
+    }
   }
 }
