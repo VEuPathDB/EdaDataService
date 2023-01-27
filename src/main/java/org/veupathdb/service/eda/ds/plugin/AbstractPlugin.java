@@ -115,13 +115,10 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R> i
     _mergingClient = new EdaMergingClient(Resources.MERGING_SERVICE_URL, authHeader);
     _computeClient = new EdaComputeClient(Resources.COMPUTE_SERVICE_URL, authHeader);
 
-    logRequestTime("Fetching study details");
-
     // get study
     APIStudyDetail study = _subsettingClient.getStudy(request.getStudyId())
         .orElseThrow(() -> new ValidationException("Study '" + request.getStudyId() + "' does not exist."));
     _studyId = study.getId();
-    logRequestTime("Fetched study details");
 
     // if plugin requires a compute, check if compute results are available
     if (_computeInfo.isPresent() && !isComputeResultsAvailable()) {
@@ -138,11 +135,9 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R> i
 
     // ask subclass to validate the configuration
     validateVisualizationSpec(_pluginSpec);
-    logRequestTime("Validated viz spec");
 
     // get list of data streams required by this subclass
     _requiredStreams = getRequestedStreams(_pluginSpec);
-    logRequestTime("Stream retrieved.");
 
     // validate stream specs provided by the subclass
     _mergingClient.getStreamSpecValidator()
