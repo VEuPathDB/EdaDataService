@@ -1,8 +1,6 @@
 package org.veupathdb.service.eda.ds.plugin.pass;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -102,8 +100,9 @@ public class MapPlugin extends AbstractEmptyComputePlugin<MapPostRequest, MapSpe
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
 
     // create scanner and line parser
-    Scanner s = new Scanner(dataStreams.get(DEFAULT_SINGLE_STREAM_NAME)).useDelimiter(NL);
-    DelimitedDataParser parser = new DelimitedDataParser(s.nextLine(), TAB, true);
+    InputStreamReader isReader = new InputStreamReader(new BufferedInputStream(dataStreams.get(DEFAULT_SINGLE_STREAM_NAME)));
+    BufferedReader reader = new BufferedReader(isReader);
+    DelimitedDataParser parser = new DelimitedDataParser(reader.readLine(), TAB, true);
 
     // establish column header indexes
     MapSpec spec = getPluginSpec();
@@ -117,8 +116,10 @@ public class MapPlugin extends AbstractEmptyComputePlugin<MapPostRequest, MapSpe
 
     // loop through rows of data stream, aggregating stats into a map from aggregate value to stats object
     Map<String, GeoVarData> aggregator = new HashMap<>();
-    while (s.hasNextLine()) {
-      String[] row = parser.parseLineToArray(s.nextLine());
+    String nextLine = reader.readLine();
+
+    while (nextLine != null) {
+      String[] row = parser.parseLineToArray(nextLine);
       
       // entity records counts not impacted by viewport
       if (!(row[geoVarIndex] == null ||
@@ -135,6 +136,7 @@ public class MapPlugin extends AbstractEmptyComputePlugin<MapPostRequest, MapSpe
           aggregator.putIfAbsent(row[geoVarIndex], new GeoVarData());
           aggregator.get(row[geoVarIndex]).addRow(latitude, longitude);
         }
+        nextLine = reader.readLine();
       }  
     }
 
