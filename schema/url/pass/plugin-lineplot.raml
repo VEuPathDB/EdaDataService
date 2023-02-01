@@ -41,8 +41,7 @@ types:
         enum: ['median','mean','geometricMean','proportion']
       # for now assume 95 ci only, eventually values like 'se', 'sd', 'ci' etc
       errorBars:
-        type: string
-        enum: ['TRUE', 'FALSE']
+        type: StringBoolean
       viewport:
         type: NumericViewport
         required: false

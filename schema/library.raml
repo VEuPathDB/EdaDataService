@@ -7,94 +7,69 @@
 ################################################################################
 
 types:
-  AbundanceBoxplotPostRequest:
-    type: VisualizationRequestBase
-    properties:
-      computeConfig: RankedAbundanceComputeConfig
-      config: BoxplotWith1ComputeSpec
-  AbundanceScatterplotPostRequest:
-    type: VisualizationRequestBase
-    properties:
-      computeConfig: RankedAbundanceComputeConfig
-      config: ScatterplotWith1ComputeSpec
-  AlphaDivBoxplotPostRequest:
-    type: VisualizationRequestBase
-    properties:
-      computeConfig: AlphaDivComputeConfig
-      config: BoxplotWith1ComputeSpec
-  AlphaDivScatterplotPostRequest:
-    type: VisualizationRequestBase
-    properties:
-      computeConfig: AlphaDivComputeConfig
-      config: ScatterplotWith1ComputeSpec
-  AppsGetResponse:
-    type: object
-    properties:
-      apps: AppOverview[]
-  AppOverview:
+  VariableClass:
+    type: string
+    enum:
+      - native
+      - derived
+      - computed
+  PlotReferenceValue:
+    type: string
+    enum:
+      - xAxis
+      - yAxis
+      - zAxis
+      - overlay
+      - facet1
+      - facet2
+      - geo
+      - latitude
+      - longitude
+  VariableMapping:
     type: object
     additionalProperties: false
     properties:
-      name: string
-      displayName: string
+      variableClass: VariableClass
+      variableSpec: VariableSpec
+      plotReference: PlotReferenceValue
+      dataType: API_VariableType
+      dataShape: API_VariableDataShape
+      displayName?: string
+      displayRangeMin?: any
+      displayRangeMax?: any
+      vocabulary?: string[]
+      isCollection: boolean
+      imputeZero: boolean
+      members?: VariableSpec[]
+  EmptyResponse:
+    type: object
+    additionalProperties: false
+  VisualizationDataElementConstraint:
+    type: object
+    additionalProperties: false
+    properties:
+      isRequired: boolean
+      isTemporal: boolean
+      minNumVars: number
+      maxNumVars: number
+      minNumValues: number
+      maxNumValues: number
+      allowedTypes:
+        type: API_VariableType[]
+        required: false
+      allowedShapes:
+        type: API_VariableDataShape[]
+        required: false
       description: string
-      projects: string[]
-      computeName?: string
-      visualizations: VisualizationOverview[]
-  VisualizationOverview:
-    type: object
-    additionalProperties: false
-    properties:
-      name: string
-      displayName: string
-      description: string
-      projects: string[]
-      maxPanels: number
-      dataElementConstraints:
-        type: VisualizationDataElementConstraintPattern[]
-        required: false
-      dataElementDependencyOrder:
-        type: string[][]
-        required: false
-  BetaDivScatterplotPostRequest:
-    type: VisualizationRequestBase
-    properties:
-      computeConfig: BetaDivComputeConfig
-      config: BetaDivScatterplotSpec
-  BetaDivScatterplotSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      outputEntityId: string
-      showMissingness:
-        type: ShowMissingnessNoAxes
-        required: false
-      overlayVariable:
-        type: VariableSpec
-        required: false
-  ExamplePluginRequest:
-    type: ComputeRequestBase
-    properties:
-      config: ExamplePluginConfig
-  ExamplePluginConfig:
+  VisualizationDataElementConstraintPattern:
     type: object
     properties:
-      outputEntityId: string
-  ComputeRequestBase:
-    type: object
-    additionalProperties: false
-    properties:
-      studyId: string
-      filters:
-        type: array
-        required: false
-        items: API_Filter
-      derivedVariables:
-        type: array
-        items: DerivedVariable
+      //: VisualizationDataElementConstraint
+  JobID: !include https://raw.githubusercontent.com/VEuPathDB/lib-hash-id/v1.1.0/schema/hash-id.raml
   JobStatus:
     type: string
     enum:
+      - no-such-job
       - queued
       - in-progress
       - complete
@@ -110,34 +85,22 @@ types:
         type: integer
         required: false
         format: int32
-  PluginOverview:
-    displayName: Plugin Overview
+  ComputeRequestBase:
+    type: object
+    properties:
+      studyId: string
+      filters:
+        type: array
+        required: false
+        items: API_Filter
+      derivedVariables:
+        type: array
+        items: DerivedVariableSpec
+  ComputedVariableMetadata:
     type: object
     additionalProperties: false
     properties:
-      name: string
-      displayName: string
-      description: string
-  VisualizationDataElementConstraint:
-    type: object
-    additionalProperties: false
-    properties:
-      isRequired: boolean
-      isTemporal: boolean
-      minNumVars: number
-      maxNumVars: number
-      maxNumValues: number
-      allowedTypes:
-        type: API_VariableType[]
-        required: false
-      allowedShapes:
-        type: API_VariableDataShape[]
-        required: false
-      description: string
-  VisualizationDataElementConstraintPattern:
-    type: object
-    properties:
-      //: VisualizationDataElementConstraint
+      variables: VariableMapping[]
   API_Filter:
     type: object
     discriminator: type
@@ -222,20 +185,20 @@ types:
     properties:
       entityId: string
       collectionId: string
-  DerivationType:
-    type: string
-    enum:
-      - transform
-      - reduction
-  DerivedVariable:
+  DerivedVariableSpec:
     type: VariableSpec
     properties:
-      variableType: API_VariableType
-      variableDataShape: API_VariableDataShape
-      derivationType: DerivationType
+      expectedVariableType: API_VariableType
+      expectedVariableDataShape: API_VariableDataShape
       functionName: string
       inputVars: VariableSpec[]
       config: object # TBD
+  ComputeSpecForMerging:
+    type: object
+    additionalProperties: false
+    properties:
+      computeName: string
+      computeConfig: object
   MergedEntityTabularPostRequest:
     type: object
     additionalProperties: false
@@ -244,7 +207,8 @@ types:
       filters: API_Filter[]
       entityId: string
       outputVariables: VariableSpec[]
-      derivedVariables: DerivedVariable[]
+      derivedVariables: DerivedVariableSpec[]
+      computeSpec?: ComputeSpecForMerging
   EntityCountPostRequest:
     type: object
     additionalProperties: false
@@ -294,6 +258,11 @@ types:
     enum:
       - standard
       - display
+  DataSourceType:
+    type: string
+    enum:
+      - database
+      - file
   API_TabularReportConfig:
     type: object
     properties:
@@ -301,6 +270,7 @@ types:
       paging?: API_PagingConfig
       headerFormat?: TabularHeaderFormat
       trimTimeFromDateVars?: boolean
+      dataSource?: DataSourceType
   BinUnits:
     type: string
     enum:
@@ -374,10 +344,21 @@ types:
     additionalProperties: false
     properties:
       study: API_StudyDetail
+  StudySourceType:
+    type: string
+    enum:
+      - curated
+      - user_submitted
   API_StudyOverview:
     type: object
     properties:
       id: string
+      datasetId: string
+      sha1hash: string
+      sourceType: StudySourceType
+      displayName: string
+      shortDisplayName: string
+      description: string
   EntityIdGetResponse:
     type: object
     properties:
@@ -560,7 +541,147 @@ types:
     discriminatorValue: date
     properties:
       distributionDefaults: API_DateDistributionDefaults
-  JobID: !include https://raw.githubusercontent.com/VEuPathDB/lib-hash-id/v1.1.0/schema/hash-id.raml
+  AlphaDivPluginRequest:
+    type: ComputeRequestBase
+    properties:
+      config: AlphaDivComputeConfig
+  AlphaDivComputeConfig:
+    type: object
+    properties:
+      collectionVariable: VariableSpec
+      alphaDivMethod: AlphaDivMethod
+  AlphaDivMethod:
+    type: string
+    enum:
+      - shannon
+      - simpson
+      - evenness
+  BetaDivPluginRequest:
+    type: ComputeRequestBase
+    properties:
+      config: BetaDivComputeConfig
+  BetaDivComputeConfig:
+    type: object
+    properties:
+      collectionVariable: VariableSpec
+      betaDivDistanceMethod: BetaDivDistanceMethod
+  BetaDivDistanceMethod:
+    type: string
+    enum:
+      - bray
+      - jaccard
+      - jsd
+  BetaDivStats:
+    type: object
+    properties:
+      pcoaVariance: number[]
+  ExamplePluginRequest:
+    type: ComputeRequestBase
+    properties:
+      config: ExampleComputeConfig
+  ExampleComputeConfig:
+    type: object
+    properties:
+      inputVariable: VariableSpec
+      valueSuffix: string
+  ExamplePluginStats:
+    type: object
+    properties:
+      numEmptyValues: integer
+  RankedAbundancePluginRequest:
+    type: ComputeRequestBase
+    properties:
+      config: RankedAbundanceComputeConfig
+  RankedAbundanceComputeConfig:
+    type: object
+    properties:
+      collectionVariable: VariableSpec
+      rankingMethod: RankingMethod
+  RankingMethod:
+    type: string
+    enum:
+      - median
+      - q3
+      - variance
+      - max
+  RankedAbundanceStats:
+    type: object
+    additionalProperties: false
+    properties:
+      isCutoff: boolean
+  PluginOverview:
+    displayName: Plugin Overview
+    type: object
+    additionalProperties: false
+    properties:
+      name: string
+      displayName: string
+      description: string
+  AbundanceBoxplotPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      computeConfig: RankedAbundanceComputeConfig
+      config: BoxplotWith1ComputeSpec
+  AbundanceScatterplotPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      computeConfig: RankedAbundanceComputeConfig
+      config: ScatterplotWith1ComputeSpec
+  AlphaDivBoxplotPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      computeConfig: AlphaDivComputeConfig
+      config: BoxplotWith1ComputeSpec
+  AlphaDivScatterplotPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      computeConfig: AlphaDivComputeConfig
+      config: ScatterplotWith1ComputeSpec
+  AppsGetResponse:
+    type: object
+    properties:
+      apps: AppOverview[]
+  AppOverview:
+    type: object
+    additionalProperties: false
+    properties:
+      name: string
+      displayName: string
+      description: string
+      projects: string[]
+      computeName?: string
+      visualizations: VisualizationOverview[]
+  VisualizationOverview:
+    type: object
+    additionalProperties: false
+    properties:
+      name: string
+      displayName: string
+      description: string
+      projects: string[]
+      maxPanels: number
+      dataElementConstraints:
+        type: VisualizationDataElementConstraintPattern[]
+        required: false
+      dataElementDependencyOrder:
+        type: string[][]
+        required: false
+  BetaDivScatterplotPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      computeConfig: BetaDivComputeConfig
+      config: BetaDivScatterplotSpec
+  BetaDivScatterplotSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      showMissingness:
+        type: ShowMissingnessNoAxes
+        required: false
+      overlayVariable:
+        type: VariableSpec
+        required: false
   BarplotPostRequest:
     type: VisualizationRequestBase
     properties:
@@ -617,16 +738,8 @@ types:
         enum:
           - outliers
           - all
-      mean:
-        type: string
-        enum:
-          - "TRUE"
-          - "FALSE"
-      computeStats:
-        type: string
-        enum:
-          - "TRUE"
-          - "FALSE"
+      mean: StringBoolean
+      computeStats: StringBoolean
       xAxisVariable: VariableSpec
       yAxisVariable: VariableSpec
       overlayVariable:
@@ -855,11 +968,7 @@ types:
           - mean
           - geometricMean
           - proportion
-      errorBars:
-        type: string
-        enum:
-          - "TRUE"
-          - "FALSE"
+      errorBars: StringBoolean
       viewport:
         type: NumericViewport
         required: false
@@ -1031,22 +1140,6 @@ types:
     properties:
       columns: VariableSpec[]
       rows: string[][]
-  TwoByTwoSpec:
-    type: MosaicSpec
-    properties:
-      xAxisReferenceValue: string
-      yAxisReferenceValue: string
-  TwoByTwoPostRequest:
-    type: VisualizationRequestBase
-    properties:
-      config: TwoByTwoSpec
-  StatisticWithConfidence:
-    type: object
-    additionalProperties: false
-    properties:
-      value: number
-      confidenceInterval: string
-      pvalue: number
   TwoByTwoStatsTable:
     type: object
     additionalProperties: false
@@ -1055,15 +1148,11 @@ types:
         type: StrataVariableDetails[]
         maxItems: 2
         required: false
-      chisq: StatisticWithConfidence
-      fisher: StatisticWithConfidence
-      prevalence: StatisticWithConfidence
-      oddsratio: StatisticWithConfidence
-      relativerisk: StatisticWithConfidence
-      sensitivity: StatisticWithConfidence
-      specificity: StatisticWithConfidence
-      posPredictiveValue: StatisticWithConfidence
-      negPredictiveValue: StatisticWithConfidence
+      oddsratio: number
+      pvalue: number
+      orInterval: string
+      relativerisk: number
+      rrInterval: string
   TwoByTwoPostResponse:
     type: object
     additionalProperties: false
@@ -1415,6 +1504,11 @@ types:
       derivedVariables:
         type: DerivedVariableSpec[]
         required: false
+  StringBoolean:
+    type: string
+    enum:
+      - "TRUE"
+      - "FALSE"
   StrataVariableDetails:
     type: VariableSpec
     properties:
@@ -1508,16 +1602,8 @@ types:
         enum:
           - outliers
           - all
-      mean:
-        type: string
-        enum:
-          - "TRUE"
-          - "FALSE"
-      computeStats:
-        type: string
-        enum:
-          - "TRUE"
-          - "FALSE"
+      mean: StringBoolean
+      computeStats: StringBoolean
       xAxisVariable:
         type: VariableSpec
         required: false
