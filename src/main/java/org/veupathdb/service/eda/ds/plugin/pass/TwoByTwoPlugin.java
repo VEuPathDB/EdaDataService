@@ -104,8 +104,8 @@ public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<TwoByTwoPostReque
           util.getVariableSpecFromList(spec.getFacetVariable(), 0),
           util.getVariableSpecFromList(spec.getFacetVariable(), 1)));
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
-      String cmd = "plot.data::mosaic(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, 'all', '" + 
-                                          spec.getXAxisReferenceValue() + "','" + 
+      String cmd = "plot.data::mosaic(data=" + DEFAULT_SINGLE_STREAM_NAME + ", variables=variables, statistic='all', 'columnReferenceValue=" + 
+                                          spec.getXAxisReferenceValue() + "', rowReferenceValue='" + 
                                           spec.getYAxisReferenceValue() + "','" + 
                                           deprecatedShowMissingness + "')";
       streamResult(connection, cmd, out);
