@@ -9,8 +9,8 @@ import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
-import org.veupathdb.service.eda.generated.model.MosaicPostRequest;
-import org.veupathdb.service.eda.generated.model.MosaicSpec;
+import org.veupathdb.service.eda.generated.model.TwoByTwoPostRequest;
+import org.veupathdb.service.eda.generated.model.TwoByTwoSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import java.io.IOException;
@@ -24,7 +24,7 @@ import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamRe
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.CLINEPI_PROJECT;
 
-public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<MosaicPostRequest, MosaicSpec> {
+public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<TwoByTwoPostRequest, TwoByTwoSpec> {
 
   @Override
   public String getDisplayName() {
@@ -42,8 +42,8 @@ public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<MosaicPostRequest
   }
 
   @Override
-  protected Class<MosaicSpec> getVisualizationSpecClass() {
-    return MosaicSpec.class;
+  protected Class<TwoByTwoSpec> getVisualizationSpecClass() {
+    return TwoByTwoSpec.class;
   }
   
   @Override
@@ -68,7 +68,7 @@ public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<MosaicPostRequest
   }
   
   @Override
-  protected void validateVisualizationSpec(MosaicSpec pluginSpec) throws ValidationException {
+  protected void validateVisualizationSpec(TwoByTwoSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
       .var("xAxisVariable", pluginSpec.getXAxisVariable())
@@ -77,7 +77,7 @@ public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<MosaicPostRequest
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(MosaicSpec pluginSpec) {
+  protected List<StreamSpec> getRequestedStreams(TwoByTwoSpec pluginSpec) {
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
@@ -88,7 +88,7 @@ public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<MosaicPostRequest
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PluginUtil util = getUtil();
-    MosaicSpec spec = getPluginSpec();
+    TwoByTwoSpec spec = getPluginSpec();
     Map<String, VariableSpec> varMap = new HashMap<>();
     varMap.put("xAxis", spec.getXAxisVariable());
     varMap.put("yAxis", spec.getYAxisVariable());

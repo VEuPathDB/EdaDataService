@@ -165,7 +165,7 @@ public class AppsService implements Apps {
 
   @DisableJackson
   @Override
-  public PostAppsPassVisualizationsTwobytwoResponse postAppsPassVisualizationsTwobytwo(MosaicPostRequest entity) {
+  public PostAppsPassVisualizationsTwobytwoResponse postAppsPassVisualizationsTwobytwo(TwoByTwoPostRequest entity) {
     return wrapPlugin(() -> PostAppsPassVisualizationsTwobytwoResponse.respond200WithApplicationJson(
         new TwoByTwoPostResponseStream(processRequest(new TwoByTwoPlugin(), entity))));
   }
@@ -262,7 +262,7 @@ public class AppsService implements Apps {
 
   @DisableJackson
   @Override
-  public PostAppsCountsandproportionsVisualizationsTwobytwoResponse postAppsCountsandproportionsVisualizationsTwobytwo(MosaicPostRequest entity) {
+  public PostAppsCountsandproportionsVisualizationsTwobytwoResponse postAppsCountsandproportionsVisualizationsTwobytwo(TwoByTwoPostRequest entity) {
     return wrapPlugin(() -> PostAppsCountsandproportionsVisualizationsTwobytwoResponse.respond200WithApplicationJson(
         new TwoByTwoPostResponseStream(processRequest(new TwoByTwoPlugin(), entity))));
   }
