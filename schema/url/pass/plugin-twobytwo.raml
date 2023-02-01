@@ -19,9 +19,9 @@ types:
     additionalProperties: false
     properties:
       value: number
-      confidenceInterval?: string
+      confidenceInterval?: string # (min - max)
       confidenceLevel?: number
-      pvalue: number
+      pvalue: string # number to two signifs or string '<0.0001'
 
   TwoByTwoStatsTable:
     additionalProperties: false
