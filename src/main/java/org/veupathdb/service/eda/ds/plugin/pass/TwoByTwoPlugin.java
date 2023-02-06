@@ -9,8 +9,8 @@ import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
-import org.veupathdb.service.eda.generated.model.MosaicPostRequest;
-import org.veupathdb.service.eda.generated.model.MosaicSpec;
+import org.veupathdb.service.eda.generated.model.TwoByTwoPostRequest;
+import org.veupathdb.service.eda.generated.model.TwoByTwoSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import java.io.IOException;
@@ -24,7 +24,7 @@ import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamRe
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.CLINEPI_PROJECT;
 
-public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<MosaicPostRequest, MosaicSpec> {
+public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<TwoByTwoPostRequest, TwoByTwoSpec> {
 
   @Override
   public String getDisplayName() {
@@ -33,7 +33,7 @@ public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<MosaicPostRequest
 
   @Override
   public String getDescription() {
-    return "Visualize the frequency distribution, relative risk and odds ratio for two dichotomous variables";
+    return "Visualize the frequency distribution and associated statistics for two dichotomous variables";
   }
   
   @Override
@@ -42,8 +42,8 @@ public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<MosaicPostRequest
   }
 
   @Override
-  protected Class<MosaicSpec> getVisualizationSpecClass() {
-    return MosaicSpec.class;
+  protected Class<TwoByTwoSpec> getVisualizationSpecClass() {
+    return TwoByTwoSpec.class;
   }
   
   @Override
@@ -68,7 +68,7 @@ public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<MosaicPostRequest
   }
   
   @Override
-  protected void validateVisualizationSpec(MosaicSpec pluginSpec) throws ValidationException {
+  protected void validateVisualizationSpec(TwoByTwoSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
       .var("xAxisVariable", pluginSpec.getXAxisVariable())
@@ -77,7 +77,7 @@ public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<MosaicPostRequest
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(MosaicSpec pluginSpec) {
+  protected List<StreamSpec> getRequestedStreams(TwoByTwoSpec pluginSpec) {
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
@@ -88,7 +88,7 @@ public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<MosaicPostRequest
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PluginUtil util = getUtil();
-    MosaicSpec spec = getPluginSpec();
+    TwoByTwoSpec spec = getPluginSpec();
     Map<String, VariableSpec> varMap = new HashMap<>();
     varMap.put("xAxis", spec.getXAxisVariable());
     varMap.put("yAxis", spec.getYAxisVariable());
@@ -96,6 +96,8 @@ public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<MosaicPostRequest
     varMap.put("facet2", util.getVariableSpecFromList(spec.getFacetVariable(), 1));
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
     String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
+    String colRefValue = spec.getXAxisReferenceValue() == null ? "NA_character_" : util.singleQuote(spec.getXAxisReferenceValue());
+    String rowRefValue = spec.getYAxisReferenceValue() == null ? "NA_character_" : util.singleQuote(spec.getYAxisReferenceValue());
 
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
@@ -104,7 +106,10 @@ public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<MosaicPostRequest
           util.getVariableSpecFromList(spec.getFacetVariable(), 0),
           util.getVariableSpecFromList(spec.getFacetVariable(), 1)));
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
-      String cmd = "plot.data::mosaic(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, 'bothRatios', '" + deprecatedShowMissingness + "')";
+      String cmd = "plot.data::mosaic(data=" + DEFAULT_SINGLE_STREAM_NAME + ", variables=variables, statistic='all', columnReferenceValue=" + 
+                                          colRefValue + ", rowReferenceValue=" + 
+                                          rowRefValue + ",'" + 
+                                          deprecatedShowMissingness + "')";
       streamResult(connection, cmd, out);
     });
   }
