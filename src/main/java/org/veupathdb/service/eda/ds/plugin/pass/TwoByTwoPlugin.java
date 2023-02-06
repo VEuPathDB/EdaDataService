@@ -110,7 +110,6 @@ public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<TwoByTwoPostReque
                                           colRefValue + ", rowReferenceValue=" + 
                                           rowRefValue + ",'" + 
                                           deprecatedShowMissingness + "')";
-                                          System.err.println(cmd);
       streamResult(connection, cmd, out);
     });
   }
