@@ -96,6 +96,8 @@ public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<TwoByTwoPostReque
     varMap.put("facet2", util.getVariableSpecFromList(spec.getFacetVariable(), 1));
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
     String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
+    String colRefValue = spec.getXAxisReferenceValue() == null ? "NA_character_" : util.singleQuote(spec.getXAxisReferenceValue());
+    String rowRefValue = spec.getYAxisReferenceValue() == null ? "NA_character_" : util.singleQuote(spec.getYAxisReferenceValue());
 
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
@@ -104,10 +106,11 @@ public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<TwoByTwoPostReque
           util.getVariableSpecFromList(spec.getFacetVariable(), 0),
           util.getVariableSpecFromList(spec.getFacetVariable(), 1)));
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
-      String cmd = "plot.data::mosaic(data=" + DEFAULT_SINGLE_STREAM_NAME + ", variables=variables, statistic='all', 'columnReferenceValue=" + 
-                                          spec.getXAxisReferenceValue() + "', rowReferenceValue='" + 
-                                          spec.getYAxisReferenceValue() + "','" + 
+      String cmd = "plot.data::mosaic(data=" + DEFAULT_SINGLE_STREAM_NAME + ", variables=variables, statistic='all', columnReferenceValue=" + 
+                                          colRefValue + ", rowReferenceValue=" + 
+                                          rowRefValue + ",'" + 
                                           deprecatedShowMissingness + "')";
+                                          System.err.println(cmd);
       streamResult(connection, cmd, out);
     });
   }
