@@ -1,0 +1,51 @@
+#%RAML 1.0 Library
+
+types:
+
+  MapPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: MapMarkerSpec
+
+  MapMarkerSpec:
+    additionalProperties: false
+    properties:
+      outputEntityId: 
+        type: string
+      geoAggregateVariable:
+        type: VariableSpec
+      longitudeVariable:
+        type: VariableSpec
+      latitudeVariable:
+        type: VariableSpec
+      overlayVariable:
+        type: VariableSpec
+      #need values to count here as well, part of a new VariableWithValueSpec type maybe?
+      #does that mean this branch should actually wait for the one where the variable metadata becomes filter aware?
+      viewport:
+        type: GeolocationViewport
+
+  MapPostResponse:
+    additionalProperties: false
+    properties:
+      mapElements: MapElementInfo[]
+
+  MapElementInfo:
+    additionalProperties: false
+    properties:
+      geoAggregateValue:
+        type: string
+      entityCount:
+        type: number
+      avgLat:
+        type: number
+      avgLon:
+        type: number
+      minLat:
+        type: number
+      minLon:
+        type: number
+      maxLat:
+        type: number
+      maxLon:
+        type: number
