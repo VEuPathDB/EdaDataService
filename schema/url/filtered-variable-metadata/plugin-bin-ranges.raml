@@ -1,0 +1,17 @@
+#%RAML 1.0 Library
+
+types:
+
+  BinRange:
+    additionalProperties: false
+    properties:
+      binStart: string # number | date
+      binEnd: string # number | date
+      binLabel: string
+
+  BinRangesPostResponse:
+    additionalProperties: false
+    properties:
+      equalIntervals: BinRange[]
+      quantiles: BinRange[]
+      standardDeviations: BinRange[]

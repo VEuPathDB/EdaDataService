@@ -1,0 +1,16 @@
+#%RAML 1.0 Library
+
+types:
+
+  RequestBase:
+    additionalProperties: false
+    properties:
+      studyId: string
+      derivedVariables:
+        required: false
+        type: DerivedVariableSpec[]
+  
+  ContinuousVariablePostRequest:
+    type: RequestBase
+    properties:
+      config: API_NumberRangeFilter
