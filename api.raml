@@ -27,37 +27,15 @@ securitySchemes:
 ####################################
 
 /filtered-variable-metadata:
-  displayName: Available Types of Filtered Variable Metadata
-  get:
+  description: Returns equal interval, quantile and standard deviation based bin ranges and/or the median for a continuous variable over a specified range.
+    body:
+      application/json:
+        type: lib.ContinuousVariableMetadataPostRequest
     responses:
       200:
         body:
           application/json:
-            type: lib.FilteredVariableMetadataGetResponse
-
-  /bin-ranges:
-    post:
-      description: Returns equal interval, quantile and standard deviation based bin ranges for a continuous variable over a specified range.
-      body:
-        application/json:
-          type: lib.ContinuousVariablePostRequest
-      responses:
-        200:
-          body:
-            application/json:
-              type: lib.BinRangesPostResponse
-
-  /median:
-    post:
-      description: Returns the median for a continuous variable over a specified range.
-      body:
-        application/json:
-          type: lib.ContinuousVariablePostRequest
-      responses:
-        200:
-          body:
-            application/json:
-              type: lib.MedianPostResponse
+            type: lib.ContinuousVariableMetadataPostResponse
 
 /apps:
   displayName: Available Apps

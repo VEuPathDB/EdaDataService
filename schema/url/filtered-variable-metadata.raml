@@ -10,7 +10,38 @@ types:
         required: false
         type: DerivedVariableSpec[]
   
-  ContinuousVariablePostRequest:
+  ContinuousVariableMetadataPostRequest:
+    additionalProperties: false
     type: RequestBase
     properties:
-      config: API_NumberRangeFilter
+      config: ContinuousVariableMetadataSpec
+
+  ContinuousVariableMetadataSpec:
+    additionalProperties: false
+    properties:
+      filter: API_NumberRangeFilter
+      metadata:
+        # is this valid? im guessing how wed do this..
+        type: array
+        items:
+          enum: ['binRanges', 'median']
+
+  BinRange:
+    additionalProperties: false
+    properties:
+      binStart: string # number | date
+      binEnd: string # number | date
+      binLabel: string
+
+  AllBinRanges:
+    additionalProperties: false
+    properties:
+      equalIntervals: BinRange[]
+      quantiles: BinRange[]
+      standardDeviations: BinRange[]
+
+  ContinuousVariableMetadataPostResponse:
+    additionalProperties: false
+    properties:
+      binRanges?: AllBinRanges
+      median?: number
