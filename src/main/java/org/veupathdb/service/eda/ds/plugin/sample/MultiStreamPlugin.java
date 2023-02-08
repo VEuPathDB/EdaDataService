@@ -1,16 +1,5 @@
 package org.veupathdb.service.eda.ds.plugin.sample;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.DelimitedDataParser;
@@ -20,14 +9,17 @@ import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.model.VariableDef;
 import org.veupathdb.service.eda.common.model.VariableSource;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.generated.model.AbundanceScatterplotPostRequest;
 import org.veupathdb.service.eda.generated.model.MultiStreamPostRequest;
 import org.veupathdb.service.eda.generated.model.MultiStreamSpec;
 
-import static org.gusdb.fgputil.FormatUtil.NL;
-import static org.gusdb.fgputil.FormatUtil.TAB;
-import static org.gusdb.fgputil.FormatUtil.join;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.stream.Collectors;
+
+import static org.gusdb.fgputil.FormatUtil.*;
 import static org.gusdb.fgputil.functional.Functions.getMapFromKeys;
 
 public class MultiStreamPlugin extends AbstractEmptyComputePlugin<MultiStreamPostRequest, MultiStreamSpec> {

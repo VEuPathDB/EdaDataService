@@ -9,7 +9,6 @@ import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.generated.model.AbundanceScatterplotPostRequest;
 import org.veupathdb.service.eda.generated.model.TablePostRequest;
 import org.veupathdb.service.eda.generated.model.TableSpec;
 
