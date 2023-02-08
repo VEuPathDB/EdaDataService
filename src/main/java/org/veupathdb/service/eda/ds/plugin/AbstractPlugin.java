@@ -86,7 +86,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R> i
   private Timer _timer;
   private boolean _requestProcessed = false;
   private String _studyId;
-  private List<APIFilter> _subset;
+  private List<APIFilter> _subsetFilters;
   private List<DerivedVariableSpec> _derivedVariableSpecs;
   private EdaSubsettingClient _subsettingClient;
   private EdaMergingClient _mergingClient;
@@ -107,7 +107,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R> i
         getSpecObject(request, "getComputeConfig", getComputeConfigClass())));
 
     // check for subset and derived entity properties of request
-    _subset = Optional.ofNullable(request.getFilters()).orElse(Collections.emptyList());
+    _subsetFilters = Optional.ofNullable(request.getFilters()).orElse(Collections.emptyList());
     _derivedVariableSpecs = Optional.ofNullable(request.getDerivedVariables()).orElse(Collections.emptyList());
 
     // build clients for required services
@@ -161,7 +161,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R> i
     // create stream generator
     Optional<TwoTuple<String,Object>> typedTuple = _computeInfo.map(info -> new TwoTuple<>(info.getFirst(), info.getSecond()));
     Function<StreamSpec, ResponseFuture> streamGenerator = spec -> _mergingClient
-        .getTabularDataStream(_referenceMetadata, _subset, typedTuple, spec);
+        .getTabularDataStream(_referenceMetadata, _subsetFilters, typedTuple, spec);
 
     // create stream processor
     // TODO: might make disallowing empty results optional in the future; this is the original implementation
@@ -178,6 +178,10 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R> i
 
   protected S getPluginSpec() {
     return _pluginSpec;
+  }
+
+  protected List<APIFilter> getSubsetFilters() {
+    return _subsetFilters;
   }
 
   protected ReferenceMetadata getReferenceMetadata() {
@@ -261,7 +265,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R> i
   private ComputeRequestBody createComputeRequestBody() {
     return new ComputeRequestBody(
         _studyId,
-        _subset,
+        _subsetFilters,
         _derivedVariableSpecs,
         _computeInfo.map(TwoTuple::getSecond).orElseThrow(NO_COMPUTE_EXCEPTION));
   }
