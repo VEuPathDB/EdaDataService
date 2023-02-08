@@ -21,6 +21,7 @@ import org.veupathdb.service.eda.common.model.VariableDef;
 import org.veupathdb.service.eda.common.model.VariableSource;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.generated.model.AbundanceScatterplotPostRequest;
 import org.veupathdb.service.eda.generated.model.MultiStreamPostRequest;
 import org.veupathdb.service.eda.generated.model.MultiStreamSpec;
 
@@ -41,6 +42,11 @@ public class MultiStreamPlugin extends AbstractEmptyComputePlugin<MultiStreamPos
   @Override
   public String getDescription() {
     return "Merges streams for up to three vars into a single tabular output and dumps it";
+  }
+
+  @Override
+  protected Class<MultiStreamPostRequest> getVisualizationRequestClass() {
+    return MultiStreamPostRequest.class;
   }
 
   @Override

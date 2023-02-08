@@ -43,7 +43,12 @@ public class AbundanceScatterplotPlugin extends AbstractPlugin<AbundanceScatterp
   public List<String> getProjects() {
     return List.of(AppsMetadata.MICROBIOME_PROJECT);
   }
-  
+
+  @Override
+  protected Class<AbundanceScatterplotPostRequest> getVisualizationRequestClass() {
+    return AbundanceScatterplotPostRequest.class;
+  }
+
   @Override
   protected Class<ScatterplotWith1ComputeSpec> getVisualizationSpecClass() {
     return ScatterplotWith1ComputeSpec.class;

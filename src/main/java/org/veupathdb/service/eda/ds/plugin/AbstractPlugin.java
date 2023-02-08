@@ -1,5 +1,7 @@
 package org.veupathdb.service.eda.ds.plugin;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import jakarta.ws.rs.BadRequestException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -8,6 +10,7 @@ import org.gusdb.fgputil.Tuples.TwoTuple;
 import org.gusdb.fgputil.client.ResponseFuture;
 import org.gusdb.fgputil.functional.FunctionalInterfaces.ConsumerWithException;
 import org.gusdb.fgputil.functional.Functions;
+import org.gusdb.fgputil.json.JsonUtil;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.*;
 import org.veupathdb.service.eda.common.client.EdaComputeClient.ComputeRequestBody;
@@ -22,6 +25,7 @@ import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
 import org.veupathdb.service.eda.generated.model.*;
 import org.veupathdb.service.eda.generated.model.BinSpec.RangeType;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -53,10 +57,8 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R> i
   // shared stream name for plugins that need request only a single stream
   protected static final String DEFAULT_SINGLE_STREAM_NAME = "single_tabular_dataset";
 
-  // to be deleted; kept for now to enable compilation of synchronous plugins
-  protected static final String COMPUTE_STREAM_NAME = "computed_dataset";
-
   // methods that need to be implemented
+  protected abstract Class<T> getVisualizationRequestClass();
   protected abstract Class<S> getVisualizationSpecClass();
   protected abstract Class<R> getComputeConfigClass();
   protected abstract void validateVisualizationSpec(S pluginSpec) throws ValidationException;
@@ -88,10 +90,22 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R> i
   private String _studyId;
   private List<APIFilter> _subsetFilters;
   private List<DerivedVariableSpec> _derivedVariableSpecs;
+  private Entry<String,String> _authHeader;
   private EdaSubsettingClient _subsettingClient;
   private EdaMergingClient _mergingClient;
   private EdaComputeClient _computeClient;
 
+  /**
+   * Processes the plugin request and prepares this plugin to receive an OutputStream via the
+   * accept() method, to which it will write its response.  As much processing as possible should
+   * be done in this method up front, since once accept() is called, we are tied to a 2xx response.
+   *
+   * @param appName app name this plugin belongs to; can be null if no compute is expected/allowed
+   * @param request incoming plugin request object
+   * @param authHeader authentication header observed on request
+   * @return this
+   * @throws ValidationException if request validation fails
+   */
   public final AbstractPlugin<T,S,R> processRequest(String appName, T request, Entry<String,String> authHeader) throws ValidationException {
 
     // start request timer (used to profile request performance dynamics)
@@ -103,7 +117,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R> i
 
     // find compute name if required by this viz plugin; if present, then look up compute config
     //   and create an optional tuple of name+config (empty optional if viz does not require compute)
-    _computeInfo = findComputeName(appName).map(name -> new TwoTuple<>(name,
+    _computeInfo = appName == null ? Optional.empty() : findComputeName(appName).map(name -> new TwoTuple<>(name,
         getSpecObject(request, "getComputeConfig", getComputeConfigClass())));
 
     // check for subset and derived entity properties of request
@@ -111,6 +125,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R> i
     _derivedVariableSpecs = Optional.ofNullable(request.getDerivedVariables()).orElse(Collections.emptyList());
 
     // build clients for required services
+    _authHeader = authHeader;
     _subsettingClient = new EdaSubsettingClient(Resources.SUBSETTING_SERVICE_URL, authHeader);
     _mergingClient = new EdaMergingClient(Resources.MERGING_SERVICE_URL, authHeader);
     _computeClient = new EdaComputeClient(Resources.COMPUTE_SERVICE_URL, authHeader);
@@ -180,6 +195,10 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R> i
     return _pluginSpec;
   }
 
+  protected String getStudyId() {
+    return _studyId;
+  }
+
   protected List<APIFilter> getSubsetFilters() {
     return _subsetFilters;
   }
@@ -215,6 +234,59 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R> i
     }
     catch (IllegalAccessException | InvocationTargetException e) {
       throw new RuntimeException("Misconfiguration of visualization plugin: " + getClass().getName(), e);
+    }
+  }
+
+  /**
+   * Enables visualization plugins to call each other to get any required data.  The same study, subset filters, and
+   * derived variable specs passed to this instance will be used to call the other plugin.  This process is has a number
+   * of caveats:
+   * 1. The call is synchronous, so the calling plugin blocks until the result is collected
+   * 2. The result is put into a response object for that plugin and stored in memory, so should not be large
+   * 3. The plugin to be called must currently use the same subset/filters as the calling plugin.  There has been talk
+   *    of wanting to enable the target plugin to use a different subset than the calling plugin but the how and why of
+   *    those use cases need to be worked out.
+   * 4. The plugin to be called cannot have a compute.  In the future, we could maybe have it depend on the same
+   *    compute (and compute config) as the calling plugin, but beyond that this plugin instance does not have enough
+   *    information to make that call.
+   *
+   * @param plugin plugin to call
+   * @param visualizationConfig configuration object specific to this plugin (i.e. the spec, normally attached to the config JSON property)
+   * @param expectedResponseType expected response type of the plugin to be called.  This can be either the interface or implementation class of the response type
+   * @param <U> type of request body for the plugin
+   * @param <V> type of the config object for the plugin (set on the undeclared config property of U)
+   * @param <W> type of response generated by the plugin to be called
+   * @return response generated by the called plugin
+   */
+  protected <U extends VisualizationRequestBase, V, W> W invokePlugin(
+      AbstractEmptyComputePlugin<U,V> plugin, V visualizationConfig, Class<W> expectedResponseType) {
+    try {
+      // build plugin request
+      String requestClassName = plugin.getVisualizationRequestClass().getName();
+      // need to use the implementation class (not the interface) so we can instantiate it
+      if (!requestClassName.endsWith("Impl")) requestClassName += "Impl";
+      U request = (U)Class.forName(requestClassName).getConstructor().newInstance();
+      request.setStudyId(_studyId);
+      request.setFilters(_subsetFilters);
+      request.setDerivedVariables(_derivedVariableSpecs); // probably not needed; how are these relevant?
+      // config is not a property on VisualizationRequestBase, but we always expect it; invoke with the passed config
+      plugin.getVisualizationRequestClass().getMethod("setConfig", plugin.getVisualizationSpecClass()).invoke(request, visualizationConfig);
+      ByteArrayOutputStream result = new ByteArrayOutputStream();
+      // passing null as appName because it is only used to look up the compute; since this is an EmptyComputePlugin, we know there is no compute
+      plugin.processRequest(null, request, _authHeader).accept(result);
+      // need to use the implementation class (not the interface) so Jackson can instantiate it
+      String expectedResponseTypeName = expectedResponseType.getName();
+      if (!expectedResponseTypeName.endsWith("Impl")) expectedResponseTypeName += "Impl";
+      return (W)JsonUtil.Jackson.readValue(result.toString(), Class.forName(expectedResponseTypeName));
+    }
+    catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+      throw new RuntimeException("Unable to create request body object", e);
+    }
+    catch (JsonProcessingException e) {
+      throw new RuntimeException("Unable to convert plugin response into expected response type", e);
+    }
+    catch (ValidationException e) {
+      throw new RuntimeException("Attempt to invoke plugin internally with invalid config", e);
     }
   }
 

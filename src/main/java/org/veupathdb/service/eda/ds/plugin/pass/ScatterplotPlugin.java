@@ -11,10 +11,7 @@ import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.common.plugin.util.RFileSetProcessor;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.generated.model.APIVariableType;
-import org.veupathdb.service.eda.generated.model.ScatterplotPostRequest;
-import org.veupathdb.service.eda.generated.model.ScatterplotSpec;
-import org.veupathdb.service.eda.generated.model.VariableSpec;
+import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,7 +43,12 @@ public class ScatterplotPlugin extends AbstractEmptyComputePlugin<ScatterplotPos
   public List<String> getProjects() {
     return List.of(CLINEPI_PROJECT);
   }
-  
+
+  @Override
+  protected Class<ScatterplotPostRequest> getVisualizationRequestClass() {
+    return ScatterplotPostRequest.class;
+  }
+
   @Override
   protected Class<ScatterplotSpec> getVisualizationSpecClass() {
     return ScatterplotSpec.class;

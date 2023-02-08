@@ -40,7 +40,12 @@ public class MapPlugin extends AbstractEmptyComputePlugin<MapPostRequest, MapSpe
   public List<String> getProjects() {
     return List.of(CLINEPI_PROJECT);
   }
-  
+
+  @Override
+  protected Class<MapPostRequest> getVisualizationRequestClass() {
+    return MapPostRequest.class;
+  }
+
   @Override
   protected Class<MapSpec> getVisualizationSpecClass() {
     return MapSpec.class;

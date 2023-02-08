@@ -38,7 +38,12 @@ public class BetaDivScatterplotPlugin extends AbstractPlugin<BetaDivScatterplotP
   public List<String> getProjects() {
     return List.of(AppsMetadata.MICROBIOME_PROJECT);
   }
-  
+
+  @Override
+  protected Class<BetaDivScatterplotPostRequest> getVisualizationRequestClass() {
+    return BetaDivScatterplotPostRequest.class;
+  }
+
   @Override
   protected Class<BetaDivScatterplotSpec> getVisualizationSpecClass() {
     return BetaDivScatterplotSpec.class;

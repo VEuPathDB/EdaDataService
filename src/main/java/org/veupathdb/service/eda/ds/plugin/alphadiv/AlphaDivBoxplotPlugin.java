@@ -17,11 +17,7 @@ import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
 import org.veupathdb.service.eda.common.plugin.util.RServeClient;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.generated.model.AlphaDivBoxplotPostRequest;
-import org.veupathdb.service.eda.generated.model.BoxplotWith1ComputeSpec;
-import org.veupathdb.service.eda.generated.model.AlphaDivComputeConfig;
-import org.veupathdb.service.eda.generated.model.ComputedVariableMetadata;
-import org.veupathdb.service.eda.generated.model.VariableSpec;
+import org.veupathdb.service.eda.generated.model.*;
 
 import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuote;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
@@ -42,7 +38,12 @@ public class AlphaDivBoxplotPlugin extends AbstractPlugin<AlphaDivBoxplotPostReq
   public List<String> getProjects() {
     return List.of(AppsMetadata.MICROBIOME_PROJECT);
   }
-  
+
+  @Override
+  protected Class<AlphaDivBoxplotPostRequest> getVisualizationRequestClass() {
+    return AlphaDivBoxplotPostRequest.class;
+  }
+
   @Override
   protected Class<BoxplotWith1ComputeSpec> getVisualizationSpecClass() {
     return BoxplotWith1ComputeSpec.class;

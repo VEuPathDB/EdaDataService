@@ -9,6 +9,7 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
+import org.veupathdb.service.eda.generated.model.AbundanceScatterplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BarplotPostRequest;
 import org.veupathdb.service.eda.generated.model.BarplotSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
@@ -37,12 +38,17 @@ public class BarplotPlugin extends AbstractEmptyComputePlugin<BarplotPostRequest
   public String getDescription() {
     return "Visualize the distribution of a categorical variable";
   }
-  
+
   @Override
   public List<String> getProjects() {
     return List.of(CLINEPI_PROJECT, MICROBIOME_PROJECT);
   }
-  
+
+  @Override
+  protected Class<BarplotPostRequest> getVisualizationRequestClass() {
+    return BarplotPostRequest.class;
+  }
+
   @Override
   protected Class<BarplotSpec> getVisualizationSpecClass() {
     return BarplotSpec.class;

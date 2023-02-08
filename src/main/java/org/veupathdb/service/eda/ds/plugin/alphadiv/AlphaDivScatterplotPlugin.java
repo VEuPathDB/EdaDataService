@@ -19,12 +19,7 @@ import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
 import org.veupathdb.service.eda.common.plugin.util.RServeClient;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.generated.model.APIVariableType;
-import org.veupathdb.service.eda.generated.model.AlphaDivComputeConfig;
-import org.veupathdb.service.eda.generated.model.AlphaDivScatterplotPostRequest;
-import org.veupathdb.service.eda.generated.model.ComputedVariableMetadata;
-import org.veupathdb.service.eda.generated.model.ScatterplotWith1ComputeSpec;
-import org.veupathdb.service.eda.generated.model.VariableSpec;
+import org.veupathdb.service.eda.generated.model.*;
 
 import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuote;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
@@ -46,6 +41,11 @@ public class AlphaDivScatterplotPlugin extends AbstractPlugin<AlphaDivScatterplo
   @Override
   public List<String> getProjects() {
     return List.of(AppsMetadata.MICROBIOME_PROJECT);
+  }
+
+  @Override
+  protected Class<AlphaDivScatterplotPostRequest> getVisualizationRequestClass() {
+    return AlphaDivScatterplotPostRequest.class;
   }
   
   @Override
