@@ -47,6 +47,11 @@ public class RecordCountPlugin extends AbstractEmptyComputePlugin<RecordCountPos
   }
 
   @Override
+  protected Class<RecordCountPostRequest> getVisualizationRequestClass() {
+    return RecordCountPostRequest.class;
+  }
+
+  @Override
   protected Class<RecordCountSpec> getVisualizationSpecClass() {
     return RecordCountSpec.class;
   }
@@ -60,7 +65,10 @@ public class RecordCountPlugin extends AbstractEmptyComputePlugin<RecordCountPos
   @Override
   protected List<StreamSpec> getRequestedStreams(RecordCountSpec pluginSpec) {
     String entityId = pluginSpec.getEntityId();
-    _cacheKey = EncryptionUtil.md5(JsonUtil.serializeObject(getSubsetFilters()) + "|" + entityId);
+    _cacheKey = EncryptionUtil.md5(
+        JsonUtil.serializeObject(getSubsetFilters()) +
+        "|" + getReferenceMetadata().getStudyId() + "|" + entityId
+    );
     _cachedResponse = RESULT_CACHE.get(_cacheKey);
     LOG.info("Did I find a cached response? " + (_cachedResponse != null));
 

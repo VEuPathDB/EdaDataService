@@ -8,10 +8,7 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.generated.model.BinSpec;
-import org.veupathdb.service.eda.generated.model.MapMarkersOverlayPostRequest;
-import org.veupathdb.service.eda.generated.model.MapMarkersOverlaySpec;
-import org.veupathdb.service.eda.generated.model.VariableSpec;
+import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +32,12 @@ public class MapMarkersOverlayPlugin extends AbstractEmptyComputePlugin<MapMarke
   public String getDescription() {
     return "Visualize counts and proportions of both categorical and continuous data overlaid on map markers.";
   }
-  
+
+  @Override
+  protected Class<MapMarkersOverlayPostRequest> getVisualizationRequestClass() {
+    return MapMarkersOverlayPostRequest.class;
+  }
+
   @Override
   protected Class<MapMarkersOverlaySpec> getVisualizationSpecClass() {
     return MapMarkersOverlaySpec.class;

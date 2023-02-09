@@ -8,10 +8,7 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.generated.model.APIVariableType;
-import org.veupathdb.service.eda.generated.model.DensityplotPostRequest;
-import org.veupathdb.service.eda.generated.model.DensityplotSpec;
-import org.veupathdb.service.eda.generated.model.VariableSpec;
+import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,7 +38,12 @@ public class DensityplotPlugin extends AbstractEmptyComputePlugin<DensityplotPos
   public List<String> getProjects() {
     return List.of(CLINEPI_PROJECT, MICROBIOME_PROJECT);
   }
-  
+
+  @Override
+  protected Class<DensityplotPostRequest> getVisualizationRequestClass() {
+    return DensityplotPostRequest.class;
+  }
+
   @Override
   protected Class<DensityplotSpec> getVisualizationSpecClass() {
     return DensityplotSpec.class;

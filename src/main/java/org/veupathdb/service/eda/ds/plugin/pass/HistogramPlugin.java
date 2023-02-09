@@ -42,7 +42,12 @@ public class HistogramPlugin extends AbstractEmptyComputePlugin<HistogramPostReq
   public List<String> getProjects() {
     return List.of(CLINEPI_PROJECT, MICROBIOME_PROJECT);
   }
-  
+
+  @Override
+  protected Class<HistogramPostRequest> getVisualizationRequestClass() {
+    return HistogramPostRequest.class;
+  }
+
   @Override
   protected Class<HistogramSpec> getVisualizationSpecClass() {
     return HistogramSpec.class;

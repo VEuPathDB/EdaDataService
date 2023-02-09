@@ -38,7 +38,12 @@ public class LineplotPlugin extends AbstractEmptyComputePlugin<LineplotPostReque
   public List<String> getProjects() {
     return List.of(MICROBIOME_PROJECT);
   }
-  
+
+  @Override
+  protected Class<LineplotPostRequest> getVisualizationRequestClass() {
+    return LineplotPostRequest.class;
+  }
+
   @Override
   protected Class<LineplotSpec> getVisualizationSpecClass() {
     return LineplotSpec.class;
