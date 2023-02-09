@@ -8,10 +8,7 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.generated.model.APIVariableType;
-import org.veupathdb.service.eda.generated.model.HeatmapPostRequest;
-import org.veupathdb.service.eda.generated.model.HeatmapSpec;
-import org.veupathdb.service.eda.generated.model.VariableSpec;
+import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,7 +38,12 @@ public class HeatmapPlugin extends AbstractEmptyComputePlugin<HeatmapPostRequest
   public List<String> getProjects() {
     return List.of(CLINEPI_PROJECT, MICROBIOME_PROJECT);
   }
-  
+
+  @Override
+  protected Class<HeatmapPostRequest> getVisualizationRequestClass() {
+    return HeatmapPostRequest.class;
+  }
+
   @Override
   protected Class<HeatmapSpec> getVisualizationSpecClass() {
     return HeatmapSpec.class;

@@ -1,5 +1,17 @@
 package org.veupathdb.service.eda.ds.plugin.abundance;
 
+import org.gusdb.fgputil.ListBuilder;
+import org.gusdb.fgputil.validation.ValidationException;
+import org.veupathdb.service.eda.common.client.spec.StreamSpec;
+import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
+import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
+import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
+import org.veupathdb.service.eda.common.plugin.util.RServeClient;
+import org.veupathdb.service.eda.ds.Resources;
+import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
+import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.generated.model.*;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -7,20 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.gusdb.fgputil.ListBuilder;
-import org.gusdb.fgputil.validation.ValidationException;
-import org.veupathdb.service.eda.common.client.spec.StreamSpec;
-import org.veupathdb.service.eda.common.model.VariableDef;
-import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
-import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
-import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
-import org.veupathdb.service.eda.ds.Resources;
-import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
-import org.veupathdb.service.eda.common.plugin.util.RServeClient;
-import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.generated.model.*;
 
-import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuote;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 
 public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostRequest, BoxplotWith1ComputeSpec, RankedAbundanceComputeConfig> {
@@ -39,7 +38,12 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
   public List<String> getProjects() {
     return List.of(AppsMetadata.MICROBIOME_PROJECT);
   }
-  
+
+  @Override
+  protected Class<AbundanceBoxplotPostRequest> getVisualizationRequestClass() {
+    return AbundanceBoxplotPostRequest.class;
+  }
+
   @Override
   protected Class<BoxplotWith1ComputeSpec> getVisualizationSpecClass() {
     return BoxplotWith1ComputeSpec.class;
