@@ -1,29 +1,23 @@
 package org.veupathdb.service.eda.ds.plugin.alphadiv;
 
+import org.gusdb.fgputil.validation.ValidationException;
+import org.veupathdb.service.eda.common.client.spec.StreamSpec;
+import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
+import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
+import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
+import org.veupathdb.service.eda.common.plugin.util.RServeClient;
+import org.veupathdb.service.eda.ds.Resources;
+import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
+import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.generated.model.*;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.gusdb.fgputil.ListBuilder;
-import org.gusdb.fgputil.validation.ValidationException;
-import org.veupathdb.service.eda.common.client.spec.StreamSpec;
-import org.veupathdb.service.eda.common.model.VariableDef;
-import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
-import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
-import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
-import org.veupathdb.service.eda.ds.Resources;
-import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
-import org.veupathdb.service.eda.common.plugin.util.RServeClient;
-import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.generated.model.AlphaDivBoxplotPostRequest;
-import org.veupathdb.service.eda.generated.model.BoxplotWith1ComputeSpec;
-import org.veupathdb.service.eda.generated.model.AlphaDivComputeConfig;
-import org.veupathdb.service.eda.generated.model.ComputedVariableMetadata;
-import org.veupathdb.service.eda.generated.model.VariableSpec;
 
-import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuote;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 
 public class AlphaDivBoxplotPlugin extends AbstractPlugin<AlphaDivBoxplotPostRequest, BoxplotWith1ComputeSpec, AlphaDivComputeConfig> {
@@ -42,7 +36,12 @@ public class AlphaDivBoxplotPlugin extends AbstractPlugin<AlphaDivBoxplotPostReq
   public List<String> getProjects() {
     return List.of(AppsMetadata.MICROBIOME_PROJECT);
   }
-  
+
+  @Override
+  protected Class<AlphaDivBoxplotPostRequest> getVisualizationRequestClass() {
+    return AlphaDivBoxplotPostRequest.class;
+  }
+
   @Override
   protected Class<BoxplotWith1ComputeSpec> getVisualizationSpecClass() {
     return BoxplotWith1ComputeSpec.class;

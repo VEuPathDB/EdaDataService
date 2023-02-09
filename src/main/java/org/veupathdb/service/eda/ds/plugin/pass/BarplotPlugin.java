@@ -37,12 +37,17 @@ public class BarplotPlugin extends AbstractEmptyComputePlugin<BarplotPostRequest
   public String getDescription() {
     return "Visualize the distribution of a categorical variable";
   }
-  
+
   @Override
   public List<String> getProjects() {
     return List.of(CLINEPI_PROJECT, MICROBIOME_PROJECT);
   }
-  
+
+  @Override
+  protected Class<BarplotPostRequest> getVisualizationRequestClass() {
+    return BarplotPostRequest.class;
+  }
+
   @Override
   protected Class<BarplotSpec> getVisualizationSpecClass() {
     return BarplotSpec.class;

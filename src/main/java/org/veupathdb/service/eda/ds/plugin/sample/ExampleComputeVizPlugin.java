@@ -15,6 +15,11 @@ import java.util.Map;
 public class ExampleComputeVizPlugin extends AbstractPlugin<ExampleComputeVizPostRequest, ExampleComputeVizSpec, ExampleComputeConfig> {
 
   @Override
+  protected Class<ExampleComputeVizPostRequest> getVisualizationRequestClass() {
+    return ExampleComputeVizPostRequest.class;
+  }
+
+  @Override
   protected Class<ExampleComputeConfig> getComputeConfigClass() {
     return ExampleComputeConfig.class;
   }
@@ -82,8 +87,14 @@ public class ExampleComputeVizPlugin extends AbstractPlugin<ExampleComputeVizPos
       }
     }
 
+    // get count stat from neighboring plugin
+    RecordCountSpec countRequest = new RecordCountSpecImpl();
+    countRequest.setEntityId(getComputeConfig().getInputVariable().getEntityId());
+    RecordCountPostResponse countResponse = invokePlugin(new RecordCountPlugin(), countRequest, RecordCountPostResponse.class);
+
     // write response (use buffering for larger responses)
     ExampleComputeVizPostResponse response = new ExampleComputeVizPostResponseImpl();
+    response.setCountPluginResult(countResponse.getRecordCount());
     response.setNumEmptyValues(numComputedEmptyValues);
     response.setLongestConcatenatedValue(longestValue);
     response.setAvgConcatenatedLength(numValues == 0 ? 0 : sumOfLengths / numValues);

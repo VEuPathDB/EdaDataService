@@ -8,10 +8,7 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
-import org.veupathdb.service.eda.generated.model.TwoByTwoPostRequest;
-import org.veupathdb.service.eda.generated.model.TwoByTwoSpec;
-import org.veupathdb.service.eda.generated.model.VariableSpec;
+import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,6 +36,11 @@ public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<TwoByTwoPostReque
   @Override
   public List<String> getProjects() {
     return List.of(CLINEPI_PROJECT);
+  }
+
+  @Override
+  protected Class<TwoByTwoPostRequest> getVisualizationRequestClass() {
+    return TwoByTwoPostRequest.class;
   }
 
   @Override

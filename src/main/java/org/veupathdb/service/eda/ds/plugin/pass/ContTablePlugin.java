@@ -44,7 +44,12 @@ public class ContTablePlugin extends AbstractEmptyComputePlugin<MosaicPostReques
   protected Class<MosaicSpec> getVisualizationSpecClass() {
     return MosaicSpec.class;
   }
-  
+
+  @Override
+  protected Class<MosaicPostRequest> getVisualizationRequestClass() {
+    return MosaicPostRequest.class;
+  }
+
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()

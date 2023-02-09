@@ -1,13 +1,5 @@
 package org.veupathdb.service.eda.ds.plugin.pass;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.function.Function;
-
 import org.gusdb.fgputil.DelimitedDataParser;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.geo.GeographyUtil.GeographicPoint;
@@ -20,7 +12,13 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.generated.model.*;
 
-import static org.gusdb.fgputil.FormatUtil.NL;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+
 import static org.gusdb.fgputil.FormatUtil.TAB;
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.CLINEPI_PROJECT;
 
@@ -40,7 +38,12 @@ public class MapPlugin extends AbstractEmptyComputePlugin<MapPostRequest, MapSpe
   public List<String> getProjects() {
     return List.of(CLINEPI_PROJECT);
   }
-  
+
+  @Override
+  protected Class<MapPostRequest> getVisualizationRequestClass() {
+    return MapPostRequest.class;
+  }
+
   @Override
   protected Class<MapSpec> getVisualizationSpecClass() {
     return MapSpec.class;

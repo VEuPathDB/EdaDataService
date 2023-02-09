@@ -1140,6 +1140,23 @@ types:
     properties:
       columns: VariableSpec[]
       rows: string[][]
+  TwoByTwoSpec:
+    type: MosaicSpec
+    properties:
+      xAxisReferenceValue: string
+      yAxisReferenceValue: string
+  TwoByTwoPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: TwoByTwoSpec
+  Statistic:
+    type: object
+    additionalProperties: false
+    properties:
+      value: number
+      confidenceInterval?: string
+      confidenceLevel?: number
+      pvalue: string
   TwoByTwoStatsTable:
     type: object
     additionalProperties: false
@@ -1148,11 +1165,15 @@ types:
         type: StrataVariableDetails[]
         maxItems: 2
         required: false
-      oddsratio: number
-      pvalue: number
-      orInterval: string
-      relativerisk: number
-      rrInterval: string
+      chisq: Statistic
+      fisher: Statistic
+      prevalence: Statistic
+      oddsratio: Statistic
+      relativerisk: Statistic
+      sensitivity: Statistic
+      specificity: Statistic
+      posPredictiveValue: Statistic
+      negPredictiveValue: Statistic
   TwoByTwoPostResponse:
     type: object
     additionalProperties: false
@@ -1463,6 +1484,7 @@ types:
     type: object
     additionalProperties: false
     properties:
+      countPluginResult: integer
       numEmptyValues: integer
       longestConcatenatedValue: string
       avgConcatenatedLength: number
@@ -1488,7 +1510,7 @@ types:
     type: object
     additionalProperties: false
     properties:
-      recordCount: number
+      recordCount: integer
   TestCollectionsPostRequest:
     type: VisualizationRequestBase
     properties:
