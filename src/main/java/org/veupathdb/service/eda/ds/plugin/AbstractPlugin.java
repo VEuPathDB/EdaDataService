@@ -5,8 +5,6 @@ import jakarta.ws.rs.BadRequestException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.Timer;
-import org.gusdb.fgputil.Tuples;
-import org.gusdb.fgputil.Tuples.ThreeTuple;
 import org.gusdb.fgputil.Tuples.TwoTuple;
 import org.gusdb.fgputil.client.ResponseFuture;
 import org.gusdb.fgputil.functional.FunctionalInterfaces.ConsumerWithException;
@@ -195,10 +193,6 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R> i
 
   protected S getPluginSpec() {
     return _pluginSpec;
-  }
-
-  protected String getStudyId() {
-    return _studyId;
   }
 
   protected List<APIFilter> getSubsetFilters() {
