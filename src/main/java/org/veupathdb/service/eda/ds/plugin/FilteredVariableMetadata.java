@@ -82,6 +82,7 @@ public class FilteredVariableMetadataPlugin extends AbstractEmptyComputePlugin<C
     // think every type of metadata listed in the enum should get its own R fxn
     // that fxn can return some json for java to concat together
     // if that proves too slow, maybe return the values directly and let java build the whole json string?
+    // if even that proves too slow, we may have to resort to approx values and do it all in java :(
 
     // for the R bit, maybe we have a class ContinuousVariable
     // it has methods for each of these metadata types
