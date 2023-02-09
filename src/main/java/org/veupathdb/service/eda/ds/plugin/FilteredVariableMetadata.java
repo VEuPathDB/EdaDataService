@@ -28,6 +28,14 @@ import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.CLINEPI_PROJECT
 
 public class FilteredVariableMetadataPlugin extends AbstractEmptyComputePlugin<ContinuousVariableMetadataPostRequest, ContinuousVariableMetadataSpec> {
   
+  private static final Logger LOG = LogManager.getLogger(FilteredVariableMetadataPlugin.class);
+
+  private static final ManagedMap<String,ContinuousVariableMetadataPostResponse> RESULT_CACHE =
+      new ManagedMap<>(5000, 2000);
+
+  private String _cacheKey;
+  private ContinuousVariableMetadataResponse _cachedResponse;
+
   @Override
   protected Class<ContinuousVariableMetadataSpec> getVisualizationSpecClass() {
     return ContinuousVariableMetadataSpec.class;
@@ -52,7 +60,15 @@ public class FilteredVariableMetadataPlugin extends AbstractEmptyComputePlugin<C
 
   @Override
   protected List<StreamSpec> getRequestedStreams(ContinuousVariableMetadataSpec pluginSpec) {
-    return ListBuilder.asList(
+    String entityId = pluginSpec.getEntityId();
+    _cacheKey = EncryptionUtil.md5(
+        JsonUtil.serializeObject(getSubsetFilters()) +
+        "|" + JsonUtil.serializeObject(pluginSpec)
+    );
+    _cachedResponse = RESULT_CACHE.get(_cacheKey);
+    if (_cachedResponse != null) LOG.info("Found cached result.");
+
+    return _cachedResponse != null ? Collections.emptyList() : ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getVariable().getEntity())
         .addVar(pluginSpec.getVariable()));
   }
@@ -61,6 +77,16 @@ public class FilteredVariableMetadataPlugin extends AbstractEmptyComputePlugin<C
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PluginUtil util = getUtil();
     ContinuousVariableMetadataSpec spec = getPluginSpec();
+
+    // we need to read in a simple file containing a single column of cont data
+    // think every type of metadata listed in the enum should get its own R fxn
+    // that fxn can return some json for java to concat together
+    // if that proves too slow, maybe return the values directly and let java build the whole json string?
+
+    // for the R bit, maybe we have a class ContinuousVariable
+    // it has methods for each of these metadata types
+    // each of those methods should return objects which have toJSON methods
+    // i think wed need only the BinRanges oject made custom for now, median is a simple numeric which jsonlite can handle
 
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       
