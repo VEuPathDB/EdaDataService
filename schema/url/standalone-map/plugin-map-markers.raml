@@ -18,10 +18,13 @@ types:
         type: VariableSpec
       latitudeVariable:
         type: VariableSpec
-      overlayVariable:
+      overlayVariable?:
         type: VariableSpec
-      #need values to count here as well, part of a new VariableWithValueSpec type maybe?
-      #does that mean this branch should actually wait for the one where the variable metadata becomes filter aware?
+      overlayValues?:
+        type: BinRange[] # categoricals can just ignore bin start and end
+      # if we choose to support things like means and medians for cont vars this may need to be a custom enum
+      valueSpec:
+        type: ValueSpec
       viewport:
         type: GeolocationViewport
 
@@ -30,6 +33,20 @@ types:
     properties:
       mapElements: MapElementInfo[]
 
+  # TODO remove once quantile endpoint is merged.
+  BinRange:
+    additionalProperties: false
+    properties:
+      binStart?: string # number | date
+      binEnd?: string # number | date
+      binLabel: string
+
+  BinRangeWithValue:
+    additionalProperties: false
+    type: BinRange
+    properties:
+      value: number
+
   MapElementInfo:
     additionalProperties: false
     properties:
@@ -37,6 +54,8 @@ types:
         type: string
       entityCount:
         type: number
+      overlayValues:
+        type: BinRangeWithValue
       avgLat:
         type: number
       avgLon:
