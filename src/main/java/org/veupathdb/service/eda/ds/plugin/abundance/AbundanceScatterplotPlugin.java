@@ -116,7 +116,7 @@ public class AbundanceScatterplotPlugin extends AbstractPlugin<AbundanceScatterp
     List<VariableSpec> inputVarSpecs = new ArrayList<VariableSpec>();
     inputVarSpecs.addAll(metadata.getVariables().stream()
         .filter(var -> var.getPlotReference().getValue().equals("overlay"))
-        .findFirst().orElseThrow().getMembers());
+        .findFirst().orElseThrow().getMembers().subList(0,8));
     inputVarSpecs.add(spec.getXAxisVariable());
     inputVarSpecs.add(util.getVariableSpecFromList(spec.getFacetVariable(), 0));
     inputVarSpecs.add(util.getVariableSpecFromList(spec.getFacetVariable(), 1));
@@ -126,6 +126,10 @@ public class AbundanceScatterplotPlugin extends AbstractPlugin<AbundanceScatterp
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       connection.voidEval(getVoidEvalComputedVariableMetadataList(metadata));
       connection.voidEval("variables <- veupathUtils::merge(variables, computedVariables)");
+      connection.voidEval("overlayVarMetadata <- veupathUtils::findVariableMetadataFromPlotRef(variables, 'overlay')");
+      connection.voidEval("overlayVarMetadata@members <- overlayVarMetadata@members[1:8]");
+      connection.voidEval("overlayVarIndex <- veupathUtils::findIndexFromPlotRef(variables, 'overlay')");
+      connection.voidEval("variables[[overlayVarIndex]] <- overlayVarMetadata");
 
       String command = "plot.data::scattergl(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, '" +
           valueSpec + "', '" + 
