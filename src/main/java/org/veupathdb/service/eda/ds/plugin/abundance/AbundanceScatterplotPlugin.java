@@ -117,7 +117,6 @@ public class AbundanceScatterplotPlugin extends AbstractPlugin<AbundanceScatterp
     inputVarSpecs.addAll(metadata.getVariables().stream()
         .filter(var -> var.getPlotReference().getValue().equals("overlay"))
         .findFirst().orElseThrow().getMembers().subList(0,8));
-    System.out.println("number collection members added to inputs: " + inputVarSpecs.size());
     inputVarSpecs.add(spec.getXAxisVariable());
     inputVarSpecs.add(util.getVariableSpecFromList(spec.getFacetVariable(), 0));
     inputVarSpecs.add(util.getVariableSpecFromList(spec.getFacetVariable(), 1));
