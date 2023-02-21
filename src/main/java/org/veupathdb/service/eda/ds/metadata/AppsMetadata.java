@@ -37,6 +37,17 @@ public class AppsMetadata {
   // NOTE: these names must match the url segments defined in the api.raml
   // Pass vizs are now different based on mbio vs clinepi so we need to adjust the below array?
   public static final AppsGetResponse APPS = apps(
+      app("standalone-map", "Standalone Map", null,
+          "A collection of visualizations designed to support the unbiased exploration of relationships between spatiotemporal variables in a cartographic map",
+          Arrays.asList(CLINEPI_PROJECT, ALLCLINEPI_PROJECT, VECTORBASE_PROJECT),
+          viz("histogram", new FloatingHistogramPlugin()),
+          viz("barplot", new FloatingBarplotPlugin()),
+          viz("scatterplot", new FloatingScatterplotPlugin()),
+          viz("boxplot", new FloatingBoxplotPlugin()),
+          viz("twobytwo", new FloatingTwoByTwoPlugin()),
+          viz("conttable", new FloatingContTablePlugin()),
+          viz("lineplot", new FloatingLineplotPlugin()),
+          viz("map-markers", new StandaloneMapMarkersPlugin())),
       app("pass", "Pass-Through", null,
           "A collection of visualizations designed to support the unbiased exploration of relationships between variables",
           Arrays.asList(CLINEPI_PROJECT, ALLCLINEPI_PROJECT, VECTORBASE_PROJECT),
