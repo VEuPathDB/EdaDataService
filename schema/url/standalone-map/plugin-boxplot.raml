@@ -1,0 +1,40 @@
+#%RAML 1.0 Library
+
+types:
+  # Type name determines the name of the Java class that will be generated.
+
+  BoxplotPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: FloatingBoxplotSpec
+
+  # think this always gives outliers and means, saves some user configuration?
+  FloatingBoxplotSpec:
+    additionalProperties: false
+    properties:
+      outputEntityId:
+        type: string
+      xAxisVariable: 
+        type: VariableSpec
+      yAxisVariable: 
+        type: VariableSpec
+      overlayVariable: 
+        type: VariableSpec
+        required: false
+      maxAllowedDataPoints:
+        type: integer
+        format: int64
+        required: false
+      
+  FloatingBoxplot:
+    additionalProperties: false
+    properties:
+      data:
+        type: BoxplotData[]
+      variables: VariableMapping[]
+
+  FloatingBoxplotPostResponse:
+    additionalProperties: false
+    properties:
+      boxplot:
+        type: FloatingBoxplot

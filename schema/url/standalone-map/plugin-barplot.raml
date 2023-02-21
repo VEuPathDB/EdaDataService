@@ -1,0 +1,40 @@
+#%RAML 1.0 Library
+
+types:
+  # Type name determines the name of the Java class that will be generated.
+
+  BarplotPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: FloatingBarplotSpec
+  
+  # do we need a BaseBarPlot type or something? 
+  # i think that wouldnt have an overlay, so wed need this anyway...
+  FloatingBarplotSpec:
+    additionalProperties: false
+    properties:
+      outputEntityId:
+        type: string
+      barMode:
+        type: string
+        enum: ['group', 'stack']
+      valueSpec:
+        type: ValueSpec
+      xAxisVariable: 
+        type: VariableSpec
+      overlayVariable: 
+        type: VariableSpec
+        required: false
+
+  FloatingBarplot:
+    additionalProperties: false
+    properties:
+      data:
+        type: BarplotData[]
+      variables: VariableMapping[]
+
+  FloatingBarplotPostResponse:
+    additionalProperties: false
+    properties:
+      barplot:
+        type: FloatingBarplot

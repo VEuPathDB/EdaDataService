@@ -1,0 +1,42 @@
+#%RAML 1.0 Library
+
+types:
+  # Type name determines the name of the Java class that will be generated.
+
+  FloatingScatterplotPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: FloatingScatterplotSpec
+
+  FloatingScatterplotSpec:
+    additionalProperties: false
+    properties:
+      outputEntityId:
+        type: string
+      valueSpec:
+        type: string
+        enum: ['raw', 'smoothedMeanWithRaw', 'bestFitLineWithRaw']
+      xAxisVariable: 
+        type: VariableSpec
+      yAxisVariable: 
+        type: VariableSpec
+      overlayVariable: 
+        type: VariableSpec
+        required: false
+      maxAllowedDataPoints:
+        type: integer
+        format: int64
+        required: false
+
+  FloatingScatterplot:
+    additionalProperties: false
+    properties:
+      data:
+        type: ScatterplotData[]
+      variables: VariableMapping[]
+
+  FloatingScatterplotPostResponse:
+    additionalProperties: false
+    properties:
+      scatterplot:
+        type: FloatingScatterplot

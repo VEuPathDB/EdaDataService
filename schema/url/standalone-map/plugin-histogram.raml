@@ -1,0 +1,42 @@
+#%RAML 1.0 Library
+
+types:
+
+  FloatingHistogramPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: FloatingHistogramSpec
+
+  FlatingHistogramSpec:
+    additionalProperties: false
+    properties:
+      outputEntityId:
+        type: string
+      xAxisVariable:
+        type: VariableSpec
+      barMode:
+        type: string
+        enum: ['overlay', 'stack']
+      valueSpec: 
+        type: ValueSpec
+      overlayVariable: 
+        type: VariableSpec
+        required: false
+      binSpec:
+        type: BinSpec
+      viewport:
+        type: NumericViewport
+        required: false
+
+  FloatingHistogram:
+    additionalProperties: false
+    properties:
+      data:
+        type: HistogramData[]
+      variables: VariableMapping[]
+
+  FloatingHistogramPostResponse:
+    additionalProperties: false
+    properties:
+      histogram:
+        type: FloatingHistogram
