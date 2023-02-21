@@ -60,10 +60,9 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
       .pattern()
         .element("xAxisVariable")
           .maxValues(10)
-          .description("Variable must have 10 or fewer unique values.")
+          .description("Variable must have 10 or fewer unique values and be of the same or a child entity as the variable the map markers are painted with.")
         .element("overlayVariable")
           .required(false)
-          .description("Variable must be of the same or a parent entity as the X-axis variable.")
       .done();
   }
 
