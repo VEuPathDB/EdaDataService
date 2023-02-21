@@ -2,12 +2,12 @@
 
 types:
 
-  MapPostRequest:
+  StandaloneMapMarkersPostRequest:
     type: VisualizationRequestBase
     properties:
-      config: MapMarkerSpec
+      config: StandaloneMapMarkerSpec
 
-  MapMarkerSpec:
+  StandaloneMapMarkerSpec:
     additionalProperties: false
     properties:
       outputEntityId: 
@@ -28,7 +28,7 @@ types:
       viewport:
         type: GeolocationViewport
 
-  MapPostResponse:
+  StandaloneMapMarkersPostResponse:
     additionalProperties: false
     properties:
       mapElements: MapElementInfo[]
@@ -47,7 +47,7 @@ types:
     properties:
       value: number
 
-  MapElementInfo:
+  StandaloneMapElementInfo:
     additionalProperties: false
     properties:
       geoAggregateValue:
