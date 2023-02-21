@@ -39,7 +39,7 @@ public class AppsMetadata {
   public static final AppsGetResponse APPS = apps(
       app("standalone-map", "Standalone Map", null,
           "A collection of visualizations designed to support the unbiased exploration of relationships between spatiotemporal variables in a cartographic map",
-          Arrays.asList(CLINEPI_PROJECT, ALLCLINEPI_PROJECT, VECTORBASE_PROJECT),
+          Arrays.asList(VECTORBASE_PROJECT),
           viz("histogram", new FloatingHistogramPlugin()),
           viz("barplot", new FloatingBarplotPlugin()),
           viz("scatterplot", new FloatingScatterplotPlugin()),
@@ -50,7 +50,7 @@ public class AppsMetadata {
           viz("map-markers", new StandaloneMapMarkersPlugin())),
       app("pass", "Pass-Through", null,
           "A collection of visualizations designed to support the unbiased exploration of relationships between variables",
-          Arrays.asList(CLINEPI_PROJECT, ALLCLINEPI_PROJECT, VECTORBASE_PROJECT),
+          Arrays.asList(CLINEPI_PROJECT, ALLCLINEPI_PROJECT),
           viz("histogram", new HistogramPlugin()),
           viz("barplot", new BarplotPlugin()),
           viz("scatterplot", new ScatterplotPlugin()),
