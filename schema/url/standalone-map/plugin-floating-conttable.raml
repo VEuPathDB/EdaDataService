@@ -15,8 +15,10 @@ types:
         type: string
       xAxisVariable:
         type: VariableSpec
-      yAxisVariable:
+      overlayVariable:
         type: VariableSpec
+      overlayValues?:
+        type: BinRange[] # categoricals can just ignore bin start and end
 
   FlatingMosaic:
     additionalProperties: false

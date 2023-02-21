@@ -11,6 +11,8 @@ types:
   # do we need a BaseBarPlot type or something? 
   # i think that wouldnt have an overlay, so wed need this anyway...
   # might help w writing the plugins ??
+
+  # TODO the float chart specs need to gain overlayValues like the markers plugin has
   FloatingBarplotSpec:
     additionalProperties: false
     properties:
@@ -26,6 +28,8 @@ types:
       overlayVariable: 
         type: VariableSpec
         required: false
+      overlayValues?:
+        type: BinRange[] # categoricals can just ignore bin start and end
 
   FloatingBarplot:
     additionalProperties: false

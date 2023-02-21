@@ -23,6 +23,8 @@ types:
       overlayVariable: 
         type: VariableSpec
         required: false
+      overlayValues?:
+        type: BinRange[] # categoricals can just ignore bin start and end
       maxAllowedDataPoints:
         type: integer
         format: int64
