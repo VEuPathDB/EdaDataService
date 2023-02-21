@@ -24,7 +24,7 @@ import static org.gusdb.fgputil.FormatUtil.NL;
 import static org.gusdb.fgputil.FormatUtil.TAB;
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.CLINEPI_PROJECT;
 
-public class MapPlugin extends AbstractEmptyComputePlugin<MapPostRequest, MapSpec> {
+public class StandaloneMapPlugin extends AbstractEmptyComputePlugin<StandaloneMapMarkersPostRequest, StandaloneMapSpec> {
 
   @Override
   public List<String> getProjects() {
