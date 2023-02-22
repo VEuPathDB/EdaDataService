@@ -44,7 +44,6 @@ public class AppsMetadata {
           viz("barplot", new FloatingBarplotPlugin()),
           viz("scatterplot", new FloatingScatterplotPlugin()),
           viz("boxplot", new FloatingBoxplotPlugin()),
-          viz("twobytwo", new FloatingTwoByTwoPlugin()),
           viz("conttable", new FloatingContTablePlugin()),
           viz("lineplot", new FloatingLineplotPlugin()),
           viz("map-markers", new StandaloneMapMarkersPlugin())),

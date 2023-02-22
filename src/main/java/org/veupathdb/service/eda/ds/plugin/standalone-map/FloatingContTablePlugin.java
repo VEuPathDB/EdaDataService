@@ -27,12 +27,12 @@ public class FloatingContTablePlugin extends AbstractEmptyComputePlugin<Floating
 
   @Override
   public String getDisplayName() {
-    return "Mosaic plot";
+    return "Contingency Table";
   }
 
   @Override
   public String getDescription() {
-    return "Visualize the frequency distribution and chi-squared test results for two categorical variables";
+    return "Visualize the frequency distribution and chi-squared and fisher's exact test results for two categorical variables";
   }
 
   @Override
@@ -53,12 +53,14 @@ public class FloatingContTablePlugin extends AbstractEmptyComputePlugin<Floating
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder(List.of("overlayVariable", "xAxisVariable"))
+      .dependencyOrder(List.of("yAxisVariable", "xAxisVariable"))
       .pattern()
-        .element("overlayVariable") // required here, since its functionally the yaxis
+        .element("yAxisVariable")
+          .maxValues(10)
+          .description("Variable must have 10 or fewer unique values and be from the same branch of the dataset diagram as the X-axis variable.")
         .element("xAxisVariable")
           .maxValues(10)
-          .description("Variable must have 10 or fewer unique values and be from the same branch of the dataset diagram as the variable the map markers are painted with.")
+          .description("Variable must have 10 or fewer unique values and be from the same branch of the dataset diagram as the Y-axis variable.")
       .done();
   }
 
@@ -67,7 +69,7 @@ public class FloatingContTablePlugin extends AbstractEmptyComputePlugin<Floating
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
       .var("xAxisVariable", pluginSpec.getXAxisVariable())
-      .var("overlayVariable", pluginSpec.getOverlayVariable()));
+      .var("yAxisVariable", pluginSpec.getYAxisVariable()));
   }
 
   @Override
@@ -75,7 +77,7 @@ public class FloatingContTablePlugin extends AbstractEmptyComputePlugin<Floating
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
-        .addVar(pluginSpec.getOverlayVariable()));
+        .addVar(pluginSpec.getYAxisVariable()));
   }
 
   @Override
@@ -84,12 +86,12 @@ public class FloatingContTablePlugin extends AbstractEmptyComputePlugin<Floating
     FloatingMosaicSpec spec = getPluginSpec();
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
     varMap.put("xAxis", spec.getXAxisVariable());
-    varMap.put("yAxis", spec.getOverlayVariable());
+    varMap.put("yAxis", spec.getYAxisVariable());
     
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
           spec.getXAxisVariable(),
-          spec.getOverlayVariable()));
+          spec.getYAxisVariable()));
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String cmd = "plot.data::mosaic(data=" + DEFAULT_SINGLE_STREAM_NAME + ", variables=variables, " + 
                                      "statistic='chiSq', " + 
