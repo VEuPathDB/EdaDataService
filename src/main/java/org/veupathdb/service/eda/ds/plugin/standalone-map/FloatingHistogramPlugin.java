@@ -55,20 +55,13 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder(List.of("xAxisVariable"), List.of("overlayVariable", "facetVariable"))
+      .dependencyOrder(List.of("xAxisVariable"), List.of("overlayVariable"))
       .pattern()
         .element("xAxisVariable")
           .types(APIVariableType.NUMBER, APIVariableType.DATE, APIVariableType.INTEGER)
-          .description("Variable must be a number or date.")
+          .description("Variable must be a number or date and be the same or a child entity as the variable the map markers are painted with.")
         .element("overlayVariable")
           .required(false)
-          .maxValues(8)
-          .description("Variable must have 8 or fewer unique values and be of the same or a parent entity as the X-axis variable.")
-        .element("facetVariable")
-          .required(false)
-          .maxVars(2)
-          .maxValues(10)
-          .description("Variable(s) must have 10 or fewer unique values and be of the same or a parent entity as the Overlay variable.")
       .done();
   }
   
@@ -77,8 +70,7 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
       .var("xAxisVariable", pluginSpec.getXAxisVariable())
-      .var("overlayVariable", pluginSpec.getOverlayVariable())
-      .var("facetVariable", pluginSpec.getFacetVariable()));
+      .var("overlayVariable", pluginSpec.getOverlayVariable()));
     if (pluginSpec.getBarMode() == null) {
       throw new ValidationException("Property 'barMode' is required.");
     }
@@ -89,8 +81,7 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
-        .addVar(pluginSpec.getOverlayVariable())
-        .addVars(pluginSpec.getFacetVariable()));
+        .addVar(pluginSpec.getOverlayVariable()));
   }
   
   @Override
@@ -100,10 +91,6 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
     varMap.put("xAxis", spec.getXAxisVariable());
     varMap.put("overlay", spec.getOverlayVariable());
-    varMap.put("facet1", util.getVariableSpecFromList(spec.getFacetVariable(), 0));
-    varMap.put("facet2", util.getVariableSpecFromList(spec.getFacetVariable(), 1));
-    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
-    String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
     String barMode = spec.getBarMode().getValue();
     String xVar = util.toColNameOrEmpty(spec.getXAxisVariable());
     String xVarType = util.getVariableType(spec.getXAxisVariable());
@@ -111,9 +98,7 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
           spec.getXAxisVariable(),
-          spec.getOverlayVariable(),
-          util.getVariableSpecFromList(spec.getFacetVariable(), 0),
-          util.getVariableSpecFromList(spec.getFacetVariable(), 1)));
+          spec.getOverlayVariable()));
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
      
       String viewportRString = getViewportAsRString(spec.getViewport(), xVarType);
@@ -152,8 +137,7 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
           "plot.data::histogram(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, binWidth, '" +
                spec.getValueSpec().getValue() + "', '" +
                binReportValue + "', '" +
-               barMode + "', viewport, '" +
-               deprecatedShowMissingness + "')";
+               barMode + "', viewport, FALSE, FALSE, 'noVariables')";
       streamResult(connection, cmd, out);
     });
   }
