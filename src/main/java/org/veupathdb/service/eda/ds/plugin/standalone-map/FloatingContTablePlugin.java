@@ -27,7 +27,7 @@ public class FloatingContTablePlugin extends AbstractEmptyComputePlugin<Floating
 
   @Override
   public String getDisplayName() {
-    return "Mosaic plot, RxC table";
+    return "Mosaic plot";
   }
 
   @Override
@@ -53,14 +53,12 @@ public class FloatingContTablePlugin extends AbstractEmptyComputePlugin<Floating
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder(List.of("yAxisVariable", "xAxisVariable"))
+      .dependencyOrder(List.of("overlayVariable", "xAxisVariable"))
       .pattern()
-        .element("yAxisVariable")
-          .maxValues(8)
-          .description("Variable must have 8 or fewer unique values and be from the same branch of the dataset diagram as the X-axis variable.")
+        .element("overlayVariable") // required here, since its functionally the yaxis
         .element("xAxisVariable")
           .maxValues(10)
-          .description("Variable must have 10 or fewer unique values and be from the same branch of the dataset diagram as the Y-axis variable.")
+          .description("Variable must have 10 or fewer unique values and be from the same branch of the dataset diagram as the variable the map markers are painted with.")
       .done();
   }
 
@@ -69,8 +67,7 @@ public class FloatingContTablePlugin extends AbstractEmptyComputePlugin<Floating
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
       .var("xAxisVariable", pluginSpec.getXAxisVariable())
-      .var("yAxisVariable", pluginSpec.getYAxisVariable())
-      .var("facetVariable", pluginSpec.getFacetVariable()));
+      .var("overlayVariable", pluginSpec.getOverlayVariable()));
   }
 
   @Override
@@ -78,8 +75,7 @@ public class FloatingContTablePlugin extends AbstractEmptyComputePlugin<Floating
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
-        .addVar(pluginSpec.getYAxisVariable())
-        .addVars(pluginSpec.getFacetVariable()));
+        .addVar(pluginSpec.getOverlayVariable()));
   }
 
   @Override
@@ -88,20 +84,19 @@ public class FloatingContTablePlugin extends AbstractEmptyComputePlugin<Floating
     FloatingMosaicSpec spec = getPluginSpec();
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
     varMap.put("xAxis", spec.getXAxisVariable());
-    varMap.put("yAxis", spec.getYAxisVariable());
-    varMap.put("facet1", util.getVariableSpecFromList(spec.getFacetVariable(), 0));
-    varMap.put("facet2", util.getVariableSpecFromList(spec.getFacetVariable(), 1));
-    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
-    String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
+    varMap.put("yAxis", spec.getOverlayVariable());
     
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
           spec.getXAxisVariable(),
-          spec.getYAxisVariable(),
-          util.getVariableSpecFromList(spec.getFacetVariable(), 0),
-          util.getVariableSpecFromList(spec.getFacetVariable(), 1)));
+          spec.getOverlayVariable()));
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
-      String cmd = "plot.data::mosaic(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, 'chiSq', NA_character_, NA_character_,'" + deprecatedShowMissingness + "')";
+      String cmd = "plot.data::mosaic(data=" + DEFAULT_SINGLE_STREAM_NAME + ", variables=variables, " + 
+                                     "statistic='chiSq', " + 
+                                     "columnReferenceValue=NA_character_, " + 
+                                     "rowReferenceValue=NA_character_, "+
+                                     "sampleSizes=FALSE, " +
+                                     "completeCases=FALSE, 'noVariables')";
       streamResult(connection, cmd, out);
     });
   }
