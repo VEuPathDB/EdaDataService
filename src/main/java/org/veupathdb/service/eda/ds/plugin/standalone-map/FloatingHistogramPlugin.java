@@ -21,12 +21,11 @@ import java.util.Map;
 
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
-import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.CLINEPI_PROJECT;
-import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.MICROBIOME_PROJECT;
+import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
-public class HistogramPlugin extends AbstractEmptyComputePlugin<HistogramPostRequest, HistogramSpec> {
+public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<FloatingHistogramPostRequest, FloatingHistogramSpec> {
   
-  private static final Logger LOG = LogManager.getLogger(HistogramPlugin.class);
+  private static final Logger LOG = LogManager.getLogger(FloatingHistogramPlugin.class);
 
   @Override
   public String getDisplayName() {
@@ -40,17 +39,17 @@ public class HistogramPlugin extends AbstractEmptyComputePlugin<HistogramPostReq
 
   @Override
   public List<String> getProjects() {
-    return List.of(CLINEPI_PROJECT, MICROBIOME_PROJECT);
+    return List.of(VECTORBASE_PROJECT);
   }
 
   @Override
-  protected Class<HistogramPostRequest> getVisualizationRequestClass() {
-    return HistogramPostRequest.class;
+  protected Class<FloatingHistogramPostRequest> getVisualizationRequestClass() {
+    return FloatingHistogramPostRequest.class;
   }
 
   @Override
-  protected Class<HistogramSpec> getVisualizationSpecClass() {
-    return HistogramSpec.class;
+  protected Class<FloatingHistogramSpec> getVisualizationSpecClass() {
+    return FloatingHistogramSpec.class;
   }
   
   @Override
@@ -74,7 +73,7 @@ public class HistogramPlugin extends AbstractEmptyComputePlugin<HistogramPostReq
   }
   
   @Override
-  protected void validateVisualizationSpec(HistogramSpec pluginSpec) throws ValidationException {
+  protected void validateVisualizationSpec(FloatingHistogramSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
       .var("xAxisVariable", pluginSpec.getXAxisVariable())
@@ -86,7 +85,7 @@ public class HistogramPlugin extends AbstractEmptyComputePlugin<HistogramPostReq
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(HistogramSpec pluginSpec) {
+  protected List<StreamSpec> getRequestedStreams(FloatingHistogramSpec pluginSpec) {
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
@@ -97,7 +96,7 @@ public class HistogramPlugin extends AbstractEmptyComputePlugin<HistogramPostReq
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PluginUtil util = getUtil();
-    HistogramSpec spec = getPluginSpec();
+    FloatingHistogramSpec spec = getPluginSpec();
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
     varMap.put("xAxis", spec.getXAxisVariable());
     varMap.put("overlay", spec.getOverlayVariable());

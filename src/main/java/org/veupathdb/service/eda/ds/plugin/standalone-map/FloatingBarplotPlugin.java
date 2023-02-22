@@ -23,8 +23,7 @@ import java.util.Scanner;
 
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
-import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.CLINEPI_PROJECT;
-import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.MICROBIOME_PROJECT;
+import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
 public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBarplotPostRequest, FloatingBarplotSpec> {
 
