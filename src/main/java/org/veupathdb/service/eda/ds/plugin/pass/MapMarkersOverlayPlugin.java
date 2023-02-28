@@ -34,13 +34,8 @@ public class MapMarkersOverlayPlugin extends AbstractEmptyComputePlugin<MapMarke
   }
 
   @Override
-  protected Class<MapMarkersOverlayPostRequest> getVisualizationRequestClass() {
-    return MapMarkersOverlayPostRequest.class;
-  }
-
-  @Override
-  protected Class<MapMarkersOverlaySpec> getVisualizationSpecClass() {
-    return MapMarkersOverlaySpec.class;
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(MapMarkersOverlayPostRequest.class, MapMarkersOverlaySpec.class);
   }
 
   @Override

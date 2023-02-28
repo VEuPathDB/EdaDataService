@@ -5,6 +5,7 @@ import org.gusdb.fgputil.json.JsonUtil;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
+import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.*;
 
@@ -15,24 +16,8 @@ import java.util.Map;
 public class ExampleComputeVizPlugin extends AbstractPlugin<ExampleComputeVizPostRequest, ExampleComputeVizSpec, ExampleComputeConfig> {
 
   @Override
-  protected Class<ExampleComputeVizPostRequest> getVisualizationRequestClass() {
-    return ExampleComputeVizPostRequest.class;
-  }
-
-  @Override
-  protected Class<ExampleComputeConfig> getComputeConfigClass() {
-    return ExampleComputeConfig.class;
-  }
-
-  @Override
-  protected Class<ExampleComputeVizSpec> getVisualizationSpecClass() {
-    return ExampleComputeVizSpec.class;
-  }
-
-  @Override
-  protected boolean includeComputedVarsInStream() {
-    // this visualization uses a compute plugin that computes a variable (not just statistics)
-    return true;
+  protected ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(ExampleComputeVizPostRequest.class, ExampleComputeVizSpec.class, ExampleComputeConfig.class);
   }
 
   @Override

@@ -44,13 +44,8 @@ public class BarplotPlugin extends AbstractEmptyComputePlugin<BarplotPostRequest
   }
 
   @Override
-  protected Class<BarplotPostRequest> getVisualizationRequestClass() {
-    return BarplotPostRequest.class;
-  }
-
-  @Override
-  protected Class<BarplotSpec> getVisualizationSpecClass() {
-    return BarplotSpec.class;
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(BarplotPostRequest.class, BarplotSpec.class);
   }
 
   @Override

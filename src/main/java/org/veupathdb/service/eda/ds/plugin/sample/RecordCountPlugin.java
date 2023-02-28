@@ -13,10 +13,7 @@ import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.model.VariableSource;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.generated.model.RecordCountPostRequest;
-import org.veupathdb.service.eda.generated.model.RecordCountPostResponse;
-import org.veupathdb.service.eda.generated.model.RecordCountPostResponseImpl;
-import org.veupathdb.service.eda.generated.model.RecordCountSpec;
+import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,13 +44,8 @@ public class RecordCountPlugin extends AbstractEmptyComputePlugin<RecordCountPos
   }
 
   @Override
-  protected Class<RecordCountPostRequest> getVisualizationRequestClass() {
-    return RecordCountPostRequest.class;
-  }
-
-  @Override
-  protected Class<RecordCountSpec> getVisualizationSpecClass() {
-    return RecordCountSpec.class;
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(RecordCountPostRequest.class, RecordCountSpec.class);
   }
 
   @Override
@@ -76,7 +68,7 @@ public class RecordCountPlugin extends AbstractEmptyComputePlugin<RecordCountPos
     return _cachedResponse != null ? Collections.emptyList() : ListBuilder.asList(
       new StreamSpec(pluginSpec.getEntityId(), pluginSpec.getEntityId())
         // add first var in entity to work around no-vars bug in subsetting service
-        .addVar(getReferenceMetadata().getEntity(pluginSpec.getEntityId()).orElseThrow().stream()
+        .addVar(getReferenceMetadata().getEntity(pluginSpec.getEntityId()).orElseThrow().getVariables().stream()
             .filter(var -> VariableSource.NATIVE.equals(var.getSource()))
             .findFirst().orElseThrow())); // should have at least one native var
   }

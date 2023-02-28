@@ -41,13 +41,8 @@ public class BoxplotPlugin extends AbstractEmptyComputePlugin<BoxplotPostRequest
   }
 
   @Override
-  protected Class<BoxplotPostRequest> getVisualizationRequestClass() {
-    return BoxplotPostRequest.class;
-  }
-
-  @Override
-  protected Class<BoxplotSpec> getVisualizationSpecClass() {
-    return BoxplotSpec.class;
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(BoxplotPostRequest.class, BoxplotSpec.class);
   }
 
   @Override

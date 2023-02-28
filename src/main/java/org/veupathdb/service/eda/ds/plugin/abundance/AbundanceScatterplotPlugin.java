@@ -12,6 +12,7 @@ import org.veupathdb.service.eda.common.plugin.util.RServeClient;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.ds.plugin.AbstractScatterplotWithCompute;
 import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
@@ -24,14 +25,9 @@ import java.util.Map;
 
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class AbundanceScatterplotPlugin extends AbstractPlugin<AbundanceScatterplotPostRequest, ScatterplotWith1ComputeSpec, RankedAbundanceComputeConfig> {
+public class AbundanceScatterplotPlugin extends AbstractScatterplotWithCompute<AbundanceScatterplotPostRequest, ScatterplotWith1ComputeSpec, RankedAbundanceComputeConfig> {
 
   private static final Logger LOG = LogManager.getLogger(AbundanceScatterplotPlugin.class);
-  
-  @Override
-  public String getDisplayName() {
-    return "Scatter plot";
-  }
 
   @Override
   public String getDescription() {
@@ -39,46 +35,10 @@ public class AbundanceScatterplotPlugin extends AbstractPlugin<AbundanceScatterp
   }
 
   @Override
-  public List<String> getProjects() {
-    return List.of(AppsMetadata.MICROBIOME_PROJECT);
+  protected ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(AbundanceScatterplotPostRequest.class, ScatterplotWith1ComputeSpec.class, RankedAbundanceComputeConfig.class);
   }
 
-  @Override
-  protected Class<AbundanceScatterplotPostRequest> getVisualizationRequestClass() {
-    return AbundanceScatterplotPostRequest.class;
-  }
-
-  @Override
-  protected Class<ScatterplotWith1ComputeSpec> getVisualizationSpecClass() {
-    return ScatterplotWith1ComputeSpec.class;
-  }
-
-  @Override
-  protected Class<RankedAbundanceComputeConfig> getComputeConfigClass() {
-    return RankedAbundanceComputeConfig.class;
-  }
-
-  @Override
-  protected boolean includeComputedVarsInStream() {
-    return true;
-  }
-
-  @Override
-  public ConstraintSpec getConstraintSpec() {
-    return new ConstraintSpec()
-      .dependencyOrder(List.of("xAxisVariable"), List.of("facetVariable"))
-      .pattern()
-        .element("xAxisVariable")
-          .types(APIVariableType.NUMBER, APIVariableType.DATE, APIVariableType.INTEGER)
-          .description("Variable must be a number or date and be of the same or a parent entity as the Y-axis variable.")
-        .element("facetVariable")
-          .required(false)
-          .maxVars(2)
-          .maxValues(7)
-          .description("Variable(s) must have7 or fewer unique values and be of the same or a parent entity as the Overlay variable.")
-      .done();
-  }
-  
   @Override
   protected void validateVisualizationSpec(ScatterplotWith1ComputeSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()

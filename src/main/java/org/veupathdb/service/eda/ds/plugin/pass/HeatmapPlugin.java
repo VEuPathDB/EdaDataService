@@ -40,13 +40,8 @@ public class HeatmapPlugin extends AbstractEmptyComputePlugin<HeatmapPostRequest
   }
 
   @Override
-  protected Class<HeatmapPostRequest> getVisualizationRequestClass() {
-    return HeatmapPostRequest.class;
-  }
-
-  @Override
-  protected Class<HeatmapSpec> getVisualizationSpecClass() {
-    return HeatmapSpec.class;
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(HeatmapPostRequest.class, HeatmapSpec.class);
   }
 
   @Override

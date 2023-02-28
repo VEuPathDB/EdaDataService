@@ -13,69 +13,26 @@ import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.ds.Resources;
-import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
 import org.veupathdb.service.eda.common.plugin.util.RServeClient;
-import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.ds.plugin.AbstractScatterplotWithCompute;
 import org.veupathdb.service.eda.generated.model.*;
 
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class BetaDivScatterplotPlugin extends AbstractPlugin<BetaDivScatterplotPostRequest, BetaDivScatterplotSpec, BetaDivComputeConfig> {
+public class BetaDivScatterplotPlugin extends AbstractScatterplotWithCompute<BetaDivScatterplotPostRequest, BetaDivScatterplotSpec, BetaDivComputeConfig> {
 
   private static final Logger LOG = LogManager.getLogger(BetaDivScatterplotPlugin.class);
-  
-  @Override
-  public String getDisplayName() {
-    return "Scatter plot";
-  }
 
   @Override
   public String getDescription() {
-    return "Visualize a 2-dimensional projection of samples based on their beta diversitiy";
+    return "Visualize a 2-dimensional projection of samples based on their beta diversity";
   }
 
   @Override
-  public List<String> getProjects() {
-    return List.of(AppsMetadata.MICROBIOME_PROJECT);
+  protected ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(BetaDivScatterplotPostRequest.class, BetaDivScatterplotSpec.class, BetaDivComputeConfig.class);
   }
 
-  @Override
-  protected Class<BetaDivScatterplotPostRequest> getVisualizationRequestClass() {
-    return BetaDivScatterplotPostRequest.class;
-  }
-
-  @Override
-  protected Class<BetaDivScatterplotSpec> getVisualizationSpecClass() {
-    return BetaDivScatterplotSpec.class;
-  }
-
-  @Override
-  protected Class<BetaDivComputeConfig> getComputeConfigClass() {
-    return BetaDivComputeConfig.class;
-  }
-
-  @Override
-  protected boolean includeComputedVarsInStream() {
-    return true;
-  }
-
-  @Override
-  public ConstraintSpec getConstraintSpec() {
-    return new ConstraintSpec()
-      .dependencyOrder(List.of("overlayVariable"))
-      .pattern()
-        .element("overlayVariable")
-          .required(false)
-          .maxValues(8)
-          .description("Variable must be a number, or have 8 or fewer values, and be of the same or a parent entity as the X-axis variable.")
-      .pattern()
-        .element("overlayVariable")
-          .required(false)
-          .types(APIVariableType.NUMBER, APIVariableType.INTEGER) 
-          .description("Variable must be a number, or have 8 or fewer values, and be of the same or a parent entity as the X-axis variable.")
-      .done();
-  }
-  
   @Override
   protected void validateVisualizationSpec(BetaDivScatterplotSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()

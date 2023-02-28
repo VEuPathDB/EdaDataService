@@ -38,23 +38,8 @@ public class AlphaDivBoxplotPlugin extends AbstractPlugin<AlphaDivBoxplotPostReq
   }
 
   @Override
-  protected Class<AlphaDivBoxplotPostRequest> getVisualizationRequestClass() {
-    return AlphaDivBoxplotPostRequest.class;
-  }
-
-  @Override
-  protected Class<BoxplotWith1ComputeSpec> getVisualizationSpecClass() {
-    return BoxplotWith1ComputeSpec.class;
-  }
-
-  @Override
-  protected Class<AlphaDivComputeConfig> getComputeConfigClass() {
-    return AlphaDivComputeConfig.class;
-  }
-
-  @Override
-  protected boolean includeComputedVarsInStream() {
-    return true;
+  protected ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(AlphaDivBoxplotPostRequest.class, BoxplotWith1ComputeSpec.class, AlphaDivComputeConfig.class);
   }
 
   @Override

@@ -11,6 +11,7 @@ import org.veupathdb.service.eda.common.plugin.util.RServeClient;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.ds.plugin.AbstractScatterplotWithCompute;
 import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
@@ -22,7 +23,7 @@ import java.util.Map;
 
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class AlphaDivScatterplotPlugin extends AbstractPlugin<AlphaDivScatterplotPostRequest, ScatterplotWith1ComputeSpec, AlphaDivComputeConfig> {
+public class AlphaDivScatterplotPlugin extends AbstractScatterplotWithCompute<AlphaDivScatterplotPostRequest, ScatterplotWith1ComputeSpec, AlphaDivComputeConfig> {
 
   private static final Logger LOG = LogManager.getLogger(AlphaDivScatterplotPlugin.class);
   
@@ -42,44 +43,11 @@ public class AlphaDivScatterplotPlugin extends AbstractPlugin<AlphaDivScatterplo
   }
 
   @Override
-  protected Class<AlphaDivScatterplotPostRequest> getVisualizationRequestClass() {
-    return AlphaDivScatterplotPostRequest.class;
-  }
-  
-  @Override
-  protected Class<ScatterplotWith1ComputeSpec> getVisualizationSpecClass() {
-    return ScatterplotWith1ComputeSpec.class;
+  protected ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(AlphaDivScatterplotPostRequest.class, ScatterplotWith1ComputeSpec.class, AlphaDivComputeConfig.class);
   }
 
-  @Override
-  protected Class<AlphaDivComputeConfig> getComputeConfigClass() {
-    return AlphaDivComputeConfig.class;
-  }
 
-  @Override
-  protected boolean includeComputedVarsInStream() {
-    return true;
-  }
-
-  @Override
-  public ConstraintSpec getConstraintSpec() {
-    return new ConstraintSpec()
-      .dependencyOrder(List.of("xAxisVariable"), List.of("overlayVariable", "facetVariable"))
-      .pattern()
-        .element("xAxisVariable")
-          .types(APIVariableType.NUMBER, APIVariableType.DATE, APIVariableType.INTEGER)
-          .description("Variable must be a number or date and be of the same or a parent entity as the Y-axis variable.")
-        .element("overlayVariable")
-          .required(false)
-          .maxValues(8)
-          .description("Variable must be of the same or a parent entity as the X-axis variable.")
-        .element("facetVariable")
-          .required(false)
-          .maxVars(2)
-          .maxValues(7)
-          .description("Variable(s) must have 7 or fewer unique values and be of the same or a parent entity as the Overlay variable.")
-      .done();
-  }
   
   @Override
   protected void validateVisualizationSpec(ScatterplotWith1ComputeSpec pluginSpec) throws ValidationException {

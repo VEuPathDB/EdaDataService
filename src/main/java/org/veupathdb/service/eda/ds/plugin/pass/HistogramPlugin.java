@@ -44,13 +44,8 @@ public class HistogramPlugin extends AbstractEmptyComputePlugin<HistogramPostReq
   }
 
   @Override
-  protected Class<HistogramPostRequest> getVisualizationRequestClass() {
-    return HistogramPostRequest.class;
-  }
-
-  @Override
-  protected Class<HistogramSpec> getVisualizationSpecClass() {
-    return HistogramSpec.class;
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(HistogramPostRequest.class, HistogramSpec.class);
   }
   
   @Override

@@ -11,14 +11,10 @@ import org.veupathdb.service.eda.generated.model.VisualizationRequestBase;
  */
 public abstract class AbstractEmptyComputePlugin<T extends VisualizationRequestBase, S> extends AbstractPlugin<T, S, Void> {
 
-  @Override
-  protected Class<Void> getComputeConfigClass() {
-    return Void.class;
-  }
-
-  @Override
-  protected boolean includeComputedVarsInStream() {
-    return false;
+  protected class EmptyComputeClassGroup extends ClassGroup {
+    public EmptyComputeClassGroup(Class<T> visualizationRequestClass, Class<S> visualizationSpecClass) {
+      super(visualizationRequestClass, visualizationSpecClass, Void.class);
+    }
   }
 
 }

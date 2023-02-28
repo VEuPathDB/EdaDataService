@@ -45,13 +45,8 @@ public class ScatterplotPlugin extends AbstractEmptyComputePlugin<ScatterplotPos
   }
 
   @Override
-  protected Class<ScatterplotPostRequest> getVisualizationRequestClass() {
-    return ScatterplotPostRequest.class;
-  }
-
-  @Override
-  protected Class<ScatterplotSpec> getVisualizationSpecClass() {
-    return ScatterplotSpec.class;
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(ScatterplotPostRequest.class, ScatterplotSpec.class);
   }
 
   @Override

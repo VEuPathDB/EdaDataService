@@ -40,13 +40,8 @@ public class DensityplotPlugin extends AbstractEmptyComputePlugin<DensityplotPos
   }
 
   @Override
-  protected Class<DensityplotPostRequest> getVisualizationRequestClass() {
-    return DensityplotPostRequest.class;
-  }
-
-  @Override
-  protected Class<DensityplotSpec> getVisualizationSpecClass() {
-    return DensityplotSpec.class;
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(DensityplotPostRequest.class, DensityplotSpec.class);
   }
 
   @Override

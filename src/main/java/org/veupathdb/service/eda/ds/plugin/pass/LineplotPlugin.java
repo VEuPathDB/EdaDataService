@@ -40,13 +40,8 @@ public class LineplotPlugin extends AbstractEmptyComputePlugin<LineplotPostReque
   }
 
   @Override
-  protected Class<LineplotPostRequest> getVisualizationRequestClass() {
-    return LineplotPostRequest.class;
-  }
-
-  @Override
-  protected Class<LineplotSpec> getVisualizationSpecClass() {
-    return LineplotSpec.class;
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(LineplotPostRequest.class, LineplotSpec.class);
   }
   
   @Override
