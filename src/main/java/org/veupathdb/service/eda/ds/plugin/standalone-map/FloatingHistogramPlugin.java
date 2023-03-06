@@ -94,6 +94,7 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
     String barMode = spec.getBarMode().getValue();
     String xVar = util.toColNameOrEmpty(spec.getXAxisVariable());
     String xVarType = util.getVariableType(spec.getXAxisVariable());
+    String overlayValues = util.listToRVector(spec.getOverlayValues());
 
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
@@ -137,7 +138,8 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
           "plot.data::histogram(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, binWidth, '" +
                spec.getValueSpec().getValue() + "', '" +
                binReportValue + "', '" +
-               barMode + "', viewport, FALSE, FALSE, 'noVariables')";
+               barMode + "', viewport=viewport, sampleSizes=FALSE, completeCases=FALSE, " +
+               "overlayValues=" + overlayValues + ", 'noVariables')";
       streamResult(connection, cmd, out);
     });
   }

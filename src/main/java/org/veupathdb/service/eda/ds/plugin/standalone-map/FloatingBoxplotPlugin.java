@@ -110,6 +110,8 @@ public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBo
       );
 
     useRConnectionWithProcessedRemoteFiles(Resources.RSERVE_URL, filesProcessor, connection -> {
+      String overlayValues = util.listToRVector(spec.getOverlayValues());
+
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String cmd =
           "plot.data::box(data=" + DEFAULT_SINGLE_STREAM_NAME + ", variables=variables, " +
@@ -117,7 +119,7 @@ public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBo
               "mean=TRUE, " +
               "computeStats=FALSE, " +
               "sampleSizes=FALSE, " +
-              "completeCases=FALSE, '" +
+              "completeCases=FALSE, overlayValues=" + overlayValues + ", '" +
               deprecatedShowMissingness + "')";
       streamResult(connection, cmd, out);
     });

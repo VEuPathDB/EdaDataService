@@ -101,6 +101,7 @@ public class FloatingScatterplotPlugin extends AbstractEmptyComputePlugin<Floati
     varMap.put("overlay", spec.getOverlayVariable());
     String valueSpec = spec.getValueSpec().getValue();
     String yVarType = util.getVariableType(spec.getYAxisVariable());
+    String overlayValues = util.listToRVector(spec.getOverlayValues());
     
     if (yVarType.equals("DATE") && !valueSpec.equals("raw")) {
       LOG.error("Cannot calculate trend lines for y-axis date variables. The `valueSpec` property must be set to `raw`.");
@@ -128,7 +129,8 @@ public class FloatingScatterplotPlugin extends AbstractEmptyComputePlugin<Floati
           "plot.data::scattergl(data=" + DEFAULT_SINGLE_STREAM_NAME + ", variables=variables, '" + 
               "value=" + valueSpec + "', '" + 
               "sampleSizes=FALSE, " +
-              "completeCases=FALSE, 'noVariables')";
+              "completeCases=FALSE, " + 
+              "overlayValues=" + overlayValues + ",'noVariables')";
       streamResult(connection, cmd, out);
     }); 
   }

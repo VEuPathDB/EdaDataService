@@ -89,6 +89,7 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
     FloatingBarplotSpec spec = getPluginSpec();
     PluginUtil util = getUtil();
     String barMode = spec.getBarMode().getValue();
+    String overlayValues = util.listToRVector(spec.getOverlayValues());
 
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
     varMap.put("xAxis", spec.getXAxisVariable());
@@ -103,7 +104,7 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
           "plot.data::bar(data=" + DEFAULT_SINGLE_STREAM_NAME + ", variables=variables, " +
               "valueSpec='" + spec.getValueSpec().getValue() + "', " +
               "barMode='" + barMode + "', " +
-              "samplesSizes=FALSE, completeCases=FALSE, 'noVariables')";
+              "samplesSizes=FALSE, completeCases=FALSE, overlayValues=" + overlayValues+ ", 'noVariables')";
       streamResult(connection, cmd, out);
     });
   }
