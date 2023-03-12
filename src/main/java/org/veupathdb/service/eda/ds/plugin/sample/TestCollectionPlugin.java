@@ -9,8 +9,6 @@ import org.veupathdb.service.eda.common.model.CollectionDef;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.generated.model.CollectionSpec;
 import org.veupathdb.service.eda.generated.model.TestCollectionsPostRequest;
-import org.veupathdb.service.eda.generated.model.TwoByTwoPostRequest;
-import org.veupathdb.service.eda.generated.model.TwoByTwoSpec;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -11,8 +11,6 @@ import org.veupathdb.service.eda.common.model.VariableSource;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.generated.model.MultiStreamPostRequest;
 import org.veupathdb.service.eda.generated.model.MultiStreamSpec;
-import org.veupathdb.service.eda.generated.model.TwoByTwoPostRequest;
-import org.veupathdb.service.eda.generated.model.TwoByTwoSpec;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -103,7 +101,7 @@ public class MultiStreamPlugin extends AbstractEmptyComputePlugin<MultiStreamPos
 
   private static List<VariableDef> getVars(EntityDef entity) {
     List<VariableDef> varsToRequest = new ArrayList<>();
-    for (VariableDef var : entity.getVariables()) {
+    for (VariableDef var : entity) {
       if (VariableSource.NATIVE.equals(var.getSource())) {
         varsToRequest.add(var);
       }
