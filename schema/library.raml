@@ -43,6 +43,17 @@ types:
     additionalProperties: false
     properties:
       variables: VariableMapping[]
+  SingleNumericVarReductionConfig:
+    type: object
+    properties:
+      inputVariable: VariableSpec
+  ConcatenationConfig:
+    type: object
+    properties:
+      prefix?: string
+      delimiter?: string
+      suffix?: string
+      inputVariables: VariableSpec[]
   API_Filter:
     type: object
     discriminator: type
@@ -130,10 +141,8 @@ types:
   DerivedVariableSpec:
     type: VariableSpec
     properties:
-      expectedVariableType: API_VariableType
-      expectedVariableDataShape: API_VariableDataShape
       functionName: string
-      inputVars: VariableSpec[]
+      displayName: string
       config: object # TBD
   ComputeSpecForMerging:
     type: object
