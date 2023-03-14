@@ -101,7 +101,7 @@ public class FloatingScatterplotPlugin extends AbstractEmptyComputePlugin<Floati
     varMap.put("overlay", spec.getOverlayVariable());
     String valueSpec = spec.getValueSpec().getValue();
     String yVarType = util.getVariableType(spec.getYAxisVariable());
-    String overlayValues = util.listToRVector(spec.getOverlayValues());
+    String overlayValues = listToRVector(spec.getOverlayValues());
     
     if (yVarType.equals("DATE") && !valueSpec.equals("raw")) {
       LOG.error("Cannot calculate trend lines for y-axis date variables. The `valueSpec` property must be set to `raw`.");

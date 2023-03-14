@@ -89,7 +89,7 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
     FloatingBarplotSpec spec = getPluginSpec();
     PluginUtil util = getUtil();
     String barMode = spec.getBarMode().getValue();
-    String overlayValues = util.listToRVector(spec.getOverlayValues());
+    String overlayValues = listToRVector(spec.getOverlayValues());
 
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
     varMap.put("xAxis", spec.getXAxisVariable());

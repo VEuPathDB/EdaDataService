@@ -94,7 +94,7 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
     String barMode = spec.getBarMode().getValue();
     String xVar = util.toColNameOrEmpty(spec.getXAxisVariable());
     String xVarType = util.getVariableType(spec.getXAxisVariable());
-    String overlayValues = util.listToRVector(spec.getOverlayValues());
+    String overlayValues = listToRVector(spec.getOverlayValues());
 
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,

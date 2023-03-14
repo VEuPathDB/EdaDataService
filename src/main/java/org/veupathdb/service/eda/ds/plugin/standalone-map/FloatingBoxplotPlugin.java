@@ -110,7 +110,7 @@ public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBo
       );
 
     useRConnectionWithProcessedRemoteFiles(Resources.RSERVE_URL, filesProcessor, connection -> {
-      String overlayValues = util.listToRVector(spec.getOverlayValues());
+      String overlayValues = listToRVector(spec.getOverlayValues());
 
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String cmd =
