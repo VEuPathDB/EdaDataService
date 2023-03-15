@@ -1,4 +1,4 @@
-package org.veupathdb.service.eda.ds.plugin.pass;
+package org.veupathdb.service.eda.ds.plugin.standalonemap;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -24,7 +24,7 @@ import static org.gusdb.fgputil.FormatUtil.NL;
 import static org.gusdb.fgputil.FormatUtil.TAB;
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.CLINEPI_PROJECT;
 
-public class StandaloneMapPlugin extends AbstractEmptyComputePlugin<StandaloneMapMarkersPostRequest, StandaloneMapSpec> {
+public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<StandaloneMapMarkersPostRequest, StandaloneMapMarkersSpec> {
 
   @Override
   public List<String> getProjects() {
@@ -124,19 +124,29 @@ public class StandaloneMapPlugin extends AbstractEmptyComputePlugin<StandaloneMa
     }
   }
 
-  private static String recodeOverlayValue(String oldOverlayValue, List<String> desiredOverlayValues) {
-    String newOverlayValue = oldOverlayValue;
+  // TODO maybe this shoud live somewhere else? idk how generally useful it is
+  protected void validateBinRanges(List<BinRange> binRanges) throws ValidationException {
+    // all must have starts and ends if any have either
+    // ranges must not overlap
+  }
 
-    if (!desiredOverlayValues.contains(oldOverlayValue)) {
-      newOverlayValue = "All un-selected values";
+  private static String recodeOverlayValue(String oldOverlayValue, List<BinRange> desiredOverlayValues) {
+    String newOverlayValue = oldOverlayValue;
+    // TODO assuming categorical vars will have labels but not starts and ends defined. maybe thats not explicit enough?
+    boolean isContinuous = desiredOverlayValues.stream().filter(bin -> bin.getBinStart() != null).findFirst().isPresent();
+
+    if (isContinuous) {
+      newOverlayValue = desiredOverlayValues.stream().filter(bin -> (bin.getBinStart() < oldOverlayValue & bin.getBinEnd() > oldOverlayValue)).findFirst().orElseThrow().getBinLabel();
+    } else {
+      boolean oldValueIsDesired = desiredOverlayValues.stream().filter(bin -> bin.getBinLabel().equals(oldOverlayValue)).findFirst().isPresent();
+      if (!oldValueIsDesired) {
+        newOverlayValue = "All un-selected values";
+      }
     }
 
     return(newOverlayValue);
   }
 
-  // TODO now needs to read some config about defined bins/ values to count up as well
-  // for continuous any value not able to map to a bin in the config should probably err?
-  // implement count vs proportions
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
 
@@ -154,7 +164,8 @@ public class StandaloneMapPlugin extends AbstractEmptyComputePlugin<StandaloneMa
     Integer overlayIndex = spec.getOverlayVariable() == null ? null : indexOf.apply(spec.getOverlayVariable());
 
     // get map markers config
-    List<String> overlayValues = spec.getOverlayValues();
+    List<BinRange> overlayValues = spec.getOverlayValues();
+    validateBinRanges(overlayValues);
     String valueSpec = spec.getValueSpec().getValue();
 
     ParsedGeolocationViewport viewport = ParsedGeolocationViewport.fromApiViewport(spec.getViewport());
@@ -180,6 +191,7 @@ public class StandaloneMapPlugin extends AbstractEmptyComputePlugin<StandaloneMa
 
         if (viewport.containsCoordinates(latitude, longitude)) {
           aggregator.putIfAbsent(row[geoVarIndex], new GeoVarData());
+          // overlayValue here could be a raw numeric value as well
           aggregator.get(row[geoVarIndex]).addRow(latitude, longitude, overlayValue);
         }
         nextLine = reader.readLine();

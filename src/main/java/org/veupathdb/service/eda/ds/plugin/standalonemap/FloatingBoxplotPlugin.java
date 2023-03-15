@@ -1,7 +1,5 @@
-package org.veupathdb.service.eda.ds.plugin.pass;
+package org.veupathdb.service.eda.ds.plugin.standalonemap;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
@@ -25,18 +23,16 @@ import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamRe
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithProcessedRemoteFiles;
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
-public class FloatingScatterplotPlugin extends AbstractEmptyComputePlugin<FloatingScatterplotPostRequest, FloatingScatterplotSpec> {
+public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBoxplotPostRequest, FloatingBoxplotSpec> {
 
-  private static final Logger LOG = LogManager.getLogger(FloatingScatterplotPlugin.class);
-  
   @Override
   public String getDisplayName() {
-    return "Scatter plot";
+    return "Box plot";
   }
 
   @Override
   public String getDescription() {
-    return "Visualize the relationship between two continuous variables";
+    return "Visualize summary values for a continuous variable";
   }
 
   @Override
@@ -45,45 +41,42 @@ public class FloatingScatterplotPlugin extends AbstractEmptyComputePlugin<Floati
   }
 
   @Override
-  protected Class<FloatingScatterplotPostRequest> getVisualizationRequestClass() {
-    return FloatingScatterplotPostRequest.class;
+  protected Class<FloatingBoxplotPostRequest> getVisualizationRequestClass() {
+    return FloatingBoxplotPostRequest.class;
   }
 
   @Override
-  protected Class<FloatingScatterplotSpec> getVisualizationSpecClass() {
-    return FloatingScatterplotSpec.class;
+  protected Class<FloatingBoxplotSpec> getVisualizationSpecClass() {
+    return FloatingBoxplotSpec.class;
   }
 
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder(List.of("yAxisVariable", "xAxisVariable"), List.of("overlayVariable"))
+      .dependencyOrder(List.of("yAxisVariable"), List.of("xAxisVariable"), List.of("overlayVariable"))
       .pattern()
         .element("yAxisVariable")
-          .types(APIVariableType.NUMBER, APIVariableType.DATE, APIVariableType.INTEGER) 
-          .description("Variable must be a number or date and be of the same or a child entity as the X-axis variable.")
+          .types(APIVariableType.NUMBER, APIVariableType.INTEGER)
+          .description("Variable must be a number and be of the same or a child entity as the X-axis variable.")
         .element("xAxisVariable")
-          .types(APIVariableType.NUMBER, APIVariableType.DATE, APIVariableType.INTEGER)
-          .description("Variable must be a number or date and be the same or a child entity as the variable the map markers are painted with.")
+          .maxValues(10)
+          .description("Variable must have 10 or fewer unique values and be the same or a child entity as the variable the map markers are painted with.")
         .element("overlayVariable")
           .required(false)
       .done();
   }
   
   @Override
-  protected void validateVisualizationSpec(FloatingScatterplotSpec pluginSpec) throws ValidationException {
+  protected void validateVisualizationSpec(FloatingBoxplotSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
       .var("xAxisVariable", pluginSpec.getXAxisVariable())
       .var("yAxisVariable", pluginSpec.getYAxisVariable())
       .var("overlayVariable", pluginSpec.getOverlayVariable()));
-    if (pluginSpec.getMaxAllowedDataPoints() != null && pluginSpec.getMaxAllowedDataPoints() <= 0) {
-      throw new ValidationException("maxAllowedDataPoints must be a positive integer");
-    }
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(FloatingScatterplotSpec pluginSpec) {
+  protected List<StreamSpec> getRequestedStreams(FloatingBoxplotSpec pluginSpec) {
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
@@ -94,18 +87,11 @@ public class FloatingScatterplotPlugin extends AbstractEmptyComputePlugin<Floati
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PluginUtil util = getUtil();
-    FloatingScatterplotSpec spec = getPluginSpec();
+    FloatingBoxplotSpec spec = getPluginSpec();
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
     varMap.put("xAxis", spec.getXAxisVariable());
     varMap.put("yAxis", spec.getYAxisVariable());
     varMap.put("overlay", spec.getOverlayVariable());
-    String valueSpec = spec.getValueSpec().getValue();
-    String yVarType = util.getVariableType(spec.getYAxisVariable());
-    String overlayValues = listToRVector(spec.getOverlayValues());
-    
-    if (yVarType.equals("DATE") && !valueSpec.equals("raw")) {
-      LOG.error("Cannot calculate trend lines for y-axis date variables. The `valueSpec` property must be set to `raw`.");
-    }
     
     List<String> nonStrataVarColNames = new ArrayList<String>();
     nonStrataVarColNames.add(util.toColNameOrEmpty(spec.getXAxisVariable()));
@@ -124,14 +110,18 @@ public class FloatingScatterplotPlugin extends AbstractEmptyComputePlugin<Floati
       );
 
     useRConnectionWithProcessedRemoteFiles(Resources.RSERVE_URL, filesProcessor, connection -> {
+      String overlayValues = listToRVector(spec.getOverlayValues());
+
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
-      String cmd = 
-          "plot.data::scattergl(data=" + DEFAULT_SINGLE_STREAM_NAME + ", variables=variables, '" + 
-              "value=" + valueSpec + "', '" + 
+      String cmd =
+          "plot.data::box(data=" + DEFAULT_SINGLE_STREAM_NAME + ", variables=variables, " +
+              "points='outliers', " +
+              "mean=TRUE, " +
+              "computeStats=FALSE, " +
               "sampleSizes=FALSE, " +
-              "completeCases=FALSE, " + 
-              "overlayValues=" + overlayValues + ",'noVariables')";
+              "completeCases=FALSE, overlayValues=" + overlayValues + ", '" +
+              deprecatedShowMissingness + "')";
       streamResult(connection, cmd, out);
-    }); 
+    });
   }
 }
