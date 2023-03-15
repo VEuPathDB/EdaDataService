@@ -72,8 +72,15 @@ public class StandaloneMapPlugin extends AbstractEmptyComputePlugin<StandaloneMa
 
   private static class MutableInt {
     int value = 0;
-    public void increment () { ++value;      }
-    public int  get ()       { return value; }
+    public void increment() { ++value;      }
+    public void set(int x)  { value = x;    }
+    public int  get()       { return value; }
+  }
+
+  private static class MutableFloat {
+    float value = 0;
+    public void set(float x){ value = x;    }
+    public float  get()     { return value; }
   }
 
   private static class GeoVarData {
@@ -85,6 +92,7 @@ public class StandaloneMapPlugin extends AbstractEmptyComputePlugin<StandaloneMa
     double minLon = 180;
     double maxLon = -180;
     Map<String, MutableInt> overlayValuesCount = new HashMap<>();
+    Map<String, MutableFloat> overlayValuesProportion = new HashMap<>();
 
     void addRow(double lat, double lon, String overlayValue) {
       count++;
@@ -96,7 +104,23 @@ public class StandaloneMapPlugin extends AbstractEmptyComputePlugin<StandaloneMa
       if (overlayValue != null) {
         overlayValuesCount.putIfAbsent(overlayValue, new MutableInt());
         overlayValuesCount.get(overlayValue).increment();
+        float proportion = (float)overlayValuesCount.get(overlayValue).get()/count;
+        overlayValuesProportion.putIfAbsent(overlayValue, new MutableFloat());
+        overlayValuesProportion.get(overlayValue).set(proportion);
       }  
+    }
+
+    String getOverlayValues(String valueSpec) {
+      List<BinRangeWithValue> overlayValuesResponse = new List<BinRangeWithValueImpl>();
+
+      for (String overlayValue : overlayValuesCount.keySet()) {
+        BinRangeWithValue newValue= new BinRangeWithValueImpl();
+        newValue.setBinLabel(overlayValue);
+        newValue.setValue(valueSpec.equals("count") ? overlayValuesCount.get(overlayValue) : overlayValuesProportion.get(overlayValue));
+        overlayValuesResponse.add(newValue);
+      }
+
+      return(overlayValuesResponse);
     }
   }
 
@@ -112,6 +136,7 @@ public class StandaloneMapPlugin extends AbstractEmptyComputePlugin<StandaloneMa
 
   // TODO now needs to read some config about defined bins/ values to count up as well
   // for continuous any value not able to map to a bin in the config should probably err?
+  // implement count vs proportions
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
 
@@ -178,6 +203,7 @@ public class StandaloneMapPlugin extends AbstractEmptyComputePlugin<StandaloneMa
         .put("minLon", data.minLon)
         .put("maxLat", data.maxLat)
         .put("maxLon", data.maxLon)
+        .put("overlayValues", data.getOverlayValues(valueSpec))
         .toString()
         .getBytes(StandardCharsets.UTF_8)
       );
