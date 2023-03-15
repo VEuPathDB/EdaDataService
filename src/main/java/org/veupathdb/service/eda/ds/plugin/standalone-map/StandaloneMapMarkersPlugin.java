@@ -70,6 +70,12 @@ public class StandaloneMapPlugin extends AbstractEmptyComputePlugin<StandaloneMa
         .addVar(pluginSpec.getOverlayVariable()));
   }
 
+  private static class MutableInt {
+    int value = 0;
+    public void increment () { ++value;      }
+    public int  get ()       { return value; }
+  }
+
   private static class GeoVarData {
 
     long count = 0;
@@ -78,21 +84,34 @@ public class StandaloneMapPlugin extends AbstractEmptyComputePlugin<StandaloneMa
     double maxLat = -90;
     double minLon = 180;
     double maxLon = -180;
+    Map<String, MutableInt> overlayValuesCount = new HashMap<>();
 
-    void addRow(double lat, double lon) {
+    void addRow(double lat, double lon, String overlayValue) {
       count++;
       latLonAvg.addDataPoint(lat, lon);
       minLat = Math.min(minLat, lat);
       minLon = Math.min(minLon, lon);
       maxLat = Math.max(maxLat, lat);
       maxLon = Math.max(maxLon, lon);
+      if (overlayValue != null) {
+        overlayValuesCount.putIfAbsent(overlayValue, new MutableInt());
+        overlayValuesCount.get(overlayValue).increment();
+      }  
     }
   }
 
+  private static String recodeOverlayValue(String oldOverlayValue, List<String> desiredOverlayValues) {
+    String newOverlayValue = oldOverlayValue;
+
+    if (!desiredOverlayValues.contains(oldOverlayValue)) {
+      newOverlayValue = "All un-selected values";
+    }
+
+    return(newOverlayValue);
+  }
+
   // TODO now needs to read some config about defined bins/ values to count up as well
-  // think for categoricals any value not in the config becomes 'Other'
   // for continuous any value not able to map to a bin in the config should probably err?
-  // TODO also dont think were tracking complete cases of any kind here?
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
 
@@ -104,12 +123,16 @@ public class StandaloneMapPlugin extends AbstractEmptyComputePlugin<StandaloneMa
     // establish column header indexes
     MapSpec spec = getPluginSpec();
     Function<VariableSpec,Integer> indexOf = var -> parser.indexOfColumn(getUtil().toColNameOrEmpty(var)).orElseThrow();
-    int geoVarIndex = indexOf.apply(spec.getGeoAggregateVariable());
-    int latIndex    = indexOf.apply(spec.getLatitudeVariable());
-    int lonIndex    = indexOf.apply(spec.getLongitudeVariable());
+    int geoVarIndex  = indexOf.apply(spec.getGeoAggregateVariable());
+    int latIndex     = indexOf.apply(spec.getLatitudeVariable());
+    int lonIndex     = indexOf.apply(spec.getLongitudeVariable());
+    Integer overlayIndex = spec.getOverlayVariable() == null ? null : indexOf.apply(spec.getOverlayVariable());
+
+    // get map markers config
+    List<String> overlayValues = spec.getOverlayValues();
+    String valueSpec = spec.getValueSpec().getValue();
 
     ParsedGeolocationViewport viewport = ParsedGeolocationViewport.fromApiViewport(spec.getViewport());
-    long entityRecordsWithGeoVar = 0;
 
     // loop through rows of data stream, aggregating stats into a map from aggregate value to stats object
     Map<String, GeoVarData> aggregator = new HashMap<>();
@@ -125,13 +148,14 @@ public class StandaloneMapPlugin extends AbstractEmptyComputePlugin<StandaloneMa
             row[latIndex].isEmpty() ||
             row[lonIndex] == null ||
             row[lonIndex].isEmpty())) {
-        entityRecordsWithGeoVar++;
       
         double latitude = Double.parseDouble(row[latIndex]);
         double longitude = Double.parseDouble(row[lonIndex]);
+        String overlayValue = overlayIndex == null ? null : recodeOverlayValue(row[overlayIndex], overlayValues);
+
         if (viewport.containsCoordinates(latitude, longitude)) {
           aggregator.putIfAbsent(row[geoVarIndex], new GeoVarData());
-          aggregator.get(row[geoVarIndex]).addRow(latitude, longitude);
+          aggregator.get(row[geoVarIndex]).addRow(latitude, longitude, overlayValue);
         }
         nextLine = reader.readLine();
       }  
@@ -158,8 +182,8 @@ public class StandaloneMapPlugin extends AbstractEmptyComputePlugin<StandaloneMa
         .getBytes(StandardCharsets.UTF_8)
       );
     }
-    // add config and close
-    String config = "],\"config\":{\"completeCasesGeoVar\":" + entityRecordsWithGeoVar + "}}";
+    // close
+    String config = "]}";
     out.write(config.getBytes());
     out.flush();
   }
