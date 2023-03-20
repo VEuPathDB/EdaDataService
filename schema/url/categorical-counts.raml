@@ -1,0 +1,19 @@
+#%RAML 1.0 Library
+
+types:
+  
+  CategoricalCountsPostRequest:
+    additionalProperties: false
+    type: VisualizationRequestBase
+    properties:
+      config: CategoricalCountsSpec
+
+  CategoricalCountsSpec:
+    additionalProperties: false
+    properties:
+      variableId : VariableSpec
+
+  CategoricalCountsPostResponse:
+    additionalProperties: false
+    properties:
+      categories: BinRangeWithValue[]

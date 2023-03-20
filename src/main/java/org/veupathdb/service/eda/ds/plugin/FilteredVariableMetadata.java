@@ -10,7 +10,6 @@ import org.veupathdb.service.eda.common.plugin.util.RFileSetProcessor;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
-import org.veupathdb.service.eda.generated.model.BoxplotPostRequest;
 import org.veupathdb.service.eda.generated.model.ContinuousVariableMetadataSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
@@ -24,7 +23,6 @@ import java.util.Map;
 
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithProcessedRemoteFiles;
-import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.CLINEPI_PROJECT;
 
 public class FilteredVariableMetadataPlugin extends AbstractEmptyComputePlugin<ContinuousVariableMetadataPostRequest, ContinuousVariableMetadataSpec> {
   
@@ -78,19 +76,14 @@ public class FilteredVariableMetadataPlugin extends AbstractEmptyComputePlugin<C
     PluginUtil util = getUtil();
     ContinuousVariableMetadataSpec spec = getPluginSpec();
 
-    // we need to read in a simple file containing a single column of cont data
-    // think every type of metadata listed in the enum should get its own R fxn
-    // that fxn can return some json for java to concat together
-    // if that proves too slow, maybe return the values directly and let java build the whole json string?
-    // if even that proves too slow, we may have to resort to approx values and do it all in java :(
-
-    // for the R bit, maybe we have a class ContinuousVariable
-    // it has methods for each of these metadata types
-    // each of those methods should return objects which have toJSON methods
-    // i think wed need only the BinRanges oject made custom for now, median is a simple numeric which jsonlite can handle
-
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      
+      // finding medians and quantile or sd bins seems like R work
+      // need to figure how to best stream the resulting json
+      // ex: the below returns a json string in the format of BinRange[] for some cont var x
+      // connection.voidEval("veupathUtils::toJSON(veupathUtils::getBinRanges(x, 'quantile', 10, FALSE))");
+      // we could concat json strings together from multiple such calls i suppose.. plus one for formatC(median(x))
+      // BUT it seems a bit like if were going to be doing work in R, we may as well do it all there and get all the JSON at once?
+      // thatd let us use the streamResult method of RServeClient
     });
   }
 }
