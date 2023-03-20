@@ -2,11 +2,16 @@ package org.veupathdb.service.eda.ds.plugin.standalonemap;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.gusdb.fgputil.DelimitedDataParser;
 import org.gusdb.fgputil.ListBuilder;
@@ -83,6 +88,11 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
     public float  get()     { return value; }
   }
 
+  private static boolean hasDuplicates(List<String> list) {
+    Set<String> seen = new HashSet<>();
+    return(list.stream().filter(e -> !seen.add(e)).collect(Collectors.toSet()).size() > 0);
+  }
+
   private static class GeoVarData {
 
     long count = 0;
@@ -126,8 +136,52 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
 
   // TODO maybe this shoud live somewhere else? idk how generally useful it is
   protected void validateBinRanges(List<BinRange> binRanges) throws ValidationException {
-    // all must have starts and ends if any have either
+    // TODO make sure we know how to compare bin start and end. this assumes they are numeric.
+    // BUT they probably arent numeric. they might be dates, which means they come in as strings
+    // I dont currently know how to differentiate numeric vs date bin ranges here
+    // either way they need type conversion...
+
+    // maybe there is a better way to do this type of thing??
+    boolean anyHaveBinStart = binRanges.stream().filter(bin -> bin.getBinStart() != null).findFirst().isPresent();
+    boolean anyHaveBinEnd = binRanges.stream().filter(bin -> bin.getBinEnd() != null).findFirst().isPresent();
+    boolean allHaveBinStart = !binRanges.stream().filter(bin -> bin.getBinStart() == null).findFirst().isPresent();
+    boolean allHaveBinEnd = !binRanges.stream().filter(bin -> bin.getBinEnd() == null).findFirst().isPresent();
+    if ((anyHaveBinStart | anyHaveBinEnd) & !(allHaveBinStart & allHaveBinEnd)) {
+      throw new ValidationException("All BinRanges must have binStart and binEnd if any BinRange has either.");
+    }
+
+    // start is always before end
+    boolean anyStartAfterEnd = binRanges.stream().filter(bin -> bin.getBinEnd() <= bin.getBinStart()).findFirst().isPresent();
+    if (anyHaveBinStart & anyStartAfterEnd) {
+      throw new ValidationException("All BinRanges must have binStart less than binEnd.");
+    }
+
+    // no duplicate labels
+    List<String> labels = new ArrayList<String>();
+    binRanges.forEach( bin -> labels.add(bin.getBinLabel()) );
+    if (hasDuplicates(labels)) {
+      throw new ValidationException("All BinRanges must have unique binLabels.");
+    }    
+
     // ranges must not overlap
+    // TODO again need to add support for dates here
+    if (anyHaveBinStart) {
+      Map<Double, Double> binEdges = new TreeMap<Double, Double>();
+      binRanges.forEach( bin -> binEdges.put(Double.parseDouble(bin.getBinStart()), Double.parseDouble(bin.getBinEnd())));
+      boolean first = true;
+      for (Double binStart : binEdges.keySet()) {
+        Double prevBinEnd;
+        if (first) {
+          prevBinEnd = binEdges.get(binStart);
+          first = false;
+        } else {
+          if (prevBinEnd > binStart) {
+            throw new ValidationException("Bin Ranges must not overlap");
+          }
+          prevBinEnd = binEdges.get(binStart);
+        }
+      }
+    }
   }
 
   private static String recodeOverlayValue(String oldOverlayValue, List<BinRange> desiredOverlayValues) {
@@ -136,11 +190,12 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
     boolean isContinuous = desiredOverlayValues.stream().filter(bin -> bin.getBinStart() != null).findFirst().isPresent();
 
     if (isContinuous) {
-      newOverlayValue = desiredOverlayValues.stream().filter(bin -> (bin.getBinStart() < oldOverlayValue & bin.getBinEnd() > oldOverlayValue)).findFirst().orElseThrow().getBinLabel();
+      // TODO figure something else out for dates- not sure yet how to compare dates in java
+      newOverlayValue = desiredOverlayValues.stream().filter(bin -> (Double.parseDouble(bin.getBinStart()) < Double.parseDouble(oldOverlayValue) & Double.parseDouble(bin.getBinEnd()) > Double.parseDouble(oldOverlayValue))).findFirst().orElseThrow().getBinLabel();
     } else {
       boolean oldValueIsDesired = desiredOverlayValues.stream().filter(bin -> bin.getBinLabel().equals(oldOverlayValue)).findFirst().isPresent();
       if (!oldValueIsDesired) {
-        newOverlayValue = "All un-selected values";
+        newOverlayValue = "__UNSELECTED__";
       }
     }
 
@@ -164,6 +219,7 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
     Integer overlayIndex = spec.getOverlayVariable() == null ? null : indexOf.apply(spec.getOverlayVariable());
 
     // get map markers config
+    // TODO update types somehow/ somewhere, need to be able to have numeric or date bin start and ends
     List<BinRange> overlayValues = spec.getOverlayValues();
     validateBinRanges(overlayValues);
     String valueSpec = spec.getValueSpec().getValue();
