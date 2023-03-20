@@ -16,6 +16,7 @@ import org.veupathdb.service.eda.generated.model.VariableSpec;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -75,15 +76,39 @@ public class FilteredVariableMetadataPlugin extends AbstractEmptyComputePlugin<C
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PluginUtil util = getUtil();
     ContinuousVariableMetadataSpec spec = getPluginSpec();
+    var jsonWrapper = new Object(){ String value = "{"; };
+    // TODO i dont actually know if this returns strings like 'median'. never done this w raml before...
+    List<String> requestedMetadata = spec.getMetadata();
+    boolean first = true;
 
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      // finding medians and quantile or sd bins seems like R work
-      // need to figure how to best stream the resulting json
-      // ex: the below returns a json string in the format of BinRange[] for some cont var x
-      // connection.voidEval("veupathUtils::toJSON(veupathUtils::getBinRanges(x, 'quantile', 10, FALSE))");
-      // we could concat json strings together from multiple such calls i suppose.. plus one for formatC(median(x))
-      // BUT it seems a bit like if were going to be doing work in R, we may as well do it all there and get all the JSON at once?
-      // thatd let us use the streamResult method of RServeClient
+      connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, spec.getVariable()));
+      // for convenience
+      connection.voidEval("x <- " + DEFAULT_SINGLE_STREAM_NAME + "$" + util.toColNameOrEmpty(spec.getVariable()));
+
+      if (requestedMetadata.contains("binRanges")) {
+        // TODO add support for user-defined N bins? for now 10..
+        String equalIntervalJson = connection.eval("veupathUtils::toJSON(veupathUtils::getBinRanges(x, 'equalInterval', 10, FALSE))");
+        String quantileJson = connection.eval("veupathUtils::toJSON(veuapthUtils::getBinRanges(x, 'quantile', 10, FALSE))");
+        // sd bins return 6 bins at most, no user control supported in R currently
+        String sdJson = connection.eval("veupathUtils::toJSON(veupathUtils::getBinRanges(x, 'sd', NULL, FALSE))");
+        jsonWrapper.value += "\"binRanges\":{\"equalInterval\":" + equalIntervalJson + 
+                                           ",\"quantile\":" + quantileJson + 
+                                           ",\"standardDeviation\":" + sdJson + "}";
+        first = false;
+      }
+
+      if (requestedMetadata.contains("median")) {
+        String medianJson = connection.eval("jsonlite::toJSON(jsonlite::unbox(formatC(median(x))))");
+        medianJson += first ? "\"median\":{" : ",\"median\":{";
+        jsonWrapper.value += medianJson + "}";
+        first = false;
+      }
+
+      jsonWrapper.value += "}";
     });
+
+    out.write(jsonWrapper.value.getBytes(StandardCharsets.UTF_8));
+    out.flush();
   }
 }
