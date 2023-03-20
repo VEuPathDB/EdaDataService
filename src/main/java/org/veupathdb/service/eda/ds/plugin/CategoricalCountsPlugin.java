@@ -1,6 +1,9 @@
 package org.veupathdb.service.eda.ds.plugin;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.cache.ManagedMap;
+import org.gusdb.fgputil.DelimitedDataParser;
 import org.gusdb.fgputil.EncryptionUtil;
 import org.gusdb.fgputil.json.JsonUtil;
 import org.gusdb.fgputil.ListBuilder;
@@ -13,18 +16,22 @@ import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
+import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
 import org.veupathdb.service.eda.generated.model.CategoricalCountsSpec;
+import org.veupathdb.service.eda.generated.model.CategoricalCountsPostRequest;
+import org.veupathdb.service.eda.generated.model.CategoricalCountsPostResponse;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+
+import static org.gusdb.fgputil.FormatUtil.TAB;
 
 public class CategoricalCountsPlugin extends AbstractEmptyComputePlugin<CategoricalCountsPostRequest, CategoricalCountsSpec> {
   
@@ -34,7 +41,12 @@ public class CategoricalCountsPlugin extends AbstractEmptyComputePlugin<Categori
       new ManagedMap<>(5000, 2000);
 
   private String _cacheKey;
-  private CategoricalCountsResponse _cachedResponse;
+  private CategoricalCountsPostResponse _cachedResponse;
+
+  @Override
+  protected Class<CategoricalCountsPostRequest> getVisualizationRequestClass() {
+    return CategoricalCountsPostRequest.class;
+  }
 
   @Override
   protected Class<CategoricalCountsSpec> getVisualizationSpecClass() {
@@ -60,7 +72,7 @@ public class CategoricalCountsPlugin extends AbstractEmptyComputePlugin<Categori
 
   @Override
   protected List<StreamSpec> getRequestedStreams(CategoricalCountsSpec pluginSpec) {
-    String entityId = pluginSpec.getEntityId();
+    String entityId = pluginSpec.getVariable().getEntityId();
     _cacheKey = EncryptionUtil.md5(
         JsonUtil.serializeObject(getSubsetFilters()) +
         "|" + JsonUtil.serializeObject(pluginSpec)
@@ -69,7 +81,7 @@ public class CategoricalCountsPlugin extends AbstractEmptyComputePlugin<Categori
     if (_cachedResponse != null) LOG.info("Found cached result.");
 
     return _cachedResponse != null ? Collections.emptyList() : ListBuilder.asList(
-      new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getVariable().getEntity())
+      new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getVariable().getEntityId())
         .addVar(pluginSpec.getVariable()));
   }
 

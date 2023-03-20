@@ -1,5 +1,10 @@
 package org.veupathdb.service.eda.ds.plugin;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.gusdb.fgputil.cache.ManagedMap;
+import org.gusdb.fgputil.EncryptionUtil;
+import org.gusdb.fgputil.json.JsonUtil;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
@@ -10,7 +15,10 @@ import org.veupathdb.service.eda.common.plugin.util.RFileSetProcessor;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
+import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
 import org.veupathdb.service.eda.generated.model.ContinuousVariableMetadataSpec;
+import org.veupathdb.service.eda.generated.model.ContinuousVariableMetadataPostRequest;
+import org.veupathdb.service.eda.generated.model.ContinuousVariableMetadataPostResponse;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import java.io.IOException;
@@ -18,12 +26,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
-import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithProcessedRemoteFiles;
+import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 
 public class FilteredVariableMetadataPlugin extends AbstractEmptyComputePlugin<ContinuousVariableMetadataPostRequest, ContinuousVariableMetadataSpec> {
   
@@ -33,7 +41,12 @@ public class FilteredVariableMetadataPlugin extends AbstractEmptyComputePlugin<C
       new ManagedMap<>(5000, 2000);
 
   private String _cacheKey;
-  private ContinuousVariableMetadataResponse _cachedResponse;
+  private ContinuousVariableMetadataPostResponse _cachedResponse;
+
+  @Override
+  protected Class<ContinuousVariableMetadataPostRequest> getVisualizationRequestClass() {
+    return ContinuousVariableMetadataPostRequest.class;
+  }
 
   @Override
   protected Class<ContinuousVariableMetadataSpec> getVisualizationSpecClass() {
@@ -59,7 +72,7 @@ public class FilteredVariableMetadataPlugin extends AbstractEmptyComputePlugin<C
 
   @Override
   protected List<StreamSpec> getRequestedStreams(ContinuousVariableMetadataSpec pluginSpec) {
-    String entityId = pluginSpec.getEntityId();
+    String entityId = pluginSpec.getVariable().getEntityId();
     _cacheKey = EncryptionUtil.md5(
         JsonUtil.serializeObject(getSubsetFilters()) +
         "|" + JsonUtil.serializeObject(pluginSpec)
@@ -68,7 +81,7 @@ public class FilteredVariableMetadataPlugin extends AbstractEmptyComputePlugin<C
     if (_cachedResponse != null) LOG.info("Found cached result.");
 
     return _cachedResponse != null ? Collections.emptyList() : ListBuilder.asList(
-      new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getVariable().getEntity())
+      new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getVariable().getEntityId())
         .addVar(pluginSpec.getVariable()));
   }
 
@@ -78,20 +91,21 @@ public class FilteredVariableMetadataPlugin extends AbstractEmptyComputePlugin<C
     ContinuousVariableMetadataSpec spec = getPluginSpec();
     var jsonWrapper = new Object(){ String value = "{"; };
     // TODO i dont actually know if this returns strings like 'median'. never done this w raml before...
-    List<String> requestedMetadata = spec.getMetadata();
-    boolean first = true;
+    List<String> requestedMetadata = spec.getMetadata();    
 
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
+      boolean first = true;
+      
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, spec.getVariable()));
       // for convenience
       connection.voidEval("x <- " + DEFAULT_SINGLE_STREAM_NAME + "$" + util.toColNameOrEmpty(spec.getVariable()));
 
       if (requestedMetadata.contains("binRanges")) {
         // TODO add support for user-defined N bins? for now 10..
-        String equalIntervalJson = connection.eval("veupathUtils::toJSON(veupathUtils::getBinRanges(x, 'equalInterval', 10, FALSE))");
-        String quantileJson = connection.eval("veupathUtils::toJSON(veuapthUtils::getBinRanges(x, 'quantile', 10, FALSE))");
+        String equalIntervalJson = connection.eval("veupathUtils::toJSON(veupathUtils::getBinRanges(x, 'equalInterval', 10, FALSE))").asString();
+        String quantileJson = connection.eval("veupathUtils::toJSON(veuapthUtils::getBinRanges(x, 'quantile', 10, FALSE))").asString();
         // sd bins return 6 bins at most, no user control supported in R currently
-        String sdJson = connection.eval("veupathUtils::toJSON(veupathUtils::getBinRanges(x, 'sd', NULL, FALSE))");
+        String sdJson = connection.eval("veupathUtils::toJSON(veupathUtils::getBinRanges(x, 'sd', NULL, FALSE))").asString();
         jsonWrapper.value += "\"binRanges\":{\"equalInterval\":" + equalIntervalJson + 
                                            ",\"quantile\":" + quantileJson + 
                                            ",\"standardDeviation\":" + sdJson + "}";
@@ -99,7 +113,7 @@ public class FilteredVariableMetadataPlugin extends AbstractEmptyComputePlugin<C
       }
 
       if (requestedMetadata.contains("median")) {
-        String medianJson = connection.eval("jsonlite::toJSON(jsonlite::unbox(formatC(median(x))))");
+        String medianJson = connection.eval("jsonlite::toJSON(jsonlite::unbox(formatC(median(x))))").asString();
         medianJson += first ? "\"median\":{" : ",\"median\":{";
         jsonWrapper.value += medianJson + "}";
         first = false;

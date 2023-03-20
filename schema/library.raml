@@ -7,6 +7,64 @@
 ################################################################################
 
 types:
+  VariableClass:
+    type: string
+    enum:
+      - native
+      - derived
+      - computed
+  PlotReferenceValue:
+    type: string
+    enum:
+      - xAxis
+      - yAxis
+      - zAxis
+      - overlay
+      - facet1
+      - facet2
+      - geo
+      - latitude
+      - longitude
+  VariableMapping:
+    type: object
+    additionalProperties: false
+    properties:
+      variableClass: VariableClass
+      variableSpec: VariableSpec
+      plotReference: PlotReferenceValue
+      dataType: API_VariableType
+      dataShape: API_VariableDataShape
+      displayName?: string
+      displayRangeMin?: any
+      displayRangeMax?: any
+      vocabulary?: string[]
+      isCollection: boolean
+      imputeZero: boolean
+      members?: VariableSpec[]
+  EmptyResponse:
+    type: object
+    additionalProperties: false
+  VisualizationDataElementConstraint:
+    type: object
+    additionalProperties: false
+    properties:
+      isRequired: boolean
+      isTemporal: boolean
+      minNumVars: number
+      maxNumVars: number
+      minNumValues: number
+      maxNumValues: number
+      allowedTypes:
+        type: API_VariableType[]
+        required: false
+      allowedShapes:
+        type: API_VariableDataShape[]
+        required: false
+      description: string
+  VisualizationDataElementConstraintPattern:
+    type: object
+    properties:
+      //: VisualizationDataElementConstraint
   JobID: !include https://raw.githubusercontent.com/VEuPathDB/lib-hash-id/v1.1.0/schema/hash-id.raml
   JobStatus:
     type: string
@@ -483,64 +541,6 @@ types:
     discriminatorValue: date
     properties:
       distributionDefaults: API_DateDistributionDefaults
-  VariableClass:
-    type: string
-    enum:
-      - native
-      - derived
-      - computed
-  PlotReferenceValue:
-    type: string
-    enum:
-      - xAxis
-      - yAxis
-      - zAxis
-      - overlay
-      - facet1
-      - facet2
-      - geo
-      - latitude
-      - longitude
-  VariableMapping:
-    type: object
-    additionalProperties: false
-    properties:
-      variableClass: VariableClass
-      variableSpec: VariableSpec
-      plotReference: PlotReferenceValue
-      dataType: API_VariableType
-      dataShape: API_VariableDataShape
-      displayName?: string
-      displayRangeMin?: any
-      displayRangeMax?: any
-      vocabulary?: string[]
-      isCollection: boolean
-      imputeZero: boolean
-      members?: VariableSpec[]
-  EmptyResponse:
-    type: object
-    additionalProperties: false
-  VisualizationDataElementConstraint:
-    type: object
-    additionalProperties: false
-    properties:
-      isRequired: boolean
-      isTemporal: boolean
-      minNumVars: number
-      maxNumVars: number
-      minNumValues: number
-      maxNumValues: number
-      allowedTypes:
-        type: API_VariableType[]
-        required: false
-      allowedShapes:
-        type: API_VariableDataShape[]
-        required: false
-      description: string
-  VisualizationDataElementConstraintPattern:
-    type: object
-    properties:
-      //: VisualizationDataElementConstraint
   AlphaDivPluginRequest:
     type: ComputeRequestBase
     properties:
@@ -564,8 +564,8 @@ types:
     type: object
     properties:
       collectionVariable: VariableSpec
-      betaDivDissimilarityMethod: BetaDivDissimilarityMethod
-  BetaDivDissimilarityMethod:
+      betaDivDistanceMethod: BetaDivDistanceMethod
+  BetaDivDistanceMethod:
     type: string
     enum:
       - bray
@@ -682,6 +682,63 @@ types:
       overlayVariable:
         type: VariableSpec
         required: false
+  CategoricalCountsPostRequest:
+    type: VisualizationRequestBase
+    additionalProperties: false
+    properties:
+      config: CategoricalCountsSpec
+  CategoricalCountsSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      variable: VariableSpec
+  CategoricalCountsPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      categories: BinRangeWithValue[]
+  ContinuousVariableMetadataPostRequest:
+    type: VisualizationRequestBase
+    additionalProperties: false
+    properties:
+      config: ContinuousVariableMetadataSpec
+  ContinuousVariableMetadataSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      variable: VariableSpec
+      metadata:
+        type: array
+        items:
+          type: string
+          enum:
+            - binRanges
+            - median
+  BinRange:
+    type: object
+    additionalProperties: false
+    properties:
+      binStart: string
+      binEnd: string
+      binLabel: string
+  BinRangeWithValue:
+    type: BinRange
+    additionalProperties: false
+    properties:
+      value: number
+  AllBinRanges:
+    type: object
+    additionalProperties: false
+    properties:
+      equalInterval: BinRange[]
+      quantile: BinRange[]
+      standardDeviation: BinRange[]
+  ContinuousVariableMetadataPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      binRanges?: AllBinRanges
+      median?: number
   BarplotPostRequest:
     type: VisualizationRequestBase
     properties:

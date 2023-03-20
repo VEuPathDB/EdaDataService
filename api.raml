@@ -27,7 +27,8 @@ securitySchemes:
 ####################################
 
 /filter-aware-variable-metadata:
-  description: Returns equal interval, quantile and standard deviation based bin ranges and/or the median for a continuous variable over a specified range.
+  post:
+    description: Returns equal interval, quantile and standard deviation based bin ranges and/or the median for a continuous variable over a specified range.
     body:
       application/json:
         type: lib.ContinuousVariableMetadataPostRequest
@@ -38,7 +39,8 @@ securitySchemes:
             type: lib.ContinuousVariableMetadataPostResponse
 
 /categorical-counts:
-  description: Returns counts per value for a categorical variable given a filter spec (subset).
+  post:
+    description: Returns counts per value for a categorical variable given a filter spec (subset).
     body:
       application/json:
         type: lib.CategoricalCountsPostRequest
