@@ -5,7 +5,7 @@ import java.net.URL
 plugins {
   kotlin("jvm") version "1.7.0" // needed for local compute import
   java
-  id("org.veupathdb.lib.gradle.container.container-utils") version "4.8.2"
+  id("org.veupathdb.lib.gradle.container.container-utils") version "4.8.3"
   id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
@@ -78,10 +78,10 @@ repositories {
 //
 
 // versions
-val coreLib       = "6.13.2"         // Container core lib version
-val edaCompute    = "1.3.0"          // EDA Compute version (used to pull in compute plugin RAML)
-val edaCommon     = "10.3.1"         // EDA Common version
-val fgputil       = "2.12.0-jakarta" // FgpUtil version
+val coreLib       = "6.14.3"         // Container core lib version
+val edaCompute    = "1.4.2"          // EDA Compute version (used to pull in compute plugin RAML)
+val edaCommon     = "10.4.0"         // EDA Common version
+val fgputil       = "2.12.3-jakarta" // FgpUtil version
 
 // use local EDA compute compiled schema if project exists, else use released version;
 //    this mirrors the way we use local EdaCommon code if available

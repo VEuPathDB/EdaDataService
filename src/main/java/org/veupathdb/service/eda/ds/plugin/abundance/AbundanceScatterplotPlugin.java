@@ -113,10 +113,14 @@ public class AbundanceScatterplotPlugin extends AbstractPlugin<AbundanceScatterp
     ComputedVariableMetadata metadata = getComputedVariableMetadata();
     metadata.getVariables().get(0).setPlotReference(PlotReferenceValue.OVERLAY);
 
-    List<VariableSpec> inputVarSpecs = new ArrayList<VariableSpec>();
-    inputVarSpecs.addAll(metadata.getVariables().stream()
+    List<VariableSpec> collectionMembers = new ArrayList<VariableSpec>();
+    collectionMembers.addAll(metadata.getVariables().stream()
         .filter(var -> var.getPlotReference().getValue().equals("overlay"))
         .findFirst().orElseThrow().getMembers());
+    int collectionSize = collectionMembers.size();
+
+    List<VariableSpec> inputVarSpecs = new ArrayList<VariableSpec>();
+    inputVarSpecs.addAll(collectionMembers.subList(0, Math.min(collectionSize, 8)));    
     inputVarSpecs.add(spec.getXAxisVariable());
     inputVarSpecs.add(util.getVariableSpecFromList(spec.getFacetVariable(), 0));
     inputVarSpecs.add(util.getVariableSpecFromList(spec.getFacetVariable(), 1));
@@ -126,6 +130,10 @@ public class AbundanceScatterplotPlugin extends AbstractPlugin<AbundanceScatterp
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       connection.voidEval(getVoidEvalComputedVariableMetadataList(metadata));
       connection.voidEval("variables <- veupathUtils::merge(variables, computedVariables)");
+      connection.voidEval("overlayVarMetadata <- veupathUtils::findVariableMetadataFromPlotRef(variables, 'overlay')");
+      connection.voidEval("overlayVarMetadata@members <- overlayVarMetadata@members[1:min(" + collectionSize + ",8)]");
+      connection.voidEval("overlayVarIndex <- veupathUtils::findIndexFromPlotRef(variables, 'overlay')");
+      connection.voidEval("variables[[overlayVarIndex]] <- overlayVarMetadata");
 
       String command = "plot.data::scattergl(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, '" +
           valueSpec + "', '" + 
