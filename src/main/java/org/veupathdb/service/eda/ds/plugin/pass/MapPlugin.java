@@ -1,5 +1,7 @@
 package org.veupathdb.service.eda.ds.plugin.pass;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.DelimitedDataParser;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.geo.GeographyUtil.GeographicPoint;
@@ -23,6 +25,7 @@ import static org.gusdb.fgputil.FormatUtil.TAB;
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.CLINEPI_PROJECT;
 
 public class MapPlugin extends AbstractEmptyComputePlugin<MapPostRequest, MapSpec> {
+  private static final Logger LOG = LogManager.getLogger(MapPlugin.class);
 
   @Override
   public String getDisplayName() {
@@ -101,7 +104,7 @@ public class MapPlugin extends AbstractEmptyComputePlugin<MapPostRequest, MapSpe
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-
+    LOG.debug("Beginning writeResults for map plugin with output id: " + _pluginSpec.getOutputEntityId());
     // create scanner and line parser
     InputStreamReader isReader = new InputStreamReader(new BufferedInputStream(dataStreams.get(DEFAULT_SINGLE_STREAM_NAME)));
     BufferedReader reader = new BufferedReader(isReader);
@@ -139,10 +142,11 @@ public class MapPlugin extends AbstractEmptyComputePlugin<MapPostRequest, MapSpe
           aggregator.putIfAbsent(row[geoVarIndex], new GeoVarData());
           aggregator.get(row[geoVarIndex]).addRow(latitude, longitude);
         }
-        nextLine = reader.readLine();
-      }  
+      }
+      nextLine = reader.readLine();
     }
 
+    LOG.debug("Writing aggregated results for " + entityRecordsWithGeoVar + " records");
     // begin output object and single property containing array of map elements
     out.write("{\"mapElements\":[".getBytes(StandardCharsets.UTF_8));
     boolean first = true;
