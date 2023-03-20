@@ -1,7 +1,11 @@
 package org.veupathdb.service.eda.ds.plugin;
 
+import org.gusdb.fgputil.cache.ManagedMap;
+import org.gusdb.fgputil.EncryptionUtil;
+import org.gusdb.fgputil.json.JsonUtil;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
+import org.json.JSONObject;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
@@ -15,10 +19,12 @@ import org.veupathdb.service.eda.generated.model.VariableSpec;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 public class CategoricalCountsPlugin extends AbstractEmptyComputePlugin<CategoricalCountsPostRequest, CategoricalCountsSpec> {
   
@@ -69,9 +75,54 @@ public class CategoricalCountsPlugin extends AbstractEmptyComputePlugin<Categori
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    PluginUtil util = getUtil();
     CategoricalCountsSpec spec = getPluginSpec();
 
-    // this just needs to make a hashmap of values and their counts  
+    // create scanner and line parser
+    InputStreamReader isReader = new InputStreamReader(new BufferedInputStream(dataStreams.get(DEFAULT_SINGLE_STREAM_NAME)));
+    BufferedReader reader = new BufferedReader(isReader);
+    DelimitedDataParser parser = new DelimitedDataParser(reader.readLine(), TAB, true);
+
+    // establish column header indexes
+    Function<VariableSpec,Integer> indexOf = var -> parser.indexOfColumn(getUtil().toColNameOrEmpty(var)).orElseThrow();
+    int varIndex = indexOf.apply(spec.getVariable());
+
+    // this just needs to make a hashmap of values and their counts
+    Map<String, MutableInt> categoryCounts = new HashMap<>();
+    String nextLine = reader.readLine();
+
+    while (nextLine != null) {
+      String[] row = parser.parseLineToArray(nextLine);
+
+      categoryCounts.putIfAbsent(row[varIndex], new MutableInt());
+      categoryCounts.get(row[varIndex]).increment();
+
+      nextLine = reader.readLine();
+    }
+
+    // begin output object and single property containing array of elements
+    out.write("{\"categories\":[".getBytes(StandardCharsets.UTF_8));
+    boolean first = true;
+    for (String key : categoryCounts.keySet()) {
+      // write commas between elements
+      if (first) first = false; else out.write(',');
+      out.write(new JSONObject()
+        .put("binLabel", key)
+        .put("value", categoryCounts.get(key))
+        .toString()
+        .getBytes(StandardCharsets.UTF_8)
+      );
+    }
+    // close
+    out.write("]}".getBytes());
+    out.flush();
+
+  }
+ 
+  // used this somewhere else recently too.. is there a better place for this to live? or some util somewhere already exists?
+  private static class MutableInt {
+    int value = 0;
+    public void increment() { ++value;      }
+    public void set(int x)  { value = x;    }
+    public int  get()       { return value; }
   }
 }
