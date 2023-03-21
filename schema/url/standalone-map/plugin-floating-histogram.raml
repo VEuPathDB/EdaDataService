@@ -7,7 +7,7 @@ types:
     properties:
       config: FloatingHistogramSpec
 
-  FlatingHistogramSpec:
+  FloatingHistogramSpec:
     additionalProperties: false
     properties:
       outputEntityId:
@@ -23,7 +23,7 @@ types:
         type: VariableSpec
         required: false
       overlayValues?:
-        type: BinRange[] # categoricals can just ignore bin start and end
+        type: NumericBinRange[] # categoricals can just ignore bin start and end
       binSpec:
         type: BinSpec
       viewport:

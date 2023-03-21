@@ -7,6 +7,64 @@
 ################################################################################
 
 types:
+  VariableClass:
+    type: string
+    enum:
+      - native
+      - derived
+      - computed
+  PlotReferenceValue:
+    type: string
+    enum:
+      - xAxis
+      - yAxis
+      - zAxis
+      - overlay
+      - facet1
+      - facet2
+      - geo
+      - latitude
+      - longitude
+  VariableMapping:
+    type: object
+    additionalProperties: false
+    properties:
+      variableClass: VariableClass
+      variableSpec: VariableSpec
+      plotReference: PlotReferenceValue
+      dataType: API_VariableType
+      dataShape: API_VariableDataShape
+      displayName?: string
+      displayRangeMin?: any
+      displayRangeMax?: any
+      vocabulary?: string[]
+      isCollection: boolean
+      imputeZero: boolean
+      members?: VariableSpec[]
+  EmptyResponse:
+    type: object
+    additionalProperties: false
+  VisualizationDataElementConstraint:
+    type: object
+    additionalProperties: false
+    properties:
+      isRequired: boolean
+      isTemporal: boolean
+      minNumVars: number
+      maxNumVars: number
+      minNumValues: number
+      maxNumValues: number
+      allowedTypes:
+        type: API_VariableType[]
+        required: false
+      allowedShapes:
+        type: API_VariableDataShape[]
+        required: false
+      description: string
+  VisualizationDataElementConstraintPattern:
+    type: object
+    properties:
+      //: VisualizationDataElementConstraint
   JobID: !include https://raw.githubusercontent.com/VEuPathDB/lib-hash-id/v1.1.0/schema/hash-id.raml
   JobStatus:
     type: string
@@ -483,64 +541,6 @@ types:
     discriminatorValue: date
     properties:
       distributionDefaults: API_DateDistributionDefaults
-  VariableClass:
-    type: string
-    enum:
-      - native
-      - derived
-      - computed
-  PlotReferenceValue:
-    type: string
-    enum:
-      - xAxis
-      - yAxis
-      - zAxis
-      - overlay
-      - facet1
-      - facet2
-      - geo
-      - latitude
-      - longitude
-  VariableMapping:
-    type: object
-    additionalProperties: false
-    properties:
-      variableClass: VariableClass
-      variableSpec: VariableSpec
-      plotReference: PlotReferenceValue
-      dataType: API_VariableType
-      dataShape: API_VariableDataShape
-      displayName?: string
-      displayRangeMin?: any
-      displayRangeMax?: any
-      vocabulary?: string[]
-      isCollection: boolean
-      imputeZero: boolean
-      members?: VariableSpec[]
-  EmptyResponse:
-    type: object
-    additionalProperties: false
-  VisualizationDataElementConstraint:
-    type: object
-    additionalProperties: false
-    properties:
-      isRequired: boolean
-      isTemporal: boolean
-      minNumVars: number
-      maxNumVars: number
-      minNumValues: number
-      maxNumValues: number
-      allowedTypes:
-        type: API_VariableType[]
-        required: false
-      allowedShapes:
-        type: API_VariableDataShape[]
-        required: false
-      description: string
-  VisualizationDataElementConstraintPattern:
-    type: object
-    properties:
-      //: VisualizationDataElementConstraint
   AlphaDivPluginRequest:
     type: ComputeRequestBase
     properties:
@@ -564,8 +564,8 @@ types:
     type: object
     properties:
       collectionVariable: VariableSpec
-      betaDivDissimilarityMethod: BetaDivDissimilarityMethod
-  BetaDivDissimilarityMethod:
+      betaDivDistanceMethod: BetaDivDistanceMethod
+  BetaDivDistanceMethod:
     type: string
     enum:
       - bray
@@ -1011,23 +1011,10 @@ types:
       valueSpec: ValueSpec
       longitudeVariable?: VariableSpec
       latitudeVariable?: VariableSpec
-      binSpec: BinSpec
       viewport?: GeolocationViewport
   MapMarkersOverlayConfig:
     type: PlotConfig
     properties:
-      rankedValues:
-        type: string[]
-        minItems: 1
-        maxItems: 20
-      overlayValues:
-        type: string[]
-        minItems: 1
-        maxItems: 20
-      binSlider?:
-        type: BinSlider
-      binSpec?:
-        type: BinSpec
       viewport:
         type: GeolocationViewport
   MapMarkersOverlay:
@@ -1167,13 +1154,13 @@ types:
         required: false
       chisq: Statistic
       fisher: Statistic
-      prevalence: Statistic
-      oddsratio: Statistic
-      relativerisk: Statistic
-      sensitivity: Statistic
-      specificity: Statistic
-      posPredictiveValue: Statistic
-      negPredictiveValue: Statistic
+      prevalence?: Statistic
+      oddsratio?: Statistic
+      relativerisk?: Statistic
+      sensitivity?: Statistic
+      specificity?: Statistic
+      posPredictiveValue?: Statistic
+      negPredictiveValue?: Statistic
   TwoByTwoPostResponse:
     type: object
     additionalProperties: false
@@ -1515,6 +1502,301 @@ types:
     type: VisualizationRequestBase
     properties:
       config: CollectionSpec
+  FloatingBarplotPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: FloatingBarplotSpec
+  FloatingBarplotSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      barMode:
+        type: string
+        enum:
+          - group
+          - stack
+      valueSpec: ValueSpec
+      xAxisVariable: VariableSpec
+      overlayVariable?:
+        type: VariableSpec
+        required: false
+      overlayValues?: BinRange[]
+  FloatingBarplot:
+    type: object
+    additionalProperties: false
+    properties:
+      data: BarplotData[]
+      variables: VariableMapping[]
+  FloatingBarplotPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      barplot: FloatingBarplot
+  FloatingBoxplotPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: FloatingBoxplotSpec
+  FloatingBoxplotSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      xAxisVariable: VariableSpec
+      yAxisVariable: VariableSpec
+      overlayVariable?:
+        type: VariableSpec
+        required: false
+      overlayValues?: BinRange[]
+      maxAllowedDataPoints:
+        type: integer
+        required: false
+        format: int64
+  FloatingBoxplot:
+    type: object
+    additionalProperties: false
+    properties:
+      data: BoxplotData[]
+      variables: VariableMapping[]
+  FloatingBoxplotPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      boxplot: FloatingBoxplot
+  FloatingMosaicPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: FloatingMosaicSpec
+  FloatingMosaicSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      xAxisVariable: VariableSpec
+      yAxisVariable: VariableSpec
+  FloatingMosaic:
+    type: object
+    additionalProperties: false
+    properties:
+      data: MosaicData[]
+      variables: VariableMapping[]
+  FloatingContTablePostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      mosaic: FloatingMosaic
+      statsTable:
+        type: TwoByTwoStatsTable[]
+        required: false
+  FloatingHistogramPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: FloatingHistogramSpec
+  FloatingHistogramSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      xAxisVariable: VariableSpec
+      barMode:
+        type: string
+        enum:
+          - overlay
+          - stack
+      valueSpec: ValueSpec
+      overlayVariable?:
+        type: VariableSpec
+        required: false
+      overlayValues?: NumericBinRange[]
+      binSpec: BinSpec
+      viewport:
+        type: NumericViewport
+        required: false
+  FloatingHistogram:
+    type: object
+    additionalProperties: false
+    properties:
+      data: HistogramData[]
+      variables: VariableMapping[]
+  FloatingHistogramPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      histogram: FloatingHistogram
+  FloatingLineplotPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: FloatingLineplotSpec
+  FloatingLineplotSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      xAxisVariable: VariableSpec
+      yAxisVariable: VariableSpec
+      yAxisNumeratorValues:
+        type: string[]
+        required: false
+      yAxisDenominatorValues:
+        type: string[]
+        required: false
+      overlayVariable?:
+        type: VariableSpec
+        required: false
+      overlayValues?: BinRange[]
+      binSpec:
+        type: BinSpec
+        required: false
+      valueSpec:
+        type: string
+        enum:
+          - median
+          - mean
+          - geometricMean
+          - proportion
+      errorBars: StringBoolean
+      viewport:
+        type: NumericViewport
+        required: false
+  FloatingLineplot:
+    type: object
+    additionalProperties: false
+    properties:
+      data: LineplotData[]
+      variables: VariableMapping[]
+  FloatingLineplotPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      lineplot: FloatingLineplot
+  FloatingScatterplotPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: FloatingScatterplotSpec
+  FloatingScatterplotSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      valueSpec:
+        type: string
+        enum:
+          - raw
+          - smoothedMeanWithRaw
+          - bestFitLineWithRaw
+      xAxisVariable: VariableSpec
+      yAxisVariable: VariableSpec
+      overlayVariable?:
+        type: VariableSpec
+        required: false
+      overlayValues?: BinRange[]
+      maxAllowedDataPoints:
+        type: integer
+        required: false
+        format: int64
+  FloatingScatterplot:
+    type: object
+    additionalProperties: false
+    properties:
+      data: ScatterplotData[]
+      variables: VariableMapping[]
+  FloatingScatterplotPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      scatterplot: FloatingScatterplot
+  StandaloneMapMarkersPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: StandaloneMapMarkersSpec
+  StandaloneMapMarkersSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      geoAggregateVariable: VariableSpec
+      longitudeVariable: VariableSpec
+      latitudeVariable: VariableSpec
+      overlayConfig?: OverlayConfig
+      valueSpec: ValueSpec
+      viewport: GeolocationViewport
+  StandaloneMapMarkersPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      mapElements: StandaloneMapElementInfo[]
+  NumericBinRange:
+    type: BinRange
+    additionalProperties: false
+    properties:
+      binLabel: string
+      binStart?: number # Dates can wired as millis since epoch. TODO is there a better raml-native way to model this? Trying not to overthink since this will be provided by quantile plugin.
+      binEnd?: number
+  DateBinRange:
+    type: BinRange
+    additionalProperties: false
+    properties:
+      binLabel: string
+      binStart?: string # Dates can wired as millis since epoch. TODO is there a better raml-native way to model this? Trying not to overthink since this will be provided by quantile plugin.
+      binEnd?: string
+  BinRange:
+    type: object
+    additionalProperties: false
+    properties:
+      binLabel: string
+  OverlayType:
+    type: string
+    enum:
+      - categorical
+      - number
+      - integer
+      - date
+  OverlayConfig:
+    type: object
+    additionalProperties: false
+    discriminator: overlayType
+    properties:
+      overlayType: OverlayType
+      overlayVariable: VariableSpec
+  DateOverlayConfig:
+    type: OverlayConfig
+    additionalProperties: false
+    discriminatorValue: date
+    properties:
+      overlayValues:
+        type: DateBinRange[]
+  NumericOverlayConfig:
+    type: OverlayConfig
+    additionalProperties: false
+    discriminatorValue: number
+    properties:
+      overlayValues:
+        type: NumericBinRange[]
+  CategoricalOverlayConfig:
+    type: OverlayConfig
+    discriminatorValue: categorical
+    additionalProperties: false
+    properties:
+      overlayValues:
+        type: string[]
+  BinRangeWithValue:
+    type: BinRange
+    additionalProperties: false
+    properties:
+      value: number
+  StandaloneMapElementInfo:
+    type: object
+    additionalProperties: false
+    properties:
+      geoAggregateValue: string
+      entityCount: number
+      overlayValues: BinRangeWithValue[]
+      avgLat: number
+      avgLon: number
+      minLat: number
+      minLon: number
+      maxLat: number
+      maxLon: number
   VisualizationRequestBase:
     type: object
     additionalProperties: false

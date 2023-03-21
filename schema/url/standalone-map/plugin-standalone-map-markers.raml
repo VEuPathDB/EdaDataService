@@ -5,7 +5,7 @@ types:
   StandaloneMapMarkersPostRequest:
     type: VisualizationRequestBase
     properties:
-      config: StandaloneMapMarkerSpec
+      config: StandaloneMapMarkersSpec
 
   StandaloneMapMarkersSpec:
     additionalProperties: false
@@ -18,10 +18,8 @@ types:
         type: VariableSpec
       latitudeVariable:
         type: VariableSpec
-      overlayVariable?:
-        type: VariableSpec
-      overlayValues?:
-        type: BinRange[] # categoricals can just ignore bin start and end
+      overlayConfig?:
+        type: OverlayConfig # categoricals can just ignore bin start and end
       # if we choose to support things like means and medians for cont vars this may need to be a custom enum
       valueSpec:
         type: ValueSpec
@@ -34,12 +32,63 @@ types:
       mapElements: StandaloneMapElementInfo[]
 
   # TODO remove once quantile endpoint is merged.
+  NumericBinRange:
+    type: BinRange
+    additionalProperties: false
+    properties:
+      binLabel: string
+      binStart?: number # Dates can wired as millis since epoch. TODO is there a better raml-native way to model this? Trying not to overthink since this will be provided by quantile plugin.
+      binEnd?: number
+
+  DateBinRange:
+    type: BinRange
+    additionalProperties: false
+    properties:
+      binLabel: string
+      binStart?: string # Dates can wired as millis since epoch. TODO is there a better raml-native way to model this? Trying not to overthink since this will be provided by quantile plugin.
+      binEnd?: string
+
   BinRange:
     additionalProperties: false
     properties:
-      binStart?: string # number | date
-      binEnd?: string # number | date
       binLabel: string
+
+  OverlayType:
+    type: string
+    enum: ['categorical', 'number', 'integer', 'date']
+
+  OverlayConfig:
+    additionalProperties: false
+    discriminator: overlayType
+    properties:
+      overlayType:
+        type: OverlayType
+      overlayVariable:
+        type: VariableSpec
+
+  DateOverlayConfig:
+    type: OverlayConfig
+    additionalProperties: false
+    discriminatorValue: date
+    properties:
+      overlayValues:
+        type: DateBinRange[]
+
+  NumericOverlayConfig:
+    type: OverlayConfig
+    additionalProperties: false
+    discriminatorValue: number
+    properties:
+      overlayValues:
+        type: NumericBinRange[]
+
+  CategoricalOverlayConfig:
+    type: OverlayConfig
+    discriminatorValue: categorical
+    additionalProperties: false
+    properties:
+      overlayValues:
+        type: string[]
 
   BinRangeWithValue:
     additionalProperties: false

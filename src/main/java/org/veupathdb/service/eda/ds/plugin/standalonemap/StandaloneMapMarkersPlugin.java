@@ -7,9 +7,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
+import java.util.Optional;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -23,11 +22,12 @@ import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.OverlayBins;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.GeolocationViewport;
 import org.veupathdb.service.eda.generated.model.*;
 
-import static org.gusdb.fgputil.FormatUtil.NL;
 import static org.gusdb.fgputil.FormatUtil.TAB;
-import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.CLINEPI_PROJECT;
+import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
 public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<StandaloneMapMarkersPostRequest, StandaloneMapMarkersSpec> {
 
@@ -35,10 +35,15 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
   public List<String> getProjects() {
     return List.of(VECTORBASE_PROJECT);
   }
-  
+
   @Override
-  protected Class<MapSpec> getVisualizationSpecClass() {
-    return MapSpec.class;
+  protected Class<StandaloneMapMarkersPostRequest> getVisualizationRequestClass() {
+    return StandaloneMapMarkersPostRequest.class;
+  }
+
+  @Override
+  protected Class<StandaloneMapMarkersSpec> getVisualizationSpecClass() {
+    return StandaloneMapMarkersSpec.class;
   }
 
   @Override
@@ -56,26 +61,31 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
   }
 
   @Override
-  protected void validateVisualizationSpec(MapSpec pluginSpec) throws ValidationException {
+  protected void validateVisualizationSpec(StandaloneMapMarkersSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
       .var("geoAggregateVariable", pluginSpec.getGeoAggregateVariable())
       .var("latitudeVariable", pluginSpec.getLatitudeVariable())
       .var("longitudeVariable", pluginSpec.getLongitudeVariable())
-      .var("overlayVariable", pluginSpec.getOverlayVariable()));
+      .var("overlayVariable", Optional.ofNullable(pluginSpec.getOverlayConfig())
+          .map(OverlayConfig::getOverlayVariable)
+          .orElse(null)));
+    validateOverlayConfig(pluginSpec.getOverlayConfig());
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(MapSpec pluginSpec) {
+  protected List<StreamSpec> getRequestedStreams(StandaloneMapMarkersSpec pluginSpec) {
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getGeoAggregateVariable())
         .addVar(pluginSpec.getLatitudeVariable())
         .addVar(pluginSpec.getLongitudeVariable())
-        .addVar(pluginSpec.getOverlayVariable()));
+        .addVar(Optional.ofNullable(pluginSpec.getOverlayConfig())
+            .map(OverlayConfig::getOverlayVariable)
+            .orElse(null)));
   }
 
-  private static class MutableInt {
+  private static class MutableInt { // We can possibly replace with AtomicInteger
     int value = 0;
     public void increment() { ++value;      }
     public void set(int x)  { value = x;    }
@@ -121,7 +131,7 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
     }
 
     String getOverlayValues(String valueSpec) {
-      List<BinRangeWithValue> overlayValuesResponse = new List<BinRangeWithValueImpl>();
+      List<BinRangeWithValue> overlayValuesResponse = new ArrayList<>();
 
       for (String overlayValue : overlayValuesCount.keySet()) {
         BinRangeWithValue newValue= new BinRangeWithValueImpl();
@@ -135,71 +145,39 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
   }
 
   // TODO maybe this shoud live somewhere else? idk how generally useful it is
-  protected void validateBinRanges(List<BinRange> binRanges) throws ValidationException {
+  protected void validateOverlayConfig(OverlayConfig overlayConfig) throws ValidationException {
     // TODO make sure we know how to compare bin start and end. this assumes they are numeric.
     // BUT they probably arent numeric. they might be dates, which means they come in as strings
     // I dont currently know how to differentiate numeric vs date bin ranges here
     // either way they need type conversion...
-
-    // maybe there is a better way to do this type of thing??
-    boolean anyHaveBinStart = binRanges.stream().filter(bin -> bin.getBinStart() != null).findFirst().isPresent();
-    boolean anyHaveBinEnd = binRanges.stream().filter(bin -> bin.getBinEnd() != null).findFirst().isPresent();
-    boolean allHaveBinStart = !binRanges.stream().filter(bin -> bin.getBinStart() == null).findFirst().isPresent();
-    boolean allHaveBinEnd = !binRanges.stream().filter(bin -> bin.getBinEnd() == null).findFirst().isPresent();
-    if ((anyHaveBinStart | anyHaveBinEnd) & !(allHaveBinStart & allHaveBinEnd)) {
-      throw new ValidationException("All BinRanges must have binStart and binEnd if any BinRange has either.");
-    }
-
-    // start is always before end
-    boolean anyStartAfterEnd = binRanges.stream().filter(bin -> bin.getBinEnd() <= bin.getBinStart()).findFirst().isPresent();
-    if (anyHaveBinStart & anyStartAfterEnd) {
-      throw new ValidationException("All BinRanges must have binStart less than binEnd.");
-    }
-
-    // no duplicate labels
-    List<String> labels = new ArrayList<String>();
-    binRanges.forEach( bin -> labels.add(bin.getBinLabel()) );
-    if (hasDuplicates(labels)) {
-      throw new ValidationException("All BinRanges must have unique binLabels.");
-    }    
-
-    // ranges must not overlap
-    // TODO again need to add support for dates here
-    if (anyHaveBinStart) {
-      Map<Double, Double> binEdges = new TreeMap<Double, Double>();
-      binRanges.forEach( bin -> binEdges.put(Double.parseDouble(bin.getBinStart()), Double.parseDouble(bin.getBinEnd())));
-      boolean first = true;
-      for (Double binStart : binEdges.keySet()) {
-        Double prevBinEnd;
-        if (first) {
-          prevBinEnd = binEdges.get(binStart);
-          first = false;
-        } else {
-          if (prevBinEnd > binStart) {
-            throw new ValidationException("Bin Ranges must not overlap");
-          }
-          prevBinEnd = binEdges.get(binStart);
-        }
-      }
+    switch (overlayConfig.getOverlayType()) {
+      case DATE -> validateDateBinRanges((DateOverlayConfig) overlayConfig);
+      case NUMBER -> validateNumericBinRanges((NumericOverlayConfig) overlayConfig);
+      case CATEGORICAL -> validateCategoricalOverlayValues((CategoricalOverlayConfig) overlayConfig)
     }
   }
 
-  private static String recodeOverlayValue(String oldOverlayValue, List<BinRange> desiredOverlayValues) {
-    String newOverlayValue = oldOverlayValue;
-    // TODO assuming categorical vars will have labels but not starts and ends defined. maybe thats not explicit enough?
-    boolean isContinuous = desiredOverlayValues.stream().filter(bin -> bin.getBinStart() != null).findFirst().isPresent();
-
-    if (isContinuous) {
-      // TODO figure something else out for dates- not sure yet how to compare dates in java
-      newOverlayValue = desiredOverlayValues.stream().filter(bin -> (Double.parseDouble(bin.getBinStart()) < Double.parseDouble(oldOverlayValue) & Double.parseDouble(bin.getBinEnd()) > Double.parseDouble(oldOverlayValue))).findFirst().orElseThrow().getBinLabel();
-    } else {
-      boolean oldValueIsDesired = desiredOverlayValues.stream().filter(bin -> bin.getBinLabel().equals(oldOverlayValue)).findFirst().isPresent();
-      if (!oldValueIsDesired) {
-        newOverlayValue = "__UNSELECTED__";
-      }
+  private void validateCategoricalOverlayValues(CategoricalOverlayConfig overlayConfig) throws ValidationException {
+    int numDistinctOverlayVals = new HashSet<>(overlayConfig.getOverlayValues()).size();
+    if (numDistinctOverlayVals != overlayConfig.getOverlayValues().size()) {
+      throw new ValidationException("All overlay values must be unique: " + overlayConfig.getOverlayValues());
     }
+  }
 
-    return(newOverlayValue);
+  private void validateNumericBinRanges(NumericOverlayConfig overlayConfig) throws ValidationException {
+    boolean anyMissingBinStart = overlayConfig.getOverlayValues().stream().anyMatch(bin -> bin.getBinStart() == null);
+    boolean anyMissingBinEnd = overlayConfig.getOverlayValues().stream().anyMatch(bin -> bin.getBinEnd() == null);
+    if (anyMissingBinStart || anyMissingBinEnd) {
+      throw new ValidationException("All numeric bin ranges must have start and end.");
+    }
+  }
+
+  private void validateDateBinRanges(DateOverlayConfig overlayConfig) throws ValidationException {
+    boolean anyMissingBinStart = overlayConfig.getOverlayValues().stream().anyMatch(bin -> bin.getBinStart() == null);
+    boolean anyMissingBinEnd = overlayConfig.getOverlayValues().stream().anyMatch(bin -> bin.getBinEnd() == null);
+    if (anyMissingBinStart || anyMissingBinEnd) {
+      throw new ValidationException("All date bin ranges must have start and end.");
+    }
   }
 
   @Override
@@ -211,20 +189,21 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
     DelimitedDataParser parser = new DelimitedDataParser(reader.readLine(), TAB, true);
 
     // establish column header indexes
-    MapSpec spec = getPluginSpec();
+    StandaloneMapMarkersSpec spec = getPluginSpec();
     Function<VariableSpec,Integer> indexOf = var -> parser.indexOfColumn(getUtil().toColNameOrEmpty(var)).orElseThrow();
     int geoVarIndex  = indexOf.apply(spec.getGeoAggregateVariable());
     int latIndex     = indexOf.apply(spec.getLatitudeVariable());
     int lonIndex     = indexOf.apply(spec.getLongitudeVariable());
-    Integer overlayIndex = spec.getOverlayVariable() == null ? null : indexOf.apply(spec.getOverlayVariable());
+    Integer overlayIndex = Optional.of(spec.getOverlayConfig())
+        .map(OverlayConfig::getOverlayVariable)
+        .map(indexOf)
+        .orElse(null);
 
     // get map markers config
     // TODO update types somehow/ somewhere, need to be able to have numeric or date bin start and ends
-    List<BinRange> overlayValues = spec.getOverlayValues();
-    validateBinRanges(overlayValues);
     String valueSpec = spec.getValueSpec().getValue();
-
-    ParsedGeolocationViewport viewport = ParsedGeolocationViewport.fromApiViewport(spec.getViewport());
+    OverlayBins overlayBins = new OverlayBins(spec.getOverlayConfig());
+    GeolocationViewport viewport = GeolocationViewport.fromApiViewport(spec.getViewport());
 
     // loop through rows of data stream, aggregating stats into a map from aggregate value to stats object
     Map<String, GeoVarData> aggregator = new HashMap<>();
@@ -234,24 +213,21 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
       String[] row = parser.parseLineToArray(nextLine);
       
       // entity records counts not impacted by viewport
-      if (!(row[geoVarIndex] == null ||
-            row[geoVarIndex].isEmpty() ||
-            row[latIndex] == null ||
-            row[latIndex].isEmpty() ||
-            row[lonIndex] == null ||
-            row[lonIndex].isEmpty())) {
+      if (!(row[geoVarIndex] == null || row[geoVarIndex].isEmpty() ||
+            row[latIndex] == null || row[latIndex].isEmpty() ||
+            row[lonIndex] == null || row[lonIndex].isEmpty())) {
       
         double latitude = Double.parseDouble(row[latIndex]);
         double longitude = Double.parseDouble(row[lonIndex]);
-        String overlayValue = overlayIndex == null ? null : recodeOverlayValue(row[overlayIndex], overlayValues);
+        String overlayValue = overlayIndex == null ? null : overlayBins.getOverlayRecoder().recode(row[overlayIndex]);
 
         if (viewport.containsCoordinates(latitude, longitude)) {
           aggregator.putIfAbsent(row[geoVarIndex], new GeoVarData());
           // overlayValue here could be a raw numeric value as well
           aggregator.get(row[geoVarIndex]).addRow(latitude, longitude, overlayValue);
         }
-        nextLine = reader.readLine();
-      }  
+      }
+      nextLine = reader.readLine();
     }
 
     // begin output object and single property containing array of map elements
@@ -280,41 +256,5 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
     String config = "]}";
     out.write(config.getBytes());
     out.flush();
-  }
-  private static class ParsedGeolocationViewport {
-    private double xMin;
-    private double xMax;
-    private double yMin;
-    private double yMax;
-    private boolean viewportIncludesIntlDateLine;
-
-    public ParsedGeolocationViewport(double xMin, double xMax,
-                                     double yMin, double yMax) {
-      this.xMin = xMin;
-      this.xMax = xMax;
-      this.yMin = yMin;
-      this.yMax = yMax;
-      this.viewportIncludesIntlDateLine = yMin > yMax;
-    }
-
-
-    public static ParsedGeolocationViewport fromApiViewport(GeolocationViewport viewport) {
-      return new ParsedGeolocationViewport(
-          Double.parseDouble(viewport.getLatitude().getXMin()),
-          Double.parseDouble(viewport.getLatitude().getXMax()),
-          viewport.getLongitude().getLeft().doubleValue(),
-          viewport.getLongitude().getRight().doubleValue()
-      );
-    }
-
-    public Boolean containsCoordinates(double latitude, double longitude) {
-      if (latitude < xMin || latitude > xMax) { return false; }
-      if (viewportIncludesIntlDateLine) {
-        if (longitude < yMin && longitude > yMax) { return false; }
-      } else {
-        if (longitude < yMin || longitude > yMax) { return false; }
-      }
-      return true;
-    }
   }
 }
