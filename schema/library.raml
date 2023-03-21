@@ -682,21 +682,6 @@ types:
       overlayVariable:
         type: VariableSpec
         required: false
-  CategoricalCountsPostRequest:
-    type: VisualizationRequestBase
-    additionalProperties: false
-    properties:
-      config: CategoricalCountsSpec
-  CategoricalCountsSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      variable: VariableSpec
-  CategoricalCountsPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      categories: BinRangeWithValue[]
   ContinuousVariableMetadataPostRequest:
     type: VisualizationRequestBase
     additionalProperties: false

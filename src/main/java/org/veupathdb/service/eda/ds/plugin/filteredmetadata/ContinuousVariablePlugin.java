@@ -1,4 +1,4 @@
-package org.veupathdb.service.eda.ds.plugin;
+package org.veupathdb.service.eda.ds.plugin.filteredmetadata;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,9 +33,9 @@ import java.util.Map;
 
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class FilteredVariableMetadataPlugin extends AbstractEmptyComputePlugin<ContinuousVariableMetadataPostRequest, ContinuousVariableMetadataSpec> {
+public class ContinuousVariablePlugin extends AbstractEmptyComputePlugin<ContinuousVariableMetadataPostRequest, ContinuousVariableMetadataSpec> {
   
-  private static final Logger LOG = LogManager.getLogger(FilteredVariableMetadataPlugin.class);
+  private static final Logger LOG = LogManager.getLogger(ContinuousVariablePlugin.class);
 
   private static final ManagedMap<String,ContinuousVariableMetadataPostResponse> RESULT_CACHE =
       new ManagedMap<>(5000, 2000);
@@ -95,7 +95,7 @@ public class FilteredVariableMetadataPlugin extends AbstractEmptyComputePlugin<C
 
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       boolean first = true;
-      
+
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, spec.getVariable()));
       // for convenience
       connection.voidEval("x <- " + DEFAULT_SINGLE_STREAM_NAME + "$" + util.toColNameOrEmpty(spec.getVariable()));

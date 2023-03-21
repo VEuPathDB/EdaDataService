@@ -26,7 +26,7 @@ securitySchemes:
 # Data Service Specific Endpoints
 ####################################
 
-/filter-aware-variable-metadata:
+/filter-aware-metadata/continuous-variable:
   post:
     description: Returns equal interval, quantile and standard deviation based bin ranges and/or the median for a continuous variable over a specified range.
     body:
@@ -37,18 +37,6 @@ securitySchemes:
         body:
           application/json:
             type: lib.ContinuousVariableMetadataPostResponse
-
-/categorical-counts:
-  post:
-    description: Returns counts per value for a categorical variable given a filter spec (subset).
-    body:
-      application/json:
-        type: lib.CategoricalCountsPostRequest
-    responses:
-      200:
-        body:
-          application/json:
-            type: lib.CategoricalCountsPostResponse
 
 /apps:
   displayName: Available Apps
