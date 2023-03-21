@@ -3,6 +3,7 @@ package org.veupathdb.service.eda.ds.plugin.filteredmetadata;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.cache.ManagedMap;
+import org.gusdb.fgputil.cache.ValueProductionException;
 import org.gusdb.fgputil.EncryptionUtil;
 import org.gusdb.fgputil.json.JsonUtil;
 import org.gusdb.fgputil.ListBuilder;
@@ -37,11 +38,11 @@ public class ContinuousVariablePlugin extends AbstractEmptyComputePlugin<Continu
   
   private static final Logger LOG = LogManager.getLogger(ContinuousVariablePlugin.class);
 
-  private static final ManagedMap<String,ContinuousVariableMetadataPostResponse> RESULT_CACHE =
+  private static final ManagedMap<String,String> RESULT_CACHE =
       new ManagedMap<>(5000, 2000);
 
   private String _cacheKey;
-  private ContinuousVariableMetadataPostResponse _cachedResponse;
+  private String _cachedResponse;
 
   @Override
   protected Class<ContinuousVariableMetadataPostRequest> getVisualizationRequestClass() {
@@ -87,42 +88,55 @@ public class ContinuousVariablePlugin extends AbstractEmptyComputePlugin<Continu
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    PluginUtil util = getUtil();
-    ContinuousVariableMetadataSpec spec = getPluginSpec();
-    var jsonWrapper = new Object(){ String value = "{"; };
-    // TODO i dont actually know if this returns strings like 'median'. never done this w raml before...
-    List<String> requestedMetadata = spec.getMetadata();    
+    if (_cachedResponse == null) {
+      LOG.info("Result not in cache; calculating..");
+      var jsonWrapper = new Object(){ String value = "{"; };
 
-    useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      boolean first = true;
+      try {
+        _cachedResponse = RESULT_CACHE.getValue(_cacheKey, key -> {
 
-      connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, spec.getVariable()));
-      // for convenience
-      connection.voidEval("x <- " + DEFAULT_SINGLE_STREAM_NAME + "$" + util.toColNameOrEmpty(spec.getVariable()));
+          PluginUtil util = getUtil();
+          ContinuousVariableMetadataSpec spec = getPluginSpec();
+          
+          // TODO i dont actually know if this returns strings like 'median'. never done this w raml before...
+          List<String> requestedMetadata = spec.getMetadata();    
+      
+          useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
+            boolean first = true;
+      
+            connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, spec.getVariable()));
+            // for convenience
+            connection.voidEval("x <- " + DEFAULT_SINGLE_STREAM_NAME + "$" + util.toColNameOrEmpty(spec.getVariable()));
+      
+            if (requestedMetadata.contains("binRanges")) {
+              // TODO add support for user-defined N bins? for now 10..
+              String equalIntervalJson = connection.eval("veupathUtils::toJSON(veupathUtils::getBinRanges(x, 'equalInterval', 10, FALSE))").asString();
+              String quantileJson = connection.eval("veupathUtils::toJSON(veuapthUtils::getBinRanges(x, 'quantile', 10, FALSE))").asString();
+              // sd bins return 6 bins at most, no user control supported in R currently
+              String sdJson = connection.eval("veupathUtils::toJSON(veupathUtils::getBinRanges(x, 'sd', NULL, FALSE))").asString();
+              jsonWrapper.value += "\"binRanges\":{\"equalInterval\":" + equalIntervalJson + 
+                                                 ",\"quantile\":" + quantileJson + 
+                                                 ",\"standardDeviation\":" + sdJson + "}";
+              first = false;
+            }
+      
+            if (requestedMetadata.contains("median")) {
+              String medianJson = connection.eval("jsonlite::toJSON(jsonlite::unbox(formatC(median(x))))").asString();
+              medianJson += first ? "\"median\":{" : ",\"median\":{";
+              jsonWrapper.value += medianJson + "}";
+              first = false;
+            }
+      
+            jsonWrapper.value += "}";
+          });
 
-      if (requestedMetadata.contains("binRanges")) {
-        // TODO add support for user-defined N bins? for now 10..
-        String equalIntervalJson = connection.eval("veupathUtils::toJSON(veupathUtils::getBinRanges(x, 'equalInterval', 10, FALSE))").asString();
-        String quantileJson = connection.eval("veupathUtils::toJSON(veuapthUtils::getBinRanges(x, 'quantile', 10, FALSE))").asString();
-        // sd bins return 6 bins at most, no user control supported in R currently
-        String sdJson = connection.eval("veupathUtils::toJSON(veupathUtils::getBinRanges(x, 'sd', NULL, FALSE))").asString();
-        jsonWrapper.value += "\"binRanges\":{\"equalInterval\":" + equalIntervalJson + 
-                                           ",\"quantile\":" + quantileJson + 
-                                           ",\"standardDeviation\":" + sdJson + "}";
-        first = false;
+          return jsonWrapper.value;
+        });
+      } catch (ValueProductionException e) {
+        throw new RuntimeException("Could not generate continuous variable metadata", e);
       }
-
-      if (requestedMetadata.contains("median")) {
-        String medianJson = connection.eval("jsonlite::toJSON(jsonlite::unbox(formatC(median(x))))").asString();
-        medianJson += first ? "\"median\":{" : ",\"median\":{";
-        jsonWrapper.value += medianJson + "}";
-        first = false;
-      }
-
-      jsonWrapper.value += "}";
-    });
-
-    out.write(jsonWrapper.value.getBytes(StandardCharsets.UTF_8));
+    }
+    out.write(_cachedResponse.getBytes(StandardCharsets.UTF_8));
     out.flush();
   }
 }
