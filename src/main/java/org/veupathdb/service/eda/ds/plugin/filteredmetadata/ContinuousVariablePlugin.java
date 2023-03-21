@@ -90,7 +90,7 @@ public class ContinuousVariablePlugin extends AbstractEmptyComputePlugin<Continu
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     if (_cachedResponse == null) {
       LOG.info("Result not in cache; calculating..");
-      var jsonWrapper = new Object(){ String value = "{"; };
+      StringBuilder json = new StringBuilder("{");
 
       try {
         _cachedResponse = RESULT_CACHE.getValue(_cacheKey, key -> {
@@ -114,23 +114,23 @@ public class ContinuousVariablePlugin extends AbstractEmptyComputePlugin<Continu
               String quantileJson = connection.eval("veupathUtils::toJSON(veuapthUtils::getBinRanges(x, 'quantile', 10, FALSE))").asString();
               // sd bins return 6 bins at most, no user control supported in R currently
               String sdJson = connection.eval("veupathUtils::toJSON(veupathUtils::getBinRanges(x, 'sd', NULL, FALSE))").asString();
-              jsonWrapper.value += "\"binRanges\":{\"equalInterval\":" + equalIntervalJson + 
-                                                 ",\"quantile\":" + quantileJson + 
-                                                 ",\"standardDeviation\":" + sdJson + "}";
+              json.append("\"binRanges\":{\"equalInterval\":" + equalIntervalJson + 
+                                        ",\"quantile\":" + quantileJson + 
+                                        ",\"standardDeviation\":" + sdJson + "}");
               first = false;
             }
       
             if (requestedMetadata.contains("median")) {
               String medianJson = connection.eval("jsonlite::toJSON(jsonlite::unbox(formatC(median(x))))").asString();
               medianJson += first ? "\"median\":{" : ",\"median\":{";
-              jsonWrapper.value += medianJson + "}";
+              json.append(medianJson + "}");
               first = false;
             }
       
-            jsonWrapper.value += "}";
+            json.append("}");
           });
 
-          return jsonWrapper.value;
+          return json.toString();
         });
       } catch (ValueProductionException e) {
         throw new RuntimeException("Could not generate continuous variable metadata", e);
