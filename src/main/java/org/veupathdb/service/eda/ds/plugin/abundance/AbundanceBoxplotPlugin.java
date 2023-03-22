@@ -40,23 +40,8 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
   }
 
   @Override
-  protected Class<AbundanceBoxplotPostRequest> getVisualizationRequestClass() {
-    return AbundanceBoxplotPostRequest.class;
-  }
-
-  @Override
-  protected Class<BoxplotWith1ComputeSpec> getVisualizationSpecClass() {
-    return BoxplotWith1ComputeSpec.class;
-  }
-
-  @Override
-  protected Class<RankedAbundanceComputeConfig> getComputeConfigClass() {
-    return RankedAbundanceComputeConfig.class;
-  }
-
-  @Override
-  protected boolean includeComputedVarsInStream() {
-    return true;
+  protected ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(AbundanceBoxplotPostRequest.class, BoxplotWith1ComputeSpec.class, RankedAbundanceComputeConfig.class);
   }
 
   @Override

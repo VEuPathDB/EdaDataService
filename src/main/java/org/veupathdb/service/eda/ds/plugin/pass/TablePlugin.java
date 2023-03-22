@@ -40,13 +40,8 @@ public class TablePlugin extends AbstractEmptyComputePlugin<TablePostRequest, Ta
   }
 
   @Override
-  protected Class<TablePostRequest> getVisualizationRequestClass() {
-    return TablePostRequest.class;
-  }
-
-  @Override
-  protected Class<TableSpec> getVisualizationSpecClass() {
-    return TableSpec.class;
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(TablePostRequest.class, TableSpec.class);
   }
 
   @Override

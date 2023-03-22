@@ -5,6 +5,7 @@ import jakarta.ws.rs.BadRequestException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.Timer;
+import org.gusdb.fgputil.Tuples.ThreeTuple;
 import org.gusdb.fgputil.Tuples.TwoTuple;
 import org.gusdb.fgputil.client.ResponseFuture;
 import org.gusdb.fgputil.functional.FunctionalInterfaces.ConsumerWithException;
@@ -56,19 +57,19 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R> i
   // shared stream name for plugins that need request only a single stream
   protected static final String DEFAULT_SINGLE_STREAM_NAME = "single_tabular_dataset";
 
-  // methods that need to be implemented
-  protected abstract Class<T> getVisualizationRequestClass();
-  protected abstract Class<S> getVisualizationSpecClass();
-  protected abstract Class<R> getComputeConfigClass();
+  protected class ClassGroup extends ThreeTuple<Class<T>,Class<S>,Class<R>> {
+    public ClassGroup(Class<T> visualizationRequestClass, Class<S> visualizationSpecClass, Class<R> computeConfigClass) {
+      super(visualizationRequestClass, visualizationSpecClass, computeConfigClass);
+    }
+    public Class<T> getVisualizationRequestClass() { return getFirst(); }
+    public Class<S> getVisualizationSpecClass() { return getSecond(); }
+    public Class<R> getComputeConfigClass() { return getThird(); }
+  }
 
+  // methods that need to be implemented
+  protected abstract ClassGroup getTypeParameterClasses();
   protected abstract void validateVisualizationSpec(S pluginSpec) throws ValidationException;
   protected abstract List<StreamSpec> getRequestedStreams(S pluginSpec);
-
-  // return true to include computed vars as part of the tabular stream
-  //   for the entity under which they were computed.  If true, a runtime
-  //   error will occur if no stream spec exists for that entity.
-  protected abstract boolean includeComputedVarsInStream();
-
   protected abstract void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException;
 
   // methods that should probably be overridden
@@ -113,12 +114,12 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R> i
     logRequestTime("Starting timer");
 
     // validate config types match classes provided by subclass
-    _pluginSpec = getSpecObject(request, "getConfig", getVisualizationSpecClass());
+    _pluginSpec = getSpecObject(request, "getConfig", getTypeParameterClasses().getVisualizationSpecClass());
 
     // find compute name if required by this viz plugin; if present, then look up compute config
     //   and create an optional tuple of name+config (empty optional if viz does not require compute)
     _computeInfo = appName == null ? Optional.empty() : findComputeName(appName).map(name -> new TwoTuple<>(name,
-        getSpecObject(request, "getComputeConfig", getComputeConfigClass())));
+        getSpecObject(request, "getComputeConfig", getTypeParameterClasses().getComputeConfigClass())));
 
     // check for subset and derived entity properties of request
     _subsetFilters = Optional.ofNullable(request.getFilters()).orElse(Collections.emptyList());
@@ -265,7 +266,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R> i
       AbstractEmptyComputePlugin<U,V> plugin, V visualizationConfig, Class<W> expectedResponseType, List<APIFilter> subsetFilters) {
     try {
       // build plugin request
-      String requestClassName = plugin.getVisualizationRequestClass().getName();
+      String requestClassName = plugin.getTypeParameterClasses().getVisualizationRequestClass().getName();
       // need to use the implementation class (not the interface) so we can instantiate it
       if (!requestClassName.endsWith("Impl")) requestClassName += "Impl";
       U request = (U)Class.forName(requestClassName).getConstructor().newInstance();
@@ -273,7 +274,8 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R> i
       request.setFilters(subsetFilters);
       request.setDerivedVariables(_derivedVariableSpecs); // probably not needed; how are these relevant?
       // config is not a property on VisualizationRequestBase, but we always expect it; invoke with the passed config
-      plugin.getVisualizationRequestClass().getMethod("setConfig", plugin.getVisualizationSpecClass()).invoke(request, visualizationConfig);
+      plugin.getTypeParameterClasses().getVisualizationRequestClass().getMethod("setConfig",
+          plugin.getTypeParameterClasses().getVisualizationSpecClass()).invoke(request, visualizationConfig);
       ByteArrayOutputStream result = new ByteArrayOutputStream();
       // passing null as appName because it is only used to look up the compute; since this is an EmptyComputePlugin, we know there is no compute
       plugin.processRequest(null, request, _authHeader).accept(result);
