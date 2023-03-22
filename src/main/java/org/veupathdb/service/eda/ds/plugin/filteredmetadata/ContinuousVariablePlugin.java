@@ -110,10 +110,10 @@ public class ContinuousVariablePlugin extends AbstractEmptyComputePlugin<Continu
       
             if (requestedMetadata.contains("binRanges")) {
               // TODO add support for user-defined N bins? for now 10..
-              String equalIntervalJson = connection.eval("veupathUtils::toJSON(veupathUtils::getBinRanges(x, 'equalInterval', 10, FALSE))").asString();
-              String quantileJson = connection.eval("veupathUtils::toJSON(veuapthUtils::getBinRanges(x, 'quantile', 10, FALSE))").asString();
+              String equalIntervalJson = connection.eval("veupathUtils::toJSON(veupathUtils::getDiscretizedBins(x, 'equalInterval', 10, FALSE))").asString();
+              String quantileJson = connection.eval("veupathUtils::toJSON(veuapthUtils::getDiscretizedBins(x, 'quantile', 10, FALSE))").asString();
               // sd bins return 6 bins at most, no user control supported in R currently
-              String sdJson = connection.eval("veupathUtils::toJSON(veupathUtils::getBinRanges(x, 'sd', NULL, FALSE))").asString();
+              String sdJson = connection.eval("veupathUtils::toJSON(veupathUtils::getDiscretizedBins(x, 'sd', NULL, FALSE))").asString();
               json.append("\"binRanges\":{\"equalInterval\":" + equalIntervalJson + 
                                         ",\"quantile\":" + quantileJson + 
                                         ",\"standardDeviation\":" + sdJson + "}");
