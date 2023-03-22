@@ -89,11 +89,10 @@ public class ContinuousVariablePlugin extends AbstractEmptyComputePlugin<Continu
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     if (_cachedResponse == null) {
-      LOG.info("Result not in cache; calculating..");
-      StringBuilder json = new StringBuilder("{");
-
       try {
         _cachedResponse = RESULT_CACHE.getValue(_cacheKey, key -> {
+          LOG.info("Result not in cache; calculating..");
+          StringBuilder json = new StringBuilder("{");
 
           PluginUtil util = getUtil();
           ContinuousVariableMetadataSpec spec = getPluginSpec();
