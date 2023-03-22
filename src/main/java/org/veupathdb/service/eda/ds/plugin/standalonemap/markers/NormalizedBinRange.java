@@ -1,8 +1,7 @@
 package org.veupathdb.service.eda.ds.plugin.standalonemap.markers;
 
-import org.veupathdb.service.eda.generated.model.DateOverlayConfig;
-import org.veupathdb.service.eda.generated.model.NumericOverlayConfig;
-import org.veupathdb.service.eda.generated.model.OverlayConfig;
+import org.veupathdb.service.eda.generated.model.APIVariableType;
+import org.veupathdb.service.eda.generated.model.ContinousOverlayConfig;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -32,27 +31,21 @@ public class NormalizedBinRange {
     return label;
   }
 
-  public static List<NormalizedBinRange> fromOverlayConfig(OverlayConfig overlayConfig) {
-    switch (overlayConfig.getOverlayType()) {
-      case DATE -> {
-        DateOverlayConfig dateOverlayConfig = (DateOverlayConfig) overlayConfig;
-        return dateOverlayConfig.getOverlayValues().stream()
-            .map(binRange -> new NormalizedBinRange(
-                Instant.parse(binRange.getBinStart()).toEpochMilli(),
-                Instant.parse(binRange.getBinEnd()).toEpochMilli(),
-                binRange.getBinLabel()))
-            .collect(Collectors.toList());
-      }
-      case NUMBER -> {
-        NumericOverlayConfig numericOverlayConfig = (NumericOverlayConfig) overlayConfig;
-        return numericOverlayConfig.getOverlayValues().stream()
-            .map(binRange -> new NormalizedBinRange(
-                binRange.getBinStart().doubleValue(),
-                binRange.getBinEnd().doubleValue(),
-                binRange.getBinLabel()))
-            .collect(Collectors.toList());
-      }
+  public static List<NormalizedBinRange> fromOverlayConfig(ContinousOverlayConfig overlayConfig, String variableType) {
+    if (variableType.equalsIgnoreCase(APIVariableType.DATE.getValue())) {
+      return overlayConfig.getOverlayValues().stream()
+          .map(binRange -> new NormalizedBinRange(
+              Instant.parse(binRange.getStart()).toEpochMilli(),
+              Instant.parse(binRange.getEnd()).toEpochMilli(),
+              binRange.getBinLabel()))
+          .collect(Collectors.toList());
+    } else {
+      return overlayConfig.getOverlayValues().stream()
+          .map(binRange -> new NormalizedBinRange(
+              Double.parseDouble(binRange.getStart()),
+              Double.parseDouble(binRange.getEnd()),
+              binRange.getBinLabel()))
+          .collect(Collectors.toList());
     }
-    return Collections.emptyList();
   }
 }

@@ -127,8 +127,7 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
 
   protected void validateOverlayConfig(OverlayConfig overlayConfig) throws ValidationException {
     switch (overlayConfig.getOverlayType()) {
-      case DATE -> validateDateBinRanges((DateOverlayConfig) overlayConfig);
-      case NUMBER -> validateNumericBinRanges((NumericOverlayConfig) overlayConfig);
+      case CONTINOUS -> validateContinousBinRanges((ContinousOverlayConfig) overlayConfig);
       case CATEGORICAL -> validateCategoricalOverlayValues((CategoricalOverlayConfig) overlayConfig);
     }
   }
@@ -144,29 +143,15 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
     }
   }
 
-  private void validateNumericBinRanges(NumericOverlayConfig overlayConfig) throws ValidationException {
-    if (!getUtil().getVariableType(overlayConfig.getOverlayVariable()).equalsIgnoreCase(APIVariableType.NUMBER.getValue())
-        && !getUtil().getVariableType(overlayConfig.getOverlayVariable()).equalsIgnoreCase(APIVariableType.LONGITUDE.getValue())
-        && !getUtil().getVariableType(overlayConfig.getOverlayVariable()).equalsIgnoreCase(APIVariableType.INTEGER.getValue())) {
-      throw new ValidationException("Input overlay variable %s is not numeric (%s), but provided overlay configuration is for a non-numeric variable."
-          .formatted(overlayConfig.getOverlayVariable().getVariableId(), getUtil().getVariableType(overlayConfig.getOverlayVariable())));
+  private void validateContinousBinRanges(ContinousOverlayConfig overlayConfig) throws ValidationException {
+    if (!getUtil().getVariableDataShape(overlayConfig.getOverlayVariable()).equalsIgnoreCase(APIVariableDataShape.CONTINUOUS.toString())) {
+      throw new ValidationException("Input overlay variable %s is %s, but provided overlay configuration is for a conginuous variable"
+          .formatted(overlayConfig.getOverlayVariable().getVariableId(), getUtil().getVariableDataShape(overlayConfig.getOverlayVariable())));
     }
-    boolean anyMissingBinStart = overlayConfig.getOverlayValues().stream().anyMatch(bin -> bin.getBinStart() == null);
-    boolean anyMissingBinEnd = overlayConfig.getOverlayValues().stream().anyMatch(bin -> bin.getBinEnd() == null);
+    boolean anyMissingBinStart = overlayConfig.getOverlayValues().stream().anyMatch(bin -> bin.getStart() == null);
+    boolean anyMissingBinEnd = overlayConfig.getOverlayValues().stream().anyMatch(bin -> bin.getEnd() == null);
     if (anyMissingBinStart || anyMissingBinEnd) {
       throw new ValidationException("All numeric bin ranges must have start and end.");
-    }
-  }
-
-  private void validateDateBinRanges(DateOverlayConfig overlayConfig) throws ValidationException {
-    if (!getUtil().getVariableType(overlayConfig.getOverlayVariable()).equalsIgnoreCase(APIVariableType.DATE.getValue())) {
-      throw new ValidationException("Input overlay variable %s is not a date, but provided overlay configuration is for a date variable."
-          .formatted(overlayConfig.getOverlayVariable().getVariableId()));
-    }
-    boolean anyMissingBinStart = overlayConfig.getOverlayValues().stream().anyMatch(bin -> bin.getBinStart() == null);
-    boolean anyMissingBinEnd = overlayConfig.getOverlayValues().stream().anyMatch(bin -> bin.getBinEnd() == null);
-    if (anyMissingBinStart || anyMissingBinEnd) {
-      throw new ValidationException("All date bin ranges must have start and end.");
     }
   }
 
@@ -193,7 +178,7 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
     // get map markers config
     // TODO update types somehow/ somewhere, need to be able to have numeric or date bin start and ends
     String valueSpec = spec.getValueSpec().getValue();
-    Optional<OverlaySpecification> overlaySpecification = overlayConfig.map(OverlaySpecification::new);
+    Optional<OverlaySpecification> overlaySpecification = overlayConfig.map(config -> new OverlaySpecification(config, getUtil()::getVariableType));
     GeolocationViewport viewport = GeolocationViewport.fromApiViewport(spec.getViewport());
 
     // loop through rows of data stream, aggregating stats into a map from aggregate value to stats object

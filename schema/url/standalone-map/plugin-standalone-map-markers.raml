@@ -53,9 +53,21 @@ types:
     properties:
       binLabel: string
 
+  BinRangeWithValue:
+    additionalProperties: false
+    type: BinRange
+    properties:
+      value: number
+
+  ContinuousBinRange:
+    type: BinRange
+    properties:
+      start: string
+      end: string
+
   OverlayType:
     type: string
-    enum: ['categorical', 'number', 'integer', 'date']
+    enum: ["continous", "categorical"]
 
   OverlayConfig:
     additionalProperties: false
@@ -66,21 +78,13 @@ types:
       overlayVariable:
         type: VariableSpec
 
-  DateOverlayConfig:
+  ContinousOverlayConfig:
     type: OverlayConfig
     additionalProperties: false
-    discriminatorValue: date
+    discriminatorValue: continous
     properties:
       overlayValues:
-        type: DateBinRange[]
-
-  NumericOverlayConfig:
-    type: OverlayConfig
-    additionalProperties: false
-    discriminatorValue: number
-    properties:
-      overlayValues:
-        type: NumericBinRange[]
+        type: ContinuousBinRange[]
 
   CategoricalOverlayConfig:
     type: OverlayConfig
@@ -89,12 +93,6 @@ types:
     properties:
       overlayValues:
         type: string[]
-
-  BinRangeWithValue:
-    additionalProperties: false
-    type: BinRange
-    properties:
-      value: number
 
   StandaloneMapElementInfo:
     additionalProperties: false
