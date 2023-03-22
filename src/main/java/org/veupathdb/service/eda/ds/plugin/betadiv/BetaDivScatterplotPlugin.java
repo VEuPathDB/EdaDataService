@@ -40,23 +40,8 @@ public class BetaDivScatterplotPlugin extends AbstractPlugin<BetaDivScatterplotP
   }
 
   @Override
-  protected Class<BetaDivScatterplotPostRequest> getVisualizationRequestClass() {
-    return BetaDivScatterplotPostRequest.class;
-  }
-
-  @Override
-  protected Class<BetaDivScatterplotSpec> getVisualizationSpecClass() {
-    return BetaDivScatterplotSpec.class;
-  }
-
-  @Override
-  protected Class<BetaDivComputeConfig> getComputeConfigClass() {
-    return BetaDivComputeConfig.class;
-  }
-
-  @Override
-  protected boolean includeComputedVarsInStream() {
-    return true;
+  protected ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(BetaDivScatterplotPostRequest.class, BetaDivScatterplotSpec.class, BetaDivComputeConfig.class);
   }
 
   @Override
@@ -75,7 +60,7 @@ public class BetaDivScatterplotPlugin extends AbstractPlugin<BetaDivScatterplotP
           .description("Variable must be a number, or have 8 or fewer values, and be of the same or a parent entity as the X-axis variable.")
       .done();
   }
-  
+
   @Override
   protected void validateVisualizationSpec(BetaDivScatterplotSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()

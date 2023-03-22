@@ -44,23 +44,8 @@ public class AbundanceScatterplotPlugin extends AbstractPlugin<AbundanceScatterp
   }
 
   @Override
-  protected Class<AbundanceScatterplotPostRequest> getVisualizationRequestClass() {
-    return AbundanceScatterplotPostRequest.class;
-  }
-
-  @Override
-  protected Class<ScatterplotWith1ComputeSpec> getVisualizationSpecClass() {
-    return ScatterplotWith1ComputeSpec.class;
-  }
-
-  @Override
-  protected Class<RankedAbundanceComputeConfig> getComputeConfigClass() {
-    return RankedAbundanceComputeConfig.class;
-  }
-
-  @Override
-  protected boolean includeComputedVarsInStream() {
-    return true;
+  protected ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(AbundanceScatterplotPostRequest.class, ScatterplotWith1ComputeSpec.class, RankedAbundanceComputeConfig.class);
   }
 
   @Override

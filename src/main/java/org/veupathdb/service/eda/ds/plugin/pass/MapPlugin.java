@@ -43,13 +43,8 @@ public class MapPlugin extends AbstractEmptyComputePlugin<MapPostRequest, MapSpe
   }
 
   @Override
-  protected Class<MapPostRequest> getVisualizationRequestClass() {
-    return MapPostRequest.class;
-  }
-
-  @Override
-  protected Class<MapSpec> getVisualizationSpecClass() {
-    return MapSpec.class;
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(MapPostRequest.class, MapSpec.class);
   }
 
   @Override

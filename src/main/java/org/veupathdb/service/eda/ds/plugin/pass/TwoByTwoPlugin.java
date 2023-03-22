@@ -39,13 +39,8 @@ public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<TwoByTwoPostReque
   }
 
   @Override
-  protected Class<TwoByTwoPostRequest> getVisualizationRequestClass() {
-    return TwoByTwoPostRequest.class;
-  }
-
-  @Override
-  protected Class<TwoByTwoSpec> getVisualizationSpecClass() {
-    return TwoByTwoSpec.class;
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(TwoByTwoPostRequest.class, TwoByTwoSpec.class);
   }
   
   @Override

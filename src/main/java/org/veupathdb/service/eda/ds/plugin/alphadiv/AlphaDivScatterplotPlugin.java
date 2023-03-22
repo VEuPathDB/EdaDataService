@@ -42,23 +42,8 @@ public class AlphaDivScatterplotPlugin extends AbstractPlugin<AlphaDivScatterplo
   }
 
   @Override
-  protected Class<AlphaDivScatterplotPostRequest> getVisualizationRequestClass() {
-    return AlphaDivScatterplotPostRequest.class;
-  }
-  
-  @Override
-  protected Class<ScatterplotWith1ComputeSpec> getVisualizationSpecClass() {
-    return ScatterplotWith1ComputeSpec.class;
-  }
-
-  @Override
-  protected Class<AlphaDivComputeConfig> getComputeConfigClass() {
-    return AlphaDivComputeConfig.class;
-  }
-
-  @Override
-  protected boolean includeComputedVarsInStream() {
-    return true;
+  protected ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(AlphaDivScatterplotPostRequest.class, ScatterplotWith1ComputeSpec.class, AlphaDivComputeConfig.class);
   }
 
   @Override

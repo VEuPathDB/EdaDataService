@@ -8,9 +8,7 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.generated.model.MosaicPostRequest;
-import org.veupathdb.service.eda.generated.model.MosaicSpec;
-import org.veupathdb.service.eda.generated.model.VariableSpec;
+import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,15 +37,10 @@ public class ContTablePlugin extends AbstractEmptyComputePlugin<MosaicPostReques
   public List<String> getProjects() {
     return List.of(CLINEPI_PROJECT);
   }
-  
-  @Override
-  protected Class<MosaicSpec> getVisualizationSpecClass() {
-    return MosaicSpec.class;
-  }
 
   @Override
-  protected Class<MosaicPostRequest> getVisualizationRequestClass() {
-    return MosaicPostRequest.class;
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(MosaicPostRequest.class, MosaicSpec.class);
   }
 
   @Override
