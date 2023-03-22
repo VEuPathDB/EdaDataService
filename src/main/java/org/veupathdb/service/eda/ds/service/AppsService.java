@@ -43,6 +43,13 @@ import org.veupathdb.service.eda.ds.plugin.sample.MultiStreamPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.RecordCountPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.TestCollectionPlugin;
 import org.veupathdb.service.eda.common.client.NonEmptyResultStream.EmptyResultException;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingBarplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingBoxplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingContTablePlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingHistogramPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingLineplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingScatterplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.StandaloneMapMarkersPlugin;
 import org.veupathdb.service.eda.generated.model.*;
 import org.veupathdb.service.eda.generated.resources.Apps;
 
@@ -57,6 +64,47 @@ public class AppsService implements Apps {
   @Override
   public GetAppsResponse getApps() {
     return GetAppsResponse.respond200WithApplicationJson(AppsMetadata.APPS);
+  }
+
+  @Override
+  public PostAppsStandaloneMapVisualizationsMapMarkersResponse postAppsStandaloneMapVisualizationsMapMarkers(StandaloneMapMarkersPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapVisualizationsMapMarkersResponse.respond200WithApplicationJson(
+        new StandaloneMapMarkersPostResponseStream(processRequest(new StandaloneMapMarkersPlugin(), entity))));
+  }
+
+  @Override
+  public PostAppsStandaloneMapVisualizationsScatterplotResponse postAppsStandaloneMapVisualizationsScatterplot(FloatingScatterplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapVisualizationsScatterplotResponse.respond200WithApplicationJson(
+        new FloatingScatterplotPostResponseStream(processRequest(new FloatingScatterplotPlugin(), entity))));
+  }
+
+  @Override
+  public PostAppsStandaloneMapVisualizationsLineplotResponse postAppsStandaloneMapVisualizationsLineplot(FloatingLineplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapVisualizationsLineplotResponse.respond200WithApplicationJson(
+        new FloatingLineplotPostResponseStream(processRequest(new FloatingLineplotPlugin(), entity))));
+  }
+
+  @Override
+  public PostAppsStandaloneMapVisualizationsHistogramResponse postAppsStandaloneMapVisualizationsHistogram(FloatingHistogramPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapVisualizationsHistogramResponse.respond200WithApplicationJson(
+        new FloatingHistogramPostResponseStream(processRequest(new FloatingHistogramPlugin(), entity))));
+  }
+
+  @Override
+  public PostAppsStandaloneMapVisualizationsBoxplotResponse postAppsStandaloneMapVisualizationsBoxplot(FloatingBoxplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapVisualizationsBoxplotResponse.respond200WithApplicationJson(
+        new FloatingBoxplotPostResponseStream(processRequest(new FloatingBoxplotPlugin(), entity))));
+  }
+
+  @Override
+  public PostAppsStandaloneMapVisualizationsBarplotResponse postAppsStandaloneMapVisualizationsBarplot(FloatingBarplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapVisualizationsBarplotResponse.respond200WithApplicationJson(
+        new FloatingBarplotPostResponseStream(processRequest(new FloatingBarplotPlugin(), entity))));
+  }
+
+  @Override
+  public PostAppsStandaloneMapVisualizationsConttableResponse postAppsStandaloneMapVisualizationsConttable(FloatingMosaicPostRequest entity) {
+    return null; // TODO
   }
 
   private <T> T wrapPlugin(SupplierWithException<T> supplier) {

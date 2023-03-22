@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithProcessedRemoteFiles;
@@ -110,8 +111,8 @@ public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBo
       );
 
     useRConnectionWithProcessedRemoteFiles(Resources.RSERVE_URL, filesProcessor, connection -> {
-      String overlayValues = listToRVector(spec.getOverlayValues());
-
+      String overlayValues = listToRVector(spec.getOverlayValues().stream().map(BinRange::getBinLabel).collect(Collectors.toList()));
+      boolean deprecatedShowMissingness = false;
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String cmd =
           "plot.data::box(data=" + DEFAULT_SINGLE_STREAM_NAME + ", variables=variables, " +

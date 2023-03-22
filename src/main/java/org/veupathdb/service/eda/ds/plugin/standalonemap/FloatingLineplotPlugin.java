@@ -16,6 +16,7 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuote;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
@@ -96,7 +97,7 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
     String xVarType = util.getVariableType(spec.getXAxisVariable());
     String numeratorValues = spec.getYAxisNumeratorValues() != null ? listToRVector(spec.getYAxisNumeratorValues()) : "NULL";
     String denominatorValues = spec.getYAxisDenominatorValues() != null ? listToRVector(spec.getYAxisDenominatorValues()) : "NULL";
-    String overlayValues = listToRVector(spec.getOverlayValues());
+    String overlayValues = listToRVector(spec.getOverlayValues().stream().map(BinRange::getBinLabel).collect(Collectors.toList()));
     
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
