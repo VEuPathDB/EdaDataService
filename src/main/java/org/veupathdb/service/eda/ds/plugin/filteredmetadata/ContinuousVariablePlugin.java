@@ -45,13 +45,8 @@ public class ContinuousVariablePlugin extends AbstractEmptyComputePlugin<Continu
   private String _cachedResponse;
 
   @Override
-  protected Class<ContinuousVariableMetadataPostRequest> getVisualizationRequestClass() {
-    return ContinuousVariableMetadataPostRequest.class;
-  }
-
-  @Override
-  protected Class<ContinuousVariableMetadataSpec> getVisualizationSpecClass() {
-    return ContinuousVariableMetadataSpec.class;
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(ContinuousVariableMetadataPostRequest.class, ContinuousVariableMetadataSpec.class);
   }
 
   @Override
