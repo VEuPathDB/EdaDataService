@@ -1607,7 +1607,7 @@ types:
       overlayVariable?:
         type: VariableSpec
         required: false
-      overlayValues?: NumericBinRange[]
+      overlayValues?: BinRange[]
       binSpec: BinSpec
       viewport:
         type: NumericViewport
@@ -1725,39 +1725,22 @@ types:
     additionalProperties: false
     properties:
       mapElements: StandaloneMapElementInfo[]
-  NumericBinRange:
-    type: BinRange
-    additionalProperties: false
-    properties:
-      binLabel: string
-      binStart?: number # Dates can wired as millis since epoch. TODO is there a better raml-native way to model this? Trying not to overthink since this will be provided by quantile plugin.
-      binEnd?: number
-  DateBinRange:
-    type: BinRange
-    additionalProperties: false
-    properties:
-      binLabel: string
-      binStart?: string # Dates can wired as millis since epoch. TODO is there a better raml-native way to model this? Trying not to overthink since this will be provided by quantile plugin.
-      binEnd?: string
   BinRange:
     type: object
     additionalProperties: false
     properties:
       binLabel: string
+      start: string
+      end: string
   BinRangeWithValue:
     type: BinRange
     additionalProperties: false
     properties:
       value: number
-  ContinuousBinRange:
-    type: BinRange
-    properties:
-      start: string
-      end: string
   OverlayType:
     type: string
     enum:
-      - continous
+      - continuous
       - categorical
   OverlayConfig:
     type: object
@@ -1769,10 +1752,10 @@ types:
   ContinousOverlayConfig:
     type: OverlayConfig
     additionalProperties: false
-    discriminatorValue: continous
+    discriminatorValue: continuous
     properties:
       overlayValues:
-        type: ContinuousBinRange[]
+        type: BinRange[]
   CategoricalOverlayConfig:
     type: OverlayConfig
     discriminatorValue: categorical

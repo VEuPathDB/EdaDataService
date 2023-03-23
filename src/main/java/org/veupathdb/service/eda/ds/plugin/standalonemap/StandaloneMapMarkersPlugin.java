@@ -127,7 +127,7 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
 
   protected void validateOverlayConfig(OverlayConfig overlayConfig) throws ValidationException {
     switch (overlayConfig.getOverlayType()) {
-      case CONTINOUS -> validateContinousBinRanges((ContinousOverlayConfig) overlayConfig);
+      case CONTINUOUS -> validateContinousBinRanges((ContinousOverlayConfig) overlayConfig);
       case CATEGORICAL -> validateCategoricalOverlayValues((CategoricalOverlayConfig) overlayConfig);
     }
   }
