@@ -39,7 +39,7 @@ public class FilterAwareMetadataService implements FilterAwareMetadataContinuous
   @Override
   public PostFilterAwareMetadataContinuousVariableResponse postFilterAwareMetadataContinuousVariable(ContinuousVariableMetadataPostRequest entity) {
     return wrapPlugin(() -> PostFilterAwareMetadataContinuousVariableResponse.respond200WithApplicationJson(
-        new ContinuousVariableMetadataPostResponseStream(processRequest(new ContinuousVariablePlugin(), entity, _request))));
+        new ContinuousVariableMetadataPostResponseStream(processRequest(new ContinuousVariablePlugin(), entity, null, _request))));
   }
 
 }
