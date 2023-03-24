@@ -38,10 +38,7 @@ import org.veupathdb.service.eda.ds.plugin.pass.ScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TablePlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TimeSeriesPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
-import org.veupathdb.service.eda.ds.plugin.sample.ExampleComputeVizPlugin;
-import org.veupathdb.service.eda.ds.plugin.sample.MultiStreamPlugin;
-import org.veupathdb.service.eda.ds.plugin.sample.RecordCountPlugin;
-import org.veupathdb.service.eda.ds.plugin.sample.TestCollectionPlugin;
+import org.veupathdb.service.eda.ds.plugin.sample.*;
 import org.veupathdb.service.eda.common.client.NonEmptyResultStream.EmptyResultException;
 import org.veupathdb.service.eda.generated.model.*;
 import org.veupathdb.service.eda.generated.resources.Apps;
@@ -204,6 +201,12 @@ public class AppsService implements Apps {
   public PostAppsSampleVisualizationsCollectionsTestResponse postAppsSampleVisualizationsCollectionsTest(TestCollectionsPostRequest entity) {
     return wrapPlugin(() -> PostAppsSampleVisualizationsCollectionsTestResponse.respond200WithTextPlain(
         new EntityTabularPostResponseStream(processRequest(new TestCollectionPlugin(), entity))));
+  }
+
+  @Override
+  public PostAppsSampleVisualizationsCategoricalDistributionResponse postAppsSampleVisualizationsCategoricalDistribution(CategoricalDistributionPostRequest entity) {
+    return wrapPlugin(() -> PostAppsSampleVisualizationsCategoricalDistributionResponse.respond200WithApplicationJson(
+        new CategoricalDistributionPostResponseStream(processRequest(new CategoricalDistributionPlugin(), entity))));
   }
 
   @Override
