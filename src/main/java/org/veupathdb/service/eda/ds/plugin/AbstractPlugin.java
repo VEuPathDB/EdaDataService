@@ -296,6 +296,36 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R> i
   }
 
   /*****************************************************************
+   *** Methods enabling direct calls to the subsetting service's non-tabular endpoints
+   ****************************************************************/
+
+  protected long getSubsetCount(String entityId) {
+    return getSubsetCount(entityId, _subsetFilters);
+  }
+
+  protected long getSubsetCount(String entityId, List<APIFilter> subsetFilters) {
+    return _subsettingClient.getSubsetCount(_referenceMetadata, entityId, subsetFilters);
+  }
+
+  protected Map<String, Long> getCategoricalCountDistribution(VariableSpec varSpec) {
+    return getCategoricalCountDistribution(varSpec, _subsetFilters);
+  }
+
+  protected Map<String, Long> getCategoricalCountDistribution(VariableSpec varSpec, List<APIFilter> subsetFilters) {
+    VariableDistributionPostResponse response = _subsettingClient.getCategoricalDistribution(_referenceMetadata, varSpec, subsetFilters, ValueSpec.COUNT);
+    return response.getHistogram().stream().collect(Collectors.toMap(HistogramBin::getBinLabel, bin -> Long.valueOf(bin.getValue().toString())));
+  }
+
+  protected Map<String, Double> getCategoricalProportionDistribution(VariableSpec varSpec) {
+    return getCategoricalProportionDistribution(varSpec, _subsetFilters);
+  }
+
+  protected Map<String, Double> getCategoricalProportionDistribution(VariableSpec varSpec, List<APIFilter> subsetFilters) {
+    VariableDistributionPostResponse response = _subsettingClient.getCategoricalDistribution(_referenceMetadata, varSpec, subsetFilters, ValueSpec.PROPORTION);
+    return response.getHistogram().stream().collect(Collectors.toMap(HistogramBin::getBinLabel, bin -> Double.valueOf(bin.getValue().toString())));
+  }
+
+  /*****************************************************************
    *** Compute-related methods
    ****************************************************************/
 
