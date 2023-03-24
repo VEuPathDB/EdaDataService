@@ -56,7 +56,7 @@ public class AppsService implements Apps {
     return GetAppsResponse.respond200WithApplicationJson(AppsMetadata.APPS);
   }
 
-  private <T> T wrapPlugin(SupplierWithException<T> supplier) {
+  static <T> T wrapPlugin(SupplierWithException<T> supplier) {
     try {
       return supplier.get();
     }
@@ -75,12 +75,20 @@ public class AppsService implements Apps {
     }
   }
 
-  private <T extends VisualizationRequestBase> Consumer<OutputStream> processRequest(AbstractPlugin<T,?,?> plugin, T entity) throws ValidationException {
-    Entry<String,String> authHeader = UserProvider.getSubmittedAuth(_request).orElseThrow();
+  private static <T extends VisualizationRequestBase> Consumer<OutputStream> processRequest(AbstractPlugin<T,?,?> plugin, T entity, ContainerRequest request) throws ValidationException {
+    String appName = request.getUriInfo().getPathSegments().get(1).getPath();
+    return processRequest(plugin, entity, appName, request);
+  }
+
+  static <T extends VisualizationRequestBase> Consumer<OutputStream> processRequest(AbstractPlugin<T,?,?> plugin, T entity, String appName, ContainerRequest request) throws ValidationException {
+    Entry<String,String> authHeader = UserProvider.getSubmittedAuth(request).orElseThrow();
     StudyAccess.confirmPermission(authHeader, Resources.DATASET_ACCESS_SERVICE_URL,
         entity.getStudyId(), StudyAccess::allowVisualizations);
-    String appName = _request.getUriInfo().getPathSegments().get(1).getPath();
     return plugin.processRequest(appName, entity, authHeader);
+  }
+
+  private <T extends VisualizationRequestBase> Consumer<OutputStream> processRequest(AbstractPlugin<T,?,?> plugin, T entity) throws ValidationException {
+    return processRequest(plugin, entity, _request);
   }
 
   @DisableJackson

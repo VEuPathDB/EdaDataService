@@ -682,6 +682,48 @@ types:
       overlayVariable:
         type: VariableSpec
         required: false
+  ContinuousVariableMetadataPostRequest:
+    type: VisualizationRequestBase
+    additionalProperties: false
+    properties:
+      config: ContinuousVariableMetadataSpec
+  ContinuousVariableMetadataSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      variable: VariableSpec
+      metadata:
+        type: array
+        items:
+          type: string
+          enum:
+            - binRanges
+            - median
+  BinRange:
+    type: object
+    additionalProperties: false
+    properties:
+      binStart: string
+      binEnd: string
+      binLabel: string
+  BinRangeWithValue:
+    type: BinRange
+    additionalProperties: false
+    properties:
+      value: number
+  AllBinRanges:
+    type: object
+    additionalProperties: false
+    properties:
+      equalInterval: BinRange[]
+      quantile: BinRange[]
+      standardDeviation: BinRange[]
+  ContinuousVariableMetadataPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      binRanges?: AllBinRanges
+      median?: number
   BarplotPostRequest:
     type: VisualizationRequestBase
     properties:
