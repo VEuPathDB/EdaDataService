@@ -396,6 +396,18 @@ securitySchemes:
               text/plain:
                 type: lib.EntityTabularPostResponse
 
+    /categorical-distribution:
+      post:
+        description: Returns a set of count and proportion distributions for a native categorical variable
+        body:
+          application/json:
+            type: lib.CategoricalDistributionPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.CategoricalDistributionPostResponse
+
   /samplewithcompute/visualizations:
     displayName: Sample visualizations with computes demonstrating/testing service capabilities
 

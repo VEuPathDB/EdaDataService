@@ -1470,6 +1470,20 @@ types:
     properties:
       variableDetails: VariableSpec
       completeCases: number
+  CategoricalDistributionPostRequest:
+    type: VisualizationRequestBase
+    properties:
+      config: VariableSpec
+  CategoricalDistributionBin:
+    type: object
+    properties:
+      label: string
+      value: number
+  CategoricalDistributionPostResponse:
+    type: object
+    properties:
+      countDistribution: CategoricalDistributionBin[]
+      proportionDistribution: CategoricalDistributionBin[]
   ExampleComputeVizPostRequest:
     type: VisualizationRequestBase
     properties:

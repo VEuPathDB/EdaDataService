@@ -21,10 +21,7 @@ import org.veupathdb.service.eda.ds.plugin.pass.MapPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.MapMarkersOverlayPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
-import org.veupathdb.service.eda.ds.plugin.sample.ExampleComputeVizPlugin;
-import org.veupathdb.service.eda.ds.plugin.sample.MultiStreamPlugin;
-import org.veupathdb.service.eda.ds.plugin.sample.RecordCountPlugin;
-import org.veupathdb.service.eda.ds.plugin.sample.TestCollectionPlugin;
+import org.veupathdb.service.eda.ds.plugin.sample.*;
 import org.veupathdb.service.eda.generated.model.*;
 
 public class AppsMetadata {
@@ -86,7 +83,8 @@ public class AppsMetadata {
           List.of(),
           viz("record-count", new RecordCountPlugin()),
           viz("multi-stream", new MultiStreamPlugin()),
-          viz("collections-test", new TestCollectionPlugin())),
+          viz("collections-test", new TestCollectionPlugin()),
+          viz("categorical-distribution", new CategoricalDistributionPlugin())),
       app("samplewithcompute", "Sample With Compute", "example",
           "Wrapper app for sample/test plugins that have associated computes",
           List.of(),

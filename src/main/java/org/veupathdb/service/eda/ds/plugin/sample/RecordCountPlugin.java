@@ -80,14 +80,16 @@ public class RecordCountPlugin extends AbstractEmptyComputePlugin<RecordCountPos
       try {
         _cachedResponse = RESULT_CACHE.getValue(_cacheKey, key -> {
           Timer t = new Timer();
-          Wrapper<Integer> rowCount = new Wrapper<>(0);
+          long subsettingRowCount = getSubsetCount(_pluginSpec.getEntityId());
+          LOG.info("Retrieved record count from subsetting (" + subsettingRowCount + ") in " + t.getElapsedStringAndRestart());
+          Wrapper<Long> rowCount = new Wrapper<>(0L);
           new Scanner(dataStreams.get(getPluginSpec().getEntityId()))
               .useDelimiter("\n")
               .forEachRemaining(str -> rowCount.set(rowCount.get() + 1));
-          int recordCount = rowCount.get() - 1; // subtract 1 for header row
+          long recordCount = rowCount.get() - 1; // subtract 1 for header row
           RecordCountPostResponse value = new RecordCountPostResponseImpl();
-          value.setRecordCount(recordCount);
-          LOG.info("Calculated result to add to cache in " + t.getElapsedString());
+          value.setRecordCount((int)recordCount);
+          LOG.info("Calculated record count result to add to cache (" + recordCount + ") in " + t.getElapsedString());
           return value;
         });
       }
