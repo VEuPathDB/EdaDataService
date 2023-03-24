@@ -85,8 +85,6 @@ public class ContinuousVariablePlugin extends AbstractEmptyComputePlugin<Continu
 
           PluginUtil util = getUtil();
           ContinuousVariableMetadataSpec spec = getPluginSpec();
-          
-          // TODO i dont actually know if this returns strings like 'median'. never done this w raml before...
           List<String> requestedMetadata = spec.getMetadata();    
       
           useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
@@ -98,10 +96,10 @@ public class ContinuousVariablePlugin extends AbstractEmptyComputePlugin<Continu
       
             if (requestedMetadata.contains("binRanges")) {
               // TODO add support for user-defined N bins? for now 10..
-              String equalIntervalJson = connection.eval("veupathUtils::toJSON(veupathUtils::getDiscretizedBins(x, 'equalInterval', 10, FALSE))").asString();
-              String quantileJson = connection.eval("veupathUtils::toJSON(veuapthUtils::getDiscretizedBins(x, 'quantile', 10, FALSE))").asString();
+              String equalIntervalJson = connection.eval("veupathUtils::toJSON(veupathUtils::getDiscretizedBins(x, 'equalInterval', 10, FALSE), FALSE)").asString();
+              String quantileJson = connection.eval("veupathUtils::toJSON(veupathUtils::getDiscretizedBins(x, 'quantile', 10, FALSE), FALSE)").asString();
               // sd bins return 6 bins at most, no user control supported in R currently
-              String sdJson = connection.eval("veupathUtils::toJSON(veupathUtils::getDiscretizedBins(x, 'sd', NULL, FALSE))").asString();
+              String sdJson = connection.eval("veupathUtils::toJSON(veupathUtils::getDiscretizedBins(x, 'sd', NULL, FALSE), FALSE)").asString();
               json.append("\"binRanges\":{\"equalInterval\":" + equalIntervalJson + 
                                         ",\"quantile\":" + quantileJson + 
                                         ",\"standardDeviation\":" + sdJson + "}");
@@ -109,7 +107,7 @@ public class ContinuousVariablePlugin extends AbstractEmptyComputePlugin<Continu
             }
       
             if (requestedMetadata.contains("median")) {
-              String medianJson = connection.eval("jsonlite::toJSON(jsonlite::unbox(formatC(median(x))))").asString();
+              String medianJson = connection.eval("jsonlite::toJSON(jsonlite::unbox(formatC(median(x, na.rm = TRUE))))").asString();
               medianJson += first ? "\"median\":{" : ",\"median\":{";
               json.append(medianJson + "}");
               first = false;
