@@ -24,6 +24,9 @@ import org.veupathdb.service.eda.common.client.NonEmptyResultStream.EmptyResultE
 import org.veupathdb.service.eda.generated.model.*;
 import org.veupathdb.service.eda.generated.resources.FilterAwareMetadataContinuousVariable;
 
+import static org.veupathdb.service.eda.ds.service.AppsService.processRequest;
+import static org.veupathdb.service.eda.ds.service.AppsService.wrapPlugin;
+
 @Authenticated(allowGuests = true)
 public class FilterAwareMetadataService implements FilterAwareMetadataContinuousVariable {
 
@@ -32,38 +35,11 @@ public class FilterAwareMetadataService implements FilterAwareMetadataContinuous
   @Context
   private ContainerRequest _request;
 
-  private <T> T wrapPlugin(SupplierWithException<T> supplier) {
-    try {
-      return supplier.get();
-    }
-    catch (ValidationException e) {
-      throw new BadRequestException(e.getMessage());
-    }
-    catch (EmptyResultException e) {
-      throw new WebApplicationException(e.getMessage(), 204);
-    }
-    catch (WebApplicationException e) {
-      throw e;
-    }
-    catch (Exception e) {
-      LOG.error("Could not execute metadata request.", e);
-      throw new ServerErrorException(e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
-    }
-  }
-
-  private <T extends VisualizationRequestBase> Consumer<OutputStream> processRequest(AbstractPlugin<T,?,?> plugin, T entity) throws ValidationException {
-    Entry<String,String> authHeader = UserProvider.getSubmittedAuth(_request).orElseThrow();
-    // idk what perms make sense really...
-    //StudyAccess.confirmPermission(authHeader, Resources.DATASET_ACCESS_SERVICE_URL,
-    //    entity.getStudyId(), StudyAccess::allowVisualizations);
-    return plugin.processRequest(null, entity, authHeader);
-  }
-
   @DisableJackson
   @Override
   public PostFilterAwareMetadataContinuousVariableResponse postFilterAwareMetadataContinuousVariable(ContinuousVariableMetadataPostRequest entity) {
     return wrapPlugin(() -> PostFilterAwareMetadataContinuousVariableResponse.respond200WithApplicationJson(
-        new ContinuousVariableMetadataPostResponseStream(processRequest(new ContinuousVariablePlugin(), entity))));
+        new ContinuousVariableMetadataPostResponseStream(processRequest(new ContinuousVariablePlugin(), entity, _request))));
   }
 
 }
