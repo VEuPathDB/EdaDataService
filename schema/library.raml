@@ -618,22 +618,22 @@ types:
       displayName: string
       description: string
   AbundanceBoxplotPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       computeConfig: RankedAbundanceComputeConfig
       config: BoxplotWith1ComputeSpec
   AbundanceScatterplotPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       computeConfig: RankedAbundanceComputeConfig
       config: ScatterplotWith1ComputeSpec
   AlphaDivBoxplotPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       computeConfig: AlphaDivComputeConfig
       config: BoxplotWith1ComputeSpec
   AlphaDivScatterplotPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       computeConfig: AlphaDivComputeConfig
       config: ScatterplotWith1ComputeSpec
@@ -667,7 +667,7 @@ types:
         type: string[][]
         required: false
   BetaDivScatterplotPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       computeConfig: BetaDivComputeConfig
       config: BetaDivScatterplotSpec
@@ -683,7 +683,7 @@ types:
         type: VariableSpec
         required: false
   ContinuousVariableMetadataPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     additionalProperties: false
     properties:
       config: ContinuousVariableMetadataSpec
@@ -725,7 +725,7 @@ types:
       binRanges?: AllBinRanges
       median?: number
   BarplotPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: BarplotSpec
   BarplotSpec:
@@ -764,7 +764,7 @@ types:
       sampleSizeTable: SampleSizeTable[]
       completeCasesTable: VariableCompleteCases[]
   BoxplotPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: BoxplotSpec
   BoxplotSpec:
@@ -839,7 +839,7 @@ types:
         required: false
       completeCasesTable: VariableCompleteCases[]
   DensityplotPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: DensityplotSpec
   DensityplotSpec:
@@ -872,7 +872,7 @@ types:
       sampleSizeTable: SampleSizeTable[]
       completeCasesTable: VariableCompleteCases[]
   HeatmapPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: HeatmapSpec
   HeatmapSpec:
@@ -911,7 +911,7 @@ types:
       sampleSizeTable: SampleSizeTable[]
       completeCasesTable: VariableCompleteCases[]
   HistogramPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: HistogramSpec
   HistogramSpec:
@@ -974,7 +974,7 @@ types:
       sampleSizeTable: SampleSizeTable[]
       completeCasesTable: VariableCompleteCases[]
   LineplotPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: LineplotSpec
   LineplotSpec:
@@ -1037,7 +1037,7 @@ types:
       sampleSizeTable: SampleSizeTable[]
       completeCasesTable: VariableCompleteCases[]
   MapMarkersOverlayPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: MapMarkersOverlaySpec
   MapMarkersOverlaySpec:
@@ -1086,7 +1086,7 @@ types:
       sampleSizeTable: SampleSizeTable[]
       completeCasesTable: VariableCompleteCases[]
   MapPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: MapSpec
   MapSpec:
@@ -1122,7 +1122,7 @@ types:
       maxLat: number
       maxLon: number
   ScatterplotPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: ScatterplotSpec
   ScatterplotSpec:
@@ -1166,7 +1166,7 @@ types:
       sampleSizeTable: SampleSizeTable[]
       completeCasesTable: VariableCompleteCases[]
   TablePostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: TableSpec
   TableSpec:
@@ -1188,7 +1188,7 @@ types:
       xAxisReferenceValue: string
       yAxisReferenceValue: string
   TwoByTwoPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: TwoByTwoSpec
   Statistic:
@@ -1354,7 +1354,7 @@ types:
         type: string[]
         minItems: 1
   MosaicPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: MosaicSpec
   MosaicSpec:
@@ -1513,7 +1513,7 @@ types:
       variableDetails: VariableSpec
       completeCases: number
   CategoricalDistributionPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: VariableSpec
   CategoricalDistributionBin:
@@ -1527,7 +1527,7 @@ types:
       countDistribution: CategoricalDistributionBin[]
       proportionDistribution: CategoricalDistributionBin[]
   ExampleComputeVizPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: ExampleComputeVizSpec
       computeConfig: ExampleComputeConfig
@@ -1545,7 +1545,7 @@ types:
       longestConcatenatedValue: string
       avgConcatenatedLength: number
   MultiStreamPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: MultiStreamSpec
   MultiStreamSpec:
@@ -1554,7 +1554,7 @@ types:
     properties:
       entityId: string
   RecordCountPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: RecordCountSpec
   RecordCountSpec:
@@ -1568,10 +1568,10 @@ types:
     properties:
       recordCount: integer
   TestCollectionsPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: CollectionSpec
-  VisualizationRequestBase:
+  DataPluginRequestBase:
     type: object
     additionalProperties: false
     properties:
