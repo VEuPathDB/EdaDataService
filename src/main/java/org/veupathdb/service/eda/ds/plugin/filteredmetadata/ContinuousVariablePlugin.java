@@ -107,9 +107,7 @@ public class ContinuousVariablePlugin extends AbstractEmptyComputePlugin<Continu
             }
 
             if (requestedMetadata.contains("median")) {
-              String medianJson = connection.eval("jsonlite::toJSON(jsonlite::unbox(formatC(median(x, na.rm = TRUE))))").asString();
-              LOG.info("Output from median call: " + medianJson);
-              Double median = Double.parseDouble(medianJson);
+              double median = connection.eval("jsonlite::toJSON(jsonlite::unbox(formatC(median(x, na.rm = TRUE))))").asDouble();
               json.put("median", median);
             }
 
