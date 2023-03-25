@@ -9,6 +9,7 @@ import org.gusdb.fgputil.json.JsonUtil;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.rosuda.REngine.REXP;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
@@ -107,7 +108,8 @@ public class ContinuousVariablePlugin extends AbstractEmptyComputePlugin<Continu
             }
 
             if (requestedMetadata.contains("median")) {
-              double median = connection.eval("jsonlite::toJSON(jsonlite::unbox(formatC(median(x, na.rm = TRUE))))").asDouble();
+              String quotedResult = connection.eval("jsonlite::toJSON(jsonlite::unbox(formatC(median(x, na.rm = TRUE))))").asString();
+              double median = Double.parseDouble(quotedResult.substring(1,quotedResult.length() - 1));
               json.put("median", median);
             }
 
