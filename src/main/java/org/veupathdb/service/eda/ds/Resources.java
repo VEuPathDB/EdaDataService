@@ -19,7 +19,7 @@ import static org.gusdb.fgputil.runtime.Environment.getRequiredVar;
 public class Resources extends ContainerResources {
 
   private static final boolean DEVELOPMENT_MODE =
-      Boolean.valueOf(getOptionalVar("DEVELOPMENT_MODE", "true"));
+      Boolean.valueOf(getOptionalVar("DEVELOPMENT_MODE", "false"));
 
   public static final String SUBSETTING_SERVICE_URL = getRequiredVar("SUBSETTING_SERVICE_URL");
   public static final String MERGING_SERVICE_URL = getRequiredVar("MERGING_SERVICE_URL");
