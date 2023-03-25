@@ -1,6 +1,5 @@
 package org.veupathdb.service.eda.ds.plugin.pass;
 
-import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
@@ -80,7 +79,7 @@ public class BoxplotPlugin extends AbstractEmptyComputePlugin<BoxplotPostRequest
 
   @Override
   protected List<StreamSpec> getRequestedStreams(BoxplotSpec pluginSpec) {
-    return ListBuilder.asList(
+    return List.of(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
         .addVar(pluginSpec.getYAxisVariable())
@@ -92,7 +91,7 @@ public class BoxplotPlugin extends AbstractEmptyComputePlugin<BoxplotPostRequest
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PluginUtil util = getUtil();
     BoxplotSpec spec = getPluginSpec();
-    Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
+    Map<String, VariableSpec> varMap = new HashMap<>();
     varMap.put("xAxis", spec.getXAxisVariable());
     varMap.put("yAxis", spec.getYAxisVariable());
     varMap.put("overlay", spec.getOverlayVariable());
@@ -104,7 +103,7 @@ public class BoxplotPlugin extends AbstractEmptyComputePlugin<BoxplotPostRequest
     String showMean = spec.getMean() != null ? spec.getMean().getValue() : "FALSE";
     String showPoints = spec.getPoints().getValue();
     
-    List<String> nonStrataVarColNames = new ArrayList<String>();
+    List<String> nonStrataVarColNames = new ArrayList<>();
     nonStrataVarColNames.add(util.toColNameOrEmpty(spec.getXAxisVariable()));
     nonStrataVarColNames.add(util.toColNameOrEmpty(spec.getYAxisVariable()));
 

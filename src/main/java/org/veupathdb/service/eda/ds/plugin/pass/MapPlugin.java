@@ -3,7 +3,6 @@ package org.veupathdb.service.eda.ds.plugin.pass;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.DelimitedDataParser;
-import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.geo.GeographyUtil.GeographicPoint;
 import org.gusdb.fgputil.geo.LatLonAverager;
 import org.gusdb.fgputil.validation.ValidationException;
@@ -71,7 +70,7 @@ public class MapPlugin extends AbstractEmptyComputePlugin<MapPostRequest, MapSpe
 
   @Override
   protected List<StreamSpec> getRequestedStreams(MapSpec pluginSpec) {
-    return ListBuilder.asList(
+    return List.of(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getGeoAggregateVariable())
         .addVar(pluginSpec.getLatitudeVariable())
@@ -169,11 +168,11 @@ public class MapPlugin extends AbstractEmptyComputePlugin<MapPostRequest, MapSpe
     out.flush();
   }
   private static class ParsedGeolocationViewport {
-    private double xMin;
-    private double xMax;
-    private double yMin;
-    private double yMax;
-    private boolean viewportIncludesIntlDateLine;
+    private final double xMin;
+    private final double xMax;
+    private final double yMin;
+    private final double yMax;
+    private final boolean viewportIncludesIntlDateLine;
 
     public ParsedGeolocationViewport(double xMin, double xMax,
                                      double yMin, double yMax) {

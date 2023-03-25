@@ -1,6 +1,5 @@
 package org.veupathdb.service.eda.ds.plugin.pass;
 
-import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
@@ -17,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuote;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.CLINEPI_PROJECT;
@@ -75,7 +75,7 @@ public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<TwoByTwoPostReque
 
   @Override
   protected List<StreamSpec> getRequestedStreams(TwoByTwoSpec pluginSpec) {
-    return ListBuilder.asList(
+    return List.of(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
         .addVar(pluginSpec.getYAxisVariable())
@@ -93,8 +93,8 @@ public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<TwoByTwoPostReque
     varMap.put("facet2", util.getVariableSpecFromList(spec.getFacetVariable(), 1));
     String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
     String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
-    String colRefValue = spec.getXAxisReferenceValue() == null ? "NA_character_" : util.singleQuote(spec.getXAxisReferenceValue());
-    String rowRefValue = spec.getYAxisReferenceValue() == null ? "NA_character_" : util.singleQuote(spec.getYAxisReferenceValue());
+    String colRefValue = spec.getXAxisReferenceValue() == null ? "NA_character_" : singleQuote(spec.getXAxisReferenceValue());
+    String rowRefValue = spec.getYAxisReferenceValue() == null ? "NA_character_" : singleQuote(spec.getYAxisReferenceValue());
 
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,

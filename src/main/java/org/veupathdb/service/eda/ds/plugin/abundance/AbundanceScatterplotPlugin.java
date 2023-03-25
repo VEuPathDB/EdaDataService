@@ -1,8 +1,5 @@
 package org.veupathdb.service.eda.ds.plugin.abundance;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
@@ -25,8 +22,6 @@ import java.util.Map;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 
 public class AbundanceScatterplotPlugin extends AbstractPlugin<AbundanceScatterplotPostRequest, ScatterplotWith1ComputeSpec, RankedAbundanceComputeConfig> {
-
-  private static final Logger LOG = LogManager.getLogger(AbundanceScatterplotPlugin.class);
   
   @Override
   public String getDisplayName() {
@@ -74,13 +69,12 @@ public class AbundanceScatterplotPlugin extends AbstractPlugin<AbundanceScatterp
 
   @Override
   protected List<StreamSpec> getRequestedStreams(ScatterplotWith1ComputeSpec pluginSpec) {
-    List<StreamSpec> requestedStreamsList = ListBuilder.asList(
+    return List.of(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
         .addVars(pluginSpec.getFacetVariable())
         .setIncludeComputedVars(true)
-      );
-    return requestedStreamsList;
+    );
   }
 
   @Override
@@ -98,14 +92,14 @@ public class AbundanceScatterplotPlugin extends AbstractPlugin<AbundanceScatterp
     ComputedVariableMetadata metadata = getComputedVariableMetadata();
     metadata.getVariables().get(0).setPlotReference(PlotReferenceValue.OVERLAY);
 
-    List<VariableSpec> collectionMembers = new ArrayList<VariableSpec>();
-    collectionMembers.addAll(metadata.getVariables().stream()
+    List<VariableSpec> collectionMembers = new ArrayList<>(
+      metadata.getVariables().stream()
         .filter(var -> var.getPlotReference().getValue().equals("overlay"))
         .findFirst().orElseThrow().getMembers());
     int collectionSize = collectionMembers.size();
 
-    List<VariableSpec> inputVarSpecs = new ArrayList<VariableSpec>();
-    inputVarSpecs.addAll(collectionMembers.subList(0, Math.min(collectionSize, 8)));    
+    List<VariableSpec> inputVarSpecs = new ArrayList<>(
+        collectionMembers.subList(0, Math.min(collectionSize, 8)));
     inputVarSpecs.add(spec.getXAxisVariable());
     inputVarSpecs.add(util.getVariableSpecFromList(spec.getFacetVariable(), 0));
     inputVarSpecs.add(util.getVariableSpecFromList(spec.getFacetVariable(), 1));

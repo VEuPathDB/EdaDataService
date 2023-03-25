@@ -3,7 +3,6 @@ package org.veupathdb.service.eda.ds.plugin.sample;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.EncryptionUtil;
-import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.Timer;
 import org.gusdb.fgputil.Wrapper;
 import org.gusdb.fgputil.cache.ManagedMap;
@@ -65,7 +64,7 @@ public class RecordCountPlugin extends AbstractEmptyComputePlugin<RecordCountPos
     LOG.info("Did I find a cached response? " + (_cachedResponse != null));
 
     // only need one stream for the requested entity and no vars (IDs included automatically)
-    return _cachedResponse != null ? Collections.emptyList() : ListBuilder.asList(
+    return _cachedResponse != null ? Collections.emptyList() : List.of(
       new StreamSpec(pluginSpec.getEntityId(), pluginSpec.getEntityId())
         // add first var in entity to work around no-vars bug in subsetting service
         .addVar(getReferenceMetadata().getEntity(pluginSpec.getEntityId()).orElseThrow().stream()

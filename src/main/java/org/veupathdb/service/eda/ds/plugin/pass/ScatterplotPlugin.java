@@ -2,7 +2,6 @@ package org.veupathdb.service.eda.ds.plugin.pass;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
@@ -102,7 +101,7 @@ public class ScatterplotPlugin extends AbstractEmptyComputePlugin<ScatterplotPos
 
   @Override
   protected List<StreamSpec> getRequestedStreams(ScatterplotSpec pluginSpec) {
-    return ListBuilder.asList(
+    return List.of(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
         .addVar(pluginSpec.getYAxisVariable())
@@ -114,7 +113,7 @@ public class ScatterplotPlugin extends AbstractEmptyComputePlugin<ScatterplotPos
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PluginUtil util = getUtil();
     ScatterplotSpec spec = getPluginSpec();
-    Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
+    Map<String, VariableSpec> varMap = new HashMap<>();
     varMap.put("xAxis", spec.getXAxisVariable());
     varMap.put("yAxis", spec.getYAxisVariable());
     varMap.put("overlay", spec.getOverlayVariable());
@@ -129,7 +128,7 @@ public class ScatterplotPlugin extends AbstractEmptyComputePlugin<ScatterplotPos
       LOG.error("Cannot calculate trend lines for y-axis date variables. The `valueSpec` property must be set to `raw`.");
     }
     
-    List<String> nonStrataVarColNames = new ArrayList<String>();
+    List<String> nonStrataVarColNames = new ArrayList<>();
     nonStrataVarColNames.add(util.toColNameOrEmpty(spec.getXAxisVariable()));
     nonStrataVarColNames.add(util.toColNameOrEmpty(spec.getYAxisVariable()));
 

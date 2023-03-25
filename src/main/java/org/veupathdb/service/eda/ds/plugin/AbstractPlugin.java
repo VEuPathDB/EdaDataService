@@ -467,7 +467,7 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R> i
     );
 
     if (var.getDisplayName() != null)
-      variableMetadata.append(",displayName=" + singleQuote(var.getDisplayName()));
+      variableMetadata.append(",displayName=").append(singleQuote(var.getDisplayName()));
 
     if (var.getDisplayRangeMax() != null && var.getDisplayRangeMin() != null) {
       variableMetadata.append(
@@ -478,10 +478,10 @@ public abstract class AbstractPlugin<T extends VisualizationRequestBase, S, R> i
     }
 
     if (var.getVocabulary() != null)
-      variableMetadata.append(",vocabulary=" + listToRVector(var.getVocabulary()));
+      variableMetadata.append(",vocabulary=").append(listToRVector(var.getVocabulary()));
 
     if (var.getMembers() != null)
-      variableMetadata.append(",members=" + getVariableSpecListRObjectAsString(var.getMembers()));
+      variableMetadata.append(",members=").append(getVariableSpecListRObjectAsString(var.getMembers()));
 
     return variableMetadata.append(")").toString();
   }

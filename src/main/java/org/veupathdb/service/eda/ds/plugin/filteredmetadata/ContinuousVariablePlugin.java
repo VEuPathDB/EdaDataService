@@ -3,11 +3,12 @@ package org.veupathdb.service.eda.ds.plugin.filteredmetadata;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.EncryptionUtil;
-import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.cache.ManagedMap;
 import org.gusdb.fgputil.cache.ValueProductionException;
 import org.gusdb.fgputil.json.JsonUtil;
 import org.gusdb.fgputil.validation.ValidationException;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
@@ -64,13 +65,14 @@ public class ContinuousVariablePlugin extends AbstractEmptyComputePlugin<Continu
   protected List<StreamSpec> getRequestedStreams(ContinuousVariableMetadataSpec pluginSpec) {
     String entityId = pluginSpec.getVariable().getEntityId();
     _cacheKey = EncryptionUtil.md5(
+        _referenceMetadata.getStudyId() + "|" + entityId + "|" +
         JsonUtil.serializeObject(getSubsetFilters()) +
         "|" + JsonUtil.serializeObject(pluginSpec)
     );
     _cachedResponse = RESULT_CACHE.get(_cacheKey);
     if (_cachedResponse != null) LOG.info("Found cached result.");
 
-    return _cachedResponse != null ? Collections.emptyList() : ListBuilder.asList(
+    return _cachedResponse != null ? Collections.emptyList() : List.of(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getVariable().getEntityId())
         .addVar(pluginSpec.getVariable()));
   }
@@ -81,44 +83,42 @@ public class ContinuousVariablePlugin extends AbstractEmptyComputePlugin<Continu
       try {
         _cachedResponse = RESULT_CACHE.getValue(_cacheKey, key -> {
           LOG.info("Result not in cache; calculating..");
-          StringBuilder json = new StringBuilder("{");
+          JSONObject json = new JSONObject();
 
           PluginUtil util = getUtil();
           ContinuousVariableMetadataSpec spec = getPluginSpec();
           List<String> requestedMetadata = spec.getMetadata();    
-      
+
           useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-            boolean first = true;
-      
             connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, spec.getVariable()));
             // for convenience
             connection.voidEval("x <- " + DEFAULT_SINGLE_STREAM_NAME + "$" + util.toColNameOrEmpty(spec.getVariable()));
-      
+
             if (requestedMetadata.contains("binRanges")) {
               // TODO add support for user-defined N bins? for now 10..
               String equalIntervalJson = connection.eval("veupathUtils::toJSON(veupathUtils::getDiscretizedBins(x, 'equalInterval', 10, FALSE), FALSE)").asString();
               String quantileJson = connection.eval("veupathUtils::toJSON(veupathUtils::getDiscretizedBins(x, 'quantile', 10, FALSE), FALSE)").asString();
               // sd bins return 6 bins at most, no user control supported in R currently
               String sdJson = connection.eval("veupathUtils::toJSON(veupathUtils::getDiscretizedBins(x, 'sd', NULL, FALSE), FALSE)").asString();
-              json.append("\"binRanges\":{\"equalInterval\":" + equalIntervalJson + 
-                                        ",\"quantile\":" + quantileJson + 
-                                        ",\"standardDeviation\":" + sdJson + "}");
-              first = false;
+              json.put("binRanges", new JSONObject()
+                  .put("equalInterval", new JSONArray(equalIntervalJson))
+                  .put("quantile", new JSONArray(quantileJson))
+                  .put("standardDeviation", new JSONArray(sdJson)));
             }
-      
+
             if (requestedMetadata.contains("median")) {
               String medianJson = connection.eval("jsonlite::toJSON(jsonlite::unbox(formatC(median(x, na.rm = TRUE))))").asString();
-              medianJson += first ? "\"median\":{" : ",\"median\":{";
-              json.append(medianJson + "}");
-              first = false;
+              LOG.info("Output from median call: " + medianJson);
+              Double median = Double.parseDouble(medianJson);
+              json.put("median", median);
             }
-      
-            json.append("}");
+
           });
 
           return json.toString();
         });
-      } catch (ValueProductionException e) {
+      }
+      catch (ValueProductionException e) {
         throw new RuntimeException("Could not generate continuous variable metadata", e);
       }
     }

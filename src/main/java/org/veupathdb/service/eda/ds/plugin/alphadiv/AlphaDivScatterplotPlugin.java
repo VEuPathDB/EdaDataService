@@ -1,7 +1,5 @@
 package org.veupathdb.service.eda.ds.plugin.alphadiv;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
@@ -23,8 +21,6 @@ import java.util.Map;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 
 public class AlphaDivScatterplotPlugin extends AbstractPlugin<AlphaDivScatterplotPostRequest, ScatterplotWith1ComputeSpec, AlphaDivComputeConfig> {
-
-  private static final Logger LOG = LogManager.getLogger(AlphaDivScatterplotPlugin.class);
   
   @Override
   public String getDisplayName() {
@@ -90,14 +86,13 @@ public class AlphaDivScatterplotPlugin extends AbstractPlugin<AlphaDivScatterplo
 
   @Override
   protected List<StreamSpec> getRequestedStreams(ScatterplotWith1ComputeSpec pluginSpec) {
-    List<StreamSpec> requestedStreamsList = List.of(
+    return List.of(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
         .addVar(pluginSpec.getOverlayVariable())
         .addVars(pluginSpec.getFacetVariable())
         .setIncludeComputedVars(true)
     );
-    return requestedStreamsList;
   }
 
   @Override

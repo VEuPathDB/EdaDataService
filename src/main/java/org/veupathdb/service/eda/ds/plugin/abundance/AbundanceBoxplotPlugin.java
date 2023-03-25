@@ -1,6 +1,5 @@
 package org.veupathdb.service.eda.ds.plugin.abundance;
 
-import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
@@ -71,13 +70,12 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
 
   @Override
   protected List<StreamSpec> getRequestedStreams(BoxplotWith1ComputeSpec pluginSpec) {
-    List<StreamSpec> requestedStreamsList = ListBuilder.asList(
+    return List.of(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getOverlayVariable())
         .addVars(pluginSpec.getFacetVariable())
         .setIncludeComputedVars(true)
-      );
-    return requestedStreamsList;
+    );
   }
 
   @Override
@@ -94,9 +92,9 @@ public class AbundanceBoxplotPlugin extends AbstractPlugin<AbundanceBoxplotPostR
     String showMean = spec.getMean() != null ? spec.getMean().getValue() : "FALSE";
 
     ComputedVariableMetadata metadata = getComputedVariableMetadata();
-    
-    List<VariableSpec> inputVarSpecs = new ArrayList<VariableSpec>();
-    inputVarSpecs.addAll(metadata.getVariables().stream()
+
+    List<VariableSpec> inputVarSpecs = new ArrayList<>(
+      metadata.getVariables().stream()
         .filter(var -> var.getPlotReference().getValue().equals("xAxis"))
         .findFirst().orElseThrow().getMembers());
     inputVarSpecs.add(spec.getOverlayVariable());

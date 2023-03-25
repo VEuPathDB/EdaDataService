@@ -1,6 +1,5 @@
 package org.veupathdb.service.eda.ds.plugin.pass;
 
-import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.json.JSONObject;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
@@ -82,7 +81,7 @@ public class BarplotPlugin extends AbstractEmptyComputePlugin<BarplotPostRequest
 
   @Override
   protected List<StreamSpec> getRequestedStreams(BarplotSpec pluginSpec) {
-    return ListBuilder.asList(
+    return List.of(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
         .addVar(pluginSpec.getOverlayVariable())
@@ -173,7 +172,7 @@ public class BarplotPlugin extends AbstractEmptyComputePlugin<BarplotPostRequest
       String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
       String barMode = spec.getBarMode().getValue();
 
-      Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
+      Map<String, VariableSpec> varMap = new HashMap<>();
       varMap.put("xAxis", spec.getXAxisVariable());
       varMap.put("overlay", spec.getOverlayVariable());
       varMap.put("facet1", util.getVariableSpecFromList(spec.getFacetVariable(), 0));
