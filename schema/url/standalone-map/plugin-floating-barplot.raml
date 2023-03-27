@@ -20,11 +20,8 @@ types:
         type: ValueSpec
       xAxisVariable: 
         type: VariableSpec
-      overlayVariable?: 
-        type: VariableSpec
-        required: false
-      overlayValues?:
-        type: BinRange[] # categoricals can just ignore bin start and end
+      overlayConfig?:
+        type: OverlayConfig
 
   FloatingBarplot:
     additionalProperties: false

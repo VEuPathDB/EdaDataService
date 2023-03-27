@@ -23,11 +23,8 @@ types:
       yAxisDenominatorValues:
         type: string[]
         required: false
-      overlayVariable?: 
-        type: VariableSpec
-        required: false
-      overlayValues?:
-        type: BinRange[] # categoricals can just ignore bin start and end
+      overlayConfig?:
+        type: OverlayConfig
       binSpec:
         type: BinSpec
         required: false

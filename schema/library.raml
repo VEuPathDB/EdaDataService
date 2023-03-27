@@ -1574,10 +1574,7 @@ types:
           - stack
       valueSpec: ValueSpec
       xAxisVariable: VariableSpec
-      overlayVariable?:
-        type: VariableSpec
-        required: false
-      overlayValues?: BinRange[]
+      overlayConfig?: OverlayConfig
   FloatingBarplot:
     type: object
     additionalProperties: false
@@ -1600,10 +1597,7 @@ types:
       outputEntityId: string
       xAxisVariable: VariableSpec
       yAxisVariable: VariableSpec
-      overlayVariable?:
-        type: VariableSpec
-        required: false
-      overlayValues?: BinRange[]
+      overlayConfig?: OverlayConfig
       maxAllowedDataPoints:
         type: integer
         required: false
@@ -1660,10 +1654,7 @@ types:
           - overlay
           - stack
       valueSpec: ValueSpec
-      overlayVariable?:
-        type: VariableSpec
-        required: false
-      overlayValues?: BinRange[]
+      overlayConfig?: OverlayConfig
       binSpec: BinSpec
       viewport:
         type: NumericViewport
@@ -1696,10 +1687,7 @@ types:
       yAxisDenominatorValues:
         type: string[]
         required: false
-      overlayVariable?:
-        type: VariableSpec
-        required: false
-      overlayValues?: BinRange[]
+      overlayConfig?: OverlayConfig
       binSpec:
         type: BinSpec
         required: false
@@ -1742,10 +1730,7 @@ types:
           - bestFitLineWithRaw
       xAxisVariable: VariableSpec
       yAxisVariable: VariableSpec
-      overlayVariable?:
-        type: VariableSpec
-        required: false
-      overlayValues?: BinRange[]
+      overlayConfig?: OverlayConfig
       maxAllowedDataPoints:
         type: integer
         required: false
