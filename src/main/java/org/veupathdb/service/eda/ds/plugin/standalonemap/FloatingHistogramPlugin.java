@@ -10,6 +10,7 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
+import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
@@ -44,16 +45,6 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
   }
 
   @Override
-  protected Class<FloatingHistogramPostRequest> getVisualizationRequestClass() {
-    return FloatingHistogramPostRequest.class;
-  }
-
-  @Override
-  protected Class<FloatingHistogramSpec> getVisualizationSpecClass() {
-    return FloatingHistogramSpec.class;
-  }
-  
-  @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
       .dependencyOrder(List.of("xAxisVariable"), List.of("overlayVariable"))
@@ -65,7 +56,12 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
           .required(false)
       .done();
   }
-  
+
+  @Override
+  protected AbstractPlugin<FloatingHistogramPostRequest, FloatingHistogramSpec, Void>.ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(FloatingHistogramPostRequest.class, FloatingHistogramSpec.class, Void.class);
+  }
+
   @Override
   protected void validateVisualizationSpec(FloatingHistogramSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()

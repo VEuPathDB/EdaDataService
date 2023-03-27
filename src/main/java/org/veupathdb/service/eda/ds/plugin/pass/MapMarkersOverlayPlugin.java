@@ -1,6 +1,5 @@
 package org.veupathdb.service.eda.ds.plugin.pass;
 
-import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
@@ -8,7 +7,10 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.generated.model.*;
+import org.veupathdb.service.eda.generated.model.BinSpec;
+import org.veupathdb.service.eda.generated.model.MapMarkersOverlayPostRequest;
+import org.veupathdb.service.eda.generated.model.MapMarkersOverlaySpec;
+import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,13 +36,8 @@ public class MapMarkersOverlayPlugin extends AbstractEmptyComputePlugin<MapMarke
   }
 
   @Override
-  protected Class<MapMarkersOverlayPostRequest> getVisualizationRequestClass() {
-    return MapMarkersOverlayPostRequest.class;
-  }
-
-  @Override
-  protected Class<MapMarkersOverlaySpec> getVisualizationSpecClass() {
-    return MapMarkersOverlaySpec.class;
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(MapMarkersOverlayPostRequest.class, MapMarkersOverlaySpec.class);
   }
 
   @Override
@@ -66,7 +63,7 @@ public class MapMarkersOverlayPlugin extends AbstractEmptyComputePlugin<MapMarke
 
   @Override
   protected List<StreamSpec> getRequestedStreams(MapMarkersOverlaySpec pluginSpec) {
-    return ListBuilder.asList(
+    return List.of(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
         .addVar(pluginSpec.getGeoAggregateVariable())

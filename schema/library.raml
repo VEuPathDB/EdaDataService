@@ -618,22 +618,22 @@ types:
       displayName: string
       description: string
   AbundanceBoxplotPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       computeConfig: RankedAbundanceComputeConfig
       config: BoxplotWith1ComputeSpec
   AbundanceScatterplotPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       computeConfig: RankedAbundanceComputeConfig
       config: ScatterplotWith1ComputeSpec
   AlphaDivBoxplotPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       computeConfig: AlphaDivComputeConfig
       config: BoxplotWith1ComputeSpec
   AlphaDivScatterplotPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       computeConfig: AlphaDivComputeConfig
       config: ScatterplotWith1ComputeSpec
@@ -667,7 +667,7 @@ types:
         type: string[][]
         required: false
   BetaDivScatterplotPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       computeConfig: BetaDivComputeConfig
       config: BetaDivScatterplotSpec
@@ -682,8 +682,50 @@ types:
       overlayVariable:
         type: VariableSpec
         required: false
+  ContinuousVariableMetadataPostRequest:
+    type: DataPluginRequestBase
+    additionalProperties: false
+    properties:
+      config: ContinuousVariableMetadataSpec
+  ContinuousVariableMetadataSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      variable: VariableSpec
+      metadata:
+        type: array
+        items:
+          type: string
+          enum:
+            - binRanges
+            - median
+  BinRange:
+    type: object
+    additionalProperties: false
+    properties:
+      binStart: string
+      binEnd: string
+      binLabel: string
+  BinRangeWithValue:
+    type: BinRange
+    additionalProperties: false
+    properties:
+      value: number
+  AllBinRanges:
+    type: object
+    additionalProperties: false
+    properties:
+      equalInterval: BinRange[]
+      quantile: BinRange[]
+      standardDeviation: BinRange[]
+  ContinuousVariableMetadataPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      binRanges?: AllBinRanges
+      median?: number
   BarplotPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: BarplotSpec
   BarplotSpec:
@@ -722,7 +764,7 @@ types:
       sampleSizeTable: SampleSizeTable[]
       completeCasesTable: VariableCompleteCases[]
   BoxplotPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: BoxplotSpec
   BoxplotSpec:
@@ -797,7 +839,7 @@ types:
         required: false
       completeCasesTable: VariableCompleteCases[]
   DensityplotPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: DensityplotSpec
   DensityplotSpec:
@@ -830,7 +872,7 @@ types:
       sampleSizeTable: SampleSizeTable[]
       completeCasesTable: VariableCompleteCases[]
   HeatmapPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: HeatmapSpec
   HeatmapSpec:
@@ -869,7 +911,7 @@ types:
       sampleSizeTable: SampleSizeTable[]
       completeCasesTable: VariableCompleteCases[]
   HistogramPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: HistogramSpec
   HistogramSpec:
@@ -932,7 +974,7 @@ types:
       sampleSizeTable: SampleSizeTable[]
       completeCasesTable: VariableCompleteCases[]
   LineplotPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: LineplotSpec
   LineplotSpec:
@@ -995,7 +1037,7 @@ types:
       sampleSizeTable: SampleSizeTable[]
       completeCasesTable: VariableCompleteCases[]
   MapMarkersOverlayPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: MapMarkersOverlaySpec
   MapMarkersOverlaySpec:
@@ -1031,7 +1073,7 @@ types:
       sampleSizeTable: SampleSizeTable[]
       completeCasesTable: VariableCompleteCases[]
   MapPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: MapSpec
   MapSpec:
@@ -1067,7 +1109,7 @@ types:
       maxLat: number
       maxLon: number
   ScatterplotPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: ScatterplotSpec
   ScatterplotSpec:
@@ -1111,7 +1153,7 @@ types:
       sampleSizeTable: SampleSizeTable[]
       completeCasesTable: VariableCompleteCases[]
   TablePostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: TableSpec
   TableSpec:
@@ -1133,7 +1175,7 @@ types:
       xAxisReferenceValue: string
       yAxisReferenceValue: string
   TwoByTwoPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: TwoByTwoSpec
   Statistic:
@@ -1299,7 +1341,7 @@ types:
         type: string[]
         minItems: 1
   MosaicPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: MosaicSpec
   MosaicSpec:
@@ -1457,8 +1499,22 @@ types:
     properties:
       variableDetails: VariableSpec
       completeCases: number
+  CategoricalDistributionPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: VariableSpec
+  CategoricalDistributionBin:
+    type: object
+    properties:
+      label: string
+      value: number
+  CategoricalDistributionPostResponse:
+    type: object
+    properties:
+      countDistribution: CategoricalDistributionBin[]
+      proportionDistribution: CategoricalDistributionBin[]
   ExampleComputeVizPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: ExampleComputeVizSpec
       computeConfig: ExampleComputeConfig
@@ -1476,7 +1532,7 @@ types:
       longestConcatenatedValue: string
       avgConcatenatedLength: number
   MultiStreamPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: MultiStreamSpec
   MultiStreamSpec:
@@ -1485,7 +1541,7 @@ types:
     properties:
       entityId: string
   RecordCountPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: RecordCountSpec
   RecordCountSpec:
@@ -1499,11 +1555,11 @@ types:
     properties:
       recordCount: integer
   TestCollectionsPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: CollectionSpec
   FloatingBarplotPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: FloatingBarplotSpec
   FloatingBarplotSpec:
@@ -1534,7 +1590,7 @@ types:
     properties:
       barplot: FloatingBarplot
   FloatingBoxplotPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: FloatingBoxplotSpec
   FloatingBoxplotSpec:
@@ -1564,7 +1620,7 @@ types:
     properties:
       boxplot: FloatingBoxplot
   FloatingMosaicPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: FloatingMosaicSpec
   FloatingMosaicSpec:
@@ -1589,7 +1645,7 @@ types:
         type: TwoByTwoStatsTable[]
         required: false
   FloatingHistogramPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: FloatingHistogramSpec
   FloatingHistogramSpec:
@@ -1624,7 +1680,7 @@ types:
     properties:
       histogram: FloatingHistogram
   FloatingLineplotPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: FloatingLineplotSpec
   FloatingLineplotSpec:
@@ -1670,7 +1726,7 @@ types:
     properties:
       lineplot: FloatingLineplot
   FloatingScatterplotPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: FloatingScatterplotSpec
   FloatingScatterplotSpec:
@@ -1706,7 +1762,7 @@ types:
     properties:
       scatterplot: FloatingScatterplot
   StandaloneMapMarkersPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: StandaloneMapMarkersSpec
   StandaloneMapMarkersSpec:
@@ -1725,18 +1781,6 @@ types:
     additionalProperties: false
     properties:
       mapElements: StandaloneMapElementInfo[]
-  BinRange:
-    type: object
-    additionalProperties: false
-    properties:
-      binLabel: string
-      start: string
-      end: string
-  BinRangeWithValue:
-    type: BinRange
-    additionalProperties: false
-    properties:
-      value: number
   OverlayType:
     type: string
     enum:
@@ -1776,7 +1820,7 @@ types:
       minLon: number
       maxLat: number
       maxLon: number
-  VisualizationRequestBase:
+  DataPluginRequestBase:
     type: object
     additionalProperties: false
     properties:

@@ -20,6 +20,7 @@ import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
+import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.OverlaySpecification;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.GeolocationViewport;
 import org.veupathdb.service.eda.generated.model.*;
@@ -35,16 +36,6 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
   }
 
   @Override
-  protected Class<StandaloneMapMarkersPostRequest> getVisualizationRequestClass() {
-    return StandaloneMapMarkersPostRequest.class;
-  }
-
-  @Override
-  protected Class<StandaloneMapMarkersSpec> getVisualizationSpecClass() {
-    return StandaloneMapMarkersSpec.class;
-  }
-
-  @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
       .pattern()
@@ -56,6 +47,11 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
           .types(APIVariableType.LONGITUDE)
         .element("overlayVariable")
       .done();
+  }
+
+  @Override
+  protected AbstractPlugin<StandaloneMapMarkersPostRequest, StandaloneMapMarkersSpec, Void>.ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(StandaloneMapMarkersPostRequest.class, StandaloneMapMarkersSpec.class, Void.class);
   }
 
   @Override
@@ -148,15 +144,15 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
       throw new ValidationException("Input overlay variable %s is %s, but provided overlay configuration is for a conginuous variable"
           .formatted(overlayConfig.getOverlayVariable().getVariableId(), getUtil().getVariableDataShape(overlayConfig.getOverlayVariable())));
     }
-    boolean anyMissingBinStart = overlayConfig.getOverlayValues().stream().anyMatch(bin -> bin.getStart() == null);
-    boolean anyMissingBinEnd = overlayConfig.getOverlayValues().stream().anyMatch(bin -> bin.getEnd() == null);
+    boolean anyMissingBinStart = overlayConfig.getOverlayValues().stream().anyMatch(bin -> bin.getBinStart() == null);
+    boolean anyMissingBinEnd = overlayConfig.getOverlayValues().stream().anyMatch(bin -> bin.getBinEnd() == null);
     if (anyMissingBinStart || anyMissingBinEnd) {
       throw new ValidationException("All numeric bin ranges must have start and end.");
     }
     Map<Double, Double> binEdges = overlayConfig.getOverlayValues().stream()
         .collect(Collectors.toMap(
-            bin -> Double.parseDouble(bin.getStart()),
-            bin -> Double.parseDouble(bin.getEnd())));
+            bin -> Double.parseDouble(bin.getBinStart()),
+            bin -> Double.parseDouble(bin.getBinEnd())));
     boolean first = true;
     Double prevBinEnd = null;
     for (Double binStart : binEdges.keySet()) {

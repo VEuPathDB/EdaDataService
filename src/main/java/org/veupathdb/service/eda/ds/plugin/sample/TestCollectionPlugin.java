@@ -19,13 +19,8 @@ import java.util.Map;
 public class TestCollectionPlugin extends AbstractEmptyComputePlugin<TestCollectionsPostRequest, CollectionSpec> {
 
   @Override
-  protected Class<TestCollectionsPostRequest> getVisualizationRequestClass() {
-    return TestCollectionsPostRequest.class;
-  }
-
-  @Override
-  protected Class<CollectionSpec> getVisualizationSpecClass() {
-    return CollectionSpec.class;
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(TestCollectionsPostRequest.class, CollectionSpec.class);
   }
 
   @Override

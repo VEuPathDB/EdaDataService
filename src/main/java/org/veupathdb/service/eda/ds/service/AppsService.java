@@ -38,10 +38,7 @@ import org.veupathdb.service.eda.ds.plugin.pass.ScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TablePlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TimeSeriesPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
-import org.veupathdb.service.eda.ds.plugin.sample.ExampleComputeVizPlugin;
-import org.veupathdb.service.eda.ds.plugin.sample.MultiStreamPlugin;
-import org.veupathdb.service.eda.ds.plugin.sample.RecordCountPlugin;
-import org.veupathdb.service.eda.ds.plugin.sample.TestCollectionPlugin;
+import org.veupathdb.service.eda.ds.plugin.sample.*;
 import org.veupathdb.service.eda.common.client.NonEmptyResultStream.EmptyResultException;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingBarplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingBoxplotPlugin;
@@ -107,7 +104,7 @@ public class AppsService implements Apps {
     return null; // TODO
   }
 
-  private <T> T wrapPlugin(SupplierWithException<T> supplier) {
+  static <T> T wrapPlugin(SupplierWithException<T> supplier) {
     try {
       return supplier.get();
     }
@@ -126,12 +123,20 @@ public class AppsService implements Apps {
     }
   }
 
-  private <T extends VisualizationRequestBase> Consumer<OutputStream> processRequest(AbstractPlugin<T,?,?> plugin, T entity) throws ValidationException {
-    Entry<String,String> authHeader = UserProvider.getSubmittedAuth(_request).orElseThrow();
+  private static <T extends DataPluginRequestBase> Consumer<OutputStream> processRequest(AbstractPlugin<T,?,?> plugin, T entity, ContainerRequest request) throws ValidationException {
+    String appName = request.getUriInfo().getPathSegments().get(1).getPath();
+    return processRequest(plugin, entity, appName, request);
+  }
+
+  static <T extends DataPluginRequestBase> Consumer<OutputStream> processRequest(AbstractPlugin<T,?,?> plugin, T entity, String appName, ContainerRequest request) throws ValidationException {
+    Entry<String,String> authHeader = UserProvider.getSubmittedAuth(request).orElseThrow();
     StudyAccess.confirmPermission(authHeader, Resources.DATASET_ACCESS_SERVICE_URL,
         entity.getStudyId(), StudyAccess::allowVisualizations);
-    String appName = _request.getUriInfo().getPathSegments().get(1).getPath();
     return plugin.processRequest(appName, entity, authHeader);
+  }
+
+  private <T extends DataPluginRequestBase> Consumer<OutputStream> processRequest(AbstractPlugin<T,?,?> plugin, T entity) throws ValidationException {
+    return processRequest(plugin, entity, _request);
   }
 
   @DisableJackson
@@ -244,6 +249,12 @@ public class AppsService implements Apps {
   public PostAppsSampleVisualizationsCollectionsTestResponse postAppsSampleVisualizationsCollectionsTest(TestCollectionsPostRequest entity) {
     return wrapPlugin(() -> PostAppsSampleVisualizationsCollectionsTestResponse.respond200WithTextPlain(
         new EntityTabularPostResponseStream(processRequest(new TestCollectionPlugin(), entity))));
+  }
+
+  @Override
+  public PostAppsSampleVisualizationsCategoricalDistributionResponse postAppsSampleVisualizationsCategoricalDistribution(CategoricalDistributionPostRequest entity) {
+    return wrapPlugin(() -> PostAppsSampleVisualizationsCategoricalDistributionResponse.respond200WithApplicationJson(
+        new CategoricalDistributionPostResponseStream(processRequest(new CategoricalDistributionPlugin(), entity))));
   }
 
   @Override

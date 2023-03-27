@@ -3,7 +3,7 @@
 types:
 
   StandaloneMapMarkersPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
       config: StandaloneMapMarkersSpec
 
@@ -30,19 +30,6 @@ types:
     additionalProperties: false
     properties:
       mapElements: StandaloneMapElementInfo[]
-
-  BinRange:
-    additionalProperties: false
-    properties:
-      binLabel: string
-      start: string
-      end: string
-
-  BinRangeWithValue:
-    additionalProperties: false
-    type: BinRange
-    properties:
-      value: number
 
   OverlayType:
     type: string

@@ -1,7 +1,8 @@
 package org.veupathdb.service.eda.ds.plugin.pass;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.DelimitedDataParser;
-import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -24,6 +25,8 @@ import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.MICROBIOME_PROJ
 
 public class TablePlugin extends AbstractEmptyComputePlugin<TablePostRequest, TableSpec> {
 
+  private static final Logger LOG = LogManager.getLogger(TablePlugin.class);
+
   @Override
   public String getDisplayName() {
     return "Table";
@@ -40,13 +43,8 @@ public class TablePlugin extends AbstractEmptyComputePlugin<TablePostRequest, Ta
   }
 
   @Override
-  protected Class<TablePostRequest> getVisualizationRequestClass() {
-    return TablePostRequest.class;
-  }
-
-  @Override
-  protected Class<TableSpec> getVisualizationSpecClass() {
-    return TableSpec.class;
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(TablePostRequest.class, TableSpec.class);
   }
 
   @Override
@@ -66,7 +64,7 @@ public class TablePlugin extends AbstractEmptyComputePlugin<TablePostRequest, Ta
 
   @Override
   protected List<StreamSpec> getRequestedStreams(TableSpec pluginSpec) {
-    return ListBuilder.asList(
+    return List.of(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVars(pluginSpec.getOutputVariable()));
   }
@@ -89,9 +87,9 @@ public class TablePlugin extends AbstractEmptyComputePlugin<TablePostRequest, Ta
     boolean first = true;
     for (String colName : header) {
       if (first) first = false; else bufOut.write(",");
-      System.err.println("col name: " + colName);
-      String varSpec[] = colName.split("\\.");
-      System.err.println(varSpec.toString());
+      LOG.debug("col name: " + colName);
+      String[] varSpec = colName.split("\\.");
+      LOG.debug(String.join(",",varSpec));
       bufOut.write(new JSONObject()
           .put("entityId", varSpec[0])
           .put("variableId", varSpec[1])

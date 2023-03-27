@@ -1,7 +1,8 @@
 package org.veupathdb.service.eda.ds.plugin.pass;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.DelimitedDataParser;
-import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.geo.GeographyUtil.GeographicPoint;
 import org.gusdb.fgputil.geo.LatLonAverager;
 import org.gusdb.fgputil.validation.ValidationException;
@@ -23,6 +24,7 @@ import static org.gusdb.fgputil.FormatUtil.TAB;
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.CLINEPI_PROJECT;
 
 public class MapPlugin extends AbstractEmptyComputePlugin<MapPostRequest, MapSpec> {
+  private static final Logger LOG = LogManager.getLogger(MapPlugin.class);
 
   @Override
   public String getDisplayName() {
@@ -40,13 +42,8 @@ public class MapPlugin extends AbstractEmptyComputePlugin<MapPostRequest, MapSpe
   }
 
   @Override
-  protected Class<MapPostRequest> getVisualizationRequestClass() {
-    return MapPostRequest.class;
-  }
-
-  @Override
-  protected Class<MapSpec> getVisualizationSpecClass() {
-    return MapSpec.class;
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(MapPostRequest.class, MapSpec.class);
   }
 
   @Override
@@ -73,7 +70,7 @@ public class MapPlugin extends AbstractEmptyComputePlugin<MapPostRequest, MapSpe
 
   @Override
   protected List<StreamSpec> getRequestedStreams(MapSpec pluginSpec) {
-    return ListBuilder.asList(
+    return List.of(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getGeoAggregateVariable())
         .addVar(pluginSpec.getLatitudeVariable())
@@ -101,7 +98,7 @@ public class MapPlugin extends AbstractEmptyComputePlugin<MapPostRequest, MapSpe
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-
+    LOG.debug("Beginning writeResults for map plugin with output id: " + _pluginSpec.getOutputEntityId());
     // create scanner and line parser
     InputStreamReader isReader = new InputStreamReader(new BufferedInputStream(dataStreams.get(DEFAULT_SINGLE_STREAM_NAME)));
     BufferedReader reader = new BufferedReader(isReader);
@@ -139,10 +136,11 @@ public class MapPlugin extends AbstractEmptyComputePlugin<MapPostRequest, MapSpe
           aggregator.putIfAbsent(row[geoVarIndex], new GeoVarData());
           aggregator.get(row[geoVarIndex]).addRow(latitude, longitude);
         }
-        nextLine = reader.readLine();
-      }  
+      }
+      nextLine = reader.readLine();
     }
 
+    LOG.debug("Writing aggregated results for " + entityRecordsWithGeoVar + " records");
     // begin output object and single property containing array of map elements
     out.write("{\"mapElements\":[".getBytes(StandardCharsets.UTF_8));
     boolean first = true;
@@ -170,11 +168,11 @@ public class MapPlugin extends AbstractEmptyComputePlugin<MapPostRequest, MapSpe
     out.flush();
   }
   private static class ParsedGeolocationViewport {
-    private double xMin;
-    private double xMax;
-    private double yMin;
-    private double yMax;
-    private boolean viewportIncludesIntlDateLine;
+    private final double xMin;
+    private final double xMax;
+    private final double yMin;
+    private final double yMax;
+    private final boolean viewportIncludesIntlDateLine;
 
     public ParsedGeolocationViewport(double xMin, double xMax,
                                      double yMin, double yMax) {

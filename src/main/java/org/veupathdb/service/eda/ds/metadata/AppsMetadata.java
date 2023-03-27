@@ -32,6 +32,7 @@ import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingHistogramPlugin
 import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingLineplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.StandaloneMapMarkersPlugin;
+import org.veupathdb.service.eda.ds.plugin.sample.*;
 import org.veupathdb.service.eda.generated.model.*;
 
 public class AppsMetadata {
@@ -103,7 +104,8 @@ public class AppsMetadata {
           List.of(),
           viz("record-count", new RecordCountPlugin()),
           viz("multi-stream", new MultiStreamPlugin()),
-          viz("collections-test", new TestCollectionPlugin())),
+          viz("collections-test", new TestCollectionPlugin()),
+          viz("categorical-distribution", new CategoricalDistributionPlugin())),
       app("samplewithcompute", "Sample With Compute", "example",
           "Wrapper app for sample/test plugins that have associated computes",
           List.of(),
@@ -131,7 +133,7 @@ public class AppsMetadata {
     return app;
   }
 
-  private static <T extends VisualizationRequestBase, S, R> VisualizationOverview viz(String urlSegment, AbstractPlugin<T, S, R> visualizationPlugin) {
+  private static <T extends DataPluginRequestBase, S, R> VisualizationOverview viz(String urlSegment, AbstractPlugin<T, S, R> visualizationPlugin) {
     ConstraintSpec constraints = visualizationPlugin.getConstraintSpec();
     VisualizationOverviewImpl viz = new VisualizationOverviewImpl();
     viz.setName(urlSegment);

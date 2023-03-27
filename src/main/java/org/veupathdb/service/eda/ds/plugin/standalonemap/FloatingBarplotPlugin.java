@@ -9,6 +9,7 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
+import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.BinRange;
 import org.veupathdb.service.eda.generated.model.FloatingBarplotPostRequest;
 import org.veupathdb.service.eda.generated.model.FloatingBarplotSpec;
@@ -45,16 +46,6 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
   }
 
   @Override
-  protected Class<FloatingBarplotPostRequest> getVisualizationRequestClass() {
-    return FloatingBarplotPostRequest.class;
-  }
-
-  @Override
-  protected Class<FloatingBarplotSpec> getVisualizationSpecClass() {
-    return FloatingBarplotSpec.class;
-  }
-
-  @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
       .dependencyOrder(List.of("xAxisVariable"), List.of("overlayVariable"))
@@ -65,6 +56,11 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
         .element("overlayVariable")
           .required(false)
       .done();
+  }
+
+  @Override
+  protected AbstractPlugin<FloatingBarplotPostRequest, FloatingBarplotSpec, Void>.ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(FloatingBarplotPostRequest.class, FloatingBarplotSpec.class, Void.class);
   }
 
   @Override

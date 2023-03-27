@@ -35,15 +35,15 @@ public class NormalizedBinRange {
     if (variableType.equalsIgnoreCase(APIVariableType.DATE.getValue())) {
       return overlayConfig.getOverlayValues().stream()
           .map(binRange -> new NormalizedBinRange(
-              Instant.parse(binRange.getStart()).toEpochMilli(),
-              Instant.parse(binRange.getEnd()).toEpochMilli(),
+              Instant.parse(binRange.getBinStart()).toEpochMilli(),
+              Instant.parse(binRange.getBinEnd()).toEpochMilli(),
               binRange.getBinLabel()))
           .collect(Collectors.toList());
     } else {
       return overlayConfig.getOverlayValues().stream()
           .map(binRange -> new NormalizedBinRange(
-              Double.parseDouble(binRange.getStart()),
-              Double.parseDouble(binRange.getEnd()),
+              Double.parseDouble(binRange.getBinStart()),
+              Double.parseDouble(binRange.getBinEnd()),
               binRange.getBinLabel()))
           .collect(Collectors.toList());
     }

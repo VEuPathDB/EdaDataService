@@ -1,6 +1,5 @@
 package org.veupathdb.service.eda.ds.plugin.pass;
 
-import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
@@ -40,13 +39,8 @@ public class HeatmapPlugin extends AbstractEmptyComputePlugin<HeatmapPostRequest
   }
 
   @Override
-  protected Class<HeatmapPostRequest> getVisualizationRequestClass() {
-    return HeatmapPostRequest.class;
-  }
-
-  @Override
-  protected Class<HeatmapSpec> getVisualizationSpecClass() {
-    return HeatmapSpec.class;
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(HeatmapPostRequest.class, HeatmapSpec.class);
   }
 
   @Override
@@ -87,7 +81,7 @@ public class HeatmapPlugin extends AbstractEmptyComputePlugin<HeatmapPostRequest
 
   @Override
   protected List<StreamSpec> getRequestedStreams(HeatmapSpec pluginSpec) {
-    return ListBuilder.asList(
+    return List.of(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
         .addVar(pluginSpec.getYAxisVariable())
@@ -100,7 +94,7 @@ public class HeatmapPlugin extends AbstractEmptyComputePlugin<HeatmapPostRequest
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       PluginUtil util = getUtil();
       HeatmapSpec spec = getPluginSpec();
-      Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
+      Map<String, VariableSpec> varMap = new HashMap<>();
       varMap.put("xAxis", spec.getXAxisVariable());
       varMap.put("yAxis", spec.getYAxisVariable());
       varMap.put("zAxis", spec.getZAxisVariable());

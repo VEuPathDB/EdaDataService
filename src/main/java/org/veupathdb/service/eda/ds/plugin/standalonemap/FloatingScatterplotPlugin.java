@@ -11,6 +11,7 @@ import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.common.plugin.util.RFileSetProcessor;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
+import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
@@ -46,16 +47,6 @@ public class FloatingScatterplotPlugin extends AbstractEmptyComputePlugin<Floati
   }
 
   @Override
-  protected Class<FloatingScatterplotPostRequest> getVisualizationRequestClass() {
-    return FloatingScatterplotPostRequest.class;
-  }
-
-  @Override
-  protected Class<FloatingScatterplotSpec> getVisualizationSpecClass() {
-    return FloatingScatterplotSpec.class;
-  }
-
-  @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
       .dependencyOrder(List.of("yAxisVariable", "xAxisVariable"), List.of("overlayVariable"))
@@ -70,7 +61,12 @@ public class FloatingScatterplotPlugin extends AbstractEmptyComputePlugin<Floati
           .required(false)
       .done();
   }
-  
+
+  @Override
+  protected AbstractPlugin<FloatingScatterplotPostRequest, FloatingScatterplotSpec, Void>.ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(FloatingScatterplotPostRequest.class, FloatingScatterplotSpec.class, Void.class);
+  }
+
   @Override
   protected void validateVisualizationSpec(FloatingScatterplotSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()

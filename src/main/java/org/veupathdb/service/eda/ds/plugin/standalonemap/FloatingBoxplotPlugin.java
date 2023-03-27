@@ -9,6 +9,7 @@ import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.common.plugin.util.RFileSetProcessor;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
+import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
@@ -42,16 +43,6 @@ public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBo
   }
 
   @Override
-  protected Class<FloatingBoxplotPostRequest> getVisualizationRequestClass() {
-    return FloatingBoxplotPostRequest.class;
-  }
-
-  @Override
-  protected Class<FloatingBoxplotSpec> getVisualizationSpecClass() {
-    return FloatingBoxplotSpec.class;
-  }
-
-  @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
       .dependencyOrder(List.of("yAxisVariable"), List.of("xAxisVariable"), List.of("overlayVariable"))
@@ -66,7 +57,12 @@ public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBo
           .required(false)
       .done();
   }
-  
+
+  @Override
+  protected AbstractPlugin<FloatingBoxplotPostRequest, FloatingBoxplotSpec, Void>.ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(FloatingBoxplotPostRequest.class, FloatingBoxplotSpec.class, Void.class);
+  }
+
   @Override
   protected void validateVisualizationSpec(FloatingBoxplotSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()

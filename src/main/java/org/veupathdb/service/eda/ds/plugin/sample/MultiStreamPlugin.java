@@ -37,13 +37,8 @@ public class MultiStreamPlugin extends AbstractEmptyComputePlugin<MultiStreamPos
   }
 
   @Override
-  protected Class<MultiStreamPostRequest> getVisualizationRequestClass() {
-    return MultiStreamPostRequest.class;
-  }
-
-  @Override
-  protected Class<MultiStreamSpec> getVisualizationSpecClass() {
-    return MultiStreamSpec.class;
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(MultiStreamPostRequest.class, MultiStreamSpec.class);
   }
 
   @Override

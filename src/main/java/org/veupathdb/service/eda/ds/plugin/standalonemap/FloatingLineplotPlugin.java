@@ -8,6 +8,7 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
+import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
@@ -41,16 +42,6 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
   }
 
   @Override
-  protected Class<FloatingLineplotPostRequest> getVisualizationRequestClass() {
-    return FloatingLineplotPostRequest.class;
-  }
-
-  @Override
-  protected Class<FloatingLineplotSpec> getVisualizationSpecClass() {
-    return FloatingLineplotSpec.class;
-  }
-  
-  @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
       .dependencyOrder(List.of("yAxisVariable"), List.of("xAxisVariable"), List.of("overlayVariable"))
@@ -63,6 +54,11 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
         .element("overlayVariable")
           .required(false)
       .done();
+  }
+
+  @Override
+  protected AbstractPlugin<FloatingLineplotPostRequest, FloatingLineplotSpec, Void>.ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(FloatingLineplotPostRequest.class, FloatingLineplotSpec.class, Void.class);
   }
 
   @Override
