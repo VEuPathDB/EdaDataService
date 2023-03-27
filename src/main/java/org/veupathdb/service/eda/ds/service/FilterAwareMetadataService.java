@@ -24,5 +24,4 @@ public class FilterAwareMetadataService implements FilterAwareMetadataContinuous
     return wrapPlugin(() -> PostFilterAwareMetadataContinuousVariableResponse.respond200WithApplicationJson(
         new ContinuousVariableMetadataPostResponseStream(processRequest(new ContinuousVariablePlugin(), entity, null, _request))));
   }
-
 }

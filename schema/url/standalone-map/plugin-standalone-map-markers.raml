@@ -3,9 +3,9 @@
 types:
 
   StandaloneMapMarkersPostRequest:
-    type: VisualizationRequestBase
+    type: DataPluginRequestBase
     properties:
-      config: StandaloneMapMarkerSpec
+      config: StandaloneMapMarkersSpec
 
   StandaloneMapMarkersSpec:
     additionalProperties: false
@@ -18,10 +18,8 @@ types:
         type: VariableSpec
       latitudeVariable:
         type: VariableSpec
-      overlayVariable?:
-        type: VariableSpec
-      overlayValues?:
-        type: BinRange[] # categoricals can just ignore bin start and end
+      overlayConfig?:
+        type: OverlayConfig # categoricals can just ignore bin start and end
       # if we choose to support things like means and medians for cont vars this may need to be a custom enum
       valueSpec:
         type: ValueSpec
@@ -32,6 +30,35 @@ types:
     additionalProperties: false
     properties:
       mapElements: StandaloneMapElementInfo[]
+
+  OverlayType:
+    type: string
+    enum: ["continuous", "categorical"]
+
+  OverlayConfig:
+    additionalProperties: false
+    discriminator: overlayType
+    properties:
+      overlayType:
+        type: OverlayType
+      overlayVariable:
+        type: VariableSpec
+
+  ContinousOverlayConfig:
+    type: OverlayConfig
+    additionalProperties: false
+    discriminatorValue: continuous
+    properties:
+      overlayValues:
+        type: BinRange[]
+
+  CategoricalOverlayConfig:
+    type: OverlayConfig
+    discriminatorValue: categorical
+    additionalProperties: false
+    properties:
+      overlayValues:
+        type: string[]
 
   StandaloneMapElementInfo:
     additionalProperties: false

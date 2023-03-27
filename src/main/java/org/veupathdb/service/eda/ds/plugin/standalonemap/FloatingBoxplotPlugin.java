@@ -9,6 +9,7 @@ import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.common.plugin.util.RFileSetProcessor;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
+import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithProcessedRemoteFiles;
@@ -41,16 +43,6 @@ public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBo
   }
 
   @Override
-  protected Class<FloatingBoxplotPostRequest> getVisualizationRequestClass() {
-    return FloatingBoxplotPostRequest.class;
-  }
-
-  @Override
-  protected Class<FloatingBoxplotSpec> getVisualizationSpecClass() {
-    return FloatingBoxplotSpec.class;
-  }
-
-  @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
       .dependencyOrder(List.of("yAxisVariable"), List.of("xAxisVariable"), List.of("overlayVariable"))
@@ -65,7 +57,12 @@ public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBo
           .required(false)
       .done();
   }
-  
+
+  @Override
+  protected AbstractPlugin<FloatingBoxplotPostRequest, FloatingBoxplotSpec, Void>.ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(FloatingBoxplotPostRequest.class, FloatingBoxplotSpec.class, Void.class);
+  }
+
   @Override
   protected void validateVisualizationSpec(FloatingBoxplotSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
@@ -110,8 +107,8 @@ public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBo
       );
 
     useRConnectionWithProcessedRemoteFiles(Resources.RSERVE_URL, filesProcessor, connection -> {
-      String overlayValues = listToRVector(spec.getOverlayValues());
-
+      String overlayValues = listToRVector(spec.getOverlayValues().stream().map(BinRange::getBinLabel).collect(Collectors.toList()));
+      boolean deprecatedShowMissingness = false;
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String cmd =
           "plot.data::box(data=" + DEFAULT_SINGLE_STREAM_NAME + ", variables=variables, " +

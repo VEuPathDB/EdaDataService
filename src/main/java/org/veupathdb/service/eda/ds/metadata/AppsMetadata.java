@@ -21,6 +21,17 @@ import org.veupathdb.service.eda.ds.plugin.pass.MapPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.MapMarkersOverlayPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
+import org.veupathdb.service.eda.ds.plugin.sample.ExampleComputeVizPlugin;
+import org.veupathdb.service.eda.ds.plugin.sample.MultiStreamPlugin;
+import org.veupathdb.service.eda.ds.plugin.sample.RecordCountPlugin;
+import org.veupathdb.service.eda.ds.plugin.sample.TestCollectionPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingBarplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingBoxplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingContTablePlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingHistogramPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingLineplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingScatterplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.StandaloneMapMarkersPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.*;
 import org.veupathdb.service.eda.generated.model.*;
 

@@ -10,6 +10,7 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
+import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
@@ -18,6 +19,7 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
@@ -43,16 +45,6 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
   }
 
   @Override
-  protected Class<FloatingHistogramPostRequest> getVisualizationRequestClass() {
-    return FloatingHistogramPostRequest.class;
-  }
-
-  @Override
-  protected Class<FloatingHistogramSpec> getVisualizationSpecClass() {
-    return FloatingHistogramSpec.class;
-  }
-  
-  @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
       .dependencyOrder(List.of("xAxisVariable"), List.of("overlayVariable"))
@@ -64,7 +56,12 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
           .required(false)
       .done();
   }
-  
+
+  @Override
+  protected AbstractPlugin<FloatingHistogramPostRequest, FloatingHistogramSpec, Void>.ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(FloatingHistogramPostRequest.class, FloatingHistogramSpec.class, Void.class);
+  }
+
   @Override
   protected void validateVisualizationSpec(FloatingHistogramSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
@@ -94,7 +91,7 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
     String barMode = spec.getBarMode().getValue();
     String xVar = util.toColNameOrEmpty(spec.getXAxisVariable());
     String xVarType = util.getVariableType(spec.getXAxisVariable());
-    String overlayValues = listToRVector(spec.getOverlayValues());
+    String overlayValues = listToRVector(spec.getOverlayValues().stream().map(BinRange::getBinLabel).collect(Collectors.toList()));
 
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,

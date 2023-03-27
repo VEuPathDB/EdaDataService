@@ -8,6 +8,7 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
+import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.FloatingMosaicPostRequest;
 import org.veupathdb.service.eda.generated.model.FloatingMosaicSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
@@ -39,16 +40,6 @@ public class FloatingContTablePlugin extends AbstractEmptyComputePlugin<Floating
   public List<String> getProjects() {
     return List.of(VECTORBASE_PROJECT);
   }
-  
-  @Override
-  protected Class<FloatingMosaicSpec> getVisualizationSpecClass() {
-    return FloatingMosaicSpec.class;
-  }
-
-  @Override
-  protected Class<FloatingMosaicPostRequest> getVisualizationRequestClass() {
-    return FloatingMosaicPostRequest.class;
-  }
 
   @Override
   public ConstraintSpec getConstraintSpec() {
@@ -62,6 +53,11 @@ public class FloatingContTablePlugin extends AbstractEmptyComputePlugin<Floating
           .maxValues(10)
           .description("Variable must have 10 or fewer unique values and be from the same branch of the dataset diagram as the Y-axis variable.")
       .done();
+  }
+
+  @Override
+  protected AbstractPlugin<FloatingMosaicPostRequest, FloatingMosaicSpec, Void>.ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(FloatingMosaicPostRequest.class, FloatingMosaicSpec.class, Void.class);
   }
 
   @Override

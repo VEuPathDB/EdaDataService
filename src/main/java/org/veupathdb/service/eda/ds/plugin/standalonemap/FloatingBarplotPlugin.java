@@ -9,6 +9,8 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
+import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.generated.model.BinRange;
 import org.veupathdb.service.eda.generated.model.FloatingBarplotPostRequest;
 import org.veupathdb.service.eda.generated.model.FloatingBarplotSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
@@ -20,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
@@ -43,16 +46,6 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
   }
 
   @Override
-  protected Class<FloatingBarplotPostRequest> getVisualizationRequestClass() {
-    return FloatingBarplotPostRequest.class;
-  }
-
-  @Override
-  protected Class<FloatingBarplotSpec> getVisualizationSpecClass() {
-    return FloatingBarplotSpec.class;
-  }
-
-  @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
       .dependencyOrder(List.of("xAxisVariable"), List.of("overlayVariable"))
@@ -63,6 +56,11 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
         .element("overlayVariable")
           .required(false)
       .done();
+  }
+
+  @Override
+  protected AbstractPlugin<FloatingBarplotPostRequest, FloatingBarplotSpec, Void>.ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(FloatingBarplotPostRequest.class, FloatingBarplotSpec.class, Void.class);
   }
 
   @Override
@@ -89,7 +87,7 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
     FloatingBarplotSpec spec = getPluginSpec();
     PluginUtil util = getUtil();
     String barMode = spec.getBarMode().getValue();
-    String overlayValues = listToRVector(spec.getOverlayValues());
+    String overlayValues = listToRVector(spec.getOverlayValues().stream().map(BinRange::getBinLabel).collect(Collectors.toList()));
 
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
     varMap.put("xAxis", spec.getXAxisVariable());

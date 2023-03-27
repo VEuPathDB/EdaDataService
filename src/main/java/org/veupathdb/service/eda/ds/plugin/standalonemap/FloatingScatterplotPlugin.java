@@ -11,6 +11,7 @@ import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.common.plugin.util.RFileSetProcessor;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
+import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithProcessedRemoteFiles;
@@ -45,16 +47,6 @@ public class FloatingScatterplotPlugin extends AbstractEmptyComputePlugin<Floati
   }
 
   @Override
-  protected Class<FloatingScatterplotPostRequest> getVisualizationRequestClass() {
-    return FloatingScatterplotPostRequest.class;
-  }
-
-  @Override
-  protected Class<FloatingScatterplotSpec> getVisualizationSpecClass() {
-    return FloatingScatterplotSpec.class;
-  }
-
-  @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
       .dependencyOrder(List.of("yAxisVariable", "xAxisVariable"), List.of("overlayVariable"))
@@ -69,7 +61,12 @@ public class FloatingScatterplotPlugin extends AbstractEmptyComputePlugin<Floati
           .required(false)
       .done();
   }
-  
+
+  @Override
+  protected AbstractPlugin<FloatingScatterplotPostRequest, FloatingScatterplotSpec, Void>.ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(FloatingScatterplotPostRequest.class, FloatingScatterplotSpec.class, Void.class);
+  }
+
   @Override
   protected void validateVisualizationSpec(FloatingScatterplotSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
@@ -101,7 +98,7 @@ public class FloatingScatterplotPlugin extends AbstractEmptyComputePlugin<Floati
     varMap.put("overlay", spec.getOverlayVariable());
     String valueSpec = spec.getValueSpec().getValue();
     String yVarType = util.getVariableType(spec.getYAxisVariable());
-    String overlayValues = listToRVector(spec.getOverlayValues());
+    String overlayValues = listToRVector(spec.getOverlayValues().stream().map(BinRange::getBinLabel).collect(Collectors.toList()));
     
     if (yVarType.equals("DATE") && !valueSpec.equals("raw")) {
       LOG.error("Cannot calculate trend lines for y-axis date variables. The `valueSpec` property must be set to `raw`.");
