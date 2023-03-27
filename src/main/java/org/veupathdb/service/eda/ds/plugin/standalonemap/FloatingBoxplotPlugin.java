@@ -10,6 +10,7 @@ import org.veupathdb.service.eda.common.plugin.util.RFileSetProcessor;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.OverlaySpecification;
 import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
@@ -26,6 +28,7 @@ import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConn
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
 public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBoxplotPostRequest, FloatingBoxplotSpec> {
+  private OverlaySpecification _overlaySpecification = null;
 
   @Override
   public String getDisplayName() {
@@ -69,7 +72,16 @@ public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBo
       .entity(pluginSpec.getOutputEntityId())
       .var("xAxisVariable", pluginSpec.getXAxisVariable())
       .var("yAxisVariable", pluginSpec.getYAxisVariable())
-      .var("overlayVariable", pluginSpec.getOverlayVariable()));
+      .var("overlayVariable", Optional.ofNullable(pluginSpec.getOverlayConfig())
+          .map(OverlayConfig::getOverlayVariable)
+          .orElse(null)));
+    if (pluginSpec.getOverlayConfig() != null) {
+      try {
+        _overlaySpecification = new OverlaySpecification(pluginSpec.getOverlayConfig(), getUtil()::getVariableType, getUtil()::getVariableDataShape);
+      } catch (IllegalArgumentException e) {
+        throw new ValidationException(e.getMessage());
+      }
+    }
   }
 
   @Override
@@ -78,7 +90,9 @@ public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBo
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
         .addVar(pluginSpec.getYAxisVariable())
-        .addVar(pluginSpec.getOverlayVariable()));
+        .addVar(Optional.ofNullable(pluginSpec.getOverlayConfig())
+            .map(OverlayConfig::getOverlayVariable)
+            .orElse(null)));
   }
 
   @Override
@@ -88,7 +102,7 @@ public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBo
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
     varMap.put("xAxis", spec.getXAxisVariable());
     varMap.put("yAxis", spec.getYAxisVariable());
-    varMap.put("overlay", spec.getOverlayVariable());
+    varMap.put("overlay", _overlaySpecification.getOverlayVariable());
     
     List<String> nonStrataVarColNames = new ArrayList<String>();
     nonStrataVarColNames.add(util.toColNameOrEmpty(spec.getXAxisVariable()));
@@ -103,11 +117,11 @@ public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBo
         conn.voidEval(util.getVoidEvalFreadCommand(name,
           spec.getXAxisVariable(),
           spec.getYAxisVariable(),
-          spec.getOverlayVariable()))
+          _overlaySpecification.getOverlayVariable()))
       );
 
     useRConnectionWithProcessedRemoteFiles(Resources.RSERVE_URL, filesProcessor, connection -> {
-      String overlayValues = listToRVector(spec.getOverlayValues().stream().map(BinRange::getBinLabel).collect(Collectors.toList()));
+      String overlayValues = _overlaySpecification == null ? "NULL" : _overlaySpecification.getRBinListAsString();
       boolean deprecatedShowMissingness = false;
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String cmd =

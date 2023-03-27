@@ -11,6 +11,7 @@ import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.OverlaySpecification;
 import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
@@ -19,6 +20,7 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
@@ -26,6 +28,7 @@ import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConn
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
 public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<FloatingHistogramPostRequest, FloatingHistogramSpec> {
+  private OverlaySpecification _overlaySpecification = null;
   
   private static final Logger LOG = LogManager.getLogger(FloatingHistogramPlugin.class);
 
@@ -67,7 +70,16 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
       .var("xAxisVariable", pluginSpec.getXAxisVariable())
-      .var("overlayVariable", pluginSpec.getOverlayVariable()));
+      .var("overlayVariable", Optional.ofNullable(pluginSpec.getOverlayConfig())
+          .map(OverlayConfig::getOverlayVariable)
+          .orElse(null)));
+    if (pluginSpec.getOverlayConfig() != null) {
+      try {
+        _overlaySpecification = new OverlaySpecification(pluginSpec.getOverlayConfig(), getUtil()::getVariableType, getUtil()::getVariableDataShape);
+      } catch (IllegalArgumentException e) {
+        throw new ValidationException(e.getMessage());
+      }
+    }
     if (pluginSpec.getBarMode() == null) {
       throw new ValidationException("Property 'barMode' is required.");
     }
@@ -78,7 +90,9 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
-        .addVar(pluginSpec.getOverlayVariable()));
+        .addVar(Optional.ofNullable(pluginSpec.getOverlayConfig())
+            .map(OverlayConfig::getOverlayVariable)
+            .orElse(null)));
   }
   
   @Override
@@ -87,16 +101,16 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
     FloatingHistogramSpec spec = getPluginSpec();
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
     varMap.put("xAxis", spec.getXAxisVariable());
-    varMap.put("overlay", spec.getOverlayVariable());
+    varMap.put("overlay", _overlaySpecification.getOverlayVariable());
     String barMode = spec.getBarMode().getValue();
     String xVar = util.toColNameOrEmpty(spec.getXAxisVariable());
     String xVarType = util.getVariableType(spec.getXAxisVariable());
-    String overlayValues = listToRVector(spec.getOverlayValues().stream().map(BinRange::getBinLabel).collect(Collectors.toList()));
+    String overlayValues = _overlaySpecification == null ? "NULL" : _overlaySpecification.getRBinListAsString();
 
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
           spec.getXAxisVariable(),
-          spec.getOverlayVariable()));
+          _overlaySpecification.getOverlayVariable()));
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
      
       String viewportRString = getViewportAsRString(spec.getViewport(), xVarType);

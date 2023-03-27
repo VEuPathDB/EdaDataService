@@ -39,6 +39,7 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
+      .dependencyOrder(List.of("overlayVariable"), List.of("geoAggregateVariable", "latitudeVariable", "longitudeVariable"))
       .pattern()
         .element("geoAggregateVariable")
           .types(APIVariableType.STRING)

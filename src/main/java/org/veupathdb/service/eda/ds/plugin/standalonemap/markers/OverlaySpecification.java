@@ -50,6 +50,28 @@ public class OverlaySpecification {
     }
   }
 
+  public String getRBinListAsString() {
+    String rBinList = "veupathUtils::BinList(S4Vectors::SimpleList(";
+
+    boolean first = true;
+    for (int i = 0; i < labels.size(); i++) {
+      String rBin = "veupathUtils::Bin(binLabel=" + labels.get(i);
+      if (binRanges != null) {
+        rBin += ",binStart=" + String.valueOf(binRanges.get(i).getStart()) + 
+                ",binEnd=" + String.valueOf(binRanges.get(i).getEnd());
+      }
+      rBin += ")";
+
+      if (first) {
+        rBinList += rBin;
+      } else {
+        rBinList += "," + rBin;
+      }
+    }
+
+    return rBinList + "))";
+  }
+
   public VariableSpec getOverlayVariable() {
     return overlayVariable;
   }

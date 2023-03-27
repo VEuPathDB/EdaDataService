@@ -9,6 +9,7 @@ import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.OverlaySpecification;
 import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
@@ -17,6 +18,7 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuote;
@@ -25,6 +27,7 @@ import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConn
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
 public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingLineplotPostRequest, FloatingLineplotSpec> {
+  private OverlaySpecification _overlaySpecification = null;
 
   @Override
   public String getDisplayName() {
@@ -67,7 +70,16 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
       .entity(pluginSpec.getOutputEntityId())
       .var("xAxisVariable", pluginSpec.getXAxisVariable())
       .var("yAxisVariable", pluginSpec.getYAxisVariable())
-      .var("overlayVariable", pluginSpec.getOverlayVariable()));
+      .var("overlayVariable", Optional.ofNullable(pluginSpec.getOverlayConfig())
+          .map(OverlayConfig::getOverlayVariable)
+          .orElse(null)));
+    if (pluginSpec.getOverlayConfig() != null) {
+      try {
+        _overlaySpecification = new OverlaySpecification(pluginSpec.getOverlayConfig(), getUtil()::getVariableType, getUtil()::getVariableDataShape);
+      } catch (IllegalArgumentException e) {
+        throw new ValidationException(e.getMessage());
+      }
+    }
   }
 
   @Override
@@ -76,7 +88,9 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
         .addVar(pluginSpec.getYAxisVariable())
-        .addVar(pluginSpec.getOverlayVariable()));
+        .addVar(Optional.ofNullable(pluginSpec.getOverlayConfig())
+            .map(OverlayConfig::getOverlayVariable)
+            .orElse(null)));
   }
 
   @Override
@@ -86,20 +100,20 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
     varMap.put("xAxis", spec.getXAxisVariable());
     varMap.put("yAxis", spec.getYAxisVariable());
-    varMap.put("overlay", spec.getOverlayVariable());
+    varMap.put("overlay", _overlaySpecification.getOverlayVariable());
     String errorBars = spec.getErrorBars() != null ? spec.getErrorBars().getValue() : "FALSE";
     String valueSpec = spec.getValueSpec().getValue();
     String xVar = util.toColNameOrEmpty(spec.getXAxisVariable());
     String xVarType = util.getVariableType(spec.getXAxisVariable());
     String numeratorValues = spec.getYAxisNumeratorValues() != null ? listToRVector(spec.getYAxisNumeratorValues()) : "NULL";
     String denominatorValues = spec.getYAxisDenominatorValues() != null ? listToRVector(spec.getYAxisDenominatorValues()) : "NULL";
-    String overlayValues = listToRVector(spec.getOverlayValues().stream().map(BinRange::getBinLabel).collect(Collectors.toList()));
+    String overlayValues = _overlaySpecification == null ? "NULL" : _overlaySpecification.getRBinListAsString();
     
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
           spec.getXAxisVariable(),
           spec.getYAxisVariable(),
-          spec.getOverlayVariable()));
+          _overlaySpecification.getOverlayVariable()));
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String viewportRString = getViewportAsRString(spec.getViewport(), xVarType);
       connection.voidEval(viewportRString);
