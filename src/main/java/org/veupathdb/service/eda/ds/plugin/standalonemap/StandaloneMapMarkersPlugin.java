@@ -29,6 +29,7 @@ import static org.gusdb.fgputil.FormatUtil.TAB;
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
 public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<StandaloneMapMarkersPostRequest, StandaloneMapMarkersSpec> {
+  private OverlaySpecification _overlaySpecification = null;
 
   @Override
   public List<String> getProjects() {
@@ -65,7 +66,11 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
           .map(OverlayConfig::getOverlayVariable)
           .orElse(null)));
     if (pluginSpec.getOverlayConfig() != null) {
-      validateOverlayConfig(pluginSpec.getOverlayConfig());
+      try {
+        _overlaySpecification = new OverlaySpecification(pluginSpec.getOverlayConfig(), getUtil()::getVariableType, getUtil()::getVariableDataShape);
+      } catch (IllegalArgumentException e) {
+        throw new ValidationException(e.getMessage());
+      }
     }
   }
 
@@ -121,50 +126,6 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
     }
   }
 
-  protected void validateOverlayConfig(OverlayConfig overlayConfig) throws ValidationException {
-    switch (overlayConfig.getOverlayType()) {
-      case CONTINUOUS -> validateContinuousBinRanges((ContinousOverlayConfig) overlayConfig);
-      case CATEGORICAL -> validateCategoricalOverlayValues((CategoricalOverlayConfig) overlayConfig);
-    }
-  }
-
-  private void validateCategoricalOverlayValues(CategoricalOverlayConfig overlayConfig) throws ValidationException {
-    if (!getUtil().getVariableDataShape(overlayConfig.getOverlayVariable()).equalsIgnoreCase(APIVariableDataShape.CATEGORICAL.toString())) {
-      throw new ValidationException("Input overlay variable %s is %s, but provided overlay configuration is for a categorical variable"
-          .formatted(overlayConfig.getOverlayVariable().getVariableId(), getUtil().getVariableDataShape(overlayConfig.getOverlayVariable())));
-    }
-    int numDistinctOverlayVals = new HashSet<>(overlayConfig.getOverlayValues()).size();
-    if (numDistinctOverlayVals != overlayConfig.getOverlayValues().size()) {
-      throw new ValidationException("All overlay values must be unique: " + overlayConfig.getOverlayValues());
-    }
-  }
-
-  private void validateContinuousBinRanges(ContinousOverlayConfig overlayConfig) throws ValidationException {
-    if (!getUtil().getVariableDataShape(overlayConfig.getOverlayVariable()).equalsIgnoreCase(APIVariableDataShape.CONTINUOUS.toString())) {
-      throw new ValidationException("Input overlay variable %s is %s, but provided overlay configuration is for a conginuous variable"
-          .formatted(overlayConfig.getOverlayVariable().getVariableId(), getUtil().getVariableDataShape(overlayConfig.getOverlayVariable())));
-    }
-    boolean anyMissingBinStart = overlayConfig.getOverlayValues().stream().anyMatch(bin -> bin.getBinStart() == null);
-    boolean anyMissingBinEnd = overlayConfig.getOverlayValues().stream().anyMatch(bin -> bin.getBinEnd() == null);
-    if (anyMissingBinStart || anyMissingBinEnd) {
-      throw new ValidationException("All numeric bin ranges must have start and end.");
-    }
-    Map<Double, Double> binEdges = overlayConfig.getOverlayValues().stream()
-        .collect(Collectors.toMap(
-            bin -> Double.parseDouble(bin.getBinStart()),
-            bin -> Double.parseDouble(bin.getBinEnd())));
-    boolean first = true;
-    Double prevBinEnd = null;
-    for (Double binStart : binEdges.keySet()) {
-      if (first) {
-        first = false;
-      } else if (prevBinEnd > binStart) {
-        throw new ValidationException("Bin Ranges must not overlap");
-      }
-      prevBinEnd = binEdges.get(binStart);
-    }
-  }
-
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
 
@@ -179,16 +140,14 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
     int geoVarIndex  = indexOf.apply(spec.getGeoAggregateVariable());
     int latIndex     = indexOf.apply(spec.getLatitudeVariable());
     int lonIndex     = indexOf.apply(spec.getLongitudeVariable());
-    Optional<OverlayConfig> overlayConfig = Optional.ofNullable(spec.getOverlayConfig());
+    Optional<OverlaySpecification> overlayConfig = Optional.ofNullable(_overlaySpecification);
     Integer overlayIndex = overlayConfig
-        .map(OverlayConfig::getOverlayVariable)
+        .map(OverlaySpecification::getOverlayVariable)
         .map(indexOf)
         .orElse(null);
 
     // get map markers config
     String valueSpec = spec.getValueSpec().getValue();
-    Optional<OverlaySpecification> overlaySpecification = overlayConfig
-        .map(config -> new OverlaySpecification(config, getUtil()::getVariableType));
     GeolocationViewport viewport = GeolocationViewport.fromApiViewport(spec.getViewport());
 
     // loop through rows of data stream, aggregating stats into a map from aggregate value to stats object
@@ -205,7 +164,7 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
       
         double latitude = Double.parseDouble(row[latIndex]);
         double longitude = Double.parseDouble(row[lonIndex]);
-        String overlayValue = overlaySpecification
+        String overlayValue = overlayConfig
             .map(overlaySpec -> overlaySpec.recode(row[overlayIndex]))
             .orElse(null);
 
