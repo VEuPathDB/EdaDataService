@@ -1,6 +1,5 @@
 package org.veupathdb.service.eda.ds.plugin.pass;
 
-import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
@@ -40,13 +39,8 @@ public class LineplotPlugin extends AbstractEmptyComputePlugin<LineplotPostReque
   }
 
   @Override
-  protected Class<LineplotPostRequest> getVisualizationRequestClass() {
-    return LineplotPostRequest.class;
-  }
-
-  @Override
-  protected Class<LineplotSpec> getVisualizationSpecClass() {
-    return LineplotSpec.class;
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(LineplotPostRequest.class, LineplotSpec.class);
   }
   
   @Override
@@ -82,7 +76,7 @@ public class LineplotPlugin extends AbstractEmptyComputePlugin<LineplotPostReque
 
   @Override
   protected List<StreamSpec> getRequestedStreams(LineplotSpec pluginSpec) {
-    return ListBuilder.asList(
+    return List.of(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
         .addVar(pluginSpec.getYAxisVariable())
@@ -94,7 +88,7 @@ public class LineplotPlugin extends AbstractEmptyComputePlugin<LineplotPostReque
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PluginUtil util = getUtil();
     LineplotSpec spec = getPluginSpec();
-    Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
+    Map<String, VariableSpec> varMap = new HashMap<>();
     varMap.put("xAxis", spec.getXAxisVariable());
     varMap.put("yAxis", spec.getYAxisVariable());
     varMap.put("overlay", spec.getOverlayVariable());
@@ -136,12 +130,12 @@ public class LineplotPlugin extends AbstractEmptyComputePlugin<LineplotPostReque
           connection.voidEval("binWidth <- NULL");
         }
       } else {
-        String binWidth = "NULL";
-        if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
-          binWidth = binSpec.getValue() == null ? "NULL" : "as.numeric('" + binSpec.getValue() + "')";
-        } else {
-          binWidth = binSpec.getValue() == null ? "NULL" : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
-        }
+        String binWidth =
+            binSpec.getValue() == null
+            ? "NULL"
+            : xVarType.equals("NUMBER") || xVarType.equals("INTEGER")
+                ? "as.numeric('" + binSpec.getValue() + "')"
+                : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
         connection.voidEval("binWidth <- " + binWidth);
       }
       String cmd = "plot.data::lineplot(" + DEFAULT_SINGLE_STREAM_NAME + 

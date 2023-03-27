@@ -3,7 +3,6 @@ package org.veupathdb.service.eda.ds.plugin.sample;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.EncryptionUtil;
-import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.Timer;
 import org.gusdb.fgputil.Wrapper;
 import org.gusdb.fgputil.cache.ManagedMap;
@@ -13,10 +12,7 @@ import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.model.VariableSource;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.generated.model.RecordCountPostRequest;
-import org.veupathdb.service.eda.generated.model.RecordCountPostResponse;
-import org.veupathdb.service.eda.generated.model.RecordCountPostResponseImpl;
-import org.veupathdb.service.eda.generated.model.RecordCountSpec;
+import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,13 +43,8 @@ public class RecordCountPlugin extends AbstractEmptyComputePlugin<RecordCountPos
   }
 
   @Override
-  protected Class<RecordCountPostRequest> getVisualizationRequestClass() {
-    return RecordCountPostRequest.class;
-  }
-
-  @Override
-  protected Class<RecordCountSpec> getVisualizationSpecClass() {
-    return RecordCountSpec.class;
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(RecordCountPostRequest.class, RecordCountSpec.class);
   }
 
   @Override
@@ -73,7 +64,7 @@ public class RecordCountPlugin extends AbstractEmptyComputePlugin<RecordCountPos
     LOG.info("Did I find a cached response? " + (_cachedResponse != null));
 
     // only need one stream for the requested entity and no vars (IDs included automatically)
-    return _cachedResponse != null ? Collections.emptyList() : ListBuilder.asList(
+    return _cachedResponse != null ? Collections.emptyList() : List.of(
       new StreamSpec(pluginSpec.getEntityId(), pluginSpec.getEntityId())
         // add first var in entity to work around no-vars bug in subsetting service
         .addVar(getReferenceMetadata().getEntity(pluginSpec.getEntityId()).orElseThrow().stream()
@@ -88,14 +79,16 @@ public class RecordCountPlugin extends AbstractEmptyComputePlugin<RecordCountPos
       try {
         _cachedResponse = RESULT_CACHE.getValue(_cacheKey, key -> {
           Timer t = new Timer();
-          Wrapper<Integer> rowCount = new Wrapper<>(0);
+          long subsettingRowCount = getSubsetCount(_pluginSpec.getEntityId());
+          LOG.info("Retrieved record count from subsetting (" + subsettingRowCount + ") in " + t.getElapsedStringAndRestart());
+          Wrapper<Long> rowCount = new Wrapper<>(0L);
           new Scanner(dataStreams.get(getPluginSpec().getEntityId()))
               .useDelimiter("\n")
               .forEachRemaining(str -> rowCount.set(rowCount.get() + 1));
-          int recordCount = rowCount.get() - 1; // subtract 1 for header row
+          long recordCount = rowCount.get() - 1; // subtract 1 for header row
           RecordCountPostResponse value = new RecordCountPostResponseImpl();
-          value.setRecordCount(recordCount);
-          LOG.info("Calculated result to add to cache in " + t.getElapsedString());
+          value.setRecordCount((int)recordCount);
+          LOG.info("Calculated record count result to add to cache (" + recordCount + ") in " + t.getElapsedString());
           return value;
         });
       }

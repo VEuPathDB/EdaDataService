@@ -15,24 +15,8 @@ import java.util.Map;
 public class ExampleComputeVizPlugin extends AbstractPlugin<ExampleComputeVizPostRequest, ExampleComputeVizSpec, ExampleComputeConfig> {
 
   @Override
-  protected Class<ExampleComputeVizPostRequest> getVisualizationRequestClass() {
-    return ExampleComputeVizPostRequest.class;
-  }
-
-  @Override
-  protected Class<ExampleComputeConfig> getComputeConfigClass() {
-    return ExampleComputeConfig.class;
-  }
-
-  @Override
-  protected Class<ExampleComputeVizSpec> getVisualizationSpecClass() {
-    return ExampleComputeVizSpec.class;
-  }
-
-  @Override
-  protected boolean includeComputedVarsInStream() {
-    // this visualization uses a compute plugin that computes a variable (not just statistics)
-    return true;
+  protected ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(ExampleComputeVizPostRequest.class, ExampleComputeVizSpec.class, ExampleComputeConfig.class);
   }
 
   @Override

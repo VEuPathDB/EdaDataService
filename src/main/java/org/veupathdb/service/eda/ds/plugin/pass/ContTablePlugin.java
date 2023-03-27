@@ -1,6 +1,5 @@
 package org.veupathdb.service.eda.ds.plugin.pass;
 
-import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
@@ -8,9 +7,7 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.generated.model.MosaicPostRequest;
-import org.veupathdb.service.eda.generated.model.MosaicSpec;
-import org.veupathdb.service.eda.generated.model.VariableSpec;
+import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,15 +36,10 @@ public class ContTablePlugin extends AbstractEmptyComputePlugin<MosaicPostReques
   public List<String> getProjects() {
     return List.of(CLINEPI_PROJECT);
   }
-  
-  @Override
-  protected Class<MosaicSpec> getVisualizationSpecClass() {
-    return MosaicSpec.class;
-  }
 
   @Override
-  protected Class<MosaicPostRequest> getVisualizationRequestClass() {
-    return MosaicPostRequest.class;
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(MosaicPostRequest.class, MosaicSpec.class);
   }
 
   @Override
@@ -80,7 +72,7 @@ public class ContTablePlugin extends AbstractEmptyComputePlugin<MosaicPostReques
 
   @Override
   protected List<StreamSpec> getRequestedStreams(MosaicSpec pluginSpec) {
-    return ListBuilder.asList(
+    return List.of(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
         .addVar(pluginSpec.getYAxisVariable())
@@ -91,7 +83,7 @@ public class ContTablePlugin extends AbstractEmptyComputePlugin<MosaicPostReques
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PluginUtil util = getUtil();
     MosaicSpec spec = getPluginSpec();
-    Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
+    Map<String, VariableSpec> varMap = new HashMap<>();
     varMap.put("xAxis", spec.getXAxisVariable());
     varMap.put("yAxis", spec.getYAxisVariable());
     varMap.put("facet1", util.getVariableSpecFromList(spec.getFacetVariable(), 0));

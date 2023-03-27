@@ -1,8 +1,5 @@
 package org.veupathdb.service.eda.ds.plugin.pass;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
@@ -25,8 +22,6 @@ import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.CLINEPI_PROJECT
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.MICROBIOME_PROJECT;
 
 public class HistogramPlugin extends AbstractEmptyComputePlugin<HistogramPostRequest, HistogramSpec> {
-  
-  private static final Logger LOG = LogManager.getLogger(HistogramPlugin.class);
 
   @Override
   public String getDisplayName() {
@@ -44,13 +39,8 @@ public class HistogramPlugin extends AbstractEmptyComputePlugin<HistogramPostReq
   }
 
   @Override
-  protected Class<HistogramPostRequest> getVisualizationRequestClass() {
-    return HistogramPostRequest.class;
-  }
-
-  @Override
-  protected Class<HistogramSpec> getVisualizationSpecClass() {
-    return HistogramSpec.class;
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(HistogramPostRequest.class, HistogramSpec.class);
   }
   
   @Override
@@ -87,7 +77,7 @@ public class HistogramPlugin extends AbstractEmptyComputePlugin<HistogramPostReq
 
   @Override
   protected List<StreamSpec> getRequestedStreams(HistogramSpec pluginSpec) {
-    return ListBuilder.asList(
+    return List.of(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
         .addVar(pluginSpec.getOverlayVariable())
@@ -98,7 +88,7 @@ public class HistogramPlugin extends AbstractEmptyComputePlugin<HistogramPostReq
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PluginUtil util = getUtil();
     HistogramSpec spec = getPluginSpec();
-    Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
+    Map<String, VariableSpec> varMap = new HashMap<>();
     varMap.put("xAxis", spec.getXAxisVariable());
     varMap.put("overlay", spec.getOverlayVariable());
     varMap.put("facet1", util.getVariableSpecFromList(spec.getFacetVariable(), 0));
@@ -140,12 +130,12 @@ public class HistogramPlugin extends AbstractEmptyComputePlugin<HistogramPostReq
           connection.voidEval("binWidth <- NULL");
         }
       } else {
-        String binWidth = "NULL";
-        if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
-          binWidth = binSpec.getValue() == null ? "NULL" : "as.numeric('" + binSpec.getValue() + "')";
-        } else {
-          binWidth = binSpec.getValue() == null ? "NULL" : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
-        }
+        String binWidth =
+            binSpec.getValue() == null
+            ? "NULL"
+            : xVarType.equals("NUMBER") || xVarType.equals("INTEGER")
+                ? "as.numeric('" + binSpec.getValue() + "')"
+                : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
         connection.voidEval("binWidth <- " + binWidth);
       }
 
