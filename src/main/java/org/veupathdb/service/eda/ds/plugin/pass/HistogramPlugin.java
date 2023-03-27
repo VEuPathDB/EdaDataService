@@ -143,7 +143,7 @@ public class HistogramPlugin extends AbstractEmptyComputePlugin<HistogramPostReq
           "plot.data::histogram(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, binWidth, '" +
                spec.getValueSpec().getValue() + "', '" +
                binReportValue + "', '" +
-               barMode + "', viewport, '" +
+               barMode + "', viewport, NULL, TRUE, TRUE, '" +
                deprecatedShowMissingness + "')";
       streamResult(connection, cmd, out);
     });

@@ -145,7 +145,7 @@ public class LineplotPlugin extends AbstractEmptyComputePlugin<LineplotPostReque
                                         ", viewport" + 
                                         ", " + numeratorValues +
                                         ", " + denominatorValues + 
-                                        ", '" + deprecatedShowMissingness + "')";                          
+                                        ", NULL, TRUE, TRUE, '" + deprecatedShowMissingness + "')";                          
       streamResult(connection, cmd, out);
     }); 
   }

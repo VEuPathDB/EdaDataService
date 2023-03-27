@@ -127,7 +127,7 @@ public class BoxplotPlugin extends AbstractEmptyComputePlugin<BoxplotPostRequest
           "plot.data::box(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, '" +
               showPoints + "', " +
               showMean + ", " +
-              computeStats + ", '" +
+              computeStats + ", NULL, TRUE, TRUE, '" +
               deprecatedShowMissingness + "')";
       streamResult(connection, cmd, out);
     });

@@ -98,7 +98,7 @@ public class MapMarkersOverlayPlugin extends AbstractEmptyComputePlugin<MapMarke
 
       String cmd =
           "plot.data::mapMarkers(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, " +
-              valueSpec + ", viewport, NULL '" +
+              valueSpec + ", viewport, NULL, NULL, TRUE, TRUE, '" +
               deprecatedShowMissingness + "')";
       streamResult(connection, cmd, out);
     });

@@ -150,7 +150,7 @@ public class ScatterplotPlugin extends AbstractEmptyComputePlugin<ScatterplotPos
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String cmd = 
           "plot.data::scattergl(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, '" + 
-              valueSpec + "', '" + 
+              valueSpec + "', NULL, TRUE, TRUE, '" + 
               deprecatedShowMissingness + "')";
       streamResult(connection, cmd, out);
     }); 

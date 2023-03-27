@@ -188,7 +188,7 @@ public class BarplotPlugin extends AbstractEmptyComputePlugin<BarplotPostRequest
         String cmd =
             "plot.data::bar(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, '" +
                 spec.getValueSpec().getValue() + "', '" +
-                barMode + "', '" +
+                barMode + "', NULL, TRUE, TRUE, '" +
                 deprecatedShowMissingness + "')";
         streamResult(connection, cmd, out);
       });
