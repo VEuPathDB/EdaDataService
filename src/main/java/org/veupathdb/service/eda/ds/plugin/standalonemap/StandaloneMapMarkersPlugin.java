@@ -9,9 +9,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.gusdb.fgputil.DelimitedDataParser;
-import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.geo.GeographyUtil.GeographicPoint;
 import org.gusdb.fgputil.geo.LatLonAverager;
 import org.gusdb.fgputil.json.JsonUtil;
@@ -75,7 +75,7 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
 
   @Override
   protected List<StreamSpec> getRequestedStreams(StandaloneMapMarkersSpec pluginSpec) {
-    return ListBuilder.asList(
+    return List.of(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getGeoAggregateVariable())
         .addVar(pluginSpec.getLatitudeVariable())
@@ -127,7 +127,7 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
 
   protected void validateOverlayConfig(OverlayConfig overlayConfig) throws ValidationException {
     switch (overlayConfig.getOverlayType()) {
-      case CONTINUOUS -> validateContinousBinRanges((ContinousOverlayConfig) overlayConfig);
+      case CONTINUOUS -> validateContinuousBinRanges((ContinousOverlayConfig) overlayConfig);
       case CATEGORICAL -> validateCategoricalOverlayValues((CategoricalOverlayConfig) overlayConfig);
     }
   }
@@ -143,7 +143,7 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
     }
   }
 
-  private void validateContinousBinRanges(ContinousOverlayConfig overlayConfig) throws ValidationException {
+  private void validateContinuousBinRanges(ContinousOverlayConfig overlayConfig) throws ValidationException {
     if (!getUtil().getVariableDataShape(overlayConfig.getOverlayVariable()).equalsIgnoreCase(APIVariableDataShape.CONTINUOUS.toString())) {
       throw new ValidationException("Input overlay variable %s is %s, but provided overlay configuration is for a conginuous variable"
           .formatted(overlayConfig.getOverlayVariable().getVariableId(), getUtil().getVariableDataShape(overlayConfig.getOverlayVariable())));
@@ -152,6 +152,20 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
     boolean anyMissingBinEnd = overlayConfig.getOverlayValues().stream().anyMatch(bin -> bin.getEnd() == null);
     if (anyMissingBinStart || anyMissingBinEnd) {
       throw new ValidationException("All numeric bin ranges must have start and end.");
+    }
+    Map<Double, Double> binEdges = overlayConfig.getOverlayValues().stream()
+        .collect(Collectors.toMap(
+            bin -> Double.parseDouble(bin.getStart()),
+            bin -> Double.parseDouble(bin.getEnd())));
+    boolean first = true;
+    Double prevBinEnd = null;
+    for (Double binStart : binEdges.keySet()) {
+      if (first) {
+        first = false;
+      } else if (prevBinEnd > binStart) {
+        throw new ValidationException("Bin Ranges must not overlap");
+      }
+      prevBinEnd = binEdges.get(binStart);
     }
   }
 
@@ -176,9 +190,9 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
         .orElse(null);
 
     // get map markers config
-    // TODO update types somehow/ somewhere, need to be able to have numeric or date bin start and ends
     String valueSpec = spec.getValueSpec().getValue();
-    Optional<OverlaySpecification> overlaySpecification = overlayConfig.map(config -> new OverlaySpecification(config, getUtil()::getVariableType));
+    Optional<OverlaySpecification> overlaySpecification = overlayConfig
+        .map(config -> new OverlaySpecification(config, getUtil()::getVariableType));
     GeolocationViewport viewport = GeolocationViewport.fromApiViewport(spec.getViewport());
 
     // loop through rows of data stream, aggregating stats into a map from aggregate value to stats object

@@ -49,11 +49,11 @@ public class OverlaySpecification {
   }
 
   private String recodeNumeric(double varValue) {
-    // Binary search
+    // Binary search?
     return binRanges.stream()
-        .filter(bin -> bin.getStart() < varValue && bin.getEnd() > varValue)
+        .filter(bin -> bin.getStart() <= varValue && bin.getEnd() > varValue)
         .findFirst()
-        .orElseThrow()
+        .orElseThrow(() -> new IllegalArgumentException("The variable value " + varValue + " is not in any specified bin range."))
         .getLabel();
   }
 }
