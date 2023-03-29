@@ -54,7 +54,7 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
       .pattern()
         .element("xAxisVariable")
           .types(APIVariableType.NUMBER, APIVariableType.DATE, APIVariableType.INTEGER)
-          .description("Variable must be a number or date and be the same or a child entity as the variable the map markers are painted with.")
+          .description("Variable must be a number or date and be the same or a child entity as the variable the map markers are painted with, if any.")
         .element("overlayVariable")
           .required(false)
       .done();

@@ -33,7 +33,7 @@ public class FloatingContTablePlugin extends AbstractEmptyComputePlugin<Floating
 
   @Override
   public String getDescription() {
-    return "Visualize the frequency distribution and chi-squared and fisher's exact test results for two categorical variables";
+    return "Visualize the frequency distribution and associated statistics for two categorical variables";
   }
 
   @Override

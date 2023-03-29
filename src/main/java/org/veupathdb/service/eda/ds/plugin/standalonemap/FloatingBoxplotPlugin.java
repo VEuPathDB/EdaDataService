@@ -55,7 +55,7 @@ public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBo
           .description("Variable must be a number and be of the same or a child entity as the X-axis variable.")
         .element("xAxisVariable")
           .maxValues(10)
-          .description("Variable must have 10 or fewer unique values and be the same or a child entity as the variable the map markers are painted with.")
+          .description("Variable must have 10 or fewer unique values and be the same or a child entity as the variable the map markers are painted with, if any.")
         .element("overlayVariable")
           .required(false)
       .done();

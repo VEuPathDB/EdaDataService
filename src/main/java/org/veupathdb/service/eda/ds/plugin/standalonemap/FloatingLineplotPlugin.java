@@ -53,7 +53,7 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
           .description("Variable must be a number and be of the same or a child entity as the X-axis variable.")
         .element("xAxisVariable")
           .shapes(APIVariableDataShape.ORDINAL, APIVariableDataShape.CONTINUOUS)
-          .description("Variable must be ordinal, a number, or a date and be the same or a child entity as the variable the map markers are painted with.")
+          .description("Variable must be ordinal, a number, or a date and be the same or a child entity as the variable the map markers are painted with, if any.")
         .element("overlayVariable")
           .required(false)
       .done();
