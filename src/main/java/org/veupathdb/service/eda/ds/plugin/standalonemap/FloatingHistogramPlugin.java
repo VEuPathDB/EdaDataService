@@ -99,9 +99,10 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PluginUtil util = getUtil();
     FloatingHistogramSpec spec = getPluginSpec();
+    VariableSpec overlayVariable = _overlaySpecification != null ? _overlaySpecification.getOverlayVariable() : null;
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
     varMap.put("xAxis", spec.getXAxisVariable());
-    varMap.put("overlay", _overlaySpecification.getOverlayVariable());
+    varMap.put("overlay", overlayVariable);
     String barMode = spec.getBarMode().getValue();
     String xVar = util.toColNameOrEmpty(spec.getXAxisVariable());
     String xVarType = util.getVariableType(spec.getXAxisVariable());
@@ -110,7 +111,7 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
           spec.getXAxisVariable(),
-          _overlaySpecification.getOverlayVariable()));
+          overlayVariable));
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
      
       String viewportRString = getViewportAsRString(spec.getViewport(), xVarType);
@@ -151,6 +152,7 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
                binReportValue + "', '" +
                barMode + "', viewport=viewport, sampleSizes=FALSE, completeCases=FALSE, " +
                "overlayValues=" + overlayValues + ", 'noVariables')";
+               System.err.println(cmd);
       streamResult(connection, cmd, out);
     });
   }

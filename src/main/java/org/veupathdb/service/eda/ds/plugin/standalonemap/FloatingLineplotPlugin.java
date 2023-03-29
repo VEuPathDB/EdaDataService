@@ -97,10 +97,11 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PluginUtil util = getUtil();
     FloatingLineplotSpec spec = getPluginSpec();
+    VariableSpec overlayVariable = _overlaySpecification != null ? _overlaySpecification.getOverlayVariable() : null;
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
     varMap.put("xAxis", spec.getXAxisVariable());
     varMap.put("yAxis", spec.getYAxisVariable());
-    varMap.put("overlay", _overlaySpecification.getOverlayVariable());
+    varMap.put("overlay", overlayVariable);
     String errorBars = spec.getErrorBars() != null ? spec.getErrorBars().getValue() : "FALSE";
     String valueSpec = spec.getValueSpec().getValue();
     String xVar = util.toColNameOrEmpty(spec.getXAxisVariable());
@@ -113,7 +114,7 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
           spec.getXAxisVariable(),
           spec.getYAxisVariable(),
-          _overlaySpecification.getOverlayVariable()));
+          overlayVariable));
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String viewportRString = getViewportAsRString(spec.getViewport(), xVarType);
       connection.voidEval(viewportRString);

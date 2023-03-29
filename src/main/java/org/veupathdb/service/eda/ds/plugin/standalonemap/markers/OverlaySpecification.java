@@ -9,6 +9,7 @@ import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -55,7 +56,7 @@ public class OverlaySpecification {
 
     boolean first = true;
     for (int i = 0; i < labels.size(); i++) {
-      String rBin = "veupathUtils::Bin(binLabel=" + labels.get(i);
+      String rBin = "veupathUtils::Bin(binLabel='" + labels.get(i) + "'";
       if (binRanges != null) {
         rBin += ",binStart=" + String.valueOf(binRanges.get(i).getStart()) + 
                 ",binEnd=" + String.valueOf(binRanges.get(i).getEnd());
@@ -64,6 +65,7 @@ public class OverlaySpecification {
 
       if (first) {
         rBinList += rBin;
+        first = false;
       } else {
         rBinList += "," + rBin;
       }
@@ -96,8 +98,8 @@ public class OverlaySpecification {
 
   private void validateContinuousBinRanges(ContinousOverlayConfig overlayConfig, Function<VariableSpec, String> varSpecFinder) {
     final String dataShape = varSpecFinder.apply(overlayConfig.getOverlayVariable());
-    if (dataShape.equalsIgnoreCase(APIVariableDataShape.CONTINUOUS.toString())) {
-      throw new IllegalArgumentException("Input overlay variable %s is %s, but provided overlay configuration is for a conginuous variable"
+    if (!dataShape.equalsIgnoreCase(APIVariableDataShape.CONTINUOUS.toString())) {
+      throw new IllegalArgumentException("Input overlay variable %s is %s, but provided overlay configuration is for a continuous variable"
           .formatted(overlayConfig.getOverlayVariable().getVariableId(), dataShape));
     }
     boolean anyMissingBinStart = overlayConfig.getOverlayValues().stream().anyMatch(bin -> bin.getBinStart() == null);
@@ -108,7 +110,11 @@ public class OverlaySpecification {
     Map<Double, Double> binEdges = overlayConfig.getOverlayValues().stream()
         .collect(Collectors.toMap(
             bin -> Double.parseDouble(bin.getBinStart()),
-            bin -> Double.parseDouble(bin.getBinEnd())));
+            bin -> Double.parseDouble(bin.getBinEnd()),
+            (u, v) -> {
+               throw new IllegalStateException(String.format("Duplicate key %s", u));
+            }, 
+            LinkedHashMap::new));
     boolean first = true;
     Double prevBinEnd = null;
     for (Double binStart : binEdges.keySet()) {
@@ -118,6 +124,7 @@ public class OverlaySpecification {
         throw new IllegalArgumentException("Bin Ranges must not overlap");
       }
       prevBinEnd = binEdges.get(binStart);
+      System.err.println(prevBinEnd + " ooooo " + binStart);
     }
   }
 

@@ -106,10 +106,11 @@ public class FloatingScatterplotPlugin extends AbstractEmptyComputePlugin<Floati
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PluginUtil util = getUtil();
     FloatingScatterplotSpec spec = getPluginSpec();
+    VariableSpec overlayVariable = _overlaySpecification != null ? _overlaySpecification.getOverlayVariable() : null;
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
     varMap.put("xAxis", spec.getXAxisVariable());
     varMap.put("yAxis", spec.getYAxisVariable());
-    varMap.put("overlay", _overlaySpecification.getOverlayVariable());
+    varMap.put("overlay", overlayVariable);
     String valueSpec = spec.getValueSpec().getValue();
     String yVarType = util.getVariableType(spec.getYAxisVariable());
     String overlayValues = _overlaySpecification == null ? "NULL" : _overlaySpecification.getRBinListAsString();
@@ -131,7 +132,7 @@ public class FloatingScatterplotPlugin extends AbstractEmptyComputePlugin<Floati
         conn.voidEval(util.getVoidEvalFreadCommand(name,
           spec.getXAxisVariable(),
           spec.getYAxisVariable(),
-          _overlaySpecification.getOverlayVariable()))
+          overlayVariable))
       );
 
     useRConnectionWithProcessedRemoteFiles(Resources.RSERVE_URL, filesProcessor, connection -> {

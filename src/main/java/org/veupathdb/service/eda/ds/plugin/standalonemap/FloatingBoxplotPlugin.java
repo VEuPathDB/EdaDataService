@@ -99,10 +99,11 @@ public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBo
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PluginUtil util = getUtil();
     FloatingBoxplotSpec spec = getPluginSpec();
+    VariableSpec overlayVariable = _overlaySpecification != null ? _overlaySpecification.getOverlayVariable() : null;
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
     varMap.put("xAxis", spec.getXAxisVariable());
     varMap.put("yAxis", spec.getYAxisVariable());
-    varMap.put("overlay", _overlaySpecification.getOverlayVariable());
+    varMap.put("overlay", overlayVariable);
     
     List<String> nonStrataVarColNames = new ArrayList<String>();
     nonStrataVarColNames.add(util.toColNameOrEmpty(spec.getXAxisVariable()));
@@ -117,7 +118,7 @@ public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBo
         conn.voidEval(util.getVoidEvalFreadCommand(name,
           spec.getXAxisVariable(),
           spec.getYAxisVariable(),
-          _overlaySpecification.getOverlayVariable()))
+          overlayVariable))
       );
 
     useRConnectionWithProcessedRemoteFiles(Resources.RSERVE_URL, filesProcessor, connection -> {

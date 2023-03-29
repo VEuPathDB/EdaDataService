@@ -98,16 +98,17 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
     FloatingBarplotSpec spec = getPluginSpec();
     PluginUtil util = getUtil();
     String barMode = spec.getBarMode().getValue();
+    VariableSpec overlayVariable = _overlaySpecification != null ? _overlaySpecification.getOverlayVariable() : null;
     String overlayValues = _overlaySpecification == null ? "NULL" : _overlaySpecification.getRBinListAsString();
 
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
     varMap.put("xAxis", spec.getXAxisVariable());
-    varMap.put("overlay", _overlaySpecification.getOverlayVariable());
+    varMap.put("overlay", overlayVariable);
       
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
           spec.getXAxisVariable(),
-          _overlaySpecification.getOverlayVariable()));
+          overlayVariable));
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String cmd =
           "plot.data::bar(data=" + DEFAULT_SINGLE_STREAM_NAME + ", variables=variables, " +
