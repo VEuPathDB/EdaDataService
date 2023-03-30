@@ -1,0 +1,35 @@
+#%RAML 1.0 Library
+
+types:
+  # Type name determines the name of the Java class that will be generated.
+
+  FloatingMosaicPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: FloatingMosaicSpec
+
+  FloatingMosaicSpec:
+    additionalProperties: false
+    properties:
+      outputEntityId:
+        type: string
+      xAxisVariable:
+        type: VariableSpec
+      yAxisVariable:
+        type: VariableSpec
+
+  FloatingMosaic:
+    additionalProperties: false
+    properties:
+      data:
+        type: MosaicData[]
+      variables: VariableMapping[]
+
+  FloatingContTablePostResponse:
+    additionalProperties: false
+    properties:
+      mosaic:
+        type: FloatingMosaic
+      statsTable:
+        type: TwoByTwoStatsTable[]
+        required: false

@@ -46,7 +46,8 @@ public class MapMarkersOverlayPlugin extends AbstractEmptyComputePlugin<MapMarke
       .dependencyOrder(List.of("xAxisVariable"), List.of("geoAggregateVariable"))
       .pattern()
         .element("xAxisVariable")
-          .description("Categorical variables with more than 8 values will assign the top 7 values by count to their own categories and assign the additonal values into an 'other' category. Continuous variables will be binned into by default 8 categories.")
+          .maxValues(8)
+          .description("Variable must have 8 or fewer unique values.")
         .element("geoAggregateVariable")
           .description("Variable(s) must be of the same or a parent entity of the main variable.")
       .done();
@@ -94,40 +95,10 @@ public class MapMarkersOverlayPlugin extends AbstractEmptyComputePlugin<MapMarke
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String viewportRString = getViewportAsRString(spec.getViewport());
       connection.voidEval(viewportRString);
-      String binReportValue = "NULL";
-      connection.voidEval("binRange <- NULL");
-      if (xVarType.equals("STRING")) {
-        // maybe i should have a warning here if they pass a BinSpec?
-        connection.voidEval("binWidth <- NULL");
-      } else {
-        BinSpec binSpec = spec.getBinSpec();
-        connection.voidEval("xVals <- " + DEFAULT_SINGLE_STREAM_NAME + "[[veupathUtils::findColNamesFromPlotRef(variables, 'xAxis')]]");
-        connection.voidEval("xVals <- xVals[complete.cases(xVals)]");
-        connection.voidEval("binWidth <- plot.data::numBinsToBinWidth(xVals, 8)");
-        binReportValue = "'binWidth'";
-        if (binSpec != null) {
-          validateBinSpec(binSpec, xVarType);
-          binReportValue = binSpec.getType() != null ? singleQuote(binSpec.getType().getValue()) : binReportValue;
-          String binWidth = "NULL";
-          String binRangeRString = getBinRangeAsRString(binSpec.getRange());
-          connection.voidEval(binRangeRString);
-          connection.voidEval("if (is.null(binRange)) { range <- plot.data::findViewport(xVals, " + singleQuote(xVarType) + ") } else { range <- plot.data::validateBinRange(xVals, binRange," + singleQuote(xVarType) + ", FALSE) }");
-          connection.voidEval("print(range)");
-          connection.voidEval("xVP <- plot.data::adjustToViewport(xVals, range)");
-          connection.voidEval("binWidth <- plot.data::numBinsToBinWidth(xVP, 8)");
-          if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
-            binWidth = binSpec.getValue() == null ? binWidth : "as.numeric('" + binSpec.getValue() + "')";
-          } else {
-            binWidth = binSpec.getValue() == null || binSpec.getUnits() == null ? binWidth : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
-          }
-          connection.voidEval("binWidth <- " + binWidth);
-        }
-      }
 
       String cmd =
-          "plot.data::mapMarkers(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, binWidth, " +
-              valueSpec + ", " +
-              binReportValue + ", binRange, viewport, '" +
+          "plot.data::mapMarkers(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, " +
+              valueSpec + ", viewport, NULL, NULL, TRUE, TRUE, '" +
               deprecatedShowMissingness + "')";
       streamResult(connection, cmd, out);
     });

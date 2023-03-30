@@ -119,7 +119,7 @@ public class AlphaDivBoxplotPlugin extends AbstractPlugin<AlphaDivBoxplotPostReq
       String command = "plot.data::box(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, '" +
           spec.getPoints().getValue() + "', " +
           showMean + ", " + 
-          computeStats + ", '" + 
+          computeStats + ", NULL, TRUE, TRUE, '" + 
           deprecatedShowMissingness +"')";
       RServeClient.streamResult(connection, command, out);
     });

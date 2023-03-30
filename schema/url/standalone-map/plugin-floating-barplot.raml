@@ -1,0 +1,37 @@
+#%RAML 1.0 Library
+
+types:
+  # Type name determines the name of the Java class that will be generated.
+
+  FloatingBarplotPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: FloatingBarplotSpec
+  
+  FloatingBarplotSpec:
+    additionalProperties: false
+    properties:
+      outputEntityId:
+        type: string
+      barMode:
+        type: string
+        enum: ['group', 'stack']
+      valueSpec:
+        type: ValueSpec
+      xAxisVariable: 
+        type: VariableSpec
+      overlayConfig?:
+        type: OverlayConfig
+
+  FloatingBarplot:
+    additionalProperties: false
+    properties:
+      data:
+        type: BarplotData[]
+      variables: VariableMapping[]
+
+  FloatingBarplotPostResponse:
+    additionalProperties: false
+    properties:
+      barplot:
+        type: FloatingBarplot

@@ -1,0 +1,83 @@
+#%RAML 1.0 Library
+
+types:
+
+  StandaloneMapMarkersPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: StandaloneMapMarkersSpec
+
+  StandaloneMapMarkersSpec:
+    additionalProperties: false
+    properties:
+      outputEntityId: 
+        type: string
+      geoAggregateVariable:
+        type: VariableSpec
+      longitudeVariable:
+        type: VariableSpec
+      latitudeVariable:
+        type: VariableSpec
+      overlayConfig?:
+        type: OverlayConfig # categoricals can just ignore bin start and end
+      # if we choose to support things like means and medians for cont vars this may need to be a custom enum
+      valueSpec:
+        type: ValueSpec
+      viewport:
+        type: GeolocationViewport
+
+  StandaloneMapMarkersPostResponse:
+    additionalProperties: false
+    properties:
+      mapElements: StandaloneMapElementInfo[]
+
+  OverlayType:
+    type: string
+    enum: ["continuous", "categorical"]
+
+  OverlayConfig:
+    additionalProperties: false
+    discriminator: overlayType
+    properties:
+      overlayType:
+        type: OverlayType
+      overlayVariable:
+        type: VariableSpec
+
+  ContinousOverlayConfig:
+    type: OverlayConfig
+    additionalProperties: false
+    discriminatorValue: continuous
+    properties:
+      overlayValues:
+        type: BinRange[]
+
+  CategoricalOverlayConfig:
+    type: OverlayConfig
+    discriminatorValue: categorical
+    additionalProperties: false
+    properties:
+      overlayValues:
+        type: string[]
+
+  StandaloneMapElementInfo:
+    additionalProperties: false
+    properties:
+      geoAggregateValue:
+        type: string
+      entityCount:
+        type: number
+      overlayValues:
+        type: BinRangeWithValue[]
+      avgLat:
+        type: number
+      avgLon:
+        type: number
+      minLat:
+        type: number
+      minLon:
+        type: number
+      maxLat:
+        type: number
+      maxLon:
+        type: number

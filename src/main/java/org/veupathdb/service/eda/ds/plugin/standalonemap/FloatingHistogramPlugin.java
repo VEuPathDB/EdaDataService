@@ -1,5 +1,8 @@
-package org.veupathdb.service.eda.ds.plugin.pass;
+package org.veupathdb.service.eda.ds.plugin.standalonemap;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
@@ -7,6 +10,8 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
+import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.OverlaySpecification;
 import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
@@ -15,13 +20,17 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
-import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.CLINEPI_PROJECT;
-import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.MICROBIOME_PROJECT;
+import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
-public class HistogramPlugin extends AbstractEmptyComputePlugin<HistogramPostRequest, HistogramSpec> {
+public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<FloatingHistogramPostRequest, FloatingHistogramSpec> {
+  private OverlaySpecification _overlaySpecification = null;
+  
+  private static final Logger LOG = LogManager.getLogger(FloatingHistogramPlugin.class);
 
   @Override
   public String getDisplayName() {
@@ -35,76 +44,74 @@ public class HistogramPlugin extends AbstractEmptyComputePlugin<HistogramPostReq
 
   @Override
   public List<String> getProjects() {
-    return List.of(CLINEPI_PROJECT, MICROBIOME_PROJECT);
+    return List.of(VECTORBASE_PROJECT);
   }
 
   @Override
-  protected ClassGroup getTypeParameterClasses() {
-    return new EmptyComputeClassGroup(HistogramPostRequest.class, HistogramSpec.class);
-  }
-  
-  @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder(List.of("xAxisVariable"), List.of("overlayVariable", "facetVariable"))
+      .dependencyOrder(List.of("xAxisVariable"), List.of("overlayVariable"))
       .pattern()
         .element("xAxisVariable")
           .types(APIVariableType.NUMBER, APIVariableType.DATE, APIVariableType.INTEGER)
-          .description("Variable must be a number or date.")
+          .description("Variable must be a number or date and be the same or a child entity as the variable the map markers are painted with, if any.")
         .element("overlayVariable")
           .required(false)
-          .maxValues(8)
-          .description("Variable must have 8 or fewer unique values and be of the same or a parent entity as the X-axis variable.")
-        .element("facetVariable")
-          .required(false)
-          .maxVars(2)
-          .maxValues(10)
-          .description("Variable(s) must have 10 or fewer unique values and be of the same or a parent entity as the Overlay variable.")
       .done();
   }
-  
+
   @Override
-  protected void validateVisualizationSpec(HistogramSpec pluginSpec) throws ValidationException {
+  protected AbstractPlugin<FloatingHistogramPostRequest, FloatingHistogramSpec, Void>.ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(FloatingHistogramPostRequest.class, FloatingHistogramSpec.class, Void.class);
+  }
+
+  @Override
+  protected void validateVisualizationSpec(FloatingHistogramSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
       .var("xAxisVariable", pluginSpec.getXAxisVariable())
-      .var("overlayVariable", pluginSpec.getOverlayVariable())
-      .var("facetVariable", pluginSpec.getFacetVariable()));
+      .var("overlayVariable", Optional.ofNullable(pluginSpec.getOverlayConfig())
+          .map(OverlayConfig::getOverlayVariable)
+          .orElse(null)));
+    if (pluginSpec.getOverlayConfig() != null) {
+      try {
+        _overlaySpecification = new OverlaySpecification(pluginSpec.getOverlayConfig(), getUtil()::getVariableType, getUtil()::getVariableDataShape);
+      } catch (IllegalArgumentException e) {
+        throw new ValidationException(e.getMessage());
+      }
+    }
     if (pluginSpec.getBarMode() == null) {
       throw new ValidationException("Property 'barMode' is required.");
     }
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(HistogramSpec pluginSpec) {
-    return List.of(
+  protected List<StreamSpec> getRequestedStreams(FloatingHistogramSpec pluginSpec) {
+    return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
-        .addVar(pluginSpec.getOverlayVariable())
-        .addVars(pluginSpec.getFacetVariable()));
+        .addVar(Optional.ofNullable(pluginSpec.getOverlayConfig())
+            .map(OverlayConfig::getOverlayVariable)
+            .orElse(null)));
   }
   
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PluginUtil util = getUtil();
-    HistogramSpec spec = getPluginSpec();
-    Map<String, VariableSpec> varMap = new HashMap<>();
+    FloatingHistogramSpec spec = getPluginSpec();
+    VariableSpec overlayVariable = _overlaySpecification != null ? _overlaySpecification.getOverlayVariable() : null;
+    Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
     varMap.put("xAxis", spec.getXAxisVariable());
-    varMap.put("overlay", spec.getOverlayVariable());
-    varMap.put("facet1", util.getVariableSpecFromList(spec.getFacetVariable(), 0));
-    varMap.put("facet2", util.getVariableSpecFromList(spec.getFacetVariable(), 1));
-    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
-    String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
+    varMap.put("overlay", overlayVariable);
     String barMode = spec.getBarMode().getValue();
     String xVar = util.toColNameOrEmpty(spec.getXAxisVariable());
     String xVarType = util.getVariableType(spec.getXAxisVariable());
+    String overlayValues = _overlaySpecification == null ? "NULL" : _overlaySpecification.getRBinListAsString();
 
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
           spec.getXAxisVariable(),
-          spec.getOverlayVariable(),
-          util.getVariableSpecFromList(spec.getFacetVariable(), 0),
-          util.getVariableSpecFromList(spec.getFacetVariable(), 1)));
+          overlayVariable));
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
      
       String viewportRString = getViewportAsRString(spec.getViewport(), xVarType);
@@ -130,12 +137,12 @@ public class HistogramPlugin extends AbstractEmptyComputePlugin<HistogramPostReq
           connection.voidEval("binWidth <- NULL");
         }
       } else {
-        String binWidth =
-            binSpec.getValue() == null
-            ? "NULL"
-            : xVarType.equals("NUMBER") || xVarType.equals("INTEGER")
-                ? "as.numeric('" + binSpec.getValue() + "')"
-                : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
+        String binWidth = "NULL";
+        if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
+          binWidth = binSpec.getValue() == null ? "NULL" : "as.numeric('" + binSpec.getValue() + "')";
+        } else {
+          binWidth = binSpec.getValue() == null ? "NULL" : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
+        }
         connection.voidEval("binWidth <- " + binWidth);
       }
 
@@ -143,8 +150,9 @@ public class HistogramPlugin extends AbstractEmptyComputePlugin<HistogramPostReq
           "plot.data::histogram(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, binWidth, '" +
                spec.getValueSpec().getValue() + "', '" +
                binReportValue + "', '" +
-               barMode + "', viewport, NULL, TRUE, TRUE, '" +
-               deprecatedShowMissingness + "')";
+               barMode + "', viewport=viewport, sampleSizes=FALSE, completeCases=FALSE, " +
+               "overlayValues=" + overlayValues + ", 'noVariables')";
+               System.err.println(cmd);
       streamResult(connection, cmd, out);
     });
   }

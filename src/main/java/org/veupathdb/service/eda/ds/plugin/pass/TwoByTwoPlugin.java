@@ -105,7 +105,7 @@ public class TwoByTwoPlugin extends AbstractEmptyComputePlugin<TwoByTwoPostReque
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String cmd = "plot.data::mosaic(data=" + DEFAULT_SINGLE_STREAM_NAME + ", variables=variables, statistic='all', columnReferenceValue=" + 
                                           colRefValue + ", rowReferenceValue=" + 
-                                          rowRefValue + ",'" + 
+                                          rowRefValue + ", NULL, TRUE, TRUE, '" + 
                                           deprecatedShowMissingness + "')";
       streamResult(connection, cmd, out);
     });

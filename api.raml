@@ -46,6 +46,93 @@ securitySchemes:
           application/json:
             type: lib.AppsGetResponse
 
+  /standalone-map/visualizations:
+    displayName: Available visualizations for the Standalone Map application
+
+    /map-markers:
+      post:
+        description: Returns data required to make Standalone Map markers
+        body:
+          application/json:
+            type: lib.StandaloneMapMarkersPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.StandaloneMapMarkersPostResponse
+
+    /scatterplot:
+      post:
+        description: Returns data required to create a floating scatterplot visualization in the Standalone Map
+        body:
+          application/json:
+            type: lib.FloatingScatterplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.FloatingScatterplotPostResponse
+
+    /lineplot:
+      post:
+        description: Returns data required to create a floating lineplot visualization in the Standalone Map
+        body:
+          application/json:
+            type: lib.FloatingLineplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.FloatingLineplotPostResponse
+
+    /histogram:
+      post:
+        description: Returns data required to create a floating histogram visualization in the Standalone Map
+        body:
+          application/json:
+            type: lib.FloatingHistogramPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.FloatingHistogramPostResponse
+
+    /boxplot:
+      post:
+        description: Returns data required to create a floating boxplot visualization in the Standalone Map
+        body:
+          application/json:
+            type: lib.FloatingBoxplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.FloatingBoxplotPostResponse
+
+    /barplot:
+      post:
+        description: Returns data required to create a floating bar plot visualization in the Standalone Map
+        body:
+          application/json:
+            type: lib.FloatingBarplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.FloatingBarplotPostResponse
+
+    /conttable:
+      post:
+        description: Returns data required to create a floating RxC mosaic plot visualization in the Standalone Map
+        body:
+          application/json:
+            type: lib.FloatingMosaicPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.FloatingContTablePostResponse
+
   /pass/visualizations:
     displayName: Available visualizations for the null/ pass-through app
 

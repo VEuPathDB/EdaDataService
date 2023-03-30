@@ -26,26 +26,12 @@ types:
         type: VariableSpec
       latitudeVariable?:
         type: VariableSpec
-      binSpec:
-        type: BinSpec
       viewport?:
         type: GeolocationViewport
 
   MapMarkersOverlayConfig:
     type: PlotConfig
     properties:
-      rankedValues:
-        type: string[]
-        minItems: 1
-        maxItems: 20
-      overlayValues:
-        type: string[]
-        minItems: 1
-        maxItems: 20
-      binSlider?:
-        type: BinSlider
-      binSpec?:
-        type: BinSpec
       viewport:
         type: GeolocationViewport
 

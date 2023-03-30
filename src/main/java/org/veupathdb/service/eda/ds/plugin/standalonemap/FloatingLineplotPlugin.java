@@ -1,5 +1,6 @@
-package org.veupathdb.service.eda.ds.plugin.pass;
+package org.veupathdb.service.eda.ds.plugin.standalonemap;
 
+import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
@@ -7,6 +8,8 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
+import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.OverlaySpecification;
 import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
@@ -15,13 +18,16 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuote;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
-import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.MICROBIOME_PROJECT;
+import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
-public class LineplotPlugin extends AbstractEmptyComputePlugin<LineplotPostRequest, LineplotSpec> {
+public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingLineplotPostRequest, FloatingLineplotSpec> {
+  private OverlaySpecification _overlaySpecification = null;
 
   @Override
   public String getDisplayName() {
@@ -35,81 +41,80 @@ public class LineplotPlugin extends AbstractEmptyComputePlugin<LineplotPostReque
 
   @Override
   public List<String> getProjects() {
-    return List.of(MICROBIOME_PROJECT);
+    return List.of(VECTORBASE_PROJECT);
   }
 
   @Override
-  protected ClassGroup getTypeParameterClasses() {
-    return new EmptyComputeClassGroup(LineplotPostRequest.class, LineplotSpec.class);
-  }
-  
-  @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder(List.of("yAxisVariable"), List.of("xAxisVariable"), List.of("overlayVariable", "facetVariable"))
+      .dependencyOrder(List.of("yAxisVariable"), List.of("xAxisVariable"), List.of("overlayVariable"))
       .pattern()
         .element("yAxisVariable")
+          .description("Variable must be of the same or a child entity as the X-axis variable.")
         .element("xAxisVariable")
           .shapes(APIVariableDataShape.ORDINAL, APIVariableDataShape.CONTINUOUS)
-          .description("Variable must be ordinal, a number, or a date and be of the same or a parent entity of the Y-axis variable.")
+          .description("Variable must be ordinal, a number, or a date and be the same or a child entity as the variable the map markers are painted with, if any.")
         .element("overlayVariable")
           .required(false)
-          .maxValues(8)
-          .description("Variable must have 8 or fewer unique values and be of the same or a parent entity as the X-axis variable.")
-        .element("facetVariable")
-          .required(false)
-          .maxVars(2)
-          .maxValues(10)
-          .description("Variable(s) must have 10 or fewer unique values and be of the same or a parent entity as the Overlay variable.")
       .done();
   }
 
   @Override
-  protected void validateVisualizationSpec(LineplotSpec pluginSpec) throws ValidationException {
+  protected AbstractPlugin<FloatingLineplotPostRequest, FloatingLineplotSpec, Void>.ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(FloatingLineplotPostRequest.class, FloatingLineplotSpec.class, Void.class);
+  }
+
+  @Override
+  protected void validateVisualizationSpec(FloatingLineplotSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
       .var("xAxisVariable", pluginSpec.getXAxisVariable())
       .var("yAxisVariable", pluginSpec.getYAxisVariable())
-      .var("overlayVariable", pluginSpec.getOverlayVariable())
-      .var("facetVariable", pluginSpec.getFacetVariable()));
+      .var("overlayVariable", Optional.ofNullable(pluginSpec.getOverlayConfig())
+          .map(OverlayConfig::getOverlayVariable)
+          .orElse(null)));
+    if (pluginSpec.getOverlayConfig() != null) {
+      try {
+        _overlaySpecification = new OverlaySpecification(pluginSpec.getOverlayConfig(), getUtil()::getVariableType, getUtil()::getVariableDataShape);
+      } catch (IllegalArgumentException e) {
+        throw new ValidationException(e.getMessage());
+      }
+    }
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(LineplotSpec pluginSpec) {
-    return List.of(
+  protected List<StreamSpec> getRequestedStreams(FloatingLineplotSpec pluginSpec) {
+    return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
         .addVar(pluginSpec.getYAxisVariable())
-        .addVar(pluginSpec.getOverlayVariable())
-        .addVars(pluginSpec.getFacetVariable()));
+        .addVar(Optional.ofNullable(pluginSpec.getOverlayConfig())
+            .map(OverlayConfig::getOverlayVariable)
+            .orElse(null)));
   }
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PluginUtil util = getUtil();
-    LineplotSpec spec = getPluginSpec();
-    Map<String, VariableSpec> varMap = new HashMap<>();
+    FloatingLineplotSpec spec = getPluginSpec();
+    VariableSpec overlayVariable = _overlaySpecification != null ? _overlaySpecification.getOverlayVariable() : null;
+    Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
     varMap.put("xAxis", spec.getXAxisVariable());
     varMap.put("yAxis", spec.getYAxisVariable());
-    varMap.put("overlay", spec.getOverlayVariable());
-    varMap.put("facet1", util.getVariableSpecFromList(spec.getFacetVariable(), 0));
-    varMap.put("facet2", util.getVariableSpecFromList(spec.getFacetVariable(), 1));
-    String showMissingness = spec.getShowMissingness() != null ? spec.getShowMissingness().getValue() : "noVariables";
-    String deprecatedShowMissingness = showMissingness.equals("FALSE") ? "noVariables" : showMissingness.equals("TRUE") ? "strataVariables" : showMissingness;
+    varMap.put("overlay", overlayVariable);
     String errorBars = spec.getErrorBars() != null ? spec.getErrorBars().getValue() : "FALSE";
     String valueSpec = spec.getValueSpec().getValue();
     String xVar = util.toColNameOrEmpty(spec.getXAxisVariable());
     String xVarType = util.getVariableType(spec.getXAxisVariable());
     String numeratorValues = spec.getYAxisNumeratorValues() != null ? listToRVector(spec.getYAxisNumeratorValues()) : "NULL";
     String denominatorValues = spec.getYAxisDenominatorValues() != null ? listToRVector(spec.getYAxisDenominatorValues()) : "NULL";
+    String overlayValues = _overlaySpecification == null ? "NULL" : _overlaySpecification.getRBinListAsString();
     
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
           spec.getXAxisVariable(),
           spec.getYAxisVariable(),
-          spec.getOverlayVariable(),
-          util.getVariableSpecFromList(spec.getFacetVariable(), 0),
-          util.getVariableSpecFromList(spec.getFacetVariable(), 1)));
+          overlayVariable));
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String viewportRString = getViewportAsRString(spec.getViewport(), xVarType);
       connection.voidEval(viewportRString);
@@ -130,22 +135,25 @@ public class LineplotPlugin extends AbstractEmptyComputePlugin<LineplotPostReque
           connection.voidEval("binWidth <- NULL");
         }
       } else {
-        String binWidth =
-            binSpec.getValue() == null
-            ? "NULL"
-            : xVarType.equals("NUMBER") || xVarType.equals("INTEGER")
-                ? "as.numeric('" + binSpec.getValue() + "')"
-                : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
+        String binWidth = "NULL";
+        if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
+          binWidth = binSpec.getValue() == null ? "NULL" : "as.numeric('" + binSpec.getValue() + "')";
+        } else {
+          binWidth = binSpec.getValue() == null ? "NULL" : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
+        }
         connection.voidEval("binWidth <- " + binWidth);
       }
-      String cmd = "plot.data::lineplot(" + DEFAULT_SINGLE_STREAM_NAME + 
-                                        ", variables, binWidth, " + 
-                                        singleQuote(valueSpec) + 
-                                        ", " + errorBars + 
-                                        ", viewport" + 
-                                        ", " + numeratorValues +
-                                        ", " + denominatorValues + 
-                                        ", NULL, TRUE, TRUE, '" + deprecatedShowMissingness + "')";                          
+      String cmd = "plot.data::lineplot(data=" + DEFAULT_SINGLE_STREAM_NAME + 
+                                        ", variables=variables, binWidth=binWidth, " + 
+                                        "  value=" + singleQuote(valueSpec) + 
+                                        ", errorBars=" + errorBars + 
+                                        ", viewport=viewport" + 
+                                        ", numeratorValues=" + numeratorValues +
+                                        ", denominatorValues=" + denominatorValues + 
+                                        ", samplesSizes=FALSE" +
+                                        ", completeCases=FALSE" +
+                                        ", overlayValues=" + overlayValues + 
+                                        ", 'noVariables')";                          
       streamResult(connection, cmd, out);
     }); 
   }
