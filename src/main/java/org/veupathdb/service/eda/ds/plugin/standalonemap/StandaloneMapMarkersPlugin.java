@@ -183,6 +183,8 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
       StandaloneMapElementInfo mapEle = new StandaloneMapElementInfoImpl();
       GeoVarData data = aggregator.get(key);
       GeographicPoint avgLatLon = data.latLonAvg.getCurrentAverage();
+      mapEle.setGeoAggregateValue(key);
+      mapEle.setEntityCount(data.count);
       mapEle.setAvgLat(avgLatLon.getLatitude());
       mapEle.setAvgLon(avgLatLon.getLongitude());
       mapEle.setMinLat(data.minLat);
