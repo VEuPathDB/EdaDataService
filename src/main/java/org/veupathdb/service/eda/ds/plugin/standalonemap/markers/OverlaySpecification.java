@@ -86,7 +86,10 @@ public class OverlaySpecification {
   }
 
   private void validateCategoricalOverlayValues(CategoricalOverlayConfig overlayConfig, Function<VariableSpec, String> varSpecFinder) {
-    if (!varSpecFinder.apply(overlayConfig.getOverlayVariable()).equalsIgnoreCase(APIVariableDataShape.CATEGORICAL.toString())) {
+    String overlayShape = varSpecFinder.apply(overlayConfig.getOverlayVariable());
+    if (!overlayShape.equalsIgnoreCase(APIVariableDataShape.CATEGORICAL.toString()) &&
+        !overlayShape.equalsIgnoreCase(APIVariableDataShape.BINARY.toString()) &&
+        !overlayShape.equalsIgnoreCase(APIVariableDataShape.ORDINAL.toString())) {
       throw new IllegalArgumentException("Input overlay variable %s is %s, but provided overlay configuration is for a categorical variable"
           .formatted(overlayConfig.getOverlayVariable().getVariableId(), varSpecFinder.apply(overlayConfig.getOverlayVariable())));
     }
@@ -124,7 +127,6 @@ public class OverlaySpecification {
         throw new IllegalArgumentException("Bin Ranges must not overlap");
       }
       prevBinEnd = binEdges.get(binStart);
-      System.err.println(prevBinEnd + " ooooo " + binStart);
     }
   }
 
