@@ -3,13 +3,11 @@ package org.veupathdb.service.eda.ds.plugin.standalonemap;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.gusdb.fgputil.DelimitedDataParser;
 import org.gusdb.fgputil.geo.GeographyUtil.GeographicPoint;
@@ -19,8 +17,8 @@ import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
-import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.ds.core.AbstractEmptyComputePlugin;
+import org.veupathdb.service.eda.ds.core.AbstractPlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.OverlaySpecification;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.GeolocationViewport;
 import org.veupathdb.service.eda.generated.model.*;
@@ -113,12 +111,12 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
       }  
     }
 
-    List<BinRangeWithValue> getOverlayValues(String valueSpec) {
-      List<BinRangeWithValue> overlayValuesResponse = new ArrayList<>();
+    List<LabeledRangeWithValue> getOverlayValues(String valueSpec) {
+      List<LabeledRangeWithValue> overlayValuesResponse = new ArrayList<>();
 
       for (String overlayValue : overlayValuesCount.keySet()) {
-        BinRangeWithValue newValue = new BinRangeWithValueImpl();
-        newValue.setBinLabel(overlayValue);
+        LabeledRangeWithValue newValue = new LabeledRangeWithValueImpl();
+        newValue.setLabel(overlayValue);
         newValue.setValue(valueSpec.equals("count") ? overlayValuesCount.get(overlayValue).get() : overlayValuesProportion.get(overlayValue));
         overlayValuesResponse.add(newValue);
       }

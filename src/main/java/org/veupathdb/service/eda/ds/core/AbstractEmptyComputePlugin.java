@@ -1,4 +1,4 @@
-package org.veupathdb.service.eda.ds.plugin;
+package org.veupathdb.service.eda.ds.core;
 
 import org.veupathdb.service.eda.generated.model.DataPluginRequestBase;
 

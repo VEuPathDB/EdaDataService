@@ -7,64 +7,6 @@
 ################################################################################
 
 types:
-  VariableClass:
-    type: string
-    enum:
-      - native
-      - derived
-      - computed
-  PlotReferenceValue:
-    type: string
-    enum:
-      - xAxis
-      - yAxis
-      - zAxis
-      - overlay
-      - facet1
-      - facet2
-      - geo
-      - latitude
-      - longitude
-  VariableMapping:
-    type: object
-    additionalProperties: false
-    properties:
-      variableClass: VariableClass
-      variableSpec: VariableSpec
-      plotReference: PlotReferenceValue
-      dataType: API_VariableType
-      dataShape: API_VariableDataShape
-      displayName?: string
-      displayRangeMin?: any
-      displayRangeMax?: any
-      vocabulary?: string[]
-      isCollection: boolean
-      imputeZero: boolean
-      members?: VariableSpec[]
-  EmptyResponse:
-    type: object
-    additionalProperties: false
-  VisualizationDataElementConstraint:
-    type: object
-    additionalProperties: false
-    properties:
-      isRequired: boolean
-      isTemporal: boolean
-      minNumVars: number
-      maxNumVars: number
-      minNumValues: number
-      maxNumValues: number
-      allowedTypes:
-        type: API_VariableType[]
-        required: false
-      allowedShapes:
-        type: API_VariableDataShape[]
-        required: false
-      description: string
-  VisualizationDataElementConstraintPattern:
-    type: object
-    properties:
-      //: VisualizationDataElementConstraint
   JobID: !include https://raw.githubusercontent.com/VEuPathDB/lib-hash-id/v1.1.0/schema/hash-id.raml
   JobStatus:
     type: string
@@ -96,6 +38,40 @@ types:
       derivedVariables:
         type: array
         items: DerivedVariableSpec
+  VariableClass:
+    type: string
+    enum:
+      - native
+      - derived
+      - computed
+  PlotReferenceValue:
+    type: string
+    enum:
+      - xAxis
+      - yAxis
+      - zAxis
+      - overlay
+      - facet1
+      - facet2
+      - geo
+      - latitude
+      - longitude
+  VariableMapping:
+    type: object
+    additionalProperties: false
+    properties:
+      variableClass: VariableClass
+      variableSpec: VariableSpec
+      plotReference: PlotReferenceValue
+      dataType: API_VariableType
+      dataShape: API_VariableDataShape
+      displayName?: string
+      displayRangeMin?: any
+      displayRangeMax?: any
+      vocabulary?: string[]
+      imputeZero: boolean
+      isCollection: boolean
+      members?: VariableSpec[]
   ComputedVariableMetadata:
     type: object
     additionalProperties: false
@@ -173,6 +149,51 @@ types:
       variableId: string
       left: number
       right: number
+  DerivedVariableSpec:
+    type: VariableSpec
+    properties:
+      functionName: string
+      displayName: string
+      config: object # varies by plugin
+  ComputeSpecForMerging:
+    type: object
+    additionalProperties: false
+    properties:
+      computeName: string
+      computeConfig: object
+  DerivedVariableBulkMetadataRequest:
+    type: object
+    additionalProperties: false
+    properties:
+      studyId: string
+      derivedVariables: DerivedVariableSpec[]
+  MergedEntityTabularPostRequest:
+    type: DerivedVariableBulkMetadataRequest
+    additionalProperties: false
+    properties:
+      filters: API_Filter[]
+      entityId: string
+      outputVariables: VariableSpec[]
+      computeSpec?: ComputeSpecForMerging
+  DerivationType:
+    type: string
+    enum:
+      - transform
+      - reduction
+  DerivedVariableMetadata:
+    type: VariableSpec
+    properties:
+      derivationType: DerivationType
+      variableType: API_VariableType
+      dataShape: API_VariableDataShape
+      vocabulary?: string[]
+      units?: string
+      dataRange?: Range
+      #precision: number
+      #binWidth?: number
+      #distinctValuesCount: integer
+      #isTemporal: boolean
+      #imputeZero: boolean
   VariableSpec:
     type: object
     additionalProperties: false
@@ -185,155 +206,51 @@ types:
     properties:
       entityId: string
       collectionId: string
-  DerivedVariableSpec:
-    type: VariableSpec
-    properties:
-      expectedVariableType: API_VariableType
-      expectedVariableDataShape: API_VariableDataShape
-      functionName: string
-      inputVars: VariableSpec[]
-      config: object # TBD
-  ComputeSpecForMerging:
+  DataElementConstraint:
     type: object
     additionalProperties: false
     properties:
-      computeName: string
-      computeConfig: object
-  MergedEntityTabularPostRequest:
+      isRequired: boolean
+      isTemporal: boolean
+      minNumVars: number
+      maxNumVars: number
+      minNumValues: number
+      maxNumValues: number
+      allowedTypes:
+        type: API_VariableType[]
+        required: false
+      allowedShapes:
+        type: API_VariableDataShape[]
+        required: false
+      description: string
+  DataElementConstraintPattern:
     type: object
-    additionalProperties: false
     properties:
-      studyId: string
-      filters: API_Filter[]
-      entityId: string
-      outputVariables: VariableSpec[]
-      derivedVariables: DerivedVariableSpec[]
-      computeSpec?: ComputeSpecForMerging
-  EntityCountPostRequest:
-    type: object
-    additionalProperties: false
-    properties:
-      filters: API_Filter[]
-  EntityCountPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      count:
-        type: integer
-        format: int64
-  EntityTabularPostRequest:
-    type: object
-    additionalProperties: false
-    properties:
-      filters: API_Filter[]
-      outputVariableIds: string[]
-      reportConfig?: API_TabularReportConfig
+      //: DataElementConstraint
   EntityTabularPostResponse:
     type: object
     additionalProperties: false
     properties:
       counts: string[][]
-  SortDirection:
-    type: string
-    enum:
-      - asc
-      - desc
-  SortSpecEntry:
+  EmptyResponse:
+    type: object
+    additionalProperties: false
+  Range:
     type: object
     additionalProperties: false
     properties:
-      key: string
-      direction: SortDirection
-  API_PagingConfig:
-    type: object
-    properties:
-      numRows?:
-        type: integer
-        format: int64
-      offset?:
-        type: integer
-        format: int64
-  TabularHeaderFormat:
-    type: string
-    enum:
-      - standard
-      - display
-  DataSourceType:
-    type: string
-    enum:
-      - database
-      - file
-  API_TabularReportConfig:
-    type: object
-    properties:
-      sorting?: SortSpecEntry[]
-      paging?: API_PagingConfig
-      headerFormat?: TabularHeaderFormat
-      trimTimeFromDateVars?: boolean
-      dataSource?: DataSourceType
-  BinUnits:
-    type: string
-    enum:
-      - day
-      - week
-      - month
-      - year
-  BinSpecWithRange:
-    type: object
+      min: string
+      max: string
+  LabeledRange:
+    type: Range
     additionalProperties: false
     properties:
-      displayRangeMin: any
-      displayRangeMax: any
-      binWidth: number
-      binUnits?: BinUnits
-  ValueSpec:
-    type: string
-    enum:
-      - count
-      - proportion
-  VariableDistributionPostRequest:
-    type: object
-    additionalProperties: false
-    properties:
-      filters: API_Filter[]
-      binSpec?: BinSpecWithRange
-      valueSpec: ValueSpec
-  HistogramBin:
-    type: object
+      label: string
+  LabeledRangeWithValue:
+    type: LabeledRange
     additionalProperties: false
     properties:
       value: number
-      binStart: string
-      binEnd: string
-      binLabel: string
-  HistogramStats:
-    type: object
-    additionalProperties: false
-    properties:
-      subsetSize:
-        type: integer
-        format: int64
-      subsetMin?: any
-      subsetMax?: any
-      subsetMean?: any
-      numVarValues:
-        type: integer
-        format: int64
-      numDistinctValues:
-        type: integer
-        format: int64
-      numDistinctEntityRecords:
-        type: integer
-        format: int64
-      numMissingCases:
-        type: integer
-        format: int64
-  VariableDistributionPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      histogram: HistogramBin[]
-      statistics: HistogramStats
   StudiesGetResponse:
     type: object
     additionalProperties: false
@@ -541,6 +458,126 @@ types:
     discriminatorValue: date
     properties:
       distributionDefaults: API_DateDistributionDefaults
+  EntityCountPostRequest:
+    type: object
+    additionalProperties: false
+    properties:
+      filters: API_Filter[]
+  EntityCountPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      count:
+        type: integer
+        format: int64
+  SortDirection:
+    type: string
+    enum:
+      - asc
+      - desc
+  SortSpecEntry:
+    type: object
+    additionalProperties: false
+    properties:
+      key: string
+      direction: SortDirection
+  API_PagingConfig:
+    type: object
+    properties:
+      numRows?:
+        type: integer
+        format: int64
+      offset?:
+        type: integer
+        format: int64
+  TabularHeaderFormat:
+    type: string
+    enum:
+      - standard
+      - display
+  DataSourceType:
+    type: string
+    enum:
+      - database
+      - file
+  API_TabularReportConfig:
+    type: object
+    properties:
+      sorting?: SortSpecEntry[]
+      paging?: API_PagingConfig
+      headerFormat?: TabularHeaderFormat
+      trimTimeFromDateVars?: boolean
+      dataSource?: DataSourceType
+  EntityTabularPostRequest:
+    type: object
+    additionalProperties: false
+    properties:
+      filters: API_Filter[]
+      outputVariableIds: string[]
+      reportConfig?: API_TabularReportConfig
+  BinUnits:
+    type: string
+    enum:
+      - day
+      - week
+      - month
+      - year
+  BinSpecWithRange:
+    type: object
+    additionalProperties: false
+    properties:
+      displayRangeMin: any
+      displayRangeMax: any
+      binWidth: number
+      binUnits?: BinUnits
+  ValueSpec:
+    type: string
+    enum:
+      - count
+      - proportion
+  VariableDistributionPostRequest:
+    type: object
+    additionalProperties: false
+    properties:
+      filters: API_Filter[]
+      binSpec?: BinSpecWithRange
+      valueSpec: ValueSpec
+  HistogramBin:
+    type: object
+    additionalProperties: false
+    properties:
+      value: number
+      binStart: string
+      binEnd: string
+      binLabel: string
+  HistogramStats:
+    type: object
+    additionalProperties: false
+    properties:
+      subsetSize:
+        type: integer
+        format: int64
+      subsetMin?: any
+      subsetMax?: any
+      subsetMean?: any
+      numVarValues:
+        type: integer
+        format: int64
+      numDistinctValues:
+        type: integer
+        format: int64
+      numDistinctEntityRecords:
+        type: integer
+        format: int64
+      numMissingCases:
+        type: integer
+        format: int64
+  VariableDistributionPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      histogram: HistogramBin[]
+      statistics: HistogramStats
   AlphaDivPluginRequest:
     type: ComputeRequestBase
     properties:
@@ -564,8 +601,8 @@ types:
     type: object
     properties:
       collectionVariable: VariableSpec
-      betaDivDistanceMethod: BetaDivDistanceMethod
-  BetaDivDistanceMethod:
+      betaDivDissimilarityMethod: BetaDivDissimilarityMethod
+  BetaDivDissimilarityMethod:
     type: string
     enum:
       - bray
@@ -661,7 +698,7 @@ types:
       projects: string[]
       maxPanels: number
       dataElementConstraints:
-        type: VisualizationDataElementConstraintPattern[]
+        type: DataElementConstraintPattern[]
         required: false
       dataElementDependencyOrder:
         type: string[][]
@@ -699,25 +736,13 @@ types:
           enum:
             - binRanges
             - median
-  BinRange:
-    type: object
-    additionalProperties: false
-    properties:
-      binStart: string
-      binEnd: string
-      binLabel: string
-  BinRangeWithValue:
-    type: BinRange
-    additionalProperties: false
-    properties:
-      value: number
   AllBinRanges:
     type: object
     additionalProperties: false
     properties:
-      equalInterval: BinRange[]
-      quantile: BinRange[]
-      standardDeviation: BinRange[]
+      equalInterval: LabeledRange[]
+      quantile: LabeledRange[]
+      standardDeviation: LabeledRange[]
   ContinuousVariableMetadataPostResponse:
     type: object
     additionalProperties: false
@@ -1784,7 +1809,7 @@ types:
     discriminatorValue: continuous
     properties:
       overlayValues:
-        type: BinRange[]
+        type: LabeledRange[]
   CategoricalOverlayConfig:
     type: OverlayConfig
     discriminatorValue: categorical
@@ -1798,7 +1823,7 @@ types:
     properties:
       geoAggregateValue: string
       entityCount: number
-      overlayValues: BinRangeWithValue[]
+      overlayValues: LabeledRangeWithValue[]
       avgLat: number
       avgLon: number
       minLat: number

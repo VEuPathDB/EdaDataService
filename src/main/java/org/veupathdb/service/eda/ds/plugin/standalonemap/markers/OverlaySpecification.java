@@ -105,15 +105,15 @@ public class OverlaySpecification {
       throw new IllegalArgumentException("Input overlay variable %s is %s, but provided overlay configuration is for a continuous variable"
           .formatted(overlayConfig.getOverlayVariable().getVariableId(), dataShape));
     }
-    boolean anyMissingBinStart = overlayConfig.getOverlayValues().stream().anyMatch(bin -> bin.getBinStart() == null);
-    boolean anyMissingBinEnd = overlayConfig.getOverlayValues().stream().anyMatch(bin -> bin.getBinEnd() == null);
+    boolean anyMissingBinStart = overlayConfig.getOverlayValues().stream().anyMatch(bin -> bin.getMin() == null);
+    boolean anyMissingBinEnd = overlayConfig.getOverlayValues().stream().anyMatch(bin -> bin.getMax() == null);
     if (anyMissingBinStart || anyMissingBinEnd) {
       throw new IllegalArgumentException("All numeric bin ranges must have start and end.");
     }
     Map<Double, Double> binEdges = overlayConfig.getOverlayValues().stream()
         .collect(Collectors.toMap(
-            bin -> Double.parseDouble(bin.getBinStart()),
-            bin -> Double.parseDouble(bin.getBinEnd()),
+            bin -> Double.parseDouble(bin.getMin()),
+            bin -> Double.parseDouble(bin.getMax()),
             (u, v) -> {
                throw new IllegalStateException(String.format("Duplicate key %s", u));
             }, 

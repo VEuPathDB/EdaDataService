@@ -8,7 +8,7 @@ import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.model.VariableDef;
 import org.veupathdb.service.eda.common.model.VariableSource;
-import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
+import org.veupathdb.service.eda.ds.core.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.generated.model.MultiStreamPostRequest;
 import org.veupathdb.service.eda.generated.model.MultiStreamSpec;
 
@@ -101,7 +101,7 @@ public class MultiStreamPlugin extends AbstractEmptyComputePlugin<MultiStreamPos
 
   private static List<VariableDef> getVars(EntityDef entity) {
     List<VariableDef> varsToRequest = new ArrayList<>();
-    for (VariableDef var : entity) {
+    for (VariableDef var : entity.getVariables()) {
       if (VariableSource.NATIVE.equals(var.getSource())) {
         varsToRequest.add(var);
       }
