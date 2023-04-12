@@ -50,7 +50,7 @@ public class AppsMetadata {
           Arrays.asList(VECTORBASE_PROJECT),
           viz("map-markers", new StandaloneMapMarkersPlugin())),
       app("standalone-map-xyrelationships", "X-Y Relationships", null,
-          "A collection of visualizations designed to support the unbiased exploration of relationships between spatiotemporal variables in a cartographic map",
+          "Build plots to explore the relationship between two variables.",
           Arrays.asList(VECTORBASE_PROJECT),
           viz("scatterplot", new FloatingScatterplotPlugin()),
           viz("lineplot", new FloatingLineplotPlugin())),
