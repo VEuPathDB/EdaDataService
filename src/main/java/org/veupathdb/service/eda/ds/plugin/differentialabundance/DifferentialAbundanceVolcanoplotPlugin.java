@@ -41,37 +41,37 @@ public class DifferentialAbundanceVolcanoplotPlugin extends AbstractPlugin<Diffe
     return new ClassGroup(DifferentialAbundanceVolcanoplotPostRequest.class, DifferentialAbundanceVolcanoplotSpec.class, DifferentialAbundanceComputeConfig.class);
   }
 
-  // I think we can remove this whole thing ?!? there are no variables for the user to select
-  @Override
-  public ConstraintSpec getConstraintSpec() {
-    return new ConstraintSpec()
-      .dependencyOrder(List.of("yAxisVariable", "xAxisVariable"), List.of("overlayVariable"))
-      .pattern()
-        .element("overlayVariable")
-          .required(false)
-          .maxValues(8)
-          .description("Variable must be a number, or have 8 or fewer values, and be of the same or a parent entity as the X-axis variable.")
-      .pattern()
-        .element("overlayVariable")
-          .required(false)
-          .types(APIVariableType.NUMBER, APIVariableType.INTEGER) 
-          .description("Variable must be a number, or have 8 or fewer values, and be of the same or a parent entity as the X-axis variable.")
-      .done();
-  }
+  // // I think we can remove this whole thing ?!? there are no variables for the user to select
+  // @Override
+  // public ConstraintSpec getConstraintSpec() {
+  //   return new ConstraintSpec()
+  //     .dependencyOrder(List.of("yAxisVariable", "xAxisVariable"), List.of("overlayVariable"))
+  //     .pattern()
+  //       .element("overlayVariable")
+  //         .required(false)
+  //         .maxValues(8)
+  //         .description("Variable must be a number, or have 8 or fewer values, and be of the same or a parent entity as the X-axis variable.")
+  //     .pattern()
+  //       .element("overlayVariable")
+  //         .required(false)
+  //         .types(APIVariableType.NUMBER, APIVariableType.INTEGER) 
+  //         .description("Variable must be a number, or have 8 or fewer values, and be of the same or a parent entity as the X-axis variable.")
+  //     .done();
+  // }
 
-  // and this??
-  @Override
-  protected void validateVisualizationSpec(DifferentialAbundanceVolcanoplotSpec pluginSpec) throws ValidationException {
-    validateInputs(new DataElementSet()
-      .entity(pluginSpec.getOutputEntityId())
-      .var("overlayVariable", pluginSpec.getOverlayVariable()));
-  }
+  // // and this??
+  // @Override
+  // protected void validateVisualizationSpec(DifferentialAbundanceVolcanoplotSpec pluginSpec) throws ValidationException {
+  //   validateInputs(new DataElementSet()
+  //     .entity(pluginSpec.getOutputEntityId())
+  //     .var("overlayVariable", pluginSpec.getOverlayVariable()));
+  // }
 
+  // Not sure about this... is this grabbing the tabular?
   @Override
   protected List<StreamSpec> getRequestedStreams(DifferentialAbundanceVolcanoplotSpec pluginSpec) {
     return List.of(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
-        .addVar(pluginSpec.getOverlayVariable())
         .setIncludeComputedVars(true)
     );
   }
@@ -79,22 +79,13 @@ public class DifferentialAbundanceVolcanoplotPlugin extends AbstractPlugin<Diffe
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     DifferentialAbundanceVolcanoplotSpec spec = getPluginSpec();
-    VolcanoplotPluginStats stats = getComputeResultStats(VolcanoplotPluginStats.class);
+    DifferentialAbundanceStats stats = getComputeResultStats(DifferentialAbundanceStats.class);
 
     System.out.println(stats);
 
-    // useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-    //   connection.voidEval(getUtil().getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
-    //       xComputedVarSpec,
-    //       yComputedVarSpec,
-    //       spec.getOverlayVariable()));
-
-    //   connection.voidEval(getVoidEvalVariableMetadataList(varMap));
-    //   connection.voidEval(getVoidEvalComputedVariableMetadataList(metadata));
-    //   connection.voidEval("variables <- veupathUtils::merge(variables, computedVariables)");
-
-    //   String command = "plot.data::scattergl(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, '" + valueSpec + "', NULL, TRUE, TRUE, '" + deprecatedShowMissingness + "')";
-    //   RServeClient.streamResult(connection, command, out);
-    // }); 
+    // Since we don't have to do anything in plot.data, we just need to write the data as-is.
+    
+    // Should we add any complete cases or anything? Seems like that should all come from the
+    // compute. 
   }
 }
