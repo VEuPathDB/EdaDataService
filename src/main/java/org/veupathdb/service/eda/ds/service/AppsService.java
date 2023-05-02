@@ -25,6 +25,7 @@ import org.veupathdb.service.eda.ds.plugin.abundance.AbundanceScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivBoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.betadiv.BetaDivScatterplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.differentialabundance.DifferentialAbundanceVolcanoplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.BarplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.BoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ContTablePlugin;
@@ -282,6 +283,13 @@ public class AppsService implements Apps {
   public PostAppsBetadivVisualizationsScatterplotResponse postAppsBetadivVisualizationsScatterplot(BetaDivScatterplotPostRequest entity) {
     return wrapPlugin(() -> PostAppsBetadivVisualizationsScatterplotResponse.respond200WithApplicationJson(
         new ScatterplotPostResponseStream(processRequest(new BetaDivScatterplotPlugin(), entity))));
+  }
+
+  @DisableJackson
+  @Override
+  public PostAppsDifferentialabundanceVisualizationsVolcanoplotResponse postAppsDifferentialabundanceVisualizationsScatterplot(DifferentialAbundanceVolcanoplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsDifferentialabundanceVisualizationsVolcanoplotResponse.respond200WithApplicationJson(
+        new VolcanoplotPostResponseStream(processRequest(new DifferentialAbundanceVolcanoplotPlugin(), entity))));
   }
 
   @DisableJackson
