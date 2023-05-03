@@ -1792,13 +1792,18 @@ types:
     properties:
       overlayValues:
         type: string[]
+  RangeWithCountAndValue:
+    type: BinRangeWithValue
+    additionalProperties: false
+    properties:
+      count: number
   StandaloneMapElementInfo:
     type: object
     additionalProperties: false
     properties:
       geoAggregateValue: string
       entityCount: number
-      overlayValues: BinRangeWithValue[]
+      overlayValues: RangeWithCountAndValue[]
       avgLat: number
       avgLon: number
       minLat: number
