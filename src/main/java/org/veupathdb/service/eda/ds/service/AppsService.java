@@ -1,8 +1,5 @@
 package org.veupathdb.service.eda.ds.service;
 
-import java.io.OutputStream;
-import java.util.Map.Entry;
-import java.util.function.Consumer;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.ServerErrorException;
 import jakarta.ws.rs.WebApplicationException;
@@ -17,6 +14,7 @@ import org.veupathdb.lib.container.jaxrs.providers.UserProvider;
 import org.veupathdb.lib.container.jaxrs.server.annotations.Authenticated;
 import org.veupathdb.lib.container.jaxrs.server.annotations.DisableJackson;
 import org.veupathdb.service.eda.common.auth.StudyAccess;
+import org.veupathdb.service.eda.common.client.NonEmptyResultStream.EmptyResultException;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
@@ -26,30 +24,15 @@ import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivBoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.betadiv.BetaDivScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.differentialabundance.DifferentialAbundanceVolcanoplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.BarplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.BoxplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.ContTablePlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.DensityplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.HeatmapPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.HistogramPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.LineplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.MapPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.MapMarkersOverlayPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.ScatterplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.TablePlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.TimeSeriesPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
+import org.veupathdb.service.eda.ds.plugin.pass.*;
 import org.veupathdb.service.eda.ds.plugin.sample.*;
-import org.veupathdb.service.eda.common.client.NonEmptyResultStream.EmptyResultException;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingBarplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingBoxplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingContTablePlugin;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingHistogramPlugin;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingLineplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingScatterplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.StandaloneMapMarkersPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.*;
 import org.veupathdb.service.eda.generated.model.*;
 import org.veupathdb.service.eda.generated.resources.Apps;
+
+import java.io.OutputStream;
+import java.util.Map.Entry;
+import java.util.function.Consumer;
 
 @Authenticated(allowGuests = true)
 public class AppsService implements Apps {
@@ -287,7 +270,7 @@ public class AppsService implements Apps {
 
   @DisableJackson
   @Override
-  public PostAppsDifferentialabundanceVisualizationsVolcanoplotResponse postAppsDifferentialabundanceVisualizationsScatterplot(DifferentialAbundanceVolcanoplotPostRequest entity) {
+  public PostAppsDifferentialabundanceVisualizationsVolcanoplotResponse postAppsDifferentialabundanceVisualizationsVolcanoplot(DifferentialAbundanceVolcanoplotPostRequest entity) {
     return wrapPlugin(() -> PostAppsDifferentialabundanceVisualizationsVolcanoplotResponse.respond200WithApplicationJson(
         new VolcanoplotPostResponseStream(processRequest(new DifferentialAbundanceVolcanoplotPlugin(), entity))));
   }

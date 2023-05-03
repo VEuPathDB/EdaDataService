@@ -365,6 +365,15 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
     return _computeClient.getJobStatistics(getComputeName(), createComputeRequestBody(), expectedStatsClass);
   }
 
+  protected void writeComputeStatsResponseToOutput(OutputStream out) {
+    try (InputStream statsStream = _computeClient.getJobStatistics(getComputeName(), createComputeRequestBody()).getInputStream()) {
+      statsStream.transferTo(out);
+    }
+    catch (Exception e) {
+      throw new RuntimeException("Unable to stream stats response from compute service", e);
+    }
+  }
+
   protected ComputedVariableMetadata getComputedVariableMetadata() {
     return _computeClient.getJobVariableMetadata(getComputeName(), createComputeRequestBody());
   }

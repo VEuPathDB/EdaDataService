@@ -13,6 +13,7 @@ import org.veupathdb.service.eda.generated.model.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,33 +60,19 @@ public class DifferentialAbundanceVolcanoplotPlugin extends AbstractPlugin<Diffe
   //     .done();
   // }
 
-  // // and this??
-  // @Override
-  // protected void validateVisualizationSpec(DifferentialAbundanceVolcanoplotSpec pluginSpec) throws ValidationException {
-  //   validateInputs(new DataElementSet()
-  //     .entity(pluginSpec.getOutputEntityId())
-  //     .var("overlayVariable", pluginSpec.getOverlayVariable()));
-  // }
+  @Override
+  protected void validateVisualizationSpec(DifferentialAbundanceVolcanoplotSpec pluginSpec) throws ValidationException {
+    // nothing to do here
+  }
 
-  // Not sure about this... is this grabbing the tabular?
   @Override
   protected List<StreamSpec> getRequestedStreams(DifferentialAbundanceVolcanoplotSpec pluginSpec) {
-    return List.of(
-      new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
-        .setIncludeComputedVars(true)
-    );
+    // this plugin only uses the stats result of the compute; no tabular data streams needed
+    return Collections.emptyList();
   }
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    DifferentialAbundanceVolcanoplotSpec spec = getPluginSpec();
-    DifferentialAbundanceStats stats = getComputeResultStats(DifferentialAbundanceStats.class);
-
-    System.out.println(stats);
-
-    // Since we don't have to do anything in plot.data, we just need to write the data as-is.
-    
-    // Should we add any complete cases or anything? Seems like that should all come from the
-    // compute. 
+    writeComputeStatsResponseToOutput(out);
   }
 }
