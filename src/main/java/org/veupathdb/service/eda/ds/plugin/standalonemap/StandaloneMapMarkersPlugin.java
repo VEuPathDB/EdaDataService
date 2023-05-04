@@ -3,13 +3,11 @@ package org.veupathdb.service.eda.ds.plugin.standalonemap;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.gusdb.fgputil.DelimitedDataParser;
 import org.gusdb.fgputil.geo.GeographyUtil.GeographicPoint;
@@ -113,17 +111,20 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
       }  
     }
 
-    List<BinRangeWithValue> getOverlayValues(String valueSpec) {
-      List<BinRangeWithValue> overlayValuesResponse = new ArrayList<>();
+    List<RangeWithCountAndValue> getOverlayValues(String valueSpec) {
+      List<RangeWithCountAndValue> overlayValuesResponse = new ArrayList<>();
 
       for (String overlayValue : overlayValuesCount.keySet()) {
-        BinRangeWithValue newValue = new BinRangeWithValueImpl();
+        RangeWithCountAndValue newValue = new RangeWithCountAndValueImpl();
         newValue.setBinLabel(overlayValue);
-        newValue.setValue(valueSpec.equals("count") ? overlayValuesCount.get(overlayValue).get() : overlayValuesProportion.get(overlayValue));
+        newValue.setCount(overlayValuesCount.get(overlayValue).get());
+        newValue.setValue(valueSpec.equals(ValueSpec.PROPORTION.getValue())
+            ? overlayValuesProportion.get(overlayValue)
+            : overlayValuesCount.get(overlayValue).get());
         overlayValuesResponse.add(newValue);
       }
 
-      return(overlayValuesResponse);
+      return overlayValuesResponse;
     }
   }
 
