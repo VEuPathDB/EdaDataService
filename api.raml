@@ -61,6 +61,9 @@ securitySchemes:
               application/json:
                 type: lib.StandaloneMapMarkersPostResponse
 
+  /standalone-map-xyrelationships/visualizations:
+    displayName: Available visualizations for the Standalone Map application
+
     /scatterplot:
       post:
         description: Returns data required to create a floating scatterplot visualization in the Standalone Map
@@ -84,6 +87,9 @@ securitySchemes:
             body:
               application/json:
                 type: lib.FloatingLineplotPostResponse
+
+  /standalone-map-distributions/visualizations:
+    displayName: Available visualizations for the Standalone Map application
 
     /histogram:
       post:
@@ -109,6 +115,9 @@ securitySchemes:
               application/json:
                 type: lib.FloatingBoxplotPostResponse
 
+  /standalone-map-countsandproportions/visualizations:
+    displayName: Available visualizations for the Standalone Map application
+
     /barplot:
       post:
         description: Returns data required to create a floating bar plot visualization in the Standalone Map
@@ -126,7 +135,7 @@ securitySchemes:
         description: Returns data required to create a floating RxC mosaic plot visualization in the Standalone Map
         body:
           application/json:
-            type: lib.FloatingMosaicPostRequest
+            type: lib.FloatingContTablePostRequest
         responses:
           200:
             body:

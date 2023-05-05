@@ -1613,18 +1613,18 @@ types:
     additionalProperties: false
     properties:
       boxplot: FloatingBoxplot
-  FloatingMosaicPostRequest:
+  FloatingContTablePostRequest:
     type: DataPluginRequestBase
     properties:
-      config: FloatingMosaicSpec
-  FloatingMosaicSpec:
+      config: FloatingContTableSpec
+  FloatingContTableSpec:
     type: object
     additionalProperties: false
     properties:
       outputEntityId: string
       xAxisVariable: VariableSpec
       yAxisVariable: VariableSpec
-  FloatingMosaic:
+  FloatingContTable:
     type: object
     additionalProperties: false
     properties:
@@ -1634,7 +1634,7 @@ types:
     type: object
     additionalProperties: false
     properties:
-      mosaic: FloatingMosaic
+      mosaic: FloatingContTable
       statsTable:
         type: TwoByTwoStatsTable[]
         required: false

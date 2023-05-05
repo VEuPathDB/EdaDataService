@@ -70,38 +70,39 @@ public class AppsService implements Apps {
   }
 
   @Override
-  public PostAppsStandaloneMapVisualizationsScatterplotResponse postAppsStandaloneMapVisualizationsScatterplot(FloatingScatterplotPostRequest entity) {
-    return wrapPlugin(() -> PostAppsStandaloneMapVisualizationsScatterplotResponse.respond200WithApplicationJson(
+  public PostAppsStandaloneMapXyrelationshipsVisualizationsScatterplotResponse postAppsStandaloneMapXyrelationshipsVisualizationsScatterplot(FloatingScatterplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapXyrelationshipsVisualizationsScatterplotResponse.respond200WithApplicationJson(
         new FloatingScatterplotPostResponseStream(processRequest(new FloatingScatterplotPlugin(), entity))));
   }
 
   @Override
-  public PostAppsStandaloneMapVisualizationsLineplotResponse postAppsStandaloneMapVisualizationsLineplot(FloatingLineplotPostRequest entity) {
-    return wrapPlugin(() -> PostAppsStandaloneMapVisualizationsLineplotResponse.respond200WithApplicationJson(
+  public PostAppsStandaloneMapXyrelationshipsVisualizationsLineplotResponse postAppsStandaloneMapXyrelationshipsVisualizationsLineplot(FloatingLineplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapXyrelationshipsVisualizationsLineplotResponse.respond200WithApplicationJson(
         new FloatingLineplotPostResponseStream(processRequest(new FloatingLineplotPlugin(), entity))));
   }
 
   @Override
-  public PostAppsStandaloneMapVisualizationsHistogramResponse postAppsStandaloneMapVisualizationsHistogram(FloatingHistogramPostRequest entity) {
-    return wrapPlugin(() -> PostAppsStandaloneMapVisualizationsHistogramResponse.respond200WithApplicationJson(
+  public PostAppsStandaloneMapDistributionsVisualizationsHistogramResponse postAppsStandaloneMapDistributionsVisualizationsHistogram(FloatingHistogramPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapDistributionsVisualizationsHistogramResponse.respond200WithApplicationJson(
         new FloatingHistogramPostResponseStream(processRequest(new FloatingHistogramPlugin(), entity))));
   }
 
   @Override
-  public PostAppsStandaloneMapVisualizationsBoxplotResponse postAppsStandaloneMapVisualizationsBoxplot(FloatingBoxplotPostRequest entity) {
-    return wrapPlugin(() -> PostAppsStandaloneMapVisualizationsBoxplotResponse.respond200WithApplicationJson(
+  public PostAppsStandaloneMapDistributionsVisualizationsBoxplotResponse postAppsStandaloneMapDistributionsVisualizationsBoxplot(FloatingBoxplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapDistributionsVisualizationsBoxplotResponse.respond200WithApplicationJson(
         new FloatingBoxplotPostResponseStream(processRequest(new FloatingBoxplotPlugin(), entity))));
   }
 
   @Override
-  public PostAppsStandaloneMapVisualizationsBarplotResponse postAppsStandaloneMapVisualizationsBarplot(FloatingBarplotPostRequest entity) {
-    return wrapPlugin(() -> PostAppsStandaloneMapVisualizationsBarplotResponse.respond200WithApplicationJson(
+  public PostAppsStandaloneMapCountsandproportionsVisualizationsBarplotResponse postAppsStandaloneMapCountsandproportionsVisualizationsBarplot(FloatingBarplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapCountsandproportionsVisualizationsBarplotResponse.respond200WithApplicationJson(
         new FloatingBarplotPostResponseStream(processRequest(new FloatingBarplotPlugin(), entity))));
   }
 
   @Override
-  public PostAppsStandaloneMapVisualizationsConttableResponse postAppsStandaloneMapVisualizationsConttable(FloatingMosaicPostRequest entity) {
-    return null; // TODO
+  public PostAppsStandaloneMapCountsandproportionsVisualizationsConttableResponse postAppsStandaloneMapCountsandproportionsVisualizationsConttable(FloatingContTablePostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapCountsandproportionsVisualizationsConttableResponse.respond200WithApplicationJson(
+        new FloatingContTablePostResponseStream(processRequest(new FloatingContTablePlugin(), entity)))); 
   }
 
   static <T> T wrapPlugin(SupplierWithException<T> supplier) {
