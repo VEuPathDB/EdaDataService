@@ -3,12 +3,12 @@
 types:
   # Type name determines the name of the Java class that will be generated.
 
-  FloatingMosaicPostRequest:
+  FloatingContTablePostRequest:
     type: DataPluginRequestBase
     properties:
-      config: FloatingMosaicSpec
+      config: FloatingContTableSpec
 
-  FloatingMosaicSpec:
+  FloatingContTableSpec:
     additionalProperties: false
     properties:
       outputEntityId:
@@ -18,7 +18,7 @@ types:
       yAxisVariable:
         type: VariableSpec
 
-  FloatingMosaic:
+  FloatingContTable:
     additionalProperties: false
     properties:
       data:
@@ -29,7 +29,7 @@ types:
     additionalProperties: false
     properties:
       mosaic:
-        type: FloatingMosaic
+        type: FloatingContTable
       statsTable:
         type: TwoByTwoStatsTable[]
         required: false
