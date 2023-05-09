@@ -9,8 +9,8 @@ import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.generated.model.FloatingMosaicPostRequest;
-import org.veupathdb.service.eda.generated.model.FloatingMosaicSpec;
+import org.veupathdb.service.eda.generated.model.FloatingContTablePostRequest;
+import org.veupathdb.service.eda.generated.model.FloatingContTableSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import java.io.IOException;
@@ -24,7 +24,7 @@ import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamRe
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
-public class FloatingContTablePlugin extends AbstractEmptyComputePlugin<FloatingMosaicPostRequest, FloatingMosaicSpec> {
+public class FloatingContTablePlugin extends AbstractEmptyComputePlugin<FloatingContTablePostRequest, FloatingContTableSpec> {
 
   @Override
   public String getDisplayName() {
@@ -56,12 +56,12 @@ public class FloatingContTablePlugin extends AbstractEmptyComputePlugin<Floating
   }
 
   @Override
-  protected AbstractPlugin<FloatingMosaicPostRequest, FloatingMosaicSpec, Void>.ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(FloatingMosaicPostRequest.class, FloatingMosaicSpec.class, Void.class);
+  protected AbstractPlugin<FloatingContTablePostRequest, FloatingContTableSpec, Void>.ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(FloatingContTablePostRequest.class, FloatingContTableSpec.class, Void.class);
   }
 
   @Override
-  protected void validateVisualizationSpec(FloatingMosaicSpec pluginSpec) throws ValidationException {
+  protected void validateVisualizationSpec(FloatingContTableSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
       .var("xAxisVariable", pluginSpec.getXAxisVariable())
@@ -69,7 +69,7 @@ public class FloatingContTablePlugin extends AbstractEmptyComputePlugin<Floating
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(FloatingMosaicSpec pluginSpec) {
+  protected List<StreamSpec> getRequestedStreams(FloatingContTableSpec pluginSpec) {
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getXAxisVariable())
@@ -79,7 +79,7 @@ public class FloatingContTablePlugin extends AbstractEmptyComputePlugin<Floating
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PluginUtil util = getUtil();
-    FloatingMosaicSpec spec = getPluginSpec();
+    FloatingContTableSpec spec = getPluginSpec();
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
     varMap.put("xAxis", spec.getXAxisVariable());
     varMap.put("yAxis", spec.getYAxisVariable());

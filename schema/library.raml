@@ -1639,18 +1639,18 @@ types:
     additionalProperties: false
     properties:
       boxplot: FloatingBoxplot
-  FloatingMosaicPostRequest:
+  FloatingContTablePostRequest:
     type: DataPluginRequestBase
     properties:
-      config: FloatingMosaicSpec
-  FloatingMosaicSpec:
+      config: FloatingContTableSpec
+  FloatingContTableSpec:
     type: object
     additionalProperties: false
     properties:
       outputEntityId: string
       xAxisVariable: VariableSpec
       yAxisVariable: VariableSpec
-  FloatingMosaic:
+  FloatingContTable:
     type: object
     additionalProperties: false
     properties:
@@ -1660,7 +1660,7 @@ types:
     type: object
     additionalProperties: false
     properties:
-      mosaic: FloatingMosaic
+      mosaic: FloatingContTable
       statsTable:
         type: TwoByTwoStatsTable[]
         required: false
@@ -1818,13 +1818,18 @@ types:
     properties:
       overlayValues:
         type: string[]
+  RangeWithCountAndValue:
+    type: BinRangeWithValue
+    additionalProperties: false
+    properties:
+      count: number
   StandaloneMapElementInfo:
     type: object
     additionalProperties: false
     properties:
       geoAggregateValue: string
       entityCount: number
-      overlayValues: BinRangeWithValue[]
+      overlayValues: RangeWithCountAndValue[]
       avgLat: number
       avgLon: number
       minLat: number
