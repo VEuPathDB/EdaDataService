@@ -272,7 +272,7 @@ public class AppsService implements Apps {
   @Override
   public PostAppsDifferentialabundanceVisualizationsVolcanoplotResponse postAppsDifferentialabundanceVisualizationsVolcanoplot(DifferentialAbundanceVolcanoplotPostRequest entity) {
     return wrapPlugin(() -> PostAppsDifferentialabundanceVisualizationsVolcanoplotResponse.respond200WithApplicationJson(
-        new VolcanoplotPostResponseStream(processRequest(new DifferentialAbundanceVolcanoplotPlugin(), entity))));
+        new DifferentialAbundanceStatsResponseStream(processRequest(new DifferentialAbundanceVolcanoplotPlugin(), entity))));
   }
 
   @DisableJackson

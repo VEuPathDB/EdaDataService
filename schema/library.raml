@@ -575,6 +575,27 @@ types:
     type: object
     properties:
       pcoaVariance: number[]
+  DifferentialAbundancePluginRequest:
+    type: ComputeRequestBase
+    properties:
+      config: DifferentialAbundanceComputeConfig
+  DifferentialAbundanceComputeConfig:
+    type: object
+    properties:
+      collectionVariable: VariableSpec
+      comparisonVariable: VariableSpec
+      differentialAbundanceGroupA: string[]
+      differentialAbundanceGroupB: string[]
+      differentialAbundanceMethod: DifferentialAbundanceMethod
+  DifferentialAbundanceMethod:
+    type: string
+    enum:
+      - DESeq
+      - ANCOMBC
+  DifferentialAbundanceStatsResponse:
+    type: object
+    properties:
+      someStats: object
   ExamplePluginRequest:
     type: ComputeRequestBase
     properties:
@@ -686,21 +707,7 @@ types:
     type: DataPluginRequestBase
     properties:
       computeConfig: DifferentialAbundanceComputeConfig
-      config: DifferentialAbundanceVolcanoplotSpec
-  DifferentialAbundanceVolcanoplotSpec:
-    type: object
-    additionalProperties: false
-  DifferentialAbundanceComputeConfig:
-    type: object
-    additionalProperties: false
-  VolcanoplotPostResponse:
-    type: object
-    additionalProperties: false
-    properties:
-      volcanoplot: DifferentialAbundanceStats
-  DifferentialAbundanceStats:
-    type: object
-    additionalProperties: false
+      config: EmptyDataPluginSpec
   ContinuousVariableMetadataPostRequest:
     type: DataPluginRequestBase
     additionalProperties: false
@@ -1835,6 +1842,9 @@ types:
       derivedVariables:
         type: DerivedVariableSpec[]
         required: false
+  EmptyDataPluginSpec:
+    type: object
+    additionalProperties: false
   StringBoolean:
     type: string
     enum:
