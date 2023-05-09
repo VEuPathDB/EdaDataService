@@ -85,7 +85,7 @@ public class AppsMetadata {
           List.of(MICROBIOME_PROJECT),
           viz("scatterplot", new BetaDivScatterplotPlugin())),
       app("differentialabundance", "Differential Abundance", "differentialabundance",
-          "Find taxa or genes that are differnetially abundant between two groups.",
+          "Find taxa or genes that are differentially abundant between two groups.",
           List.of(MICROBIOME_PROJECT),
           viz("volcanoplot", new DifferentialAbundanceVolcanoplotPlugin())),
       app("distributions", "Distributions", null,
