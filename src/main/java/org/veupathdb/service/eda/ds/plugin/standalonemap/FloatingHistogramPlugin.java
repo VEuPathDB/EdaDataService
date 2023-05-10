@@ -147,11 +147,17 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
       }
 
       String cmd =
-          "plot.data::histogram(" + DEFAULT_SINGLE_STREAM_NAME + ", variables, binWidth, '" +
-               spec.getValueSpec().getValue() + "', '" +
-               binReportValue + "', '" +
-               barMode + "', viewport=viewport, sampleSizes=FALSE, completeCases=FALSE, " +
-               "overlayValues=" + overlayValues + ", 'noVariables')";
+          "plot.data::histogram(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " +
+                                  "variables=variables, " +
+                                  "binWidth=binWidth, " +
+                                  "value='" + spec.getValueSpec().getValue() + "', " +
+                                  "binReportValue='" + binReportValue + "', " +
+                                  "barMode='" + barMode + "', " +
+                                  "viewport=viewport, " + 
+                                  "sampleSizes=FALSE, " +
+                                  "completeCases=FALSE, " +
+                                  "overlayValues=" + overlayValues + ", " +
+                                  "evilMode='noVariables')";
                System.err.println(cmd);
       streamResult(connection, cmd, out);
     });

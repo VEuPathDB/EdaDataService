@@ -89,12 +89,14 @@ public class FloatingContTablePlugin extends AbstractEmptyComputePlugin<Floating
           spec.getXAxisVariable(),
           spec.getYAxisVariable()));
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
-      String cmd = "plot.data::mosaic(data=" + DEFAULT_SINGLE_STREAM_NAME + ", variables=variables, " + 
-                                     "statistic='chiSq', " + 
-                                     "columnReferenceValue=NA_character_, " + 
-                                     "rowReferenceValue=NA_character_, "+
-                                     "sampleSizes=FALSE, " +
-                                     "completeCases=FALSE, 'noVariables')";
+      String cmd = "plot.data::mosaic(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " + 
+                                        "variables=variables, " + 
+                                        "statistic='chiSq', " + 
+                                        "columnReferenceValue=NA_character_, " + 
+                                        "rowReferenceValue=NA_character_, "+
+                                        "sampleSizes=FALSE, " +
+                                        "completeCases=FALSE, " +
+                                        "evilMode='noVariables')";
       streamResult(connection, cmd, out);
     });
   }
