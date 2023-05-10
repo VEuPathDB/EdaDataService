@@ -88,12 +88,18 @@ public class ContinuousVariablePlugin extends AbstractEmptyComputePlugin<Continu
 
           PluginUtil util = getUtil();
           ContinuousVariableMetadataSpec spec = getPluginSpec();
-          List<String> requestedMetadata = spec.getMetadata();    
+          List<String> requestedMetadata = spec.getMetadata();
 
           useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
             connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, spec.getVariable()));
             // for convenience
             connection.voidEval("x <- " + DEFAULT_SINGLE_STREAM_NAME + "$" + util.toColNameOrEmpty(spec.getVariable()));
+
+            // Dates are read in as class=character. If we see the variable type is date, let's
+            // force the data in R to be have class=date. See veupathUtils #14 for more details.
+            if (util.getVariableType(spec.getVariable()) == "DATE") {
+              connection.voidEval("x <- as.Date(x)");
+            }
 
             if (requestedMetadata.contains("binRanges")) {
               // TODO add support for user-defined N bins? for now 10..
