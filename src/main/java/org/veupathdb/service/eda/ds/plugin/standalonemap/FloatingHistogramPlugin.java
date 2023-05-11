@@ -152,7 +152,7 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
                                   "binWidth=binWidth, " +
                                   "value='" + spec.getValueSpec().getValue() + "', " +
                                   "binReportValue='" + binReportValue + "', " +
-                                  "barMode='" + barMode + "', " +
+                                  "barmode='" + barMode + "', " +
                                   "viewport=viewport, " + 
                                   "sampleSizes=FALSE, " +
                                   "completeCases=FALSE, " +

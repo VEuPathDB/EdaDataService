@@ -113,9 +113,9 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
       String cmd =
           "plot.data::bar(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " +
               "variables=variables, " +
-              "valueSpec='" + spec.getValueSpec().getValue() + "', " +
-              "barMode='" + barMode + "', " +
-              "samplesSizes=FALSE, " +
+              "value='" + spec.getValueSpec().getValue() + "', " +
+              "barmode='" + barMode + "', " +
+              "sampleSizes=FALSE, " +
               "completeCases=FALSE, " + 
               "overlayValues=" + overlayValues + ", " + 
               "evilMode='noVariables')";

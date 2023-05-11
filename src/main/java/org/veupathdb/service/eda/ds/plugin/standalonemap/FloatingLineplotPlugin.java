@@ -150,7 +150,7 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
                                         "viewport=viewport, " +
                                         "numeratorValues=" + numeratorValues + ", " +
                                         "denominatorValues=" + denominatorValues + ", " +
-                                        "samplesSizes=FALSE," +
+                                        "sampleSizes=FALSE," +
                                         "completeCases=FALSE," +
                                         "overlayValues=" + overlayValues + ", " +
                                         "evilMode='noVariables')";                          
