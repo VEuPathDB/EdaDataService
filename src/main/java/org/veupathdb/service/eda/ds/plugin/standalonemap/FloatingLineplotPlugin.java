@@ -47,7 +47,7 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder(List.of("yAxisVariable"), List.of("xAxisVariable"), List.of("overlayVariable"))
+      .dependencyOrder(List.of("yAxisVariable"), List.of("xAxisVariable", "overlayVariable"))
       .pattern()
         .element("yAxisVariable")
           .description("Variable must be of the same or a child entity as the X-axis variable.")
