@@ -8,6 +8,8 @@ import org.veupathdb.service.eda.generated.model.OverlayConfig;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -33,8 +35,8 @@ public class OverlaySpecification {
       binRanges = null;
       labels = ((CategoricalOverlayConfig) overlayConfig).getOverlayValues();
     } else {
-      validateContinuousBinRanges((ContinousOverlayConfig) overlayConfig, varDatashapeFinder);
       binRanges = NormalizedBinRange.fromOverlayConfig((ContinousOverlayConfig) overlayConfig, variableType);
+      validateContinuousBinRanges((ContinousOverlayConfig) overlayConfig, binRanges, varDatashapeFinder);
       labels = binRanges.stream()
           .map(NormalizedBinRange::getLabel)
           .collect(Collectors.toList());
@@ -45,7 +47,7 @@ public class OverlaySpecification {
     } else if (variableType.equalsIgnoreCase(APIVariableType.INTEGER.getValue())) {
       overlayRecoder = input -> recodeNumeric(Integer.parseInt(input));
     } else if (variableType.equalsIgnoreCase(APIVariableType.DATE.getValue())) {
-      overlayRecoder = input -> recodeNumeric(Instant.parse(input).toEpochMilli());
+      overlayRecoder = input -> recodeNumeric(LocalDateTime.parse(input).toInstant(ZoneOffset.UTC).toEpochMilli());
     } else {
       overlayRecoder = input -> labels.contains(input) ? input : "__UNSELECTED__";
     }
@@ -99,7 +101,7 @@ public class OverlaySpecification {
     }
   }
 
-  private void validateContinuousBinRanges(ContinousOverlayConfig overlayConfig, Function<VariableSpec, String> varSpecFinder) {
+  private void validateContinuousBinRanges(ContinousOverlayConfig overlayConfig, List<NormalizedBinRange> normalizedRanges, Function<VariableSpec, String> varSpecFinder) {
     final String dataShape = varSpecFinder.apply(overlayConfig.getOverlayVariable());
     if (!dataShape.equalsIgnoreCase(APIVariableDataShape.CONTINUOUS.toString())) {
       throw new IllegalArgumentException("Input overlay variable %s is %s, but provided overlay configuration is for a continuous variable"
@@ -110,10 +112,10 @@ public class OverlaySpecification {
     if (anyMissingBinStart || anyMissingBinEnd) {
       throw new IllegalArgumentException("All numeric bin ranges must have start and end.");
     }
-    Map<Double, Double> binEdges = overlayConfig.getOverlayValues().stream()
+    Map<Double, Double> binEdges = normalizedRanges.stream()
         .collect(Collectors.toMap(
-            bin -> Double.parseDouble(bin.getBinStart()),
-            bin -> Double.parseDouble(bin.getBinEnd()),
+            NormalizedBinRange::getStart,
+            NormalizedBinRange::getEnd,
             (u, v) -> {
                throw new IllegalStateException(String.format("Duplicate key %s", u));
             }, 
