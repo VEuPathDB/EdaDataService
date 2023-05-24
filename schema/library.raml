@@ -300,6 +300,7 @@ types:
       sourceType: StudySourceType
       displayName: string
       shortDisplayName: string
+      lastModified: datetime
       description: string
   EntityIdGetResponse:
     type: object
@@ -583,19 +584,26 @@ types:
     type: object
     properties:
       collectionVariable: VariableSpec
-      comparisonVariable: VariableSpec
-      differentialAbundanceGroupA: string[]
-      differentialAbundanceGroupB: string[]
+      comparator: ComparatorSpec
       differentialAbundanceMethod: DifferentialAbundanceMethod
   DifferentialAbundanceMethod:
     type: string
     enum:
       - DESeq
       - ANCOMBC
+  ComparatorSpec:
+    type: object
+    properties:
+      variable: VariableSpec
+      groupA: string[]
+      groupB: string[]
   DifferentialAbundanceStatsResponse:
     type: object
     properties:
-      someStats: object
+      log2foldChange: string[]
+      pValue: string[]
+      adjustedPValue: string[]
+      pointId: string[]
   ExamplePluginRequest:
     type: ComputeRequestBase
     properties:

@@ -141,8 +141,9 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
       throw new BadRequestException("Compute results are not available for the requested job.");
     }
 
-    // if plugin requires a compute, get computed var metadata
-    List<VariableMapping> computedVars = _computeInfo.isPresent()
+    // if plugin requires a compute and metadata is expected for this compute, get computed var metadata
+    boolean expectMetadata = !appName.equals("differentialabundance");  // Diff abundance has no computed var metadata
+    List<VariableMapping> computedVars = (_computeInfo.isPresent() && expectMetadata)
         ? getComputedVariableMetadata().getVariables()
         : Collections.emptyList();
 
