@@ -142,8 +142,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
     }
 
     // if plugin requires a compute and metadata is expected for this compute, get computed var metadata
-    boolean expectMetadata = !appName.equals("differentialabundance");  // Diff abundance has no computed var metadata
-    List<VariableMapping> computedVars = (_computeInfo.isPresent() && expectMetadata)
+    List<VariableMapping> computedVars = _computeInfo.isPresent() && computeGeneratesVars()
         ? getComputedVariableMetadata().getVariables()
         : Collections.emptyList();
 
@@ -163,6 +162,13 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
     _requestProcessed = true;
     logRequestTime("Initial request processing complete");
     return this;
+  }
+
+  /**
+   * @return whether the associated compute generates vars (assumes true unless overridden)
+   */
+  protected boolean computeGeneratesVars() {
+    return true;
   }
 
   protected void logRequestTime(String eventDescription) {

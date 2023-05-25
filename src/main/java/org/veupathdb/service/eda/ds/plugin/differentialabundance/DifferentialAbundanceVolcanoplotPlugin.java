@@ -38,6 +38,11 @@ public class DifferentialAbundanceVolcanoplotPlugin extends AbstractPlugin<Diffe
   }
 
   @Override
+  protected boolean computeGeneratesVars() {
+    return false;
+  }
+
+  @Override
   protected void validateVisualizationSpec(EmptyDataPluginSpec pluginSpec) throws ValidationException {
     // nothing to do here
   }
