@@ -48,7 +48,7 @@ public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBo
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder(List.of("yAxisVariable"), List.of("xAxisVariable"), List.of("overlayVariable"))
+      .dependencyOrder(List.of("yAxisVariable"), List.of("xAxisVariable", "overlayVariable"))
       .pattern()
         .element("yAxisVariable")
           .types(APIVariableType.NUMBER, APIVariableType.INTEGER)
@@ -123,16 +123,17 @@ public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBo
 
     useRConnectionWithProcessedRemoteFiles(Resources.RSERVE_URL, filesProcessor, connection -> {
       String overlayValues = _overlaySpecification == null ? "NULL" : _overlaySpecification.getRBinListAsString();
-      boolean deprecatedShowMissingness = false;
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String cmd =
-          "plot.data::box(data=" + DEFAULT_SINGLE_STREAM_NAME + ", variables=variables, " +
+          "plot.data::box(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " +
+              "variables=variables, " +
               "points='outliers', " +
               "mean=TRUE, " +
               "computeStats=FALSE, " +
               "sampleSizes=FALSE, " +
-              "completeCases=FALSE, overlayValues=" + overlayValues + ", '" +
-              deprecatedShowMissingness + "')";
+              "completeCases=FALSE, " +
+              "overlayValues=" + overlayValues + ", " +
+              "evilMode='noVariables')";
       streamResult(connection, cmd, out);
     });
   }

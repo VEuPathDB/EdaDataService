@@ -111,10 +111,14 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
           overlayVariable));
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String cmd =
-          "plot.data::bar(data=" + DEFAULT_SINGLE_STREAM_NAME + ", variables=variables, " +
-              "valueSpec='" + spec.getValueSpec().getValue() + "', " +
-              "barMode='" + barMode + "', " +
-              "samplesSizes=FALSE, completeCases=FALSE, overlayValues=" + overlayValues + ", 'noVariables')";
+          "plot.data::bar(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " +
+              "variables=variables, " +
+              "value='" + spec.getValueSpec().getValue() + "', " +
+              "barmode='" + barMode + "', " +
+              "sampleSizes=FALSE, " +
+              "completeCases=FALSE, " + 
+              "overlayValues=" + overlayValues + ", " + 
+              "evilMode='noVariables')";
       streamResult(connection, cmd, out);
     });
   }

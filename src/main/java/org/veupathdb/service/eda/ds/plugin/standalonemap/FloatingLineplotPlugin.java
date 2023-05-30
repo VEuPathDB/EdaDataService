@@ -47,7 +47,7 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder(List.of("yAxisVariable"), List.of("xAxisVariable"), List.of("overlayVariable"))
+      .dependencyOrder(List.of("yAxisVariable"), List.of("xAxisVariable", "overlayVariable"))
       .pattern()
         .element("yAxisVariable")
           .description("Variable must be of the same or a child entity as the X-axis variable.")
@@ -143,17 +143,17 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
         }
         connection.voidEval("binWidth <- " + binWidth);
       }
-      String cmd = "plot.data::lineplot(data=" + DEFAULT_SINGLE_STREAM_NAME + 
-                                        ", variables=variables, binWidth=binWidth, " + 
-                                        "  value=" + singleQuote(valueSpec) + 
-                                        ", errorBars=" + errorBars + 
-                                        ", viewport=viewport" + 
-                                        ", numeratorValues=" + numeratorValues +
-                                        ", denominatorValues=" + denominatorValues + 
-                                        ", samplesSizes=FALSE" +
-                                        ", completeCases=FALSE" +
-                                        ", overlayValues=" + overlayValues + 
-                                        ", 'noVariables')";                          
+      String cmd = "plot.data::lineplot(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " +
+                                        "variables=variables, binWidth=binWidth, " + 
+                                        "value=" + singleQuote(valueSpec) + ", " +
+                                        "errorBars=" + errorBars + ", " +
+                                        "viewport=viewport, " +
+                                        "numeratorValues=" + numeratorValues + ", " +
+                                        "denominatorValues=" + denominatorValues + ", " +
+                                        "sampleSizes=FALSE," +
+                                        "completeCases=FALSE," +
+                                        "overlayValues=" + overlayValues + ", " +
+                                        "evilMode='noVariables')";                          
       streamResult(connection, cmd, out);
     }); 
   }

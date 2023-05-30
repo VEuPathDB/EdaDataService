@@ -46,7 +46,7 @@ public class LineplotPlugin extends AbstractEmptyComputePlugin<LineplotPostReque
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder(List.of("yAxisVariable"), List.of("xAxisVariable"), List.of("overlayVariable", "facetVariable"))
+      .dependencyOrder(List.of("yAxisVariable"), List.of("xAxisVariable", "overlayVariable", "facetVariable"))
       .pattern()
         .element("yAxisVariable")
         .element("xAxisVariable")

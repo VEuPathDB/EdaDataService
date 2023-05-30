@@ -4,11 +4,15 @@ import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.ContinousOverlayConfig;
 
 import java.time.Instant;
-import java.util.Collections;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class NormalizedBinRange {
+  private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
   private final double start;
   private final double end;
   private final String label;
@@ -35,8 +39,8 @@ public class NormalizedBinRange {
     if (variableType.equalsIgnoreCase(APIVariableType.DATE.getValue())) {
       return overlayConfig.getOverlayValues().stream()
           .map(binRange -> new NormalizedBinRange(
-              Instant.parse(binRange.getBinStart()).toEpochMilli(),
-              Instant.parse(binRange.getBinEnd()).toEpochMilli(),
+              LocalDate.parse(binRange.getBinStart(), DATE_FORMATTER).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),
+              LocalDate.parse(binRange.getBinEnd(), DATE_FORMATTER).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),
               binRange.getBinLabel()))
           .collect(Collectors.toList());
     } else {
