@@ -141,8 +141,8 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
       throw new BadRequestException("Compute results are not available for the requested job.");
     }
 
-    // if plugin requires a compute, get computed var metadata
-    List<VariableMapping> computedVars = _computeInfo.isPresent()
+    // if plugin requires a compute and metadata is expected for this compute, get computed var metadata
+    List<VariableMapping> computedVars = _computeInfo.isPresent() && computeGeneratesVars()
         ? getComputedVariableMetadata().getVariables()
         : Collections.emptyList();
 
@@ -162,6 +162,13 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
     _requestProcessed = true;
     logRequestTime("Initial request processing complete");
     return this;
+  }
+
+  /**
+   * @return whether the associated compute generates vars (assumes true unless overridden)
+   */
+  protected boolean computeGeneratesVars() {
+    return true;
   }
 
   protected void logRequestTime(String eventDescription) {
@@ -363,6 +370,15 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
 
   protected <Q> Q getComputeResultStats(Class<Q> expectedStatsClass) {
     return _computeClient.getJobStatistics(getComputeName(), createComputeRequestBody(), expectedStatsClass);
+  }
+
+  protected void writeComputeStatsResponseToOutput(OutputStream out) {
+    try (InputStream statsStream = _computeClient.getJobStatistics(getComputeName(), createComputeRequestBody()).getInputStream()) {
+      statsStream.transferTo(out);
+    }
+    catch (Exception e) {
+      throw new RuntimeException("Unable to stream stats response from compute service", e);
+    }
   }
 
   protected ComputedVariableMetadata getComputedVariableMetadata() {

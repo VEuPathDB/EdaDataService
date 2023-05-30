@@ -371,6 +371,21 @@ securitySchemes:
               application/json:
                 type: lib.ScatterplotPostResponse
 
+  /differentialabundance/visualizations:
+    displayName: Visualizations for interrogating differentially abundant taxa, genes, or pathways
+
+    /volcanoplot:
+      post:
+        description: Returns data required to create a volcanoplot from a differential abundance analysis.
+        body:
+          application/json:
+            type: lib.DifferentialAbundanceVolcanoplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.DifferentialAbundanceStatsResponse
+
   /distributions/visualizations:
     displayName: Visualizations for exploring distributions of data.
 
