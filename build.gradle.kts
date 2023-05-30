@@ -79,7 +79,7 @@ repositories {
 
 // versions
 val coreLib       = "6.14.4"         // Container core lib version
-val edaCompute    = "1.5.0-diffabund-beta2"          // EDA Compute version (used to pull in compute plugin RAML)
+val edaCompute    = "1.5.0"          // EDA Compute version (used to pull in compute plugin RAML)
 val edaCommon     = "10.6.1"         // EDA Common version
 val fgputil       = "2.12.6-jakarta" // FgpUtil version
 
