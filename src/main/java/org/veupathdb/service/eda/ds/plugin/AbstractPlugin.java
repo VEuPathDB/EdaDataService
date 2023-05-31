@@ -458,17 +458,9 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
     }
   }
 
-  // there is probably some JRI util that would make this unnecessary if i were more clever??
-  public static String listToRVector(List<String> values) {
-    return
-        "c(" +
-        values.stream()
-            .map(PluginUtil::doubleQuote)
-            .collect(Collectors.joining(", ")) +
-        ")";
-  }
-
   public String getVariableMetadataRObjectAsString(VariableMapping var) {
+    PluginUtil util = getUtil();
+
     if (var == null) return null;
 
     StringBuilder variableMetadata = new StringBuilder(
@@ -494,7 +486,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
     }
 
     if (var.getVocabulary() != null)
-      variableMetadata.append(",vocabulary=").append(listToRVector(var.getVocabulary()));
+      variableMetadata.append(",vocabulary=").append(util.listToRVector(var.getVocabulary()));
 
     if (var.getMembers() != null)
       variableMetadata.append(",members=").append(getVariableSpecListRObjectAsString(var.getMembers()));
