@@ -106,8 +106,8 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
     String valueSpec = spec.getValueSpec().getValue();
     String xVar = util.toColNameOrEmpty(spec.getXAxisVariable());
     String xVarType = util.getVariableType(spec.getXAxisVariable());
-    String numeratorValues = spec.getYAxisNumeratorValues() != null ? listToRVector(spec.getYAxisNumeratorValues()) : "NULL";
-    String denominatorValues = spec.getYAxisDenominatorValues() != null ? listToRVector(spec.getYAxisDenominatorValues()) : "NULL";
+    String numeratorValues = spec.getYAxisNumeratorValues() != null ? util.listToRVector(spec.getYAxisNumeratorValues()) : "NULL";
+    String denominatorValues = spec.getYAxisDenominatorValues() != null ? util.listToRVector(spec.getYAxisDenominatorValues()) : "NULL";
     String overlayValues = _overlaySpecification == null ? "NULL" : _overlaySpecification.getRBinListAsString();
     
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
