@@ -31,7 +31,7 @@ public class FloatingTimeSeriesPlugin extends FloatingLineplotPlugin {
           .description("Variable must be of the same or a child entity as the X-axis variable.")
         .element("xAxisVariable")
           .temporal(true)
-          .description("Variable must be temporal and be the same or a child entity as the variable the map markers are configured with, if any.")
+          .description("Variable must be temporal and belong to the same or child entity as the variable the map markers are configured with, if any.")
         .element("overlayVariable")
           .required(false)
       .done();
