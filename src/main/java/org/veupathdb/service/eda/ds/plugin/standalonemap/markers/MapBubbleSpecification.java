@@ -28,7 +28,7 @@ public class MapBubbleSpecification {
 
       CategoricalColorConfig colorConfig = (CategoricalColorConfig) overlayConfig;
       aggregatorSupplier = () -> new CategoricalRatioAggregator(new HashSet<>(colorConfig.getNumeratorValues()),
-          new HashSet<>(colorConfig.getNumeratorValues()));
+          new HashSet<>(colorConfig.getDenominatorValues()));
     } else {
 
       if (!varShapeFinder.apply(overlayVariable).equalsIgnoreCase(APIVariableDataShape.CONTINUOUS.getValue())) {

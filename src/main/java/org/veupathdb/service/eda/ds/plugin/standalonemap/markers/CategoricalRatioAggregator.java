@@ -32,6 +32,9 @@ public class CategoricalRatioAggregator implements MarkerAggregator<Double> {
 
   @Override
   public Double finish() {
+    if (numDenominatorMatches == 0) {
+      return null;
+    }
     return (double) numNumeratorMatches / numDenominatorMatches;
   }
 }

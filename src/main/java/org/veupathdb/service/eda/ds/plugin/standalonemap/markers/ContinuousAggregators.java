@@ -24,6 +24,9 @@ public enum ContinuousAggregators {
 
     @Override
     public Double finish() {
+      if (n == 0) {
+        return null;
+      }
       return sum / n;
     }
   }),
