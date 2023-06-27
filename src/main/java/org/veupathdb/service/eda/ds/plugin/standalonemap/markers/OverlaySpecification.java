@@ -7,7 +7,6 @@ import org.veupathdb.service.eda.generated.model.ContinousOverlayConfig;
 import org.veupathdb.service.eda.generated.model.OverlayConfig;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.HashSet;
@@ -23,7 +22,7 @@ public class OverlaySpecification {
   private final List<String> labels;
   private final List<NormalizedBinRange> binRanges;
   private final VariableSpec overlayVariable;
-  private OverlayRecoder overlayRecoder;
+  private final OverlayRecoder overlayRecoder;
 
   public OverlaySpecification(OverlayConfig overlayConfig,
                               Function<VariableSpec, String> varTypeFinder,
@@ -78,6 +77,10 @@ public class OverlaySpecification {
 
   public VariableSpec getOverlayVariable() {
     return overlayVariable;
+  }
+
+  public OverlayRecoder getOverlayRecoder() {
+    return overlayRecoder;
   }
 
   public String recode(String s) {

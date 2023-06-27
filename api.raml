@@ -61,6 +61,18 @@ securitySchemes:
               application/json:
                 type: lib.StandaloneMapMarkersPostResponse
 
+      /bubbles:
+        post:
+          description: Returns data required to make bubble markers
+          body:
+            application/json:
+              type: lib.StandaloneMapBubblesPostRequest
+          responses:
+            200:
+              body:
+                application/json:
+                  type: lib.StandaloneMapBubblesPostResponse
+
   /standalone-map-xyrelationships/visualizations:
     displayName: Available visualizations for the Standalone Map application
 

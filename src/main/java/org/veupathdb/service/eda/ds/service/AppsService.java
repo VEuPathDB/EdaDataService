@@ -54,6 +54,12 @@ public class AppsService implements Apps {
   }
 
   @Override
+  public PostAppsStandaloneMapVisualizationsMapMarkersBubblesResponse postAppsStandaloneMapVisualizationsMapMarkersBubbles(StandaloneMapBubblesPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapVisualizationsMapMarkersBubblesResponse.respond200WithApplicationJson(
+        new StandaloneMapBubblesPostResponseStream(processRequest(new BubbleMapMarkersPlugin(), entity))));
+  }
+
+  @Override
   public PostAppsStandaloneMapXyrelationshipsVisualizationsScatterplotResponse postAppsStandaloneMapXyrelationshipsVisualizationsScatterplot(FloatingScatterplotPostRequest entity) {
     return wrapPlugin(() -> PostAppsStandaloneMapXyrelationshipsVisualizationsScatterplotResponse.respond200WithApplicationJson(
         new FloatingScatterplotPostResponseStream(processRequest(new FloatingScatterplotPlugin(), entity))));

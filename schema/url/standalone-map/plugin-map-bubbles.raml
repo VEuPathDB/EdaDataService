@@ -1,0 +1,82 @@
+#%RAML 1.0 Library
+
+types:
+
+  StandaloneMapBubblesPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: StandaloneMapBubblesSpec
+
+  StandaloneMapBubblesSpec:
+    additionalProperties: false
+    properties:
+      outputEntityId: 
+        type: string
+      geoAggregateVariable:
+        type: VariableSpec
+      longitudeVariable:
+        type: VariableSpec
+      latitudeVariable:
+        type: VariableSpec
+      colorConfig?:
+        type: ColorConfig # categoricals can just ignore bin start and end
+      # if we choose to support things like means and medians for cont vars this may need to be a custom enum
+      valueSpec:
+        type: ValueSpec
+      viewport:
+        type: GeolocationViewport
+
+  StandaloneMapBubblesPostResponse:
+    additionalProperties: false
+    properties:
+      mapElements: ColoredMapElementInfo[]
+
+  Aggregator:
+    type: string
+    enum: [ "Mean", "Median" ]
+
+  ColorConfig:
+    additionalProperties: false
+    discriminator: overlayType
+    properties:
+      overlayType:
+        type: OverlayType
+      overlayVariable:
+        type: VariableSpec
+
+  ContinousColorConfig:
+    type: ColorConfig
+    additionalProperties: false
+    discriminatorValue: continuous
+    properties:
+      aggregator: string
+
+  CategoricalColorConfig:
+    type: ColorConfig
+    discriminatorValue: categorical
+    additionalProperties: false
+    properties:
+      numeratorValues: string[]
+      denominatorValues: string[]
+
+  ColoredMapElementInfo:
+    additionalProperties: false
+    properties:
+      geoAggregateValue:
+        type: string
+      entityCount:
+        type: number
+      colorValue:
+        type: number
+      avgLat:
+        type: number
+      avgLon:
+        type: number
+      minLat:
+        type: number
+      minLon:
+        type: number
+      maxLat:
+        type: number
+      maxLon:
+        type: number

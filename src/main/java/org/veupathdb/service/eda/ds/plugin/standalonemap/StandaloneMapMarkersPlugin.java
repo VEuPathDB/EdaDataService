@@ -2,16 +2,15 @@ package org.veupathdb.service.eda.ds.plugin.standalonemap;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.gusdb.fgputil.DelimitedDataParser;
 import org.gusdb.fgputil.geo.GeographyUtil.GeographicPoint;
-import org.gusdb.fgputil.geo.LatLonAverager;
 import org.gusdb.fgputil.json.JsonUtil;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
@@ -19,6 +18,10 @@ import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MarkerAggregator;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.CategoricalOverlayAggregator;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MapMarkerRowProcessor;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MarkerData;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.OverlaySpecification;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.GeolocationViewport;
 import org.veupathdb.service.eda.generated.model.*;
@@ -85,49 +88,6 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
             .orElse(null)));
   }
 
-  private static class GeoVarData {
-
-    long count = 0;
-    LatLonAverager latLonAvg = new LatLonAverager();
-    double minLat = 90;
-    double maxLat = -90;
-    double minLon = 180;
-    double maxLon = -180;
-    Map<String, AtomicInteger> overlayValuesCount = new HashMap<>();
-    Map<String, Float> overlayValuesProportion = new HashMap<>();
-
-    void addRow(double lat, double lon, String overlayValue) {
-      count++;
-      latLonAvg.addDataPoint(lat, lon);
-      minLat = Math.min(minLat, lat);
-      minLon = Math.min(minLon, lon);
-      maxLat = Math.max(maxLat, lat);
-      maxLon = Math.max(maxLon, lon);
-      if (overlayValue != null) {
-        overlayValuesCount.putIfAbsent(overlayValue, new AtomicInteger(0));
-        overlayValuesCount.get(overlayValue).incrementAndGet();
-        float proportion = (float) overlayValuesCount.get(overlayValue).get() / count;
-        overlayValuesProportion.put(overlayValue, proportion);
-      }  
-    }
-
-    List<RangeWithCountAndValue> getOverlayValues(String valueSpec) {
-      List<RangeWithCountAndValue> overlayValuesResponse = new ArrayList<>();
-
-      for (String overlayValue : overlayValuesCount.keySet()) {
-        RangeWithCountAndValue newValue = new RangeWithCountAndValueImpl();
-        newValue.setBinLabel(overlayValue);
-        newValue.setCount(overlayValuesCount.get(overlayValue).get());
-        newValue.setValue(valueSpec.equals(ValueSpec.PROPORTION.getValue())
-            ? overlayValuesProportion.get(overlayValue)
-            : overlayValuesCount.get(overlayValue).get());
-        overlayValuesResponse.add(newValue);
-      }
-
-      return overlayValuesResponse;
-    }
-  }
-
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
 
@@ -153,51 +113,45 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
     GeolocationViewport viewport = GeolocationViewport.fromApiViewport(spec.getViewport());
 
     // loop through rows of data stream, aggregating stats into a map from aggregate value to stats object
-    Map<String, GeoVarData> aggregator = new HashMap<>();
-    String nextLine = reader.readLine();
+    MapMarkerRowProcessor<Map<String, CategoricalOverlayAggregator.CategoricalOverlayData>> processor = new MapMarkerRowProcessor<>(geoVarIndex, latIndex, lonIndex, overlayIndex);
 
-    while (nextLine != null) {
-      String[] row = parser.parseLineToArray(nextLine);
-      
-      // entity records counts not impacted by viewport
-      if (!(row[geoVarIndex] == null || row[geoVarIndex].isEmpty() ||
-            row[latIndex] == null || row[latIndex].isEmpty() ||
-            row[lonIndex] == null || row[lonIndex].isEmpty())) {
-      
-        double latitude = Double.parseDouble(row[latIndex]);
-        double longitude = Double.parseDouble(row[lonIndex]);
-        String overlayValue = overlayConfig
-            .map(overlaySpec -> overlaySpec.recode(row[overlayIndex]))
-            .orElse(null);
+    Supplier<MarkerAggregator<Map<String, CategoricalOverlayAggregator.CategoricalOverlayData>>> aggregatorSupplier = () ->
+        new CategoricalOverlayAggregator(overlayConfig.map(OverlaySpecification::getOverlayRecoder).orElse(null));
 
-        if (viewport.containsCoordinates(latitude, longitude)) {
-          aggregator.putIfAbsent(row[geoVarIndex], new GeoVarData());
-          // overlayValue here could be a raw numeric value as well
-          aggregator.get(row[geoVarIndex]).addRow(latitude, longitude, overlayValue);
-        }
-      }
-      nextLine = reader.readLine();
-    }
+    Map<String, MarkerData<Map<String, CategoricalOverlayAggregator.CategoricalOverlayData>>> aggregator = processor.process(
+        reader, parser, viewport, aggregatorSupplier);
 
     List<StandaloneMapElementInfo> output = new ArrayList<>();
     for (String key : aggregator.keySet()) {
       StandaloneMapElementInfo mapEle = new StandaloneMapElementInfoImpl();
-      GeoVarData data = aggregator.get(key);
-      GeographicPoint avgLatLon = data.latLonAvg.getCurrentAverage();
+      MarkerData<Map<String, CategoricalOverlayAggregator.CategoricalOverlayData>> data = aggregator.get(key);
+      GeographicPoint avgLatLon = data.getLatLonAvg().getCurrentAverage();
       mapEle.setGeoAggregateValue(key);
-      mapEle.setEntityCount(data.count);
+      mapEle.setEntityCount(data.getCount());
       mapEle.setAvgLat(avgLatLon.getLatitude());
       mapEle.setAvgLon(avgLatLon.getLongitude());
-      mapEle.setMinLat(data.minLat);
-      mapEle.setMaxLat(data.maxLat);
-      mapEle.setMinLon(data.minLon);
-      mapEle.setMaxLon(data.maxLon);
-      mapEle.setOverlayValues(data.getOverlayValues(valueSpec));
+      mapEle.setMinLat(data.getMinLat());
+      mapEle.setMaxLat(data.getMaxLat());
+      mapEle.setMinLon(data.getMinLon());
+      mapEle.setMaxLon(data.getMaxLon());
+      mapEle.setOverlayValues(convertAggregator(data.getMarkerAggregator(), valueSpec));
       output.add(mapEle);
     }
     StandaloneMapMarkersPostResponse response = new StandaloneMapMarkersPostResponseImpl();
     response.setMapElements(output);
     JsonUtil.Jackson.writeValue(out, response);
     out.flush();
+  }
+
+  private List<RangeWithCountAndValue> convertAggregator(MarkerAggregator<Map<String, CategoricalOverlayAggregator.CategoricalOverlayData>> aggregator, String valueSpec) {
+    return aggregator.finish().entrySet().stream()
+        .map(entry -> {
+          RangeWithCountAndValue bin = new RangeWithCountAndValueImpl();
+          bin.setValue(valueSpec.equals(ValueSpec.PROPORTION.getValue()) ? entry.getValue().getProportion() : entry.getValue().getCount());
+          bin.setBinLabel(entry.getKey());
+          bin.setCount(entry.getValue().getCount());
+          return bin;
+        })
+        .collect(Collectors.toList());
   }
 }
