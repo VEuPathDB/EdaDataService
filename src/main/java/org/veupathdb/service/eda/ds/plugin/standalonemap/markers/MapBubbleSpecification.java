@@ -1,9 +1,9 @@
 package org.veupathdb.service.eda.ds.plugin.standalonemap.markers;
 
 import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
-import org.veupathdb.service.eda.generated.model.CategoricalColorConfig;
-import org.veupathdb.service.eda.generated.model.ColorConfig;
-import org.veupathdb.service.eda.generated.model.ContinousColorConfig;
+import org.veupathdb.service.eda.generated.model.CategoricalQuantitativeOverlayConfig;
+import org.veupathdb.service.eda.generated.model.ContinuousQuantitativeOverlayConfig;
+import org.veupathdb.service.eda.generated.model.QuantitativeOverlayConfig;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import java.util.HashSet;
@@ -14,28 +14,29 @@ import static org.veupathdb.service.eda.generated.model.OverlayType.CATEGORICAL;
 
 public class MapBubbleSpecification {
   private final VariableSpec overlayVariable;
-  private OverlayRecoder overlayRecoder;
-  private Supplier<MarkerAggregator<Double>> aggregatorSupplier;
+  private final Supplier<MarkerAggregator<Double>> aggregatorSupplier;
 
-  public MapBubbleSpecification(ColorConfig overlayConfig,
+  public MapBubbleSpecification(QuantitativeOverlayConfig overlayConfig,
                                 Function<VariableSpec, String> varShapeFinder) {
     this.overlayVariable = overlayConfig.getOverlayVariable();
     if (CATEGORICAL.equals(overlayConfig.getOverlayType())) {
-
-      if (!varShapeFinder.apply(overlayVariable).equalsIgnoreCase(APIVariableDataShape.CATEGORICAL.getValue())) {
+      if (!varShapeFinder.apply(overlayVariable).equalsIgnoreCase(APIVariableDataShape.CATEGORICAL.getValue())
+          && !varShapeFinder.apply(overlayVariable).equalsIgnoreCase(APIVariableDataShape.ORDINAL.getValue())) {
         throw new IllegalArgumentException("Incorrect overlay configuration type for categorical var: " + varShapeFinder.apply(overlayVariable));
       }
-
-      CategoricalColorConfig colorConfig = (CategoricalColorConfig) overlayConfig;
-      aggregatorSupplier = () -> new CategoricalRatioAggregator(new HashSet<>(colorConfig.getNumeratorValues()),
+      CategoricalQuantitativeOverlayConfig colorConfig = (CategoricalQuantitativeOverlayConfig) overlayConfig;
+      if (!colorConfig.getDenominatorValues().containsAll(colorConfig.getNumeratorValues())) {
+        throw new IllegalArgumentException("CategoricalQuantitativeOverlay numerator values must be a subset of denominator values.");
+      }
+      aggregatorSupplier = () -> new CategoricalProportionAggregator(new HashSet<>(colorConfig.getNumeratorValues()),
           new HashSet<>(colorConfig.getDenominatorValues()));
     } else {
-
       if (!varShapeFinder.apply(overlayVariable).equalsIgnoreCase(APIVariableDataShape.CONTINUOUS.getValue())) {
         throw new IllegalArgumentException("Incorrect overlay configuration type for continuous var: " + varShapeFinder.apply(overlayVariable));
       }
 
-      aggregatorSupplier = ContinuousAggregators.fromExternalString(((ContinousColorConfig) overlayConfig).getAggregator()).getAggregatorSupplier();
+      aggregatorSupplier = ContinuousAggregators.fromExternalString(((ContinuousQuantitativeOverlayConfig) overlayConfig).getAggregator().getValue())
+          .getAggregatorSupplier();
     }
   }
 
