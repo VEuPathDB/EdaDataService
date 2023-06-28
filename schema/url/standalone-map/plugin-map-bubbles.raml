@@ -55,9 +55,8 @@ types:
         type: VariableSpec
       latitudeVariable:
         type: VariableSpec
-      colorConfig?:
-        type: ColorConfig # categoricals can just ignore bin start and end
-      # if we choose to support things like means and medians for cont vars this may need to be a custom enum
+      overlayConfig?:
+        type: QuantitativeOverlayConfig
       valueSpec:
         type: ValueSpec
       viewport:
@@ -70,9 +69,9 @@ types:
 
   Aggregator:
     type: string
-    enum: [ "Mean", "Median" ]
+    enum: [ "mean", "median" ]
 
-  ColorConfig:
+  QuantitativeOverlayConfig:
     additionalProperties: false
     discriminator: overlayType
     properties:
@@ -81,15 +80,15 @@ types:
       overlayVariable:
         type: VariableSpec
 
-  ContinousColorConfig:
-    type: ColorConfig
+  ContinuousQuantitativeOverlayConfig:
+    type: QuantitativeOverlayConfig
     additionalProperties: false
     discriminatorValue: continuous
     properties:
-      aggregator: string
+      aggregator: Aggregator
 
-  CategoricalColorConfig:
-    type: ColorConfig
+  CategoricalQuantitativeOverlayConfig:
+    type: QuantitativeOverlayConfig
     discriminatorValue: categorical
     additionalProperties: false
     properties:
@@ -103,7 +102,7 @@ types:
         type: string
       entityCount:
         type: number
-      colorValue:
+      overlayValue:
         type: number
       avgLat:
         type: number

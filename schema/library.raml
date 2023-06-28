@@ -1822,7 +1822,7 @@ types:
       geoAggregateVariable: VariableSpec
       longitudeVariable: VariableSpec
       latitudeVariable: VariableSpec
-      colorConfig?: ColorConfig
+      overlayConfig?: QuantitativeOverlayConfig
       valueSpec: ValueSpec
       viewport: GeolocationViewport
   StandaloneMapBubblesPostResponse:
@@ -1833,23 +1833,23 @@ types:
   Aggregator:
     type: string
     enum:
-      - Mean
-      - Median
-  ColorConfig:
+      - mean
+      - median
+  QuantitativeOverlayConfig:
     type: object
     additionalProperties: false
     discriminator: overlayType
     properties:
       overlayType: OverlayType
       overlayVariable: VariableSpec
-  ContinousColorConfig:
-    type: ColorConfig
+  ContinuousQuantitativeOverlayConfig:
+    type: QuantitativeOverlayConfig
     additionalProperties: false
     discriminatorValue: continuous
     properties:
-      aggregator: string
-  CategoricalColorConfig:
-    type: ColorConfig
+      aggregator: Aggregator
+  CategoricalQuantitativeOverlayConfig:
+    type: QuantitativeOverlayConfig
     discriminatorValue: categorical
     additionalProperties: false
     properties:
@@ -1861,7 +1861,7 @@ types:
     properties:
       geoAggregateValue: string
       entityCount: number
-      colorValue: number
+      overlayValue: number
       avgLat: number
       avgLon: number
       minLat: number

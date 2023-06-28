@@ -14,9 +14,9 @@ import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MapBubbleSpecif
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MapMarkerRowProcessor;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MarkerData;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
-import org.veupathdb.service.eda.generated.model.ColorConfig;
 import org.veupathdb.service.eda.generated.model.ColoredMapElementInfo;
 import org.veupathdb.service.eda.generated.model.ColoredMapElementInfoImpl;
+import org.veupathdb.service.eda.generated.model.QuantitativeOverlayConfig;
 import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesPostRequest;
 import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesPostResponse;
 import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesPostResponseImpl;
@@ -73,12 +73,12 @@ public class BubbleMapMarkersPlugin extends AbstractEmptyComputePlugin<Standalon
       .var("geoAggregateVariable", pluginSpec.getGeoAggregateVariable())
       .var("latitudeVariable", pluginSpec.getLatitudeVariable())
       .var("longitudeVariable", pluginSpec.getLongitudeVariable())
-      .var("overlayVariable", Optional.ofNullable(pluginSpec.getColorConfig())
-          .map(ColorConfig::getOverlayVariable)
+      .var("overlayVariable", Optional.ofNullable(pluginSpec.getOverlayConfig())
+          .map(QuantitativeOverlayConfig::getOverlayVariable)
           .orElse(null)));
-    if (pluginSpec.getColorConfig() != null) {
+    if (pluginSpec.getOverlayConfig() != null) {
       try {
-        _overlaySpecification = new MapBubbleSpecification(pluginSpec.getColorConfig(), getUtil()::getVariableDataShape);
+        _overlaySpecification = new MapBubbleSpecification(pluginSpec.getOverlayConfig(), getUtil()::getVariableDataShape);
       } catch (IllegalArgumentException e) {
         throw new ValidationException(e.getMessage());
       }
@@ -92,8 +92,8 @@ public class BubbleMapMarkersPlugin extends AbstractEmptyComputePlugin<Standalon
         .addVar(pluginSpec.getGeoAggregateVariable())
         .addVar(pluginSpec.getLatitudeVariable())
         .addVar(pluginSpec.getLongitudeVariable())
-        .addVar(Optional.ofNullable(pluginSpec.getColorConfig())
-            .map(ColorConfig::getOverlayVariable)
+        .addVar(Optional.ofNullable(pluginSpec.getOverlayConfig())
+            .map(QuantitativeOverlayConfig::getOverlayVariable)
             .orElse(null)));
   }
 
@@ -137,7 +137,7 @@ public class BubbleMapMarkersPlugin extends AbstractEmptyComputePlugin<Standalon
       mapEle.setMaxLat(data.getMaxLat());
       mapEle.setMinLon(data.getMinLon());
       mapEle.setMaxLon(data.getMaxLon());
-      mapEle.setColorValue(data.getMarkerAggregator().finish());
+      mapEle.setOverlayValue(data.getMarkerAggregator().finish());
       output.add(mapEle);
     }
     StandaloneMapBubblesPostResponse response = new StandaloneMapBubblesPostResponseImpl();

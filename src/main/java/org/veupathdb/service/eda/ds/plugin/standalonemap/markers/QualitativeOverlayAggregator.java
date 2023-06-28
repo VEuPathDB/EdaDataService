@@ -7,12 +7,12 @@ import java.util.stream.Collectors;
 /**
  * Overlay aggregator for categorical variables on the standalone map marker.
  */
-public class CategoricalOverlayAggregator implements MarkerAggregator<Map<String, CategoricalOverlayAggregator.CategoricalOverlayData>> {
+public class QualitativeOverlayAggregator implements MarkerAggregator<Map<String, QualitativeOverlayAggregator.CategoricalOverlayData>> {
   private final OverlayRecoder overlayRecoder;
   private final Map<String, Integer> count = new HashMap<>();
   private int n = 0;
 
-  public CategoricalOverlayAggregator(OverlayRecoder overlayRecoder) {
+  public QualitativeOverlayAggregator(OverlayRecoder overlayRecoder) {
     this.overlayRecoder = overlayRecoder;
   }
 

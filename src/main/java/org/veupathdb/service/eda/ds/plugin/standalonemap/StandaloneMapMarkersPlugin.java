@@ -19,7 +19,7 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MarkerAggregator;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.CategoricalOverlayAggregator;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.QualitativeOverlayAggregator;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MapMarkerRowProcessor;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MarkerData;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.OverlaySpecification;
@@ -113,18 +113,18 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
     GeolocationViewport viewport = GeolocationViewport.fromApiViewport(spec.getViewport());
 
     // loop through rows of data stream, aggregating stats into a map from aggregate value to stats object
-    MapMarkerRowProcessor<Map<String, CategoricalOverlayAggregator.CategoricalOverlayData>> processor = new MapMarkerRowProcessor<>(geoVarIndex, latIndex, lonIndex, overlayIndex);
+    MapMarkerRowProcessor<Map<String, QualitativeOverlayAggregator.CategoricalOverlayData>> processor = new MapMarkerRowProcessor<>(geoVarIndex, latIndex, lonIndex, overlayIndex);
 
-    Supplier<MarkerAggregator<Map<String, CategoricalOverlayAggregator.CategoricalOverlayData>>> aggregatorSupplier = () ->
-        new CategoricalOverlayAggregator(overlayConfig.map(OverlaySpecification::getOverlayRecoder).orElse(null));
+    Supplier<MarkerAggregator<Map<String, QualitativeOverlayAggregator.CategoricalOverlayData>>> aggregatorSupplier = () ->
+        new QualitativeOverlayAggregator(overlayConfig.map(OverlaySpecification::getOverlayRecoder).orElse(null));
 
-    Map<String, MarkerData<Map<String, CategoricalOverlayAggregator.CategoricalOverlayData>>> aggregator = processor.process(
+    Map<String, MarkerData<Map<String, QualitativeOverlayAggregator.CategoricalOverlayData>>> aggregator = processor.process(
         reader, parser, viewport, aggregatorSupplier);
 
     List<StandaloneMapElementInfo> output = new ArrayList<>();
     for (String key : aggregator.keySet()) {
       StandaloneMapElementInfo mapEle = new StandaloneMapElementInfoImpl();
-      MarkerData<Map<String, CategoricalOverlayAggregator.CategoricalOverlayData>> data = aggregator.get(key);
+      MarkerData<Map<String, QualitativeOverlayAggregator.CategoricalOverlayData>> data = aggregator.get(key);
       GeographicPoint avgLatLon = data.getLatLonAvg().getCurrentAverage();
       mapEle.setGeoAggregateValue(key);
       mapEle.setEntityCount(data.getCount());
@@ -143,7 +143,7 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
     out.flush();
   }
 
-  private List<RangeWithCountAndValue> convertAggregator(MarkerAggregator<Map<String, CategoricalOverlayAggregator.CategoricalOverlayData>> aggregator, String valueSpec) {
+  private List<RangeWithCountAndValue> convertAggregator(MarkerAggregator<Map<String, QualitativeOverlayAggregator.CategoricalOverlayData>> aggregator, String valueSpec) {
     return aggregator.finish().entrySet().stream()
         .map(entry -> {
           RangeWithCountAndValue bin = new RangeWithCountAndValueImpl();
