@@ -2,6 +2,43 @@
 
 types:
 
+  StandaloneMapBubblesLegendPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: StandaloneMapBubblesLegendSpec
+
+  StandaloneMapBubblesLegendSpec:
+    additionalProperties: false
+    properties:
+      outputEntityId:
+        type: string
+      colorLegendConfig:
+        type: ColorLegendConfig
+      sizeConfig:
+        type: SizeLegendConfig
+
+  ColorLegendConfig:
+    additionalProperties: false
+    properties:
+      geoAggregateVariable: # Should be most granular
+        type: VariableSpec
+      colorConfig:
+        type: ColorConfig
+
+  SizeLegendConfig:
+    additionalProperties: false
+    properties:
+      geoAggregateVariable: # Should be least granular
+        type: VariableSpec
+
+  StandaloneMapBubblesLegendPostResponse:
+    additionalProperties: false
+    properties:
+      minColorValue: number
+      maxColorValue: number
+      minSizeValue: number
+      maxSizeValue: number
+
   StandaloneMapBubblesPostRequest:
     type: DataPluginRequestBase
     properties:

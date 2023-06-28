@@ -1780,6 +1780,36 @@ types:
     additionalProperties: false
     properties:
       scatterplot: FloatingScatterplot
+  StandaloneMapBubblesLegendPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: StandaloneMapBubblesLegendSpec
+  StandaloneMapBubblesLegendSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      colorLegendConfig: ColorLegendConfig
+      sizeConfig: SizeLegendConfig
+  ColorLegendConfig:
+    type: object
+    additionalProperties: false
+    properties:
+      geoAggregateVariable: VariableSpec
+      colorConfig: ColorConfig
+  SizeLegendConfig:
+    type: object
+    additionalProperties: false
+    properties:
+      geoAggregateVariable: VariableSpec
+  StandaloneMapBubblesLegendPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      minColorValue: number
+      maxColorValue: number
+      minSizeValue: number
+      maxSizeValue: number
   StandaloneMapBubblesPostRequest:
     type: DataPluginRequestBase
     properties:
