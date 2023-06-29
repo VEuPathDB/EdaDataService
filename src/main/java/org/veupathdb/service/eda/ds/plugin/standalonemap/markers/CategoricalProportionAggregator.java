@@ -14,7 +14,7 @@ public class CategoricalProportionAggregator implements MarkerAggregator<Double>
 
   public CategoricalProportionAggregator(Set<String> numeratorValues, Set<String> denominatorValues) {
     if (!denominatorValues.containsAll(numeratorValues)) {
-      throw new IllegalArgumentException("CategoricalQuantitativeOverlay numerator values must be a subset of denominator values.");
+      throw new IllegalArgumentException("Numerator values must be a subset of denominator values.");
     }
     this.numeratorValues = numeratorValues;
     this.denominatorValues = denominatorValues;
