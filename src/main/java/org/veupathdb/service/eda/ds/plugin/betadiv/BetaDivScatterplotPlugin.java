@@ -23,7 +23,7 @@ public class BetaDivScatterplotPlugin extends AbstractPlugin<BetaDivScatterplotP
   
   @Override
   public String getDisplayName() {
-    return "Scatter plot";
+    return "Dimensional reduction scatter plot";
   }
 
   @Override
