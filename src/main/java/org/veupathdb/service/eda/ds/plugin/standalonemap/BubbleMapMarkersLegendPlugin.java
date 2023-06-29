@@ -17,6 +17,7 @@ import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.ColorLegendConfig;
 import org.veupathdb.service.eda.generated.model.ColoredMapElementInfo;
 import org.veupathdb.service.eda.generated.model.ColoredMapElementInfoImpl;
+import org.veupathdb.service.eda.generated.model.OverlayLegendConfig;
 import org.veupathdb.service.eda.generated.model.SizeLegendConfig;
 import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesLegendPostRequest;
 import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesLegendSpec;
@@ -71,17 +72,17 @@ public class BubbleMapMarkersLegendPlugin extends AbstractEmptyComputePlugin<Sta
     if (pluginSpec.getColorLegendConfig() == null && pluginSpec.getSizeConfig() == null) {
       throw new ValidationException("One of colorLegendConfig or sizeConfig must be provided.");
     }
-    Optional<ColorLegendConfig> legendConfig = Optional.ofNullable(pluginSpec.getColorLegendConfig());
+    Optional<OverlayLegendConfig> legendConfig = Optional.ofNullable(pluginSpec.getColorLegendConfig());
     Optional<SizeLegendConfig> sizeConfig = Optional.ofNullable(pluginSpec.getSizeConfig());
 
     validateInputs(new DataElementSet()
         .entity(pluginSpec.getOutputEntityId())
-        .var("colorGeoVariable", legendConfig.map(ColorLegendConfig::getGeoAggregateVariable).orElse(null))
-        .var("colorVariable", legendConfig.map(colorLegendConfig -> colorLegendConfig.getColorConfig().getOverlayVariable()).orElse(null))
+        .var("colorGeoVariable", legendConfig.map(OverlayLegendConfig::getGeoAggregateVariable).orElse(null))
+        .var("colorVariable", legendConfig.map(colorLegendConfig -> colorLegendConfig.getQuantitativeOverlayConfig().getOverlayVariable()).orElse(null))
         .var("sizeGeoVariable", sizeConfig.map(SizeLegendConfig::getGeoAggregateVariable).orElse(null)));
-    if (pluginSpec.getColorConfig() != null) {
+    if (pluginSpec.getColorLegendConfig() != null) {
       try {
-        _colorSpecification = new MapBubbleSpecification(pluginSpec.getColorConfig(), getUtil()::getVariableDataShape);
+        _colorSpecification = new MapBubbleSpecification(pluginSpec.getColorLegendConfig(), getUtil()::getVariableDataShape);
       } catch (IllegalArgumentException e) {
         throw new ValidationException(e.getMessage());
       }
@@ -90,12 +91,12 @@ public class BubbleMapMarkersLegendPlugin extends AbstractEmptyComputePlugin<Sta
 
   @Override
   protected List<StreamSpec> getRequestedStreams(StandaloneMapBubblesLegendSpec pluginSpec) {
-    Optional<ColorLegendConfig> legendConfig = Optional.ofNullable(pluginSpec.getColorLegendConfig());
+    Optional<OverlayLegendConfig> legendConfig = Optional.ofNullable(pluginSpec.getColorLegendConfig());
     Optional<SizeLegendConfig> sizeConfig = Optional.ofNullable(pluginSpec.getSizeConfig());
     return List.of(
         new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
-            .addVar(legendConfig.map(ColorLegendConfig::getGeoAggregateVariable).orElse(null))
-            .addVar(legendConfig.map(colorLegendConfig -> colorLegendConfig.getColorConfig().getOverlayVariable()).orElse(null))
+            .addVar(legendConfig.map(OverlayLegendConfig::getGeoAggregateVariable).orElse(null))
+            .addVar(legendConfig.map(colorLegendConfig -> colorLegendConfig.getQuantitativeOverlayConfig().getOverlayVariable()).orElse(null))
             .addVar(sizeConfig.map(SizeLegendConfig::getGeoAggregateVariable).orElse(null)));
   }
 

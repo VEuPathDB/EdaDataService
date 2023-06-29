@@ -13,17 +13,17 @@ types:
       outputEntityId:
         type: string
       colorLegendConfig:
-        type: ColorLegendConfig
+        type: OverlayLegendConfig
       sizeConfig:
         type: SizeLegendConfig
 
-  ColorLegendConfig:
+  OverlayLegendConfig:
     additionalProperties: false
     properties:
       geoAggregateVariable: # Should be most granular
         type: VariableSpec
-      colorConfig:
-        type: ColorConfig
+      quantitativeOverlayConfig:
+        type: QuantitativeOverlayConfig
 
   SizeLegendConfig:
     additionalProperties: false

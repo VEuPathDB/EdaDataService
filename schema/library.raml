@@ -1789,14 +1789,14 @@ types:
     additionalProperties: false
     properties:
       outputEntityId: string
-      colorLegendConfig: ColorLegendConfig
+      colorLegendConfig: OverlayLegendConfig
       sizeConfig: SizeLegendConfig
-  ColorLegendConfig:
+  OverlayLegendConfig:
     type: object
     additionalProperties: false
     properties:
       geoAggregateVariable: VariableSpec
-      colorConfig: ColorConfig
+      quantitativeOverlayConfig: QuantitativeOverlayConfig
   SizeLegendConfig:
     type: object
     additionalProperties: false
