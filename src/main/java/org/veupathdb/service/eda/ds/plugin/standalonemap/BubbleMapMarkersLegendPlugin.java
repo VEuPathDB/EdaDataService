@@ -1,8 +1,6 @@
 package org.veupathdb.service.eda.ds.plugin.standalonemap;
 
 import org.gusdb.fgputil.DelimitedDataParser;
-import org.gusdb.fgputil.Tuples;
-import org.gusdb.fgputil.geo.GeographyUtil.GeographicPoint;
 import org.gusdb.fgputil.json.JsonUtil;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
@@ -10,19 +8,18 @@ import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.CountAggregator;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MapBubbleSpecification;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MarkerAggregator;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MarkerData;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
-import org.veupathdb.service.eda.generated.model.ColorLegendConfig;
-import org.veupathdb.service.eda.generated.model.ColoredMapElementInfo;
-import org.veupathdb.service.eda.generated.model.ColoredMapElementInfoImpl;
 import org.veupathdb.service.eda.generated.model.OverlayLegendConfig;
 import org.veupathdb.service.eda.generated.model.SizeLegendConfig;
 import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesLegendPostRequest;
+import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesLegendPostResponse;
+import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesLegendPostResponseImpl;
 import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesLegendSpec;
-import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesPostResponse;
-import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesPostResponseImpl;
+import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesPostRequest;
+import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import java.io.BufferedInputStream;
@@ -31,7 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +61,7 @@ public class BubbleMapMarkersLegendPlugin extends AbstractEmptyComputePlugin<Sta
 
   @Override
   protected AbstractPlugin<StandaloneMapBubblesLegendPostRequest, StandaloneMapBubblesLegendSpec, Void>.ClassGroup getTypeParameterClasses() {
-    return null;
+    return new ClassGroup(StandaloneMapBubblesLegendPostRequest.class, StandaloneMapBubblesLegendSpec.class, Void.class);
   }
 
   @Override
@@ -82,7 +79,7 @@ public class BubbleMapMarkersLegendPlugin extends AbstractEmptyComputePlugin<Sta
         .var("sizeGeoVariable", sizeConfig.map(SizeLegendConfig::getGeoAggregateVariable).orElse(null)));
     if (pluginSpec.getColorLegendConfig() != null) {
       try {
-        _colorSpecification = new MapBubbleSpecification(pluginSpec.getColorLegendConfig(), getUtil()::getVariableDataShape);
+        _colorSpecification = new MapBubbleSpecification(pluginSpec.getColorLegendConfig().getQuantitativeOverlayConfig(), getUtil()::getVariableDataShape);
       } catch (IllegalArgumentException e) {
         throw new ValidationException(e.getMessage());
       }
@@ -110,21 +107,15 @@ public class BubbleMapMarkersLegendPlugin extends AbstractEmptyComputePlugin<Sta
     // establish column header indexes
     StandaloneMapBubblesLegendSpec spec = getPluginSpec();
     Function<VariableSpec, Integer> indexOf = var -> parser.indexOfColumn(getUtil().toColNameOrEmpty(var)).orElseThrow();
-    Integer mostGranularGeoIndex = indexOf.apply(spec.getGeoAggregateVariable());
-    Integer leastGranularGeoIndex = indexOf.apply(spec.getGeoAggregateVariable());
-    Integer colorIndex = indexOf.apply(spec.getGeoAggregateVariable());
+    // TODO: Handle nulls here
+    Integer mostGranularGeoIndex = indexOf.apply(spec.getColorLegendConfig().getGeoAggregateVariable());
+    Integer leastGranularGeoIndex = indexOf.apply(spec.getSizeConfig().getGeoAggregateVariable());
+    Integer colorIndex = indexOf.apply(spec.getColorLegendConfig().getQuantitativeOverlayConfig().getOverlayVariable());
 
-    Optional<MapBubbleSpecification> overlayConfig = Optional.ofNullable(_colorSpecification);
-    Integer overlayIndex = overlayConfig
-        .map(MapBubbleSpecification::getOverlayVariable)
-        .map(indexOf)
-        .orElse(null);
-
-    //
     Supplier<MarkerAggregator<Double>> colorAggregatorSupplier = _colorSpecification.getAggregatorSupplier();
 
     final Map<String, MarkerAggregator<Double>> colorAggregators = new HashMap<>();
-    final Map<String, MarkerAggregator<Tuples.TwoTuple<Integer, Integer>>> countAggregators = new HashMap<>();
+    final Map<String, MarkerAggregator<Integer>> countAggregators = new HashMap<>();
     String nextLine = reader.readLine();
 
     while (nextLine != null) {
@@ -132,38 +123,36 @@ public class BubbleMapMarkersLegendPlugin extends AbstractEmptyComputePlugin<Sta
 
       // entity records counts not impacted by viewport
       if (!(row[mostGranularGeoIndex] == null || row[mostGranularGeoIndex].isEmpty())) {
-
-        MarkerAggregator<Double> colorAgg = colorAggregators.putIfAbsent(row[mostGranularGeoIndex], colorAggregatorSupplier.get());
-        colorAgg.addValue(row[colorIndex]);
+        colorAggregators.putIfAbsent(row[mostGranularGeoIndex], colorAggregatorSupplier.get());
+        colorAggregators.get(row[mostGranularGeoIndex]).addValue(row[colorIndex]);
       }
 
       // entity records counts not impacted by viewport
       if (!(row[leastGranularGeoIndex] == null || row[leastGranularGeoIndex].isEmpty())) {
-        MarkerAggregator<Tuples.TwoTuple<Integer, Integer>> countAgg = countAggregators.putIfAbsent(row[leastGranularGeoIndex], new CountAgg());
-        countAgg.addValue(null);
+        countAggregators.putIfAbsent(row[leastGranularGeoIndex], new CountAggregator());
+        countAggregators.get(row[leastGranularGeoIndex]).addValue(null);
       }
-
       nextLine = reader.readLine();
     }
-    
-    List<ColoredMapElementInfo> output = new ArrayList<>();
-    for (String key : aggregatedDataByGeoVal.keySet()) {
-      ColoredMapElementInfo mapEle = new ColoredMapElementInfoImpl();
-      MarkerData<Double> data = aggregatedDataByGeoVal.get(key);
-      GeographicPoint avgLatLon = data.getLatLonAvg().getCurrentAverage();
-      mapEle.setGeoAggregateValue(key);
-      mapEle.setEntityCount(data.getCount());
-      mapEle.setAvgLat(avgLatLon.getLatitude());
-      mapEle.setAvgLon(avgLatLon.getLongitude());
-      mapEle.setMinLat(data.getMinLat());
-      mapEle.setMaxLat(data.getMaxLat());
-      mapEle.setMinLon(data.getMinLon());
-      mapEle.setMaxLon(data.getMaxLon());
-      mapEle.setColorValue(data.getMarkerAggregator().finish());
-      output.add(mapEle);
-    }
-    StandaloneMapBubblesPostResponse response = new StandaloneMapBubblesPostResponseImpl();
-    response.setMapElements(output);
+
+    final StandaloneMapBubblesLegendPostResponse response = new StandaloneMapBubblesLegendPostResponseImpl();
+    final List<Double> colorValues = colorAggregators.values().stream()
+        .map(MarkerAggregator::finish)
+        .toList();
+    final List<Integer> sizeValues = countAggregators.values().stream()
+        .map(MarkerAggregator::finish)
+        .toList();
+    response.setMaxColorValue(colorValues.stream()
+        .max(Comparator.comparingDouble(x -> x == null ? Double.NEGATIVE_INFINITY : x))
+        .orElse(null));
+    response.setMinColorValue(colorValues.stream()
+        .min(Comparator.comparingDouble(x -> x == null ? Double.POSITIVE_INFINITY : x))
+        .orElse(null));
+    response.setMinSizeValue(1);
+    response.setMaxSizeValue(sizeValues.stream()
+        .max(Comparator.comparingInt(Integer::intValue))
+        .orElse(null));
+
     JsonUtil.Jackson.writeValue(out, response);
     out.flush();
   }
