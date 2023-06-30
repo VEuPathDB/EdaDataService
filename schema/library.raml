@@ -1780,6 +1780,64 @@ types:
     additionalProperties: false
     properties:
       scatterplot: FloatingScatterplot
+  StandaloneMapBubblesPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: StandaloneMapBubblesSpec
+  StandaloneMapBubblesSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      geoAggregateVariable: VariableSpec
+      longitudeVariable: VariableSpec
+      latitudeVariable: VariableSpec
+      overlayConfig?: QuantitativeOverlayConfig
+      valueSpec: ValueSpec
+      viewport: GeolocationViewport
+  StandaloneMapBubblesPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      mapElements: ColoredMapElementInfo[]
+  Aggregator:
+    type: string
+    enum:
+      - mean
+      - median
+  QuantitativeOverlayConfig:
+    type: object
+    additionalProperties: false
+    discriminator: overlayType
+    properties:
+      overlayType: OverlayType
+      overlayVariable: VariableSpec
+  ContinuousQuantitativeOverlayConfig:
+    type: QuantitativeOverlayConfig
+    additionalProperties: false
+    discriminatorValue: continuous
+    properties:
+      aggregator: Aggregator
+  CategoricalQuantitativeOverlayConfig:
+    type: QuantitativeOverlayConfig
+    discriminatorValue: categorical
+    additionalProperties: false
+    properties:
+      numeratorValues: string[]
+      denominatorValues: string[]
+  ColoredMapElementInfo:
+    type: object
+    additionalProperties: false
+    properties:
+      geoAggregateValue: string
+      entityCount: number
+      overlayValue: number
+      avgLat: number
+      avgLon: number
+      minLat: number
+      minLon: number
+      maxLat: number
+      maxLon: number
   StandaloneMapMarkersPostRequest:
     type: DataPluginRequestBase
     properties:

@@ -1,14 +1,5 @@
 package org.veupathdb.service.eda.ds.plugin.standalonemap;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-
 import org.gusdb.fgputil.DelimitedDataParser;
 import org.gusdb.fgputil.geo.GeographyUtil.GeographicPoint;
 import org.gusdb.fgputil.json.JsonUtil;
@@ -18,19 +9,37 @@ import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MarkerAggregator;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.QualitativeOverlayAggregator;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.GeolocationViewport;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MapBubbleSpecification;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MapMarkerRowProcessor;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MarkerData;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.OverlaySpecification;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.GeolocationViewport;
-import org.veupathdb.service.eda.generated.model.*;
+import org.veupathdb.service.eda.generated.model.APIVariableType;
+import org.veupathdb.service.eda.generated.model.ColoredMapElementInfo;
+import org.veupathdb.service.eda.generated.model.ColoredMapElementInfoImpl;
+import org.veupathdb.service.eda.generated.model.QuantitativeOverlayConfig;
+import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesPostRequest;
+import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesPostResponse;
+import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesPostResponseImpl;
+import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesSpec;
+import org.veupathdb.service.eda.generated.model.VariableSpec;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 
 import static org.gusdb.fgputil.FormatUtil.TAB;
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
-public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<StandaloneMapMarkersPostRequest, StandaloneMapMarkersSpec> {
-  private OverlaySpecification _overlaySpecification = null;
+public class BubbleMapMarkersPlugin extends AbstractEmptyComputePlugin<StandaloneMapBubblesPostRequest, StandaloneMapBubblesSpec> {
+  private MapBubbleSpecification _overlaySpecification = null;
 
   @Override
   public List<String> getProjects() {
@@ -53,23 +62,23 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
   }
 
   @Override
-  protected AbstractPlugin<StandaloneMapMarkersPostRequest, StandaloneMapMarkersSpec, Void>.ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(StandaloneMapMarkersPostRequest.class, StandaloneMapMarkersSpec.class, Void.class);
+  protected AbstractPlugin<StandaloneMapBubblesPostRequest, StandaloneMapBubblesSpec, Void>.ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(StandaloneMapBubblesPostRequest.class, StandaloneMapBubblesSpec.class, Void.class);
   }
 
   @Override
-  protected void validateVisualizationSpec(StandaloneMapMarkersSpec pluginSpec) throws ValidationException {
+  protected void validateVisualizationSpec(StandaloneMapBubblesSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
       .var("geoAggregateVariable", pluginSpec.getGeoAggregateVariable())
       .var("latitudeVariable", pluginSpec.getLatitudeVariable())
       .var("longitudeVariable", pluginSpec.getLongitudeVariable())
       .var("overlayVariable", Optional.ofNullable(pluginSpec.getOverlayConfig())
-          .map(OverlayConfig::getOverlayVariable)
+          .map(QuantitativeOverlayConfig::getOverlayVariable)
           .orElse(null)));
     if (pluginSpec.getOverlayConfig() != null) {
       try {
-        _overlaySpecification = new OverlaySpecification(pluginSpec.getOverlayConfig(), getUtil()::getVariableType, getUtil()::getVariableDataShape);
+        _overlaySpecification = new MapBubbleSpecification(pluginSpec.getOverlayConfig(), getUtil()::getVariableDataShape);
       } catch (IllegalArgumentException e) {
         throw new ValidationException(e.getMessage());
       }
@@ -77,54 +86,49 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(StandaloneMapMarkersSpec pluginSpec) {
+  protected List<StreamSpec> getRequestedStreams(StandaloneMapBubblesSpec pluginSpec) {
     return List.of(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
         .addVar(pluginSpec.getGeoAggregateVariable())
         .addVar(pluginSpec.getLatitudeVariable())
         .addVar(pluginSpec.getLongitudeVariable())
         .addVar(Optional.ofNullable(pluginSpec.getOverlayConfig())
-            .map(OverlayConfig::getOverlayVariable)
+            .map(QuantitativeOverlayConfig::getOverlayVariable)
             .orElse(null)));
   }
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-
     // create scanner and line parser
     InputStreamReader isReader = new InputStreamReader(new BufferedInputStream(dataStreams.get(DEFAULT_SINGLE_STREAM_NAME)));
     BufferedReader reader = new BufferedReader(isReader);
     DelimitedDataParser parser = new DelimitedDataParser(reader.readLine(), TAB, true);
 
     // establish column header indexes
-    StandaloneMapMarkersSpec spec = getPluginSpec();
-    Function<VariableSpec,Integer> indexOf = var -> parser.indexOfColumn(getUtil().toColNameOrEmpty(var)).orElseThrow();
+    StandaloneMapBubblesSpec spec = getPluginSpec();
+    Function<VariableSpec, Integer> indexOf = var -> parser.indexOfColumn(getUtil().toColNameOrEmpty(var)).orElseThrow();
     int geoVarIndex  = indexOf.apply(spec.getGeoAggregateVariable());
     int latIndex     = indexOf.apply(spec.getLatitudeVariable());
     int lonIndex     = indexOf.apply(spec.getLongitudeVariable());
-    Optional<OverlaySpecification> overlayConfig = Optional.ofNullable(_overlaySpecification);
+    Optional<MapBubbleSpecification> overlayConfig = Optional.ofNullable(_overlaySpecification);
     Integer overlayIndex = overlayConfig
-        .map(OverlaySpecification::getOverlayVariable)
+        .map(MapBubbleSpecification::getOverlayVariable)
         .map(indexOf)
         .orElse(null);
 
     // get map markers config
-    String valueSpec = spec.getValueSpec().getValue();
     GeolocationViewport viewport = GeolocationViewport.fromApiViewport(spec.getViewport());
 
+    MapMarkerRowProcessor<Double> processor = new MapMarkerRowProcessor<>(geoVarIndex, latIndex, lonIndex, overlayIndex);
+
     // loop through rows of data stream, aggregating stats into a map from aggregate value to stats object
-    MapMarkerRowProcessor<Map<String, QualitativeOverlayAggregator.CategoricalOverlayData>> processor = new MapMarkerRowProcessor<>(geoVarIndex, latIndex, lonIndex, overlayIndex);
+    Map<String, MarkerData<Double>> aggregatedDataByGeoVal = processor.process(reader, parser, viewport,
+        overlayConfig.map(MapBubbleSpecification::getAggregatorSupplier).orElse(() -> null));
 
-    Supplier<MarkerAggregator<Map<String, QualitativeOverlayAggregator.CategoricalOverlayData>>> aggregatorSupplier = () ->
-        new QualitativeOverlayAggregator(overlayConfig.map(OverlaySpecification::getOverlayRecoder).orElse(null));
-
-    Map<String, MarkerData<Map<String, QualitativeOverlayAggregator.CategoricalOverlayData>>> aggregator = processor.process(
-        reader, parser, viewport, aggregatorSupplier);
-
-    List<StandaloneMapElementInfo> output = new ArrayList<>();
-    for (String key : aggregator.keySet()) {
-      StandaloneMapElementInfo mapEle = new StandaloneMapElementInfoImpl();
-      MarkerData<Map<String, QualitativeOverlayAggregator.CategoricalOverlayData>> data = aggregator.get(key);
+    List<ColoredMapElementInfo> output = new ArrayList<>();
+    for (String key : aggregatedDataByGeoVal.keySet()) {
+      ColoredMapElementInfo mapEle = new ColoredMapElementInfoImpl();
+      MarkerData<Double> data = aggregatedDataByGeoVal.get(key);
       GeographicPoint avgLatLon = data.getLatLonAvg().getCurrentAverage();
       mapEle.setGeoAggregateValue(key);
       mapEle.setEntityCount(data.getCount());
@@ -134,24 +138,12 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
       mapEle.setMaxLat(data.getMaxLat());
       mapEle.setMinLon(data.getMinLon());
       mapEle.setMaxLon(data.getMaxLon());
-      mapEle.setOverlayValues(convertAggregator(data.getMarkerAggregator(), valueSpec));
+      mapEle.setOverlayValue(data.getMarkerAggregator().finish());
       output.add(mapEle);
     }
-    StandaloneMapMarkersPostResponse response = new StandaloneMapMarkersPostResponseImpl();
+    StandaloneMapBubblesPostResponse response = new StandaloneMapBubblesPostResponseImpl();
     response.setMapElements(output);
     JsonUtil.Jackson.writeValue(out, response);
     out.flush();
-  }
-
-  private List<RangeWithCountAndValue> convertAggregator(MarkerAggregator<Map<String, QualitativeOverlayAggregator.CategoricalOverlayData>> aggregator, String valueSpec) {
-    return aggregator.finish().entrySet().stream()
-        .map(entry -> {
-          RangeWithCountAndValue bin = new RangeWithCountAndValueImpl();
-          bin.setValue(valueSpec.equals(ValueSpec.PROPORTION.getValue()) ? entry.getValue().getProportion() : entry.getValue().getCount());
-          bin.setBinLabel(entry.getKey());
-          bin.setCount(entry.getValue().getCount());
-          return bin;
-        })
-        .collect(Collectors.toList());
   }
 }

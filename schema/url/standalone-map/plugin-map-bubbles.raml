@@ -1,0 +1,81 @@
+#%RAML 1.0 Library
+
+types:
+
+  StandaloneMapBubblesPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: StandaloneMapBubblesSpec
+
+  StandaloneMapBubblesSpec:
+    additionalProperties: false
+    properties:
+      outputEntityId: 
+        type: string
+      geoAggregateVariable:
+        type: VariableSpec
+      longitudeVariable:
+        type: VariableSpec
+      latitudeVariable:
+        type: VariableSpec
+      overlayConfig?:
+        type: QuantitativeOverlayConfig
+      valueSpec:
+        type: ValueSpec
+      viewport:
+        type: GeolocationViewport
+
+  StandaloneMapBubblesPostResponse:
+    additionalProperties: false
+    properties:
+      mapElements: ColoredMapElementInfo[]
+
+  Aggregator:
+    type: string
+    enum: [ "mean", "median" ]
+
+  QuantitativeOverlayConfig:
+    additionalProperties: false
+    discriminator: overlayType
+    properties:
+      overlayType:
+        type: OverlayType
+      overlayVariable:
+        type: VariableSpec
+
+  ContinuousQuantitativeOverlayConfig:
+    type: QuantitativeOverlayConfig
+    additionalProperties: false
+    discriminatorValue: continuous
+    properties:
+      aggregator: Aggregator
+
+  CategoricalQuantitativeOverlayConfig:
+    type: QuantitativeOverlayConfig
+    discriminatorValue: categorical
+    additionalProperties: false
+    properties:
+      numeratorValues: string[]
+      denominatorValues: string[]
+
+  ColoredMapElementInfo:
+    additionalProperties: false
+    properties:
+      geoAggregateValue:
+        type: string
+      entityCount:
+        type: number
+      overlayValue:
+        type: number
+      avgLat:
+        type: number
+      avgLon:
+        type: number
+      minLat:
+        type: number
+      minLon:
+        type: number
+      maxLat:
+        type: number
+      maxLon:
+        type: number
