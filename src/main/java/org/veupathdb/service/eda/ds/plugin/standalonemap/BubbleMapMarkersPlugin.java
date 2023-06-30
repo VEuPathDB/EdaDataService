@@ -122,7 +122,8 @@ public class BubbleMapMarkersPlugin extends AbstractEmptyComputePlugin<Standalon
     MapMarkerRowProcessor<Double> processor = new MapMarkerRowProcessor<>(geoVarIndex, latIndex, lonIndex, overlayIndex);
 
     // loop through rows of data stream, aggregating stats into a map from aggregate value to stats object
-    Map<String, MarkerData<Double>> aggregatedDataByGeoVal = processor.process(reader, parser, viewport, overlayConfig.get().getAggregatorSupplier());
+    Map<String, MarkerData<Double>> aggregatedDataByGeoVal = processor.process(reader, parser, viewport,
+        overlayConfig.map(MapBubbleSpecification::getAggregatorSupplier).orElse(() -> null));
 
     List<ColoredMapElementInfo> output = new ArrayList<>();
     for (String key : aggregatedDataByGeoVal.keySet()) {
