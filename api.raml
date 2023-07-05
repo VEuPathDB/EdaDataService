@@ -73,17 +73,17 @@ securitySchemes:
                 application/json:
                   type: lib.StandaloneMapBubblesPostResponse
 
-      /legend:
-        post:
-          description: Returns data required to make bubble marker legends
-          body:
-            application/json:
-              type: lib.StandaloneMapBubblesLegendPostRequest
-          responses:
-            200:
-              body:
-                application/json:
-                  type: lib.StandaloneMapBubblesLegendPostResponse
+        /legend:
+          post:
+            description: Returns data required to make bubble marker legends
+            body:
+              application/json:
+                type: lib.StandaloneMapBubblesLegendPostRequest
+            responses:
+              200:
+                body:
+                  application/json:
+                    type: lib.StandaloneMapBubblesLegendPostResponse
 
 
   /standalone-map-xyrelationships/visualizations:
