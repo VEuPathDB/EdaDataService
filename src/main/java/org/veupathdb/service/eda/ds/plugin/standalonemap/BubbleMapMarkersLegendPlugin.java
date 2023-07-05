@@ -18,8 +18,6 @@ import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesLegendPostR
 import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesLegendPostResponse;
 import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesLegendPostResponseImpl;
 import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesLegendSpec;
-import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesPostRequest;
-import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import java.io.BufferedInputStream;
@@ -34,11 +32,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static org.gusdb.fgputil.FormatUtil.TAB;
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
+/**
+ * Plugin designed to provide legend information for bubble markers. This is required for a client to interpret
+ * the results of the bubble markers plugin. The bubble marker plugin provides numeric results for the size and color
+ * of a bubble marker. In order to render the size or color, this plugin provides ranges representing the min/max for
+ * color and size for a given configuration.
+ */
 public class BubbleMapMarkersLegendPlugin extends AbstractEmptyComputePlugin<StandaloneMapBubblesLegendPostRequest, StandaloneMapBubblesLegendSpec> {
   private MapBubbleSpecification _colorSpecification = null;
 
@@ -106,13 +109,11 @@ public class BubbleMapMarkersLegendPlugin extends AbstractEmptyComputePlugin<Sta
 
     // establish column header indexes
     StandaloneMapBubblesLegendSpec spec = getPluginSpec();
-    Function<VariableSpec, Integer> indexOf = var -> parser.indexOfColumn(getUtil().toColNameOrEmpty(var)).orElseThrow();
-    // TODO: Handle nulls here
+    Function<VariableSpec, Integer> indexOf = var -> parser.indexOfColumn(getUtil().toColNameOrEmpty(var)).orElse(null);
+
     Integer mostGranularGeoIndex = indexOf.apply(spec.getColorLegendConfig().getGeoAggregateVariable());
     Integer leastGranularGeoIndex = indexOf.apply(spec.getSizeConfig().getGeoAggregateVariable());
     Integer colorIndex = indexOf.apply(spec.getColorLegendConfig().getQuantitativeOverlayConfig().getOverlayVariable());
-
-    Supplier<MarkerAggregator<Double>> colorAggregatorSupplier = _colorSpecification.getAggregatorSupplier();
 
     final Map<String, MarkerAggregator<Double>> colorAggregators = new HashMap<>();
     final Map<String, MarkerAggregator<Integer>> countAggregators = new HashMap<>();
@@ -121,20 +122,28 @@ public class BubbleMapMarkersLegendPlugin extends AbstractEmptyComputePlugin<Sta
     while (nextLine != null) {
       String[] row = parser.parseLineToArray(nextLine);
 
-      // entity records counts not impacted by viewport
-      if (!(row[mostGranularGeoIndex] == null || row[mostGranularGeoIndex].isEmpty())) {
-        colorAggregators.putIfAbsent(row[mostGranularGeoIndex], colorAggregatorSupplier.get());
+      // Check that color config is present and geo aggregate variable is present
+      if (spec.getColorLegendConfig() != null && !(row[mostGranularGeoIndex] == null || row[mostGranularGeoIndex].isEmpty())) {
+        colorAggregators.putIfAbsent(row[mostGranularGeoIndex], _colorSpecification.getAggregatorSupplier().get());
         colorAggregators.get(row[mostGranularGeoIndex]).addValue(row[colorIndex]);
       }
 
-      // entity records counts not impacted by viewport
-      if (!(row[leastGranularGeoIndex] == null || row[leastGranularGeoIndex].isEmpty())) {
+      // Check that size config is present and geo aggregate variable is present
+      if (spec.getSizeConfig() != null && !(row[leastGranularGeoIndex] == null || row[leastGranularGeoIndex].isEmpty())) {
         countAggregators.putIfAbsent(row[leastGranularGeoIndex], new CountAggregator());
         countAggregators.get(row[leastGranularGeoIndex]).addValue(null);
       }
       nextLine = reader.readLine();
     }
 
+    // Construct response, serialize and flush output
+    final StandaloneMapBubblesLegendPostResponse response = constructResponse(colorAggregators, countAggregators);
+    JsonUtil.Jackson.writeValue(out, response);
+    out.flush();
+  }
+
+  private StandaloneMapBubblesLegendPostResponse constructResponse(Map<String, MarkerAggregator<Double>> colorAggregators,
+                                                                   Map<String, MarkerAggregator<Integer>> countAggregators) {
     final StandaloneMapBubblesLegendPostResponse response = new StandaloneMapBubblesLegendPostResponseImpl();
     final List<Double> colorValues = colorAggregators.values().stream()
         .map(MarkerAggregator::finish)
@@ -142,18 +151,20 @@ public class BubbleMapMarkersLegendPlugin extends AbstractEmptyComputePlugin<Sta
     final List<Integer> sizeValues = countAggregators.values().stream()
         .map(MarkerAggregator::finish)
         .toList();
-    response.setMaxColorValue(colorValues.stream()
-        .max(Comparator.comparingDouble(x -> x == null ? Double.NEGATIVE_INFINITY : x))
-        .orElse(null));
-    response.setMinColorValue(colorValues.stream()
-        .min(Comparator.comparingDouble(x -> x == null ? Double.POSITIVE_INFINITY : x))
-        .orElse(null));
-    response.setMinSizeValue(1);
-    response.setMaxSizeValue(sizeValues.stream()
-        .max(Comparator.comparingInt(Integer::intValue))
-        .orElse(null));
-
-    JsonUtil.Jackson.writeValue(out, response);
-    out.flush();
+    if (_pluginSpec.getColorLegendConfig() != null) {
+      response.setMaxColorValue(colorValues.stream()
+          .max(Comparator.comparingDouble(x -> x == null ? Double.NEGATIVE_INFINITY : x))
+          .orElse(null));
+      response.setMinColorValue(colorValues.stream()
+          .min(Comparator.comparingDouble(x -> x == null ? Double.POSITIVE_INFINITY : x))
+          .orElse(null));
+    }
+    if (_pluginSpec.getSizeConfig() != null) {
+      response.setMinSizeValue(1);
+      response.setMaxSizeValue(sizeValues.stream()
+          .max(Comparator.comparingInt(Integer::intValue))
+          .orElse(null));
+    }
+    return response;
   }
 }
