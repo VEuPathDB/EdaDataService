@@ -1785,16 +1785,29 @@ types:
     properties:
       config: StandaloneMapBubblesSpec
   StandaloneMapBubblesSpec:
+    description: Specification for map bubbles.
     type: object
     additionalProperties: false
     properties:
-      outputEntityId: string
-      geoAggregateVariable: VariableSpec
-      longitudeVariable: VariableSpec
-      latitudeVariable: VariableSpec
-      overlayConfig?: QuantitativeOverlayConfig
+      outputEntityId:
+        description: Entity whose cardinality will be reported per marker.
+        type: string
+      geoAggregateVariable:
+        description: Geohash component variable to group markers by. This is usually determined by zoom level of the client application.
+        type: VariableSpec
+      longitudeVariable:
+        description: Variable representing longitude of output entity.
+        type: VariableSpec
+      latitudeVariable:
+        description: Variable representing latitude of output entity.
+        type: VariableSpec
+      overlayConfig?:
+        description: Overlay configuration for quantitative overlay. The quantitative overlay value can be used to render color on the markers.
+        type: QuantitativeOverlayConfig
       valueSpec: ValueSpec
-      viewport: GeolocationViewport
+      viewport:
+        description: Viewport used to filter markers. Only entities that are contained in the viewport will be grouped into markers.
+        type: GeolocationViewport
   StandaloneMapBubblesPostResponse:
     type: object
     additionalProperties: false
@@ -1819,6 +1832,8 @@ types:
     properties:
       aggregator: Aggregator
   CategoricalQuantitativeOverlayConfig:
+    description: |
+      Quantitative overlay config
     type: QuantitativeOverlayConfig
     discriminatorValue: categorical
     additionalProperties: false

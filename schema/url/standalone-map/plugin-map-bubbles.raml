@@ -9,21 +9,28 @@ types:
 
   StandaloneMapBubblesSpec:
     additionalProperties: false
+    description: Specification for map bubbles.
     properties:
       outputEntityId: 
         type: string
+        description: Entity whose cardinality will be reported per marker.
       geoAggregateVariable:
         type: VariableSpec
+        description: Geohash component variable to group markers by. This is usually determined by zoom level of the client application.
       longitudeVariable:
         type: VariableSpec
+        description: Variable representing longitude of output entity.
       latitudeVariable:
         type: VariableSpec
+        description: Variable representing latitude of output entity.
       overlayConfig?:
         type: QuantitativeOverlayConfig
+        description: Overlay configuration for quantitative overlay. The quantitative overlay value can be used to render color on the markers.
       valueSpec:
         type: ValueSpec
       viewport:
         type: GeolocationViewport
+        description: Viewport used to filter markers. Only entities that are contained in the viewport will be grouped into markers.
 
   StandaloneMapBubblesPostResponse:
     additionalProperties: false
