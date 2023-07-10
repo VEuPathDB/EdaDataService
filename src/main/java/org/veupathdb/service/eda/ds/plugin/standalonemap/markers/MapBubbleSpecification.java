@@ -16,6 +16,10 @@ public class MapBubbleSpecification {
   private final VariableSpec overlayVariable;
   private final Supplier<MarkerAggregator<Double>> aggregatorSupplier;
 
+  /**
+   * Constructs a map bubble specification from the raw input. Note that this will throw an IllegalArgumentException
+   * with a user-friendly message if there are any user input errors.
+   */
   public MapBubbleSpecification(QuantitativeOverlayConfig overlayConfig,
                                 Function<VariableSpec, String> varShapeFinder) {
     this.overlayVariable = overlayConfig.getOverlayVariable();
