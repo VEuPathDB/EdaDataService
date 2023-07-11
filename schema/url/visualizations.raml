@@ -148,3 +148,31 @@ types:
         type: VariableSpec[]
         maxItems: 2
         required: false
+
+  Aggregator:
+    type: string
+    enum: [ "mean", "median" ]
+
+  QuantitativeOverlayConfig:
+    additionalProperties: false
+    discriminator: overlayType
+    properties:
+      overlayType:
+        type: OverlayType
+      overlayVariable:
+        type: VariableSpec
+
+  ContinuousQuantitativeOverlayConfig:
+    type: QuantitativeOverlayConfig
+    additionalProperties: false
+    discriminatorValue: continuous
+    properties:
+      aggregator: Aggregator
+
+  CategoricalQuantitativeOverlayConfig:
+    type: QuantitativeOverlayConfig
+    discriminatorValue: categorical
+    additionalProperties: false
+    properties:
+      numeratorValues: string[]
+      denominatorValues: string[]

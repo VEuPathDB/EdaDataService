@@ -15,45 +15,20 @@ types:
         required: true
         type: string
         description: Entity ID associated with collection variable of interest.
-      collectionVariableId:
+      collection:
         required: true
-        type: VariableSpec
+        type: CollectionSpec
         description: Collection variable to use for markers.
-      memberVariables:
-        type: MemberVariable[]
-        description: | 
-          Optionally, a set of member variable IDs can be provided. Aggregate output values will be provided per marker
-          for each variable in this set. By default, all variables in collection will be provided. The maximum number of
-          variables we can provide output for per marker is 8.
+      aggregationConfig:
+        required: true
+        type: QuantitativeOverlayConfig
+        description: Specification for how variable values will be aggregated into quantiative value shown in bar plot marker.
+      selectedMemberVariables:
+        required: true
+        type: VariableSpec[]
+        description: Variables in the provided collection for which marker data should be provided.
 
-  # Note that this is not using inheritance as it breaks API doc generation. Instead, both continuous/categorical
-  # configurations are top-level fields and the backend will validate that the config is compatible with the associated var.
-  MemberVariable:
-    additionalProperties: false
-    properties:
-      variableId: string
-      categoricalConfig:
-        type: CategoricalMemberConfig
-        description: Categorical member configuration. Note that this should only be provided with a categorical variable.
-      continousConfig:
-        type: ContinuousMemberConfig
-        description: Continous member configuration. Note that this should only be provided with a continuous variable.
-
-  ContinuousMemberConfig:
-    additionalProperties: false
-    properties:
-      aggregator: Aggregator
-
-  CategoricalMemberConfig:
-    additionalProperties: false
-    description: | 
-      Configuration for aggregating categorical values into a proportion. Note that numerator values must be a subset
-      of denominator values.
-    properties:
-      numeratorValues: string[]
-      denominatorValues: string[]
-
-  MapMarkerElement:
+  CollectionMapMarkerElement:
     description: |
       Data needed to render a collection map marker. Contains geographical data as well as per-variable collection var
       aggregates needed to render bar plots with error bar.
@@ -77,5 +52,5 @@ types:
   StandaloneCollectionMapMarkerPostResponse:
     additionalProperties: false
     properties:
-      markers: MapMarkerElement[]
+      markers: CollectionMapMarkerElement[]
 

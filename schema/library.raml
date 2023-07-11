@@ -1604,41 +1604,16 @@ types:
       outputEntityId:
         description: Entity ID associated with collection variable of interest.
         type: string
-      collectionVariableId:
+      collection:
         description: Collection variable to use for markers.
-        type: VariableSpec
-      memberVariables:
-        description: |
-          Optionally, a set of member variable IDs can be provided. Aggregate output values will be provided per marker
-          for each variable in this set. By default, all variables in collection will be provided. The maximum number of
-          variables we can provide output for per marker is 8.
-        type: MemberVariable[]
-  MemberVariable:
-    type: object
-    additionalProperties: false
-    properties:
-      variableId: string
-      categoricalConfig:
-        description: Categorical member configuration. Note that this should only be provided with a categorical variable.
-        type: CategoricalMemberConfig
-      continousConfig:
-        description: Continous member configuration. Note that this should only be provided with a continuous variable.
-        type: ContinuousMemberConfig
-  ContinuousMemberConfig:
-    type: object
-    additionalProperties: false
-    properties:
-      aggregator: Aggregator
-  CategoricalMemberConfig:
-    description: |
-      Configuration for aggregating categorical values into a proportion. Note that numerator values must be a subset
-      of denominator values.
-    type: object
-    additionalProperties: false
-    properties:
-      numeratorValues: string[]
-      denominatorValues: string[]
-  MapMarkerElement:
+        type: CollectionSpec
+      aggregationConfig:
+        description: Specification for how variable values will be aggregated into quantiative value shown in bar plot marker.
+        type: QuantitativeOverlayConfig
+      selectedMemberVariables:
+        description: Variables in the provided collection for which marker data should be provided.
+        type: VariableSpec[]
+  CollectionMapMarkerElement:
     description: |
       Data needed to render a collection map marker. Contains geographical data as well as per-variable collection var
       aggregates needed to render bar plots with error bar.
@@ -1663,7 +1638,7 @@ types:
     type: object
     additionalProperties: false
     properties:
-      markers: MapMarkerElement[]
+      markers: CollectionMapMarkerElement[]
   FloatingBarplotPostRequest:
     type: DataPluginRequestBase
     properties:
@@ -1915,31 +1890,6 @@ types:
     additionalProperties: false
     properties:
       mapElements: ColoredMapElementInfo[]
-  Aggregator:
-    type: string
-    enum:
-      - mean
-      - median
-  QuantitativeOverlayConfig:
-    type: object
-    additionalProperties: false
-    discriminator: overlayType
-    properties:
-      overlayType: OverlayType
-      overlayVariable: VariableSpec
-  ContinuousQuantitativeOverlayConfig:
-    type: QuantitativeOverlayConfig
-    additionalProperties: false
-    discriminatorValue: continuous
-    properties:
-      aggregator: Aggregator
-  CategoricalQuantitativeOverlayConfig:
-    type: QuantitativeOverlayConfig
-    discriminatorValue: categorical
-    additionalProperties: false
-    properties:
-      numeratorValues: string[]
-      denominatorValues: string[]
   ColoredMapElementInfo:
     type: object
     additionalProperties: false
@@ -2163,4 +2113,29 @@ types:
         type: VariableSpec[]
         maxItems: 2
         required: false
+  Aggregator:
+    type: string
+    enum:
+      - mean
+      - median
+  QuantitativeOverlayConfig:
+    type: object
+    additionalProperties: false
+    discriminator: overlayType
+    properties:
+      overlayType: OverlayType
+      overlayVariable: VariableSpec
+  ContinuousQuantitativeOverlayConfig:
+    type: QuantitativeOverlayConfig
+    additionalProperties: false
+    discriminatorValue: continuous
+    properties:
+      aggregator: Aggregator
+  CategoricalQuantitativeOverlayConfig:
+    type: QuantitativeOverlayConfig
+    discriminatorValue: categorical
+    additionalProperties: false
+    properties:
+      numeratorValues: string[]
+      denominatorValues: string[]
 
