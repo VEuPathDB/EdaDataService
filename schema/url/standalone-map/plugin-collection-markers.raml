@@ -19,7 +19,7 @@ types:
         required: true
         type: VariableSpec
         description: Collection variable to use for markers.
-      memberVariableIds:
+      memberVariables:
         type: MemberVariable[]
         description: | 
           Optionally, a set of member variable IDs can be provided. Aggregate output values will be provided per marker
@@ -58,6 +58,7 @@ types:
       Data needed to render a collection map marker. Contains geographical data as well as per-variable collection var
       aggregates needed to render bar plots with error bar.
     properties:
+      entityCount: number
       avgLat: number
       avgLon: number
       minLat: number

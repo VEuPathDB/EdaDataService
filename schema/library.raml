@@ -1607,7 +1607,7 @@ types:
       collectionVariableId:
         description: Collection variable to use for markers.
         type: VariableSpec
-      memberVariableIds:
+      memberVariables:
         description: |
           Optionally, a set of member variable IDs can be provided. Aggregate output values will be provided per marker
           for each variable in this set. By default, all variables in collection will be provided. The maximum number of
@@ -1644,6 +1644,7 @@ types:
       aggregates needed to render bar plots with error bar.
     type: object
     properties:
+      entityCount: number
       avgLat: number
       avgLon: number
       minLat: number
