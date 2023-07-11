@@ -1592,6 +1592,77 @@ types:
     type: DataPluginRequestBase
     properties:
       config: CollectionSpec
+  StandaloneCollectionMapMarkerPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: StandaloneCollectionMapMarkerSpec
+  StandaloneCollectionMapMarkerSpec:
+    description: Specification for a map marker
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId:
+        description: Entity ID associated with collection variable of interest.
+        type: string
+      collectionVariableId:
+        description: Collection variable to use for markers.
+        type: VariableSpec
+      memberVariableIds:
+        description: |
+          Optionally, a set of member variable IDs can be provided. Aggregate output values will be provided per marker
+          for each variable in this set. By default, all variables in collection will be provided. The maximum number of
+          variables we can provide output for per marker is 8.
+        type: MemberVariable[]
+  MemberVariable:
+    type: object
+    additionalProperties: false
+    properties:
+      variableId: string
+      categoricalConfig:
+        description: Categorical member configuration. Note that this should only be provided with a categorical variable.
+        type: CategoricalMemberConfig
+      continousConfig:
+        description: Continous member configuration. Note that this should only be provided with a continuous variable.
+        type: ContinuousMemberConfig
+  ContinuousMemberConfig:
+    type: object
+    additionalProperties: false
+    properties:
+      aggregator: Aggregator
+  CategoricalMemberConfig:
+    description: |
+      Configuration for aggregating categorical values into a proportion. Note that numerator values must be a subset
+      of denominator values.
+    type: object
+    additionalProperties: false
+    properties:
+      numeratorValues: string[]
+      denominatorValues: string[]
+  MapMarkerElement:
+    description: |
+      Data needed to render a collection map marker. Contains geographical data as well as per-variable collection var
+      aggregates needed to render bar plots with error bar.
+    type: object
+    properties:
+      avgLat: number
+      avgLon: number
+      minLat: number
+      minLon: number
+      maxLat: number
+      maxLon: number
+      values: CollectionMemberAggregate[]
+  CollectionMemberAggregate:
+    type: object
+    properties:
+      variableId: string
+      mean: number
+      median: number
+      proportion: number
+  StandaloneCollectionMapMarkerPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      markers: MapMarkerElement[]
   FloatingBarplotPostRequest:
     type: DataPluginRequestBase
     properties:
@@ -1862,8 +1933,6 @@ types:
     properties:
       aggregator: Aggregator
   CategoricalQuantitativeOverlayConfig:
-    description: |
-      Quantitative overlay config
     type: QuantitativeOverlayConfig
     discriminatorValue: categorical
     additionalProperties: false

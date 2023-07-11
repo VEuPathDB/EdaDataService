@@ -1,0 +1,80 @@
+#%RAML 1.0 Library
+
+types:
+
+  StandaloneCollectionMapMarkerPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: StandaloneCollectionMapMarkerSpec
+
+  StandaloneCollectionMapMarkerSpec:
+    additionalProperties: false
+    description: Specification for a map marker
+    properties:
+      outputEntityId:
+        required: true
+        type: string
+        description: Entity ID associated with collection variable of interest.
+      collectionVariableId:
+        required: true
+        type: VariableSpec
+        description: Collection variable to use for markers.
+      memberVariableIds:
+        type: MemberVariable[]
+        description: | 
+          Optionally, a set of member variable IDs can be provided. Aggregate output values will be provided per marker
+          for each variable in this set. By default, all variables in collection will be provided. The maximum number of
+          variables we can provide output for per marker is 8.
+
+  # Note that this is not using inheritance as it breaks API doc generation. Instead, both continuous/categorical
+  # configurations are top-level fields and the backend will validate that the config is compatible with the associated var.
+  MemberVariable:
+    additionalProperties: false
+    properties:
+      variableId: string
+      categoricalConfig:
+        type: CategoricalMemberConfig
+        description: Categorical member configuration. Note that this should only be provided with a categorical variable.
+      continousConfig:
+        type: ContinuousMemberConfig
+        description: Continous member configuration. Note that this should only be provided with a continuous variable.
+
+  ContinuousMemberConfig:
+    additionalProperties: false
+    properties:
+      aggregator: Aggregator
+
+  CategoricalMemberConfig:
+    additionalProperties: false
+    description: | 
+      Configuration for aggregating categorical values into a proportion. Note that numerator values must be a subset
+      of denominator values.
+    properties:
+      numeratorValues: string[]
+      denominatorValues: string[]
+
+  MapMarkerElement:
+    description: |
+      Data needed to render a collection map marker. Contains geographical data as well as per-variable collection var
+      aggregates needed to render bar plots with error bar.
+    properties:
+      avgLat: number
+      avgLon: number
+      minLat: number
+      minLon: number
+      maxLat: number
+      maxLon: number
+      values: CollectionMemberAggregate[]
+
+  CollectionMemberAggregate:
+    properties:
+      variableId: string
+      mean: number
+      median: number
+      proportion: number
+
+  StandaloneCollectionMapMarkerPostResponse:
+    additionalProperties: false
+    properties:
+      markers: MapMarkerElement[]
+

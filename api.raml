@@ -85,6 +85,18 @@ securitySchemes:
                 body:
                   application/json:
                     type: lib.StandaloneMapBubblesLegendPostResponse
+      /collections:
+        post:
+          description: |
+            Map marker endpoint for collection variables.
+          body:
+            application/json:
+              type: lib.StandaloneCollectionMapMarkerPostRequest
+          responses:
+            200:
+              body:
+                application/json:
+                  type: lib.StandaloneCollectionMapMarkerPostResponse
 
 
   /standalone-map-xyrelationships/visualizations:
