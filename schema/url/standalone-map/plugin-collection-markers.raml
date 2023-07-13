@@ -15,6 +15,18 @@ types:
         required: true
         type: string
         description: Entity ID associated with collection variable of interest.
+      geoAggregateVariable:
+        type: VariableSpec
+        description: Geohash component variable to group markers by. This is usually determined by zoom level of the client application.
+      longitudeVariable:
+        type: VariableSpec
+        description: Variable representing longitude of output entity.
+      latitudeVariable:
+        type: VariableSpec
+        description: Variable representing latitude of output entity.
+      viewport:
+        type: GeolocationViewport
+        description: Viewport used to filter markers. Only entities that are contained in the viewport will be grouped into markers.
       collection:
         required: true
         type: CollectionSpec
@@ -47,7 +59,7 @@ types:
       variableId: string
       mean: number
       median: number
-      proportion: number
+      stddev: number
 
   StandaloneCollectionMapMarkerPostResponse:
     additionalProperties: false
