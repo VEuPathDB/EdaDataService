@@ -10,7 +10,8 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.GeolocationViewport;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MapBubbleSpecification;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MarkerAggregator;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.QuantitativeAggregateConfiguration;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MapMarkerRowProcessor;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MarkerData;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
@@ -34,12 +35,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.gusdb.fgputil.FormatUtil.TAB;
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
 public class BubbleMapMarkersPlugin extends AbstractEmptyComputePlugin<StandaloneMapBubblesPostRequest, StandaloneMapBubblesSpec> {
-  private MapBubbleSpecification _overlaySpecification = null;
+  private QuantitativeAggregateConfiguration _overlaySpecification = null;
 
   @Override
   public List<String> getProjects() {
@@ -78,7 +80,7 @@ public class BubbleMapMarkersPlugin extends AbstractEmptyComputePlugin<Standalon
           .orElse(null)));
     if (pluginSpec.getOverlayConfig() != null) {
       try {
-        _overlaySpecification = new MapBubbleSpecification(pluginSpec.getOverlayConfig(), getUtil()::getVariableDataShape);
+        _overlaySpecification = new QuantitativeAggregateConfiguration(pluginSpec.getOverlayConfig(), getUtil()::getVariableDataShape);
       } catch (IllegalArgumentException e) {
         throw new ValidationException(e.getMessage());
       }
@@ -110,20 +112,22 @@ public class BubbleMapMarkersPlugin extends AbstractEmptyComputePlugin<Standalon
     int geoVarIndex  = indexOf.apply(spec.getGeoAggregateVariable());
     int latIndex     = indexOf.apply(spec.getLatitudeVariable());
     int lonIndex     = indexOf.apply(spec.getLongitudeVariable());
-    Optional<MapBubbleSpecification> overlayConfig = Optional.ofNullable(_overlaySpecification);
+    Optional<QuantitativeAggregateConfiguration> overlayConfig = Optional.ofNullable(_overlaySpecification);
     Integer overlayIndex = overlayConfig
-        .map(MapBubbleSpecification::getOverlayVariable)
+        .map(QuantitativeAggregateConfiguration::getOverlayVariable)
         .map(indexOf)
         .orElse(null);
 
     // get map markers config
     GeolocationViewport viewport = GeolocationViewport.fromApiViewport(spec.getViewport());
 
-    MapMarkerRowProcessor<Double> processor = new MapMarkerRowProcessor<>(geoVarIndex, latIndex, lonIndex, overlayIndex);
+    MapMarkerRowProcessor<Double> processor = new MapMarkerRowProcessor<>(geoVarIndex, latIndex, lonIndex);
+
+    Supplier<MarkerAggregator<Double>> markerAggregatorSupplier = () -> overlayConfig.map(x -> x.getAggregatorProvider(overlayIndex))
+        .orElse(null);
 
     // loop through rows of data stream, aggregating stats into a map from aggregate value to stats object
-    Map<String, MarkerData<Double>> aggregatedDataByGeoVal = processor.process(reader, parser, viewport,
-        overlayConfig.map(MapBubbleSpecification::getAggregatorSupplier).orElse(() -> null));
+    Map<String, MarkerData<Double>> aggregatedDataByGeoVal = processor.process(reader, parser, viewport, markerAggregatorSupplier);
 
     List<ColoredMapElementInfo> output = new ArrayList<>();
     for (String key : aggregatedDataByGeoVal.keySet()) {

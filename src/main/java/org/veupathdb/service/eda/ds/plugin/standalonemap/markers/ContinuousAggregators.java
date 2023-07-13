@@ -2,6 +2,7 @@ package org.veupathdb.service.eda.ds.plugin.standalonemap.markers;
 
 import java.util.Comparator;
 import java.util.PriorityQueue;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -9,16 +10,16 @@ import java.util.stream.Stream;
  * Aggregators that collect variable values and produce some aggregated result.
  */
 public enum ContinuousAggregators {
-  Mean(org.veupathdb.service.eda.generated.model.Aggregator.MEAN.getValue(), () -> new MarkerAggregator<Double>() {
+  Mean(org.veupathdb.service.eda.generated.model.Aggregator.MEAN.getValue(), (index) -> new MarkerAggregator<>() {
     private double sum = 0;
     private int n = 0;
 
     @Override
-    public void addValue(String d) {
-      if (d == null || d.isEmpty()) {
+    public void addValue(String[] arr) {
+      if (arr[index] == null || arr[index].isEmpty()) {
         return;
       }
-      sum += Double.parseDouble(d);
+      sum += Double.parseDouble(arr[index]);
       n += 1;
     }
 
@@ -31,7 +32,7 @@ public enum ContinuousAggregators {
     }
   }),
 
-  Median(org.veupathdb.service.eda.generated.model.Aggregator.MEDIAN.getValue(), () -> new MarkerAggregator<Double>() {
+  Median(org.veupathdb.service.eda.generated.model.Aggregator.MEDIAN.getValue(), (index) -> new MarkerAggregator<>() {
     private Double currentMedian = null;
     // Initialize a min-heap for the elements greater than the running median.
     private final PriorityQueue<Double> above = new PriorityQueue<>(Comparator.naturalOrder());
@@ -39,11 +40,11 @@ public enum ContinuousAggregators {
     private final PriorityQueue<Double> below = new PriorityQueue<>(Comparator.reverseOrder());
 
     @Override
-    public void addValue(String s) {
-      if (s == null || s.isEmpty()) {
+    public void addValue(String[] arr) {
+      if (arr[index] == null || arr[index].isEmpty()) {
         return;
       }
-      Double d = Double.parseDouble(s);
+      Double d = Double.parseDouble(arr[index]);
       if (currentMedian == null) {
         // This is the first number we're seeing. Set it to the median.
         currentMedian = d;
@@ -109,16 +110,16 @@ public enum ContinuousAggregators {
     }
   });
 
-  private final Supplier<MarkerAggregator<Double>> aggregator;
+  private final Function<Integer, MarkerAggregator<Double>> aggregator;
   private final String name;
 
-  ContinuousAggregators(String name, Supplier<MarkerAggregator<Double>> aggregator) {
+  ContinuousAggregators(String name, Function<Integer, MarkerAggregator<Double>> aggregator) {
     this.aggregator = aggregator;
     this.name = name;
   }
 
-  public Supplier<MarkerAggregator<Double>> getAggregatorSupplier() {
-    return aggregator;
+  public MarkerAggregator<Double> getAggregatorSupplier(int index) {
+    return aggregator.apply(index);
   }
 
   public static ContinuousAggregators fromExternalString(String name) {

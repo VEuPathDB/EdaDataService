@@ -16,13 +16,11 @@ public class MapMarkerRowProcessor<T> {
   private final int geoVarIndex;
   private final int latIndex;
   private final int lonIndex;
-  private final Integer overlayIndex;
 
-  public MapMarkerRowProcessor(int geoVarIndex, int latIndex, int lonIndex, Integer overlayIndex) {
+  public MapMarkerRowProcessor(int geoVarIndex, int latIndex, int lonIndex) {
     this.geoVarIndex = geoVarIndex;
     this.latIndex = latIndex;
     this.lonIndex = lonIndex;
-    this.overlayIndex = overlayIndex;
   }
 
   public Map<String, MarkerData<T>> process(BufferedReader reader,
@@ -46,7 +44,7 @@ public class MapMarkerRowProcessor<T> {
         if (viewport.containsCoordinates(latitude, longitude)) {
           aggregatedDataByGeoVal.putIfAbsent(row[geoVarIndex], new MarkerData<>(aggregatorSupplier.get()));
           // overlayValue here could be a raw numeric value as well
-          aggregatedDataByGeoVal.get(row[geoVarIndex]).addRow(latitude, longitude, overlayIndex != null ? row[overlayIndex] : null);
+          aggregatedDataByGeoVal.get(row[geoVarIndex]).addRow(latitude, longitude, row);
         }
       }
       nextLine = reader.readLine();
