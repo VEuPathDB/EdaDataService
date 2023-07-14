@@ -60,10 +60,17 @@ public class AppsService implements Apps {
   }
 
   @Override
-  public PostAppsStandaloneMapVisualizationsMapMarkersLegendResponse postAppsStandaloneMapVisualizationsMapMarkersLegend(StandaloneMapBubblesLegendPostRequest entity) {
-    return wrapPlugin(() -> PostAppsStandaloneMapVisualizationsMapMarkersLegendResponse.respond200WithApplicationJson(
+  public PostAppsStandaloneMapVisualizationsMapMarkersBubblesLegendResponse postAppsStandaloneMapVisualizationsMapMarkersBubblesLegend(StandaloneMapBubblesLegendPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapVisualizationsMapMarkersBubblesLegendResponse.respond200WithApplicationJson(
         new StandaloneMapBubblesLegendPostResponseStream(processRequest(new BubbleMapMarkersLegendPlugin(), entity))));
   }
+
+  @Override
+  public PostAppsStandaloneMapVisualizationsMapMarkersCollectionsResponse postAppsStandaloneMapVisualizationsMapMarkersCollections(StandaloneCollectionMapMarkerPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapVisualizationsMapMarkersCollectionsResponse.respond200WithApplicationJson(
+        new StandaloneCollectionMapMarkerPostResponseStream(processRequest(new CollectionMapMarkersPlugin(), entity))));
+  }
+
 
   @Override
   public PostAppsStandaloneMapXyrelationshipsVisualizationsTimeseriesResponse postAppsStandaloneMapXyrelationshipsVisualizationsTimeseries(FloatingLineplotPostRequest entity) {

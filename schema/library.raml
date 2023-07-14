@@ -1592,6 +1592,53 @@ types:
     type: DataPluginRequestBase
     properties:
       config: CollectionSpec
+  StandaloneCollectionMapMarkerPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: StandaloneCollectionMapMarkerSpec
+  StandaloneCollectionMapMarkerSpec:
+    description: Specification for a map marker
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId:
+        description: Entity ID associated with collection variable of interest.
+        type: string
+      collection:
+        description: Collection variable to use for markers.
+        type: CollectionSpec
+      aggregationConfig:
+        description: Specification for how variable values will be aggregated into quantiative value shown in bar plot marker.
+        type: QuantitativeOverlayConfig
+      selectedMemberVariables:
+        description: Variables in the provided collection for which marker data should be provided.
+        type: VariableSpec[]
+  CollectionMapMarkerElement:
+    description: |
+      Data needed to render a collection map marker. Contains geographical data as well as per-variable collection var
+      aggregates needed to render bar plots with error bar.
+    type: object
+    properties:
+      entityCount: number
+      avgLat: number
+      avgLon: number
+      minLat: number
+      minLon: number
+      maxLat: number
+      maxLon: number
+      values: CollectionMemberAggregate[]
+  CollectionMemberAggregate:
+    type: object
+    properties:
+      variableId: string
+      mean: number
+      median: number
+      proportion: number
+  StandaloneCollectionMapMarkerPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      markers: CollectionMapMarkerElement[]
   FloatingBarplotPostRequest:
     type: DataPluginRequestBase
     properties:
@@ -1843,33 +1890,6 @@ types:
     additionalProperties: false
     properties:
       mapElements: ColoredMapElementInfo[]
-  Aggregator:
-    type: string
-    enum:
-      - mean
-      - median
-  QuantitativeOverlayConfig:
-    type: object
-    additionalProperties: false
-    discriminator: overlayType
-    properties:
-      overlayType: OverlayType
-      overlayVariable: VariableSpec
-  ContinuousQuantitativeOverlayConfig:
-    type: QuantitativeOverlayConfig
-    additionalProperties: false
-    discriminatorValue: continuous
-    properties:
-      aggregator: Aggregator
-  CategoricalQuantitativeOverlayConfig:
-    description: |
-      Quantitative overlay config
-    type: QuantitativeOverlayConfig
-    discriminatorValue: categorical
-    additionalProperties: false
-    properties:
-      numeratorValues: string[]
-      denominatorValues: string[]
   ColoredMapElementInfo:
     type: object
     additionalProperties: false
@@ -2093,4 +2113,29 @@ types:
         type: VariableSpec[]
         maxItems: 2
         required: false
+  Aggregator:
+    type: string
+    enum:
+      - mean
+      - median
+  QuantitativeOverlayConfig:
+    type: object
+    additionalProperties: false
+    discriminator: overlayType
+    properties:
+      overlayType: OverlayType
+      overlayVariable: VariableSpec
+  ContinuousQuantitativeOverlayConfig:
+    type: QuantitativeOverlayConfig
+    additionalProperties: false
+    discriminatorValue: continuous
+    properties:
+      aggregator: Aggregator
+  CategoricalQuantitativeOverlayConfig:
+    type: QuantitativeOverlayConfig
+    discriminatorValue: categorical
+    additionalProperties: false
+    properties:
+      numeratorValues: string[]
+      denominatorValues: string[]
 
