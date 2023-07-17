@@ -153,27 +153,27 @@ types:
     type: string
     enum: [ "mean", "median" ]
 
-  QuantitativeOverlayConfigWithVariable:
+  QuantitativeOverlayConfig:
     properties:
       overlayVariable: VariableSpec
-      overlayConfig: QuantitativeOverlayConfig
+      aggregationConfig: QuantitativeAggregationConfig
 
-  QuantitativeOverlayConfig:
+  QuantitativeAggregationConfig:
     additionalProperties: false
     discriminator: overlayType
     properties:
       overlayType:
         type: OverlayType
 
-  ContinuousQuantitativeOverlayConfig:
-    type: QuantitativeOverlayConfig
+  ContinuousAggregationConfig:
+    type: QuantitativeAggregationConfig
     additionalProperties: false
     discriminatorValue: continuous
     properties:
       aggregator: Aggregator
 
-  CategoricalQuantitativeOverlayConfig:
-    type: QuantitativeOverlayConfig
+  CategoricalAggregationConfig:
+    type: QuantitativeAggregationConfig
     discriminatorValue: categorical
     additionalProperties: false
     properties:
