@@ -1,0 +1,25 @@
+#%RAML 1.0 Library
+
+types:
+  # Type name determines the name of the Java class that will be generated.
+
+  CollectionFloatingBarplotPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: CollectionFloatingBarplotSpec
+  
+  CollectionFloatingBarplotSpec:
+    additionalProperties: false
+    properties:
+      outputEntityId:
+        type: string
+      barMode:
+        type: string
+        enum: ['group', 'stack']
+      valueSpec:
+        type: ValueSpec
+      # idea here might be to borrow any validation, and maybe limiting the collection to requested members, from the collection marker plugin
+      # R may need to learn a new trick to limit to specified collection members either way... need to check the code
+      overlayConfig:
+        type: CollectionOverlayConfig
+

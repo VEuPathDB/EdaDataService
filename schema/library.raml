@@ -1592,6 +1592,98 @@ types:
     type: DataPluginRequestBase
     properties:
       config: CollectionSpec
+  CollectionFloatingBarplotPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: CollectionFloatingBarplotSpec
+  CollectionFloatingBarplotSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      barMode:
+        type: string
+        enum:
+          - group
+          - stack
+      valueSpec: ValueSpec
+      overlayConfig: CollectionOverlayConfig
+  CollectionFloatingBoxplotPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: CollectionFloatingBoxplotSpec
+  CollectionFloatingBoxplotSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      xAxisVariable: VariableSpec
+      overlayConfig: CollectionOverlayConfig
+      maxAllowedDataPoints:
+        type: integer
+        required: false
+        format: int64
+  CollectionFloatingContTablePostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: CollectionFloatingContTableSpec
+  CollectionFloatingContTableSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      xAxisVariable: CollectionOverlayConfig
+  CollectionFloatingHistogramPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: CollectionFloatingHistogramSpec
+  CollectionFloatingHistogramSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      barMode:
+        type: string
+        enum:
+          - overlay
+          - stack
+      valueSpec: ValueSpec
+      overlayConfig: CollectionOverlayConfig
+      binSpec: BinSpec
+      viewport:
+        type: NumericViewport
+        required: false
+  CollectionFloatingLineplotPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: CollectionFloatingLineplotSpec
+  CollectionFloatingLineplotSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      xAxisVariable: VariableSpec
+      yAxisNumeratorValues:
+        type: string[]
+        required: false
+      yAxisDenominatorValues:
+        type: string[]
+        required: false
+      overlayConfig: CollectionOverlayConfig
+      binSpec:
+        type: BinSpec
+        required: false
+      valueSpec:
+        type: string
+        enum:
+          - median
+          - mean
+          - geometricMean
+          - proportion
+      errorBars: StringBoolean
+      viewport:
+        type: NumericViewport
+        required: false
   StandaloneCollectionMapMarkerPostRequest:
     type: DataPluginRequestBase
     properties:
@@ -1604,6 +1696,18 @@ types:
       outputEntityId:
         description: Entity ID associated with collection variable of interest.
         type: string
+      geoAggregateVariable:
+        description: Geohash component variable to group markers by. This is usually determined by zoom level of the client application.
+        type: VariableSpec
+      longitudeVariable:
+        description: Variable representing longitude of output entity.
+        type: VariableSpec
+      latitudeVariable:
+        description: Variable representing latitude of output entity.
+        type: VariableSpec
+      viewport:
+        description: Viewport used to filter markers. Only entities that are contained in the viewport will be grouped into markers.
+        type: GeolocationViewport
       collection:
         description: Collection variable to use for markers.
         type: CollectionSpec
@@ -1633,7 +1737,8 @@ types:
       variableId: string
       mean: number
       median: number
-      proportion: number
+      confidenceInterval: NumberRange
+      n: number
   StandaloneCollectionMapMarkerPostResponse:
     type: object
     additionalProperties: false
@@ -2138,4 +2243,10 @@ types:
     properties:
       numeratorValues: string[]
       denominatorValues: string[]
+  CollectionOverlayConfig:
+    type: object
+    additionalProperties: false
+    properties:
+      collection: CollectionSpec
+      selectedMembers: VariableSpec[]
 
