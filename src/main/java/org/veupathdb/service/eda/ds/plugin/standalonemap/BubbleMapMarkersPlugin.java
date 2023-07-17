@@ -18,6 +18,7 @@ import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.ColoredMapElementInfo;
 import org.veupathdb.service.eda.generated.model.ColoredMapElementInfoImpl;
 import org.veupathdb.service.eda.generated.model.QuantitativeOverlayConfig;
+import org.veupathdb.service.eda.generated.model.QuantitativeOverlayConfigWithVariable;
 import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesPostRequest;
 import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesPostResponse;
 import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesPostResponseImpl;
@@ -76,11 +77,12 @@ public class BubbleMapMarkersPlugin extends AbstractEmptyComputePlugin<Standalon
       .var("latitudeVariable", pluginSpec.getLatitudeVariable())
       .var("longitudeVariable", pluginSpec.getLongitudeVariable())
       .var("overlayVariable", Optional.ofNullable(pluginSpec.getOverlayConfig())
-          .map(QuantitativeOverlayConfig::getOverlayVariable)
+          .map(QuantitativeOverlayConfigWithVariable::getOverlayVariable)
           .orElse(null)));
     if (pluginSpec.getOverlayConfig() != null) {
       try {
-        _overlaySpecification = new QuantitativeAggregateConfiguration(pluginSpec.getOverlayConfig(), getUtil()::getVariableDataShape);
+        _overlaySpecification = new QuantitativeAggregateConfiguration(pluginSpec.getOverlayConfig().getOverlayConfig(),
+            getUtil().getVariableDataShape(pluginSpec.getOverlayConfig().getOverlayVariable()));
       } catch (IllegalArgumentException e) {
         throw new ValidationException(e.getMessage());
       }
@@ -95,7 +97,7 @@ public class BubbleMapMarkersPlugin extends AbstractEmptyComputePlugin<Standalon
         .addVar(pluginSpec.getLatitudeVariable())
         .addVar(pluginSpec.getLongitudeVariable())
         .addVar(Optional.ofNullable(pluginSpec.getOverlayConfig())
-            .map(QuantitativeOverlayConfig::getOverlayVariable)
+            .map(QuantitativeOverlayConfigWithVariable::getOverlayVariable)
             .orElse(null)));
   }
 
@@ -113,8 +115,8 @@ public class BubbleMapMarkersPlugin extends AbstractEmptyComputePlugin<Standalon
     int latIndex     = indexOf.apply(spec.getLatitudeVariable());
     int lonIndex     = indexOf.apply(spec.getLongitudeVariable());
     Optional<QuantitativeAggregateConfiguration> overlayConfig = Optional.ofNullable(_overlaySpecification);
-    Integer overlayIndex = overlayConfig
-        .map(QuantitativeAggregateConfiguration::getOverlayVariable)
+    Integer overlayIndex = Optional.ofNullable(_pluginSpec.getOverlayConfig())
+        .map(QuantitativeOverlayConfigWithVariable::getOverlayVariable)
         .map(indexOf)
         .orElse(null);
 

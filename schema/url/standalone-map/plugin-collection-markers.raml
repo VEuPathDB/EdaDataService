@@ -29,16 +29,17 @@ types:
         description: Viewport used to filter markers. Only entities that are contained in the viewport will be grouped into markers.
       collection:
         required: true
-        type: CollectionSpec
+        type: CollectionOverlayConfig
         description: Collection variable to use for markers.
-      aggregationConfig:
+      aggregatorConfig:
         required: true
         type: QuantitativeOverlayConfig
         description: Specification for how variable values will be aggregated into quantiative value shown in bar plot marker.
-      selectedMemberVariables:
-        required: true
-        type: VariableSpec[]
-        description: Variables in the provided collection for which marker data should be provided.
+
+  CollectionOverlayConfig:
+    properties:
+      collection: CollectionSpec
+      selectedMembers: VariableSpec[]
 
   CollectionMapMarkerElement:
     description: |

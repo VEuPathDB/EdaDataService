@@ -78,12 +78,14 @@ public class BubbleMapMarkersLegendPlugin extends AbstractEmptyComputePlugin<Sta
     validateInputs(new DataElementSet()
         .entity(pluginSpec.getOutputEntityId())
         .var("colorGeoVariable", legendConfig.map(OverlayLegendConfig::getGeoAggregateVariable).orElse(null))
-        .var("colorVariable", legendConfig.map(colorLegendConfig -> colorLegendConfig.getQuantitativeOverlayConfig().getOverlayVariable()).orElse(null))
+        .var("colorVariable", Optional.ofNullable(pluginSpec.getColorLegendConfig())
+            .map(config -> config.getQuantitativeOverlayConfig().getOverlayVariable())
+            .orElse(null))
         .var("sizeGeoVariable", sizeConfig.map(SizeLegendConfig::getGeoAggregateVariable).orElse(null)));
     if (pluginSpec.getColorLegendConfig() != null) {
       try {
-        _colorSpecification = new QuantitativeAggregateConfiguration(pluginSpec.getColorLegendConfig().getQuantitativeOverlayConfig(),
-            getUtil()::getVariableDataShape);
+        _colorSpecification = new QuantitativeAggregateConfiguration(pluginSpec.getColorLegendConfig().getQuantitativeOverlayConfig().getOverlayConfig(),
+            getUtil().getVariableDataShape(pluginSpec.getColorLegendConfig().getQuantitativeOverlayConfig().getOverlayVariable()));
       } catch (IllegalArgumentException e) {
         throw new ValidationException(e.getMessage());
       }

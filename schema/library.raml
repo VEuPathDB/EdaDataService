@@ -1618,13 +1618,15 @@ types:
         type: GeolocationViewport
       collection:
         description: Collection variable to use for markers.
-        type: CollectionSpec
-      aggregationConfig:
+        type: CollectionOverlayConfig
+      aggregatorConfig:
         description: Specification for how variable values will be aggregated into quantiative value shown in bar plot marker.
         type: QuantitativeOverlayConfig
-      selectedMemberVariables:
-        description: Variables in the provided collection for which marker data should be provided.
-        type: VariableSpec[]
+  CollectionOverlayConfig:
+    type: object
+    properties:
+      collection: CollectionSpec
+      selectedMembers: VariableSpec[]
   CollectionMapMarkerElement:
     description: |
       Data needed to render a collection map marker. Contains geographical data as well as per-variable collection var
@@ -1856,7 +1858,7 @@ types:
     additionalProperties: false
     properties:
       geoAggregateVariable: VariableSpec
-      quantitativeOverlayConfig: QuantitativeOverlayConfig
+      quantitativeOverlayConfig: QuantitativeOverlayConfigWithVariable
   SizeLegendConfig:
     type: object
     additionalProperties: false
@@ -1893,7 +1895,7 @@ types:
         type: VariableSpec
       overlayConfig?:
         description: Overlay configuration for quantitative overlay. The quantitative overlay value can be used to render color on the markers.
-        type: QuantitativeOverlayConfig
+        type: QuantitativeOverlayConfigWithVariable
       valueSpec: ValueSpec
       viewport:
         description: Viewport used to filter markers. Only entities that are contained in the viewport will be grouped into markers.
@@ -2131,13 +2133,17 @@ types:
     enum:
       - mean
       - median
+  QuantitativeOverlayConfigWithVariable:
+    type: object
+    properties:
+      overlayVariable: VariableSpec
+      overlayConfig: QuantitativeOverlayConfig
   QuantitativeOverlayConfig:
     type: object
     additionalProperties: false
     discriminator: overlayType
     properties:
       overlayType: OverlayType
-      overlayVariable: VariableSpec
   ContinuousQuantitativeOverlayConfig:
     type: QuantitativeOverlayConfig
     additionalProperties: false

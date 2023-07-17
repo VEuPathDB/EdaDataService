@@ -23,7 +23,7 @@ types:
       geoAggregateVariable: # Should be most granular
         type: VariableSpec
       quantitativeOverlayConfig:
-        type: QuantitativeOverlayConfig
+        type: QuantitativeOverlayConfigWithVariable
 
   SizeLegendConfig:
     additionalProperties: false
@@ -61,7 +61,7 @@ types:
         type: VariableSpec
         description: Variable representing latitude of output entity.
       overlayConfig?:
-        type: QuantitativeOverlayConfig
+        type: QuantitativeOverlayConfigWithVariable
         description: Overlay configuration for quantitative overlay. The quantitative overlay value can be used to render color on the markers.
       valueSpec:
         type: ValueSpec

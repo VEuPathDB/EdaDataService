@@ -153,14 +153,17 @@ types:
     type: string
     enum: [ "mean", "median" ]
 
+  QuantitativeOverlayConfigWithVariable:
+    properties:
+      overlayVariable: VariableSpec
+      overlayConfig: QuantitativeOverlayConfig
+
   QuantitativeOverlayConfig:
     additionalProperties: false
     discriminator: overlayType
     properties:
       overlayType:
         type: OverlayType
-      overlayVariable:
-        type: VariableSpec
 
   ContinuousQuantitativeOverlayConfig:
     type: QuantitativeOverlayConfig

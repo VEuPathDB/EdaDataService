@@ -76,8 +76,11 @@ public class CollectionMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
 
   @Override
   protected void validateVisualizationSpec(StandaloneCollectionMapMarkerSpec pluginSpec) throws ValidationException {
-    final List<VariableDef> allMembers = getUtil().getCollectionMembers(pluginSpec.getCollection());
-    final Set<String> selectedMemberIds = pluginSpec.getSelectedMemberVariables().stream()
+    if (pluginSpec.getCollection() == null) {
+      throw new ValidationException("Collection information must be specified.");
+    }
+    final List<VariableDef> allMembers = getUtil().getCollectionMembers(pluginSpec.getCollection().getCollection());
+    final Set<String> selectedMemberIds = pluginSpec.getCollection().getSelectedMembers().stream()
         .map(VariableSpec::getVariableId)
         .collect(Collectors.toSet());
     final Set<String> allMemberIds = allMembers.stream()
@@ -88,9 +91,10 @@ public class CollectionMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
       throw new ValidationException("Specified member variables must belong to the specified collection. " +
           "The following were not found in collection: " + invalidMemberIds);
     }
-    if (pluginSpec.getAggregationConfig() != null) {
+    if (pluginSpec.getAggregatorConfig() != null) {
       try {
-        _aggregateConfig = new QuantitativeAggregateConfiguration(pluginSpec.getAggregationConfig(), getUtil()::getVariableDataShape);
+        _aggregateConfig = new QuantitativeAggregateConfiguration(pluginSpec.getAggregatorConfig(),
+            getUtil().getCollectionDataShape(pluginSpec.getCollection().getCollection()));
       } catch (IllegalArgumentException e) {
         throw new ValidationException(e.getMessage());
       }
@@ -100,7 +104,7 @@ public class CollectionMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
   @Override
   protected List<StreamSpec> getRequestedStreams(StandaloneCollectionMapMarkerSpec pluginSpec) {
     StreamSpec streamSpec = new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId());
-    pluginSpec.getSelectedMemberVariables().forEach(streamSpec::addVar);
+    pluginSpec.getCollection().getSelectedMembers().forEach(streamSpec::addVar);
     return List.of(streamSpec);
   }
 
@@ -113,7 +117,7 @@ public class CollectionMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
     StandaloneCollectionMapMarkerSpec spec = getPluginSpec();
     Function<String, Integer> indexOf = var -> parser.indexOfColumn(var).orElseThrow();
     Function<Integer, String> indexToVarId = index -> parser.getColumnNames().get(index);
-    List<String> memberVarColNames = spec.getSelectedMemberVariables().stream()
+    List<String> memberVarColNames = spec.getCollection().getSelectedMembers().stream()
         .map(getUtil()::toColNameOrEmpty)
         .toList();
 
