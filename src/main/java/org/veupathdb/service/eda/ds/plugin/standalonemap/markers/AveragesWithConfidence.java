@@ -1,16 +1,21 @@
 package org.veupathdb.service.eda.ds.plugin.standalonemap.markers;
 
+/**
+ * Data class containing mean, median and confidence interval.
+ */
 public class AveragesWithConfidence {
-  private double mean;
-  private double median;
-  private double intervalLowerBound;
-  private double intervalUpperBound;
+  private final double mean;
+  private final double median;
+  private final double intervalLowerBound;
+  private final double intervalUpperBound;
+  private final int n;
 
-  public AveragesWithConfidence(double mean, double median, double lowerBound, double upperBound) {
+  public AveragesWithConfidence(double mean, double median, double lowerBound, double upperBound, int n) {
     this.mean = mean;
     this.median = median;
     this.intervalLowerBound = lowerBound;
     this.intervalUpperBound = upperBound;
+    this.n = n;
   }
 
   public double getMean() {
@@ -27,5 +32,9 @@ public class AveragesWithConfidence {
 
   public double getIntervalUpperBound() {
     return intervalUpperBound;
+  }
+
+  public int getN() {
+    return n;
   }
 }

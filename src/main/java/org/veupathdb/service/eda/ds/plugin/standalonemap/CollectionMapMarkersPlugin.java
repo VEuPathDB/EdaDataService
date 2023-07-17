@@ -20,6 +20,8 @@ import org.veupathdb.service.eda.generated.model.CollectionMapMarkerElement;
 import org.veupathdb.service.eda.generated.model.CollectionMapMarkerElementImpl;
 import org.veupathdb.service.eda.generated.model.CollectionMemberAggregate;
 import org.veupathdb.service.eda.generated.model.CollectionMemberAggregateImpl;
+import org.veupathdb.service.eda.generated.model.NumberRange;
+import org.veupathdb.service.eda.generated.model.NumberRangeImpl;
 import org.veupathdb.service.eda.generated.model.StandaloneCollectionMapMarkerPostRequest;
 import org.veupathdb.service.eda.generated.model.StandaloneCollectionMapMarkerPostResponse;
 import org.veupathdb.service.eda.generated.model.StandaloneCollectionMapMarkerPostResponseImpl;
@@ -84,8 +86,6 @@ public class CollectionMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
         throw new ValidationException(e.getMessage());
       }
     }
-
-    // TODO rest of validation
   }
 
   @Override
@@ -97,7 +97,6 @@ public class CollectionMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    // TODO stub implementation
     InputStreamReader isReader = new InputStreamReader(new BufferedInputStream(dataStreams.get(DEFAULT_SINGLE_STREAM_NAME)));
     BufferedReader reader = new BufferedReader(isReader);
     DelimitedDataParser parser = new DelimitedDataParser(reader.readLine(), TAB, true);
@@ -109,9 +108,9 @@ public class CollectionMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
     List<String> varColNames = spec.getSelectedMemberVariables().stream()
         .map(getUtil()::toColNameOrEmpty)
         .toList();
-    _aggregateConfig.getAggregatorProvider()
 
-    final Supplier<MarkerAggregator<Map<String, AveragesWithConfidence>>> agg = () -> new CollectionAveragesWithConfidenceAggregator(indexToVarId, indexOf, varColNames);
+    final Supplier<MarkerAggregator<Map<String, AveragesWithConfidence>>> agg = () -> new CollectionAveragesWithConfidenceAggregator(indexToVarId,
+        indexOf, varColNames, _aggregateConfig.getVariableValueQuantifier());
     int geoVarIndex  = indexOf.apply(getUtil().toColNameOrEmpty(spec.getGeoAggregateVariable()));
     int latIndex     = indexOf.apply(getUtil().toColNameOrEmpty(spec.getLatitudeVariable()));
     int lonIndex     = indexOf.apply(getUtil().toColNameOrEmpty(spec.getLongitudeVariable()));
@@ -123,20 +122,23 @@ public class CollectionMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
 
     // Construct response, serialize and flush output
     final StandaloneCollectionMapMarkerPostResponse response = new StandaloneCollectionMapMarkerPostResponseImpl();
-    response.setMarkers(markerDataById.entrySet().stream().map(markerData -> {
+    response.setMarkers(markerDataById.values().stream().map(mapMarkerData -> {
       final CollectionMapMarkerElement ele = new CollectionMapMarkerElementImpl();
-      ele.setAvgLat(markerData.getValue().getLatLonAvg().getCurrentAverage().getLatitude());
-      ele.setAvgLon(markerData.getValue().getLatLonAvg().getCurrentAverage().getLongitude());
-      ele.setMaxLat(markerData.getValue().getMaxLat());
-      ele.setMaxLon(markerData.getValue().getMaxLon());
+      ele.setAvgLat(mapMarkerData.getLatLonAvg().getCurrentAverage().getLatitude());
+      ele.setAvgLon(mapMarkerData.getLatLonAvg().getCurrentAverage().getLongitude());
+      ele.setMaxLat(mapMarkerData.getMaxLat());
+      ele.setMaxLon(mapMarkerData.getMaxLon());
       ele.setEntityCount(ele.getEntityCount());
-      ele.setValues(markerData.getValue().getMarkerAggregator().finish().entrySet().stream()
-          .map(val -> {
+      ele.setValues(mapMarkerData.getMarkerAggregator().finish().values().stream()
+          .map(averagesWithConfidence -> {
             final CollectionMemberAggregate collectionMemberResult = new CollectionMemberAggregateImpl();
-            collectionMemberResult.setMean(val.getValue().getMean());
-            collectionMemberResult.setMedian(val.getValue().getMedian());
-//            collectionMemberResult.setStddev(val.getValue().getMean());
-//            collectionMemberResult.setMean(val.getValue().getMean());
+            collectionMemberResult.setMean(averagesWithConfidence.getMean());
+            collectionMemberResult.setMedian(averagesWithConfidence.getMedian());
+            final NumberRange range = new NumberRangeImpl();
+            range.setMin(averagesWithConfidence.getIntervalLowerBound());
+            range.setMax(averagesWithConfidence.getIntervalUpperBound());
+            collectionMemberResult.setConfidenceInterval(range);
+            collectionMemberResult.setN(averagesWithConfidence.getN());
             return collectionMemberResult;
           }).collect(Collectors.toList()));
       return ele;

@@ -32,14 +32,13 @@ public class QuantitativeAggregateConfiguration {
       if (!colorConfig.getDenominatorValues().containsAll(colorConfig.getNumeratorValues())) {
         throw new IllegalArgumentException("CategoricalQuantitativeOverlay numerator values must be a subset of denominator values.");
       }
-      variableValueQuantifier = raw -> (colorConfig.getNumeratorValues().contains(raw) ? 1.0 : 0.0) / (colorConfig.getDenominatorValues().contains(raw) ? 1.0 : 0.0);
+      variableValueQuantifier = raw -> (colorConfig.getNumeratorValues().contains(raw) ? 1.0 : colorConfig.getDenominatorValues().contains(raw) ? 0 : null);
       aggregatorSupplier = (index) -> new CategoricalProportionAggregator(new HashSet<>(colorConfig.getNumeratorValues()),
           new HashSet<>(colorConfig.getDenominatorValues()), index);
     } else {
       if (!varShapeFinder.apply(overlayVariable).equalsIgnoreCase(APIVariableDataShape.CONTINUOUS.getValue())) {
         throw new IllegalArgumentException("Incorrect overlay configuration type for continuous var: " + varShapeFinder.apply(overlayVariable));
       }
-
       aggregatorSupplier = i -> ContinuousAggregators.fromExternalString(((ContinuousQuantitativeOverlayConfig) overlayConfig).getAggregator().getValue())
           .getAggregatorSupplier(i);
     }

@@ -44,7 +44,8 @@ public class MapMarkerRowProcessorTest {
     Supplier<MarkerAggregator<Map<String, AveragesWithConfidence>>> aggregator = () -> new CollectionAveragesWithConfidenceAggregator(
         headers::get,
         headerToIndex::get,
-        List.of("E1.C1", "E1.C2") // just collection vars.
+        List.of("E1.C1", "E1.C2"), // just collection vars.,
+        Double::parseDouble
     );
     Map<String, MarkerData<Map<String, AveragesWithConfidence>>> data = collectionAggregator.process(bufferedReader, parser, viewport, aggregator);
     Map<String, AveragesWithConfidence> aMarkerData = data.get("a").getMarkerAggregator().finish();
@@ -52,7 +53,6 @@ public class MapMarkerRowProcessorTest {
     Assertions.assertEquals(77.80791180246531, aMarkerData.get("E1.C1").getIntervalLowerBound());
     Assertions.assertEquals(0.1, data.get("a").getLatLonAvg().getCurrentAverage().getLatitude(), 0.0001);
     Assertions.assertEquals(0.1, data.get("a").getLatLonAvg().getCurrentAverage().getLongitude(), 0.0001);
-    System.out.println( aMarkerData.get("E1.C1").getIntervalLowerBound());
   }
 
   private String generateTabularRow(double lat, double lon, String geoVar, String... colectionVars) {
