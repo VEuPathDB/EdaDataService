@@ -16,6 +16,7 @@ import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MapMarkerRowPro
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MarkerAggregator;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MarkerData;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.QuantitativeAggregateConfiguration;
+import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.CollectionMapMarkerElement;
 import org.veupathdb.service.eda.generated.model.CollectionMapMarkerElementImpl;
 import org.veupathdb.service.eda.generated.model.CollectionMemberAggregate;
@@ -55,8 +56,16 @@ public class CollectionMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
 
   @Override
   public ConstraintSpec getConstraintSpec() {
-    // TODO stub implementation
-    return new ConstraintSpec();
+    return new ConstraintSpec()
+        .dependencyOrder(List.of("geoAggregateVariable", "latitudeVariable", "longitudeVariable"))
+        .pattern()
+          .element("geoAggregateVariable")
+            .types(APIVariableType.STRING)
+          .element("latitudeVariable")
+            .types(APIVariableType.NUMBER)
+          .element("longitudeVariable")
+            .types(APIVariableType.NUMBER)
+        .done();
   }
 
 
@@ -101,24 +110,25 @@ public class CollectionMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
     BufferedReader reader = new BufferedReader(isReader);
     DelimitedDataParser parser = new DelimitedDataParser(reader.readLine(), TAB, true);
 
-    // establish column header indexes
     StandaloneCollectionMapMarkerSpec spec = getPluginSpec();
     Function<String, Integer> indexOf = var -> parser.indexOfColumn(var).orElseThrow();
     Function<Integer, String> indexToVarId = index -> parser.getColumnNames().get(index);
-    List<String> varColNames = spec.getSelectedMemberVariables().stream()
+    List<String> memberVarColNames = spec.getSelectedMemberVariables().stream()
         .map(getUtil()::toColNameOrEmpty)
         .toList();
 
-    final Supplier<MarkerAggregator<Map<String, AveragesWithConfidence>>> agg = () -> new CollectionAveragesWithConfidenceAggregator(indexToVarId,
-        indexOf, varColNames, _aggregateConfig.getVariableValueQuantifier());
-    int geoVarIndex  = indexOf.apply(getUtil().toColNameOrEmpty(spec.getGeoAggregateVariable()));
-    int latIndex     = indexOf.apply(getUtil().toColNameOrEmpty(spec.getLatitudeVariable()));
-    int lonIndex     = indexOf.apply(getUtil().toColNameOrEmpty(spec.getLongitudeVariable()));
+    // For each marker, aggregate all data into a Map of collection member ID to stats containing averages and confidence intervals
+    final Supplier<MarkerAggregator<Map<String, AveragesWithConfidence>>> aggSupplier = () -> new CollectionAveragesWithConfidenceAggregator(indexToVarId,
+        indexOf, memberVarColNames, _aggregateConfig.getVariableValueQuantifier());
+
+    // Establish column header indexes
+    int geoVarIndex = indexOf.apply(getUtil().toColNameOrEmpty(spec.getGeoAggregateVariable()));
+    int latIndex = indexOf.apply(getUtil().toColNameOrEmpty(spec.getLatitudeVariable()));
+    int lonIndex = indexOf.apply(getUtil().toColNameOrEmpty(spec.getLongitudeVariable()));
 
     GeolocationViewport viewport = GeolocationViewport.fromApiViewport(spec.getViewport());
-
     MapMarkerRowProcessor<Map<String, AveragesWithConfidence>> processor = new MapMarkerRowProcessor<>(geoVarIndex, latIndex, lonIndex);
-    Map<String, MarkerData<Map<String, AveragesWithConfidence>>> markerDataById = processor.process(reader, parser, viewport, agg);
+    Map<String, MarkerData<Map<String, AveragesWithConfidence>>> markerDataById = processor.process(reader, parser, viewport, aggSupplier);
 
     // Construct response, serialize and flush output
     final StandaloneCollectionMapMarkerPostResponse response = new StandaloneCollectionMapMarkerPostResponseImpl();
@@ -130,20 +140,24 @@ public class CollectionMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
       ele.setMaxLon(mapMarkerData.getMaxLon());
       ele.setEntityCount(ele.getEntityCount());
       ele.setValues(mapMarkerData.getMarkerAggregator().finish().values().stream()
-          .map(averagesWithConfidence -> {
-            final CollectionMemberAggregate collectionMemberResult = new CollectionMemberAggregateImpl();
-            collectionMemberResult.setMean(averagesWithConfidence.getMean());
-            collectionMemberResult.setMedian(averagesWithConfidence.getMedian());
-            final NumberRange range = new NumberRangeImpl();
-            range.setMin(averagesWithConfidence.getIntervalLowerBound());
-            range.setMax(averagesWithConfidence.getIntervalUpperBound());
-            collectionMemberResult.setConfidenceInterval(range);
-            collectionMemberResult.setN(averagesWithConfidence.getN());
-            return collectionMemberResult;
-          }).collect(Collectors.toList()));
+          .map(this::translateToOutput)
+          .collect(Collectors.toList()));
       return ele;
     }).collect(Collectors.toList()));
+
     JsonUtil.Jackson.writeValue(out, response);
     out.flush();
+  }
+
+  private CollectionMemberAggregate translateToOutput(AveragesWithConfidence averagesWithConfidence) {
+    final CollectionMemberAggregate collectionMemberResult = new CollectionMemberAggregateImpl();
+    collectionMemberResult.setMean(averagesWithConfidence.getMean());
+    collectionMemberResult.setMedian(averagesWithConfidence.getMedian());
+    final NumberRange range = new NumberRangeImpl();
+    range.setMin(averagesWithConfidence.getIntervalLowerBound());
+    range.setMax(averagesWithConfidence.getIntervalUpperBound());
+    collectionMemberResult.setConfidenceInterval(range);
+    collectionMemberResult.setN(averagesWithConfidence.getN());
+    return collectionMemberResult;
   }
 }
