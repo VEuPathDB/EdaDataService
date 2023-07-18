@@ -125,6 +125,7 @@ securitySchemes:
             body:
               application/json:
                 type: lib.FloatingLineplotPostResponse
+
     /timeseries:
       post:
         description: Returns data required to create a floating time series visualization in the Standalone Map
@@ -206,6 +207,17 @@ securitySchemes:
               application/json:
                 type: lib.FloatingLineplotPostResponse
 
+    /timeseries:
+      post:
+        description: Returns data required to create a floating time series visualization for continuous variable collections in the Standalone Map
+        body:
+          application/json:
+            type: lib.CollectionFloatingLineplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.FloatingLineplotPostResponse
 
     /boxplot:
       post:
