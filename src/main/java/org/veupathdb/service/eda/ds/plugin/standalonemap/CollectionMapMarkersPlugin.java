@@ -123,7 +123,7 @@ public class CollectionMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
 
     // For each marker, aggregate all data into a Map of collection member ID to stats containing averages and confidence intervals
     final Supplier<MarkerAggregator<Map<String, AveragesWithConfidence>>> aggSupplier = () -> new CollectionAveragesWithConfidenceAggregator(indexToVarId,
-        indexOf, memberVarColNames, _aggregateConfig.getVariableValueQuantifier());
+        indexOf, memberVarColNames, _aggregateConfig);
 
     // Establish column header indexes
     int geoVarIndex = indexOf.apply(getUtil().toColNameOrEmpty(spec.getGeoAggregateVariable()));
@@ -136,15 +136,15 @@ public class CollectionMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
 
     // Construct response, serialize and flush output
     final StandaloneCollectionMapMarkerPostResponse response = new StandaloneCollectionMapMarkerPostResponseImpl();
-    response.setMarkers(markerDataById.values().stream().map(mapMarkerData -> {
+    response.setMarkers(markerDataById.entrySet().stream().map(entry -> {
       final CollectionMapMarkerElement ele = new CollectionMapMarkerElementImpl();
-      ele.setAvgLat(mapMarkerData.getLatLonAvg().getCurrentAverage().getLatitude());
-      ele.setAvgLon(mapMarkerData.getLatLonAvg().getCurrentAverage().getLongitude());
-      ele.setMaxLat(mapMarkerData.getMaxLat());
-      ele.setMaxLon(mapMarkerData.getMaxLon());
+      ele.setAvgLat(entry.getValue().getLatLonAvg().getCurrentAverage().getLatitude());
+      ele.setAvgLon(entry.getValue().getLatLonAvg().getCurrentAverage().getLongitude());
+      ele.setMaxLat(entry.getValue().getMaxLat());
+      ele.setMaxLon(entry.getValue().getMaxLon());
       ele.setEntityCount(ele.getEntityCount());
-      ele.setValues(mapMarkerData.getMarkerAggregator().finish().values().stream()
-          .map(this::translateToOutput)
+      ele.setValues(entry.getValue().getMarkerAggregator().finish().values().stream()
+          .map(markerAggregate -> translateToOutput(markerAggregate, entry.getKey()))
           .collect(Collectors.toList()));
       return ele;
     }).collect(Collectors.toList()));
@@ -153,15 +153,15 @@ public class CollectionMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
     out.flush();
   }
 
-  private CollectionMemberAggregate translateToOutput(AveragesWithConfidence averagesWithConfidence) {
+  private CollectionMemberAggregate translateToOutput(AveragesWithConfidence averagesWithConfidence, String variableId) {
     final CollectionMemberAggregate collectionMemberResult = new CollectionMemberAggregateImpl();
-    collectionMemberResult.setMean(averagesWithConfidence.getMean());
-    collectionMemberResult.setMedian(averagesWithConfidence.getMedian());
+    collectionMemberResult.setValue(averagesWithConfidence.getAverage());
+    collectionMemberResult.setN(averagesWithConfidence.getN());
+    collectionMemberResult.setVariableId(variableId);
     final NumberRange range = new NumberRangeImpl();
     range.setMin(averagesWithConfidence.getIntervalLowerBound());
     range.setMax(averagesWithConfidence.getIntervalUpperBound());
     collectionMemberResult.setConfidenceInterval(range);
-    collectionMemberResult.setN(averagesWithConfidence.getN());
     return collectionMemberResult;
   }
 }

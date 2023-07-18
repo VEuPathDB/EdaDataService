@@ -3,6 +3,14 @@ package org.veupathdb.service.eda.ds.plugin.standalonemap.markers;
 import org.gusdb.fgputil.DelimitedDataParser;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.veupathdb.service.eda.generated.model.Aggregator;
+import org.veupathdb.service.eda.generated.model.CategoricalAggregationConfig;
+import org.veupathdb.service.eda.generated.model.CategoricalAggregationConfigImpl;
+import org.veupathdb.service.eda.generated.model.ContinuousAggregationConfig;
+import org.veupathdb.service.eda.generated.model.ContinuousAggregationConfigImpl;
+import org.veupathdb.service.eda.generated.model.QuantitativeAggregationConfig;
+import org.veupathdb.service.eda.generated.model.QuantitativeAggregationConfigImpl;
+import org.veupathdb.service.eda.generated.model.QuantitativeOverlayConfig;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -41,18 +49,61 @@ public class MapMarkerRowProcessorTest {
         .boxed()
         .collect(Collectors.toMap(headers::get, i -> i));
     final DelimitedDataParser parser = new DelimitedDataParser(List.of("E1.LAT", "E1.LON", "E1.GEO", "E1.C1", "E1.C2"), ",", true);
+    ContinuousAggregationConfig aggregationConfig = new ContinuousAggregationConfigImpl();
+    aggregationConfig.setAggregator(Aggregator.MEAN);
     Supplier<MarkerAggregator<Map<String, AveragesWithConfidence>>> aggregator = () -> new CollectionAveragesWithConfidenceAggregator(
         headers::get,
         headerToIndex::get,
         List.of("E1.C1", "E1.C2"), // just collection vars.,
-        Double::parseDouble
+        new QuantitativeAggregateConfiguration(aggregationConfig, "continuous")
     );
     Map<String, MarkerData<Map<String, AveragesWithConfidence>>> data = collectionAggregator.process(bufferedReader, parser, viewport, aggregator);
     Map<String, AveragesWithConfidence> aMarkerData = data.get("a").getMarkerAggregator().finish();
-    Assertions.assertEquals(316.1920881975347, aMarkerData.get("E1.C1").getIntervalUpperBound());
-    Assertions.assertEquals(77.80791180246531, aMarkerData.get("E1.C1").getIntervalLowerBound());
+
+    Assertions.assertEquals(498.18, aMarkerData.get("E1.C1").getIntervalUpperBound(), 0.01);
+    Assertions.assertEquals(-104.18, aMarkerData.get("E1.C1").getIntervalLowerBound(), 0.01);
     Assertions.assertEquals(0.1, data.get("a").getLatLonAvg().getCurrentAverage().getLatitude(), 0.0001);
     Assertions.assertEquals(0.1, data.get("a").getLatLonAvg().getCurrentAverage().getLongitude(), 0.0001);
+  }
+
+  @Test
+  public void testProportion() throws IOException {
+    MapMarkerRowProcessor<Map<String, AveragesWithConfidence>> collectionAggregator = new MapMarkerRowProcessor<>(2, 0, 1);
+    GeolocationViewport viewport = new GeolocationViewport(
+        -2,
+        2,
+        -2,
+        2
+    );
+    String inputData = new StringBuilder()
+        .append(generateTabularRow(0.1, 0.1, "a", "a", "b"))
+        .append(generateTabularRow(0.1, 0.1, "a", "a", "b"))
+        .append(generateTabularRow(0.1, 0.1, "a", "b", "a"))
+        .toString();
+    InputStream inputStream = new ByteArrayInputStream(inputData.getBytes(StandardCharsets.UTF_8));
+    Reader reader = new InputStreamReader(inputStream);
+    BufferedReader bufferedReader = new BufferedReader(reader);
+    final List<String> headers = List.of("E1.LAT", "E1.LON", "E1.GEO", "E1.C1", "E1.C2");
+    final Map<String, Integer> headerToIndex = IntStream.range(0, headers.size())
+        .boxed()
+        .collect(Collectors.toMap(headers::get, i -> i));
+    final DelimitedDataParser parser = new DelimitedDataParser(List.of("E1.LAT", "E1.LON", "E1.GEO", "E1.C1", "E1.C2"), ",", true);
+    CategoricalAggregationConfig aggregationConfig = new CategoricalAggregationConfigImpl();
+    aggregationConfig.setDenominatorValues(List.of("a", "b"));
+    aggregationConfig.setNumeratorValues(List.of("a"));
+
+    Supplier<MarkerAggregator<Map<String, AveragesWithConfidence>>> aggregator = () -> new CollectionAveragesWithConfidenceAggregator(
+        headers::get,
+        headerToIndex::get,
+        List.of("E1.C1", "E1.C2"), // just collection vars.,
+        new QuantitativeAggregateConfiguration(aggregationConfig, "categorical")
+    );
+    Map<String, MarkerData<Map<String, AveragesWithConfidence>>> data = collectionAggregator.process(bufferedReader, parser, viewport, aggregator);
+    Map<String, AveragesWithConfidence> aMarkerData = data.get("a").getMarkerAggregator().finish();
+
+    Assertions.assertEquals(1.20, aMarkerData.get("E1.C1").getIntervalUpperBound(), 0.01);
+    Assertions.assertEquals(0.133, aMarkerData.get("E1.C1").getIntervalLowerBound(), 0.01);
+    Assertions.assertEquals(0.666, aMarkerData.get("E1.C1").getAverage(), 0.01);
   }
 
   private String generateTabularRow(double lat, double lon, String geoVar, String... colectionVars) {

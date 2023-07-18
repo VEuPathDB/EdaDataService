@@ -12,6 +12,8 @@ import static org.veupathdb.service.eda.generated.model.OverlayType.CATEGORICAL;
 
 public class QuantitativeAggregateConfiguration {
   private final Function<Integer, MarkerAggregator<Double>> aggregatorSupplier;
+  private final Function<Integer, MarkerAggregator<AveragesWithConfidence>> averageWithConfAggregatorSupplier;
+
   private Function<String, Double> variableValueQuantifier;
 
   /**
@@ -25,23 +27,32 @@ public class QuantitativeAggregateConfiguration {
           && !varShape.equalsIgnoreCase(APIVariableDataShape.ORDINAL.getValue())) {
         throw new IllegalArgumentException("Incorrect overlay configuration type for categorical var: " + varShape);
       }
-      CategoricalAggregationConfig colorConfig = (CategoricalAggregationConfig) overlayConfig;
-      if (!colorConfig.getDenominatorValues().containsAll(colorConfig.getNumeratorValues())) {
+      CategoricalAggregationConfig categoricalConfig = (CategoricalAggregationConfig) overlayConfig;
+      if (!categoricalConfig.getDenominatorValues().containsAll(categoricalConfig.getNumeratorValues())) {
         throw new IllegalArgumentException("CategoricalQuantitativeOverlay numerator values must be a subset of denominator values.");
       }
-      variableValueQuantifier = raw -> (colorConfig.getNumeratorValues().contains(raw) ? 1.0 : colorConfig.getDenominatorValues().contains(raw) ? 0 : null);
-      aggregatorSupplier = (index) -> new CategoricalProportionAggregator(new HashSet<>(colorConfig.getNumeratorValues()),
-          new HashSet<>(colorConfig.getDenominatorValues()), index);
+      variableValueQuantifier = Double::valueOf;
+      aggregatorSupplier = (index) -> new CategoricalProportionAggregator(new HashSet<>(categoricalConfig.getNumeratorValues()),
+          new HashSet<>(categoricalConfig.getDenominatorValues()), index);
+      averageWithConfAggregatorSupplier = (index) -> new ProportionWithConfidenceAggregator(index,
+          categoricalConfig.getNumeratorValues(),
+          categoricalConfig.getDenominatorValues());
     } else {
       if (!varShape.equalsIgnoreCase(APIVariableDataShape.CONTINUOUS.getValue())) {
         throw new IllegalArgumentException("Incorrect overlay configuration type for continuous var: " + varShape);
       }
-      aggregatorSupplier = i -> ContinuousAggregators.fromExternalString(((ContinuousAggregationConfig) overlayConfig).getAggregator().getValue())
-          .getAggregatorSupplier(i);
+      ContinuousAggregators continuousAgg = ContinuousAggregators.fromExternalString(((ContinuousAggregationConfig) overlayConfig).getAggregator().getValue());
+      variableValueQuantifier = Double::valueOf;
+      averageWithConfAggregatorSupplier = continuousAgg::getAverageWithConfidenceAggregator;
+      aggregatorSupplier = continuousAgg::getAggregatorSupplier;
     }
   }
 
-  public MarkerAggregator<Double> getAggregatorProvider(int index) {
+  public MarkerAggregator<AveragesWithConfidence> getAverageWithConfidenceAggregatorProvider(int index) {
+    return averageWithConfAggregatorSupplier.apply(index);
+  }
+
+  public MarkerAggregator<Double> getAverageAggregatorProvider(int index) {
     return aggregatorSupplier.apply(index);
   }
 

@@ -124,7 +124,7 @@ public class BubbleMapMarkersPlugin extends AbstractEmptyComputePlugin<Standalon
 
     MapMarkerRowProcessor<Double> processor = new MapMarkerRowProcessor<>(geoVarIndex, latIndex, lonIndex);
 
-    Supplier<MarkerAggregator<Double>> markerAggregatorSupplier = () -> overlayConfig.map(x -> x.getAggregatorProvider(overlayIndex))
+    Supplier<MarkerAggregator<Double>> markerAggregatorSupplier = () -> overlayConfig.map(aggregateConfig -> aggregateConfig.getAverageAggregatorProvider(overlayIndex))
         .orElse(null);
 
     // loop through rows of data stream, aggregating stats into a map from aggregate value to stats object

@@ -127,7 +127,7 @@ public class BubbleMapMarkersLegendPlugin extends AbstractEmptyComputePlugin<Sta
 
       // Check that color config is present and geo aggregate variable is present
       if (spec.getColorLegendConfig() != null && !(row[mostGranularGeoIndex] == null || row[mostGranularGeoIndex].isEmpty())) {
-        colorAggregators.putIfAbsent(row[mostGranularGeoIndex], _colorSpecification.getAggregatorProvider(colorIndex));
+        colorAggregators.putIfAbsent(row[mostGranularGeoIndex], _colorSpecification.getAverageAggregatorProvider(colorIndex));
         colorAggregators.get(row[mostGranularGeoIndex]).addValue(row);
       }
 

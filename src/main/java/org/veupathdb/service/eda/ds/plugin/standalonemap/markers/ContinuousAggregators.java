@@ -10,7 +10,8 @@ import java.util.stream.Stream;
  * Aggregators that collect variable values and produce some aggregated result.
  */
 public enum ContinuousAggregators {
-  Mean(org.veupathdb.service.eda.generated.model.Aggregator.MEAN.getValue(), (index) -> new MarkerAggregator<>() {
+  Mean(org.veupathdb.service.eda.generated.model.Aggregator.MEAN.getValue(), index -> new MeanWithConfidenceAggregator(index, Double::parseDouble),
+      (index) -> new MarkerAggregator<>() {
     private double sum = 0;
     private int n = 0;
 
@@ -32,7 +33,8 @@ public enum ContinuousAggregators {
     }
   }),
 
-  Median(org.veupathdb.service.eda.generated.model.Aggregator.MEDIAN.getValue(), (index) -> new MarkerAggregator<>() {
+  Median(org.veupathdb.service.eda.generated.model.Aggregator.MEDIAN.getValue(), MedianWithConfidenceAggregator::new,
+      (index) -> new MarkerAggregator<>() {
     private Double currentMedian = null;
     // Initialize a min-heap for the elements greater than the running median.
     private final PriorityQueue<Double> above = new PriorityQueue<>(Comparator.naturalOrder());
@@ -111,15 +113,23 @@ public enum ContinuousAggregators {
   });
 
   private final Function<Integer, MarkerAggregator<Double>> aggregator;
+  private final Function<Integer, MarkerAggregator<AveragesWithConfidence>> averageWithConfidenceAggregator;
   private final String name;
 
-  ContinuousAggregators(String name, Function<Integer, MarkerAggregator<Double>> aggregator) {
+  ContinuousAggregators(String name,
+                        Function<Integer, MarkerAggregator<AveragesWithConfidence>> averageWithConfidenceAggregator,
+                        Function<Integer, MarkerAggregator<Double>> aggregator) {
     this.aggregator = aggregator;
     this.name = name;
+    this.averageWithConfidenceAggregator = averageWithConfidenceAggregator;
   }
 
   public MarkerAggregator<Double> getAggregatorSupplier(int index) {
     return aggregator.apply(index);
+  }
+
+  public MarkerAggregator<AveragesWithConfidence> getAverageWithConfidenceAggregator(int index) {
+    return averageWithConfidenceAggregator.apply(index);
   }
 
   public static ContinuousAggregators fromExternalString(String name) {

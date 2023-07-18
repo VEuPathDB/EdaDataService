@@ -7,16 +7,14 @@ import java.util.function.Function;
  * Marker aggregator for mean/median and standard deviation. Computes online by keeping track of sum, sum of squares and
  * sample count.
  */
-public class AveragesWithConfidenceAggregator implements MarkerAggregator<AveragesWithConfidence> {
+public class MeanWithConfidenceAggregator implements MarkerAggregator<AveragesWithConfidence> {
   private double sum = 0;
-  private double sumSquared = 0;
+  private double sumOfSquares = 0;
   private int n = 0;
   private final int index;
-  private final MarkerAggregator<Double> medianAggregator;
   private final Function<String, Double> variableValueQuantifier;
 
-  public AveragesWithConfidenceAggregator(int index, Function<String, Double> variableValueQuantifier) {
-    this.medianAggregator = ContinuousAggregators.Median.getAggregatorSupplier(index);
+  public MeanWithConfidenceAggregator(int index, Function<String, Double> variableValueQuantifier) {
     this.index = index;
     this.variableValueQuantifier = variableValueQuantifier;
   }
@@ -31,23 +29,20 @@ public class AveragesWithConfidenceAggregator implements MarkerAggregator<Averag
     if (value == null) {
       return;
     }
-    medianAggregator.addValue(arr);
     sum += value;
-    sumSquared += value * value;
+    sumOfSquares += value * value;
     n += 1;
   }
 
   @Override
   public AveragesWithConfidence finish() {
     final double mean = sum / n;
-    final double variance = (sumSquared / n) - Math.pow(mean, 2);
-    // Confidence * (stddev / sqrt(n))
-    final double confidence = 0.95 * (Math.sqrt(variance) / Math.sqrt(n));
+    final double sampleVariance = (sumOfSquares - (sum * sum) / n) / (n - 1);
+    final double confidence = 1.96 * (Math.sqrt(sampleVariance) / Math.sqrt(n));
     final double upperBound = mean + confidence;
     final double lowerBound = mean - confidence;
     return new AveragesWithConfidence(
         mean,
-        medianAggregator.finish(),
         lowerBound,
         upperBound,
         n
