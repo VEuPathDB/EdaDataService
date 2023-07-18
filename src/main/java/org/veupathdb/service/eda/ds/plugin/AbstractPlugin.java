@@ -566,4 +566,24 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
           "))";
   }
 
+  // TODO could be better named since this only deals w labels
+  public String getRBinListAsString(List<String> labels) {
+    String rBinList = "veupathUtils::BinList(S4Vectors::SimpleList(";
+
+    boolean first = true;
+    for (int i = 0; i < labels.size(); i++) {
+      String rBin = "veupathUtils::Bin(binLabel='" + labels.get(i) + "'";
+      rBin += ")";
+
+      if (first) {
+        rBinList += rBin;
+        first = false;
+      } else {
+        rBinList += "," + rBin;
+      }
+    }
+
+    return rBinList + "))";
+  }
+
 }
