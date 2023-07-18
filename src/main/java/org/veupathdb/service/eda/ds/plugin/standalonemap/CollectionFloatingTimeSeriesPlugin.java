@@ -5,7 +5,7 @@ import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
-public class FloatingTimeSeriesPlugin extends FloatingLineplotPlugin {
+public class CollectionFloatingTimeSeriesPlugin extends CollectionFloatingLineplotPlugin {
 
   @Override
   public String getDisplayName() {
@@ -14,7 +14,7 @@ public class FloatingTimeSeriesPlugin extends FloatingLineplotPlugin {
 
   @Override
   public String getDescription() {
-    return "Visualize aggregate values of one variable across the sequential values of a temporal variable";
+    return "Visualize aggregate values of one variable across the sequential values of a temporal Variable Group";
   }
 
   @Override
@@ -27,13 +27,9 @@ public class FloatingTimeSeriesPlugin extends FloatingLineplotPlugin {
     return new ConstraintSpec()
       .dependencyOrder(List.of("yAxisVariable"), List.of("xAxisVariable", "overlayVariable"))
       .pattern()
-        .element("yAxisVariable")
-          .description("Variable must be of the same or a child entity as the X-axis variable.")
         .element("xAxisVariable")
           .temporal(true)
           .description("Variable must be temporal and belong to the same or child entity as the variable the map markers are configured with, if any.")
-        .element("overlayVariable")
-          .required(false)
       .done();
   }
 }

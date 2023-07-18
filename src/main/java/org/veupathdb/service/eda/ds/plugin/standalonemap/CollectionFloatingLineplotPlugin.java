@@ -26,7 +26,7 @@ import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamRe
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
-public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingLineplotPostRequest, FloatingLineplotSpec> {
+public class CollectionFloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingLineplotPostRequest, FloatingLineplotSpec> {
   private OverlaySpecification _overlaySpecification = null;
 
   @Override
@@ -36,7 +36,7 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
 
   @Override
   public String getDescription() {
-    return "Visualize aggregate values of one variable across the sequential values of an ordered variable";
+    return "Visualize aggregate values of one variable across the sequential values of an ordered Variable Group";
   }
 
   @Override
@@ -49,13 +49,9 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
     return new ConstraintSpec()
       .dependencyOrder(List.of("yAxisVariable"), List.of("xAxisVariable", "overlayVariable"))
       .pattern()
-        .element("yAxisVariable")
-          .description("Variable must be of the same or a child entity as the X-axis variable.")
         .element("xAxisVariable")
           .shapes(APIVariableDataShape.ORDINAL, APIVariableDataShape.CONTINUOUS)
           .description("Variable must be ordinal, a number, or a date and be the same or a child entity as the variable the map markers are painted with, if any.")
-        .element("overlayVariable")
-          .required(false)
       .done();
   }
 
@@ -68,81 +64,52 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
   protected void validateVisualizationSpec(FloatingLineplotSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
-      .var("xAxisVariable", pluginSpec.getXAxisVariable())
-      .var("yAxisVariable", pluginSpec.getYAxisVariable())
-      .var("overlayVariable", Optional.ofNullable(pluginSpec.getOverlayConfig())
-          .map(OverlayConfig::getOverlayVariable)
-          .orElse(null)));
-    if (pluginSpec.getOverlayConfig() != null) {
-      try {
-        _overlaySpecification = new OverlaySpecification(pluginSpec.getOverlayConfig(), getUtil()::getVariableType, getUtil()::getVariableDataShape);
-      } catch (IllegalArgumentException e) {
-        throw new ValidationException(e.getMessage());
-      }
-    }
+      .var("xAxisVariable", pluginSpec.getXAxisVariable()));
+    // TODO general collection validation
   }
 
   @Override
   protected List<StreamSpec> getRequestedStreams(FloatingLineplotSpec pluginSpec) {
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
+        .addVars(getUtil().getChildrenVariables(pluginSpec.getCollectionOverlayConfigWithValues().getCollection())
         .addVar(pluginSpec.getXAxisVariable())
-        .addVar(pluginSpec.getYAxisVariable())
-        .addVar(Optional.ofNullable(pluginSpec.getOverlayConfig())
-            .map(OverlayConfig::getOverlayVariable)
-            .orElse(null)));
+      ));
   }
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PluginUtil util = getUtil();
     FloatingLineplotSpec spec = getPluginSpec();
-    VariableSpec overlayVariable = _overlaySpecification != null ? _overlaySpecification.getOverlayVariable() : null;
+    List<VariableSpec> inputVarSpecs = new ArrayList<>(spec.getCollectionOverlayConfig().getSelectedMembers());
+    inputVarSpecs.add(spec.getXAxisVariable());
+    CollectionSpec overlayVariable = spec.getCollectionOverlayConfigWithValues().getCollection();
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
     varMap.put("xAxis", spec.getXAxisVariable());
-    varMap.put("yAxis", spec.getYAxisVariable());
     varMap.put("overlay", overlayVariable);
     String errorBars = spec.getErrorBars() != null ? spec.getErrorBars().getValue() : "FALSE";
     String valueSpec = spec.getValueSpec().getValue();
-    String xVar = util.toColNameOrEmpty(spec.getXAxisVariable());
-    String xVarType = util.getVariableType(spec.getXAxisVariable());
+    String collectionType = util.getCollectionType(overlayVariable);
     String numeratorValues = spec.getYAxisNumeratorValues() != null ? util.listToRVector(spec.getYAxisNumeratorValues()) : "NULL";
     String denominatorValues = spec.getYAxisDenominatorValues() != null ? util.listToRVector(spec.getYAxisDenominatorValues()) : "NULL";
-    String overlayValues = _overlaySpecification == null ? "NULL" : _overlaySpecification.getRBinListAsString();
+    String overlayValues = getRBinListAsString(spec.getCollectionOverlayConfigWithValues().getSelectedValues());
     
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
-          spec.getXAxisVariable(),
-          spec.getYAxisVariable(),
-          overlayVariable));
+      connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, inputVarSpecs));
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
-      String viewportRString = getViewportAsRString(spec.getViewport(), xVarType);
+      String viewportRString = getViewportAsRString(spec.getViewport(), collectionType);
       connection.voidEval(viewportRString);
       BinSpec binSpec = spec.getBinSpec();
-      validateBinSpec(binSpec, xVarType);
-      // consider refactoring this, does the same as something in histo
-      String binType = binSpec.getType().getValue() != null ? binSpec.getType().getValue() : "none";
-      if (binType.equals("numBins")) {
-        if (binSpec.getValue() != null) {
-          String numBins = binSpec.getValue().toString();
-          if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
-            connection.voidEval("binWidth <- plot.data::numBinsToBinWidth(data$" + xVar + ", " + numBins + ")");
-          } else {
-            connection.voidEval("binWidth <- ceiling(as.numeric(diff(range(as.Date(data$" + xVar + ")))/" + numBins + "))");
-            connection.voidEval("binWidth <- paste(binWidth, 'day')");
-          }
-        } else {
-          connection.voidEval("binWidth <- NULL");
-        }
+      validateBinSpec(binSpec, collectionType);
+     
+      String binWidth = "NULL";
+      if (collectionType.equals("NUMBER") || collectionType.equals("INTEGER")) {
+        binWidth = binSpec.getValue() == null ? "NULL" : "as.numeric('" + binSpec.getValue() + "')";
       } else {
-        String binWidth = "NULL";
-        if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
-          binWidth = binSpec.getValue() == null ? "NULL" : "as.numeric('" + binSpec.getValue() + "')";
-        } else {
-          binWidth = binSpec.getValue() == null ? "NULL" : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
-        }
-        connection.voidEval("binWidth <- " + binWidth);
+        binWidth = binSpec.getValue() == null ? "NULL" : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
       }
+      connection.voidEval("binWidth <- " + binWidth);
+
       String cmd = "plot.data::lineplot(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " +
                                         "variables=variables, binWidth=binWidth, " + 
                                         "value=" + singleQuote(valueSpec) + ", " +

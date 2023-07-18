@@ -27,7 +27,7 @@ import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamRe
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
-public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<FloatingHistogramPostRequest, FloatingHistogramSpec> {
+public class CollectionFloatingHistogramPlugin extends AbstractEmptyComputePlugin<FloatingHistogramPostRequest, FloatingHistogramSpec> {
   private OverlaySpecification _overlaySpecification = null;
   
   private static final Logger LOG = LogManager.getLogger(FloatingHistogramPlugin.class);
@@ -39,7 +39,7 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
 
   @Override
   public String getDescription() {
-    return "Visualize the distribution of a continuous variable";
+    return "Visualize the distribution of a continuous Variable Group";
   }
 
   @Override
@@ -54,9 +54,8 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
       .pattern()
         .element("xAxisVariable")
           .types(APIVariableType.NUMBER, APIVariableType.DATE, APIVariableType.INTEGER)
-          .description("Variable must be a number or date and be the same or a child entity as the variable the map markers are painted with, if any.")
+          .description("Variable must be a number or date.")
         .element("overlayVariable")
-          .required(false)
       .done();
   }
 
@@ -67,19 +66,7 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
 
   @Override
   protected void validateVisualizationSpec(FloatingHistogramSpec pluginSpec) throws ValidationException {
-    validateInputs(new DataElementSet()
-      .entity(pluginSpec.getOutputEntityId())
-      .var("xAxisVariable", pluginSpec.getXAxisVariable())
-      .var("overlayVariable", Optional.ofNullable(pluginSpec.getOverlayConfig())
-          .map(OverlayConfig::getOverlayVariable)
-          .orElse(null)));
-    if (pluginSpec.getOverlayConfig() != null) {
-      try {
-        _overlaySpecification = new OverlaySpecification(pluginSpec.getOverlayConfig(), getUtil()::getVariableType, getUtil()::getVariableDataShape);
-      } catch (IllegalArgumentException e) {
-        throw new ValidationException(e.getMessage());
-      }
-    }
+    // TODO general collection validation plus make sure its a continuous collection
     if (pluginSpec.getBarMode() == null) {
       throw new ValidationException("Property 'barMode' is required.");
     }
@@ -89,24 +76,21 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
   protected List<StreamSpec> getRequestedStreams(FloatingHistogramSpec pluginSpec) {
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
-        .addVar(pluginSpec.getXAxisVariable())
-        .addVar(Optional.ofNullable(pluginSpec.getOverlayConfig())
-            .map(OverlayConfig::getOverlayVariable)
-            .orElse(null)));
+        .addVars(getUtil().getChildrenVariables(pluginSpec.getCollectionOverlayConfig().getCollection())
+      ));
   }
   
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PluginUtil util = getUtil();
     FloatingHistogramSpec spec = getPluginSpec();
-    VariableSpec overlayVariable = _overlaySpecification != null ? _overlaySpecification.getOverlayVariable() : null;
+    List<VariableSpec> inputVarSpecs = new ArrayList<>(spec.getCollectionOverlayConfig().getSelectedMembers());
+    CollectionSpec overlayVariable = spec.getCollectionOverlayConfig().getCollection();
+    // TODO figure out how to make this work, im trying to add a CollectionSpec rather than a VariableSpec
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
-    varMap.put("xAxis", spec.getXAxisVariable());
     varMap.put("overlay", overlayVariable);
     String barMode = spec.getBarMode().getValue();
-    String xVar = util.toColNameOrEmpty(spec.getXAxisVariable());
-    String xVarType = util.getVariableType(spec.getXAxisVariable());
-    String overlayValues = _overlaySpecification == null ? "NULL" : _overlaySpecification.getRBinListAsString();
+    String collectionType = util.getCollectionType(overlayVariable);
 
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
@@ -114,37 +98,20 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
           overlayVariable));
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
      
-      String viewportRString = getViewportAsRString(spec.getViewport(), xVarType);
+      String viewportRString = getViewportAsRString(spec.getViewport(), collectionType);
       connection.voidEval(viewportRString);
       
       BinSpec binSpec = spec.getBinSpec();
-      validateBinSpec(binSpec, xVarType);
+      validateBinSpec(binSpec, collectionType);
       String binReportValue = binSpec.getType().getValue() != null ? binSpec.getType().getValue() : "binWidth";
       
-      //consider reorganizing conditions, move check for null value up a level ?
-      if (binReportValue.equals("numBins")) {
-        if (binSpec.getValue() != null) {
-          String numBins = binSpec.getValue().toString();
-          connection.voidEval("xVP <- adjustToViewport(data$" + xVar + ", viewport)");
-          if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
-            connection.voidEval("xRange <- diff(range(xVP))");
-            connection.voidEval("binWidth <- xRange/" + numBins);
-          } else {
-            connection.voidEval("binWidth <- ceiling(as.numeric(diff(range(as.Date(xVP)))/" + numBins + "))");
-            connection.voidEval("binWidth <- paste(binWidth, 'day')");
-          }
-        } else {
-          connection.voidEval("binWidth <- NULL");
-        }
+      String binWidth = "NULL";
+      if (collectionType.equals("NUMBER") || collectionType.equals("INTEGER")) {
+        binWidth = binSpec.getValue() == null ? "NULL" : "as.numeric('" + binSpec.getValue() + "')";
       } else {
-        String binWidth = "NULL";
-        if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
-          binWidth = binSpec.getValue() == null ? "NULL" : "as.numeric('" + binSpec.getValue() + "')";
-        } else {
-          binWidth = binSpec.getValue() == null ? "NULL" : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
-        }
-        connection.voidEval("binWidth <- " + binWidth);
+        binWidth = binSpec.getValue() == null ? "NULL" : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
       }
+      connection.voidEval("binWidth <- " + binWidth);
 
       String cmd =
           "plot.data::histogram(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " +

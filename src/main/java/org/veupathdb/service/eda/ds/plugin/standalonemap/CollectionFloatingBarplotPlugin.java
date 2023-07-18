@@ -28,7 +28,6 @@ import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConn
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
 public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBarplotPostRequest, FloatingBarplotSpec> {
-  private OverlaySpecification _overlaySpecification = null;
 
   @Override
   public String getDisplayName() {
@@ -37,7 +36,7 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
 
   @Override
   public String getDescription() {
-    return "Visualize the distribution of a categorical variable";
+    return "Visualize the distribution of a group of categorical variables";
   }
 
   @Override
@@ -52,9 +51,8 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
       .pattern()
         .element("xAxisVariable")
           .maxValues(10)
-          .description("Variable must have 10 or fewer unique values and be of the same or a child entity as the variable the map markers are painted with, if any.")
+          .description("Variable Group vocabulary must have 10 or fewer unique values.")
         .element("overlayVariable")
-          .required(false)
       .done();
   }
 
@@ -67,16 +65,11 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
   protected void validateVisualizationSpec(FloatingBarplotSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
-      .var("xAxisVariable", pluginSpec.getXAxisVariable())
-      .var("overlayVariable", Optional.ofNullable(pluginSpec.getOverlayConfig())
-          .map(OverlayConfig::getOverlayVariable)
+      .var("overlayVariable", Optional.ofNullable(pluginSpec.getCollectionOverlayConfig())
+          .map(CollectionOverlayConfig::getCollection())
           .orElse(null)));
-    if (pluginSpec.getOverlayConfig() != null) {
-      try {
-        _overlaySpecification = new OverlaySpecification(pluginSpec.getOverlayConfig(), getUtil()::getVariableType, getUtil()::getVariableDataShape);
-      } catch (IllegalArgumentException e) {
-        throw new ValidationException(e.getMessage());
-      }
+    if (pluginSpec.getCollectionOverlayConfig() != null) {
+      // TODO replace this w collection specific validation. maybe leave a stub for now, and reuse some collection marker validation once merged.
     }
     if (pluginSpec.getBarMode() == null) {
       throw new ValidationException("Property 'barMode' is required.");
@@ -84,13 +77,11 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(FloatingBarplotSpec pluginSpec) {
+  protected List<StreamSpec> getRequestedStreams(FloatingBarplotSpec pluginSpec) {    
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
-        .addVar(pluginSpec.getXAxisVariable())
-        .addVar(Optional.ofNullable(pluginSpec.getOverlayConfig())
-            .map(OverlayConfig::getOverlayVariable)
-            .orElse(null)));
+        .addVars(getUtil().getChildrenVariables(pluginSpec.getCollectionOverlayConfigWithValues().getCollection())
+      )); 
   }
 
   @Override
@@ -98,17 +89,16 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
     FloatingBarplotSpec spec = getPluginSpec();
     PluginUtil util = getUtil();
     String barMode = spec.getBarMode().getValue();
-    VariableSpec overlayVariable = _overlaySpecification != null ? _overlaySpecification.getOverlayVariable() : null;
-    String overlayValues = _overlaySpecification == null ? "NULL" : _overlaySpecification.getRBinListAsString();
+    String overlayValues = getRBinListAsString(spec.getCollectionOverlayConfigWithValues().getSelectedValues());
+    List<VariableSpec> inputVarSpecs = new ArrayList<>(spec.getCollectionOverlayConfigWithValues().getSelectedMembers());
+    inputVarSpecs.add(spec.getXAxisVariable());
 
     Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
     varMap.put("xAxis", spec.getXAxisVariable());
-    varMap.put("overlay", overlayVariable);
+    varMap.put("overlay", spec.getCollectionOverlayConfigWithValues().getCollection());
       
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
-          spec.getXAxisVariable(),
-          overlayVariable));
+      connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, inputVarSpecs));
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String cmd =
           "plot.data::bar(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " +
