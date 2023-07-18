@@ -38,6 +38,18 @@ types:
       units?: BinUnits
       range?: NumberRange | DateRange
 
+  # im thinking we should remove support for numBins.
+  # weve never used it and its complicating the logic.
+  BinWidthSpec:
+    additionalProperties: false
+    properties:
+      type?:
+        type: string
+        enum: ['binWidth']
+      value?: number
+      units?: BinUnits
+      range?: NumberRange | DateRange
+
   NumberRange:
     additionalProperties: false
     properties:
