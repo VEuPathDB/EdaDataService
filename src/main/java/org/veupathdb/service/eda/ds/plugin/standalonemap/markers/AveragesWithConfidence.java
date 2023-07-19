@@ -5,11 +5,11 @@ package org.veupathdb.service.eda.ds.plugin.standalonemap.markers;
  */
 public class AveragesWithConfidence {
   private final double average;
-  private final double intervalLowerBound;
-  private final double intervalUpperBound;
+  private final Double intervalLowerBound;
+  private final Double intervalUpperBound;
   private final int n;
 
-  public AveragesWithConfidence(double average, double lowerBound, double upperBound, int n) {
+  public AveragesWithConfidence(double average, Double lowerBound, Double upperBound, int n) {
     this.average = average;
     this.intervalLowerBound = lowerBound;
     this.intervalUpperBound = upperBound;
@@ -20,11 +20,11 @@ public class AveragesWithConfidence {
     return average;
   }
 
-  public double getIntervalLowerBound() {
+  public Double getIntervalLowerBound() {
     return intervalLowerBound;
   }
 
-  public double getIntervalUpperBound() {
+  public Double getIntervalUpperBound() {
     return intervalUpperBound;
   }
 

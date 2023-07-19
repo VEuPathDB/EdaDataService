@@ -34,17 +34,14 @@ public class MedianWithConfidenceAggregator implements MarkerAggregator<Averages
     // nq +/– z * sqrt( nq(1-q) ) where q is the quantile of interest (0.5 for median)
     double lowerIndex = values.size() * 0.5 - 1.96 * Math.sqrt(values.size() * 0.5 * 0.5);
     double upperIndex = values.size() * 0.5 + 1.96 * Math.sqrt(values.size() * 0.5 * 0.5);
-    double lowerBound;
-    double upperBound;
-    if (lowerIndex < 0) {
-      lowerBound = values.get(0);
-    } else {
-      lowerBound = values.get((int) Math.ceil(lowerIndex));
-    }
-    if (upperIndex >= values.size()) {
-      upperBound = values.get(values.size() - 1);
+    Double lowerBound;
+    Double upperBound;
+    if (lowerIndex < 0 || upperIndex >= values.size()) {
+      upperBound = null;
+      lowerBound = null;
     } else {
       upperBound = values.get((int) Math.ceil(upperIndex));
+      lowerBound = values.get((int) Math.ceil(lowerIndex));
     }
     double medianIndex = values.size() / 2.0;
     int lowerMedianIndex = (int) Math.ceil(medianIndex);

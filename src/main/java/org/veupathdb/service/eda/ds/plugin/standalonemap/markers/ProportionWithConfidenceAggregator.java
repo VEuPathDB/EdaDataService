@@ -40,8 +40,8 @@ public class ProportionWithConfidenceAggregator implements MarkerAggregator<Aver
   public AveragesWithConfidence finish() {
     final double proportion = (double) numeratorMatches / denominatorMatches;
     final double confidence = StatUtils.Z_SCORE_95 * (Math.sqrt((proportion * (1 - proportion)) / n));
-    final double upperBound = proportion + confidence;
-    final double lowerBound = proportion - confidence;
+    final double upperBound = Math.min(1.0, proportion + confidence);
+    final double lowerBound = Math.max(0.0, proportion - confidence);
     return new AveragesWithConfidence(
         proportion,
         lowerBound,
