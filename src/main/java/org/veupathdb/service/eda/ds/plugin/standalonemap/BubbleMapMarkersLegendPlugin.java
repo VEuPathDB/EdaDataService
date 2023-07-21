@@ -9,7 +9,7 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.CountAggregator;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MapBubbleSpecification;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.QuantitativeAggregateConfiguration;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MarkerAggregator;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.OverlayLegendConfig;
@@ -43,7 +43,7 @@ import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.VECTORBASE_PROJ
  * color and size for a given configuration.
  */
 public class BubbleMapMarkersLegendPlugin extends AbstractEmptyComputePlugin<StandaloneMapBubblesLegendPostRequest, StandaloneMapBubblesLegendSpec> {
-  private MapBubbleSpecification _colorSpecification = null;
+  private QuantitativeAggregateConfiguration _colorSpecification = null;
 
   @Override
   public List<String> getProjects() {
@@ -78,11 +78,14 @@ public class BubbleMapMarkersLegendPlugin extends AbstractEmptyComputePlugin<Sta
     validateInputs(new DataElementSet()
         .entity(pluginSpec.getOutputEntityId())
         .var("colorGeoVariable", legendConfig.map(OverlayLegendConfig::getGeoAggregateVariable).orElse(null))
-        .var("colorVariable", legendConfig.map(colorLegendConfig -> colorLegendConfig.getQuantitativeOverlayConfig().getOverlayVariable()).orElse(null))
+        .var("colorVariable", Optional.ofNullable(pluginSpec.getColorLegendConfig())
+            .map(config -> config.getQuantitativeOverlayConfig().getOverlayVariable())
+            .orElse(null))
         .var("sizeGeoVariable", sizeConfig.map(SizeLegendConfig::getGeoAggregateVariable).orElse(null)));
     if (pluginSpec.getColorLegendConfig() != null) {
       try {
-        _colorSpecification = new MapBubbleSpecification(pluginSpec.getColorLegendConfig().getQuantitativeOverlayConfig(), getUtil()::getVariableDataShape);
+        _colorSpecification = new QuantitativeAggregateConfiguration(pluginSpec.getColorLegendConfig().getQuantitativeOverlayConfig().getAggregationConfig(),
+            getUtil().getVariableDataShape(pluginSpec.getColorLegendConfig().getQuantitativeOverlayConfig().getOverlayVariable()));
       } catch (IllegalArgumentException e) {
         throw new ValidationException(e.getMessage());
       }
@@ -124,8 +127,8 @@ public class BubbleMapMarkersLegendPlugin extends AbstractEmptyComputePlugin<Sta
 
       // Check that color config is present and geo aggregate variable is present
       if (spec.getColorLegendConfig() != null && !(row[mostGranularGeoIndex] == null || row[mostGranularGeoIndex].isEmpty())) {
-        colorAggregators.putIfAbsent(row[mostGranularGeoIndex], _colorSpecification.getAggregatorSupplier().get());
-        colorAggregators.get(row[mostGranularGeoIndex]).addValue(row[colorIndex]);
+        colorAggregators.putIfAbsent(row[mostGranularGeoIndex], _colorSpecification.getAverageAggregatorProvider(colorIndex));
+        colorAggregators.get(row[mostGranularGeoIndex]).addValue(row);
       }
 
       // Check that size config is present and geo aggregate variable is present

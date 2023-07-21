@@ -1604,15 +1604,29 @@ types:
       outputEntityId:
         description: Entity ID associated with collection variable of interest.
         type: string
+      geoAggregateVariable:
+        description: Geohash component variable to group markers by. This is usually determined by zoom level of the client application.
+        type: VariableSpec
+      longitudeVariable:
+        description: Variable representing longitude of output entity.
+        type: VariableSpec
+      latitudeVariable:
+        description: Variable representing latitude of output entity.
+        type: VariableSpec
+      viewport:
+        description: Viewport used to filter markers. Only entities that are contained in the viewport will be grouped into markers.
+        type: GeolocationViewport
       collection:
         description: Collection variable to use for markers.
-        type: CollectionSpec
-      aggregationConfig:
+        type: CollectionOverlayConfig
+      aggregatorConfig:
         description: Specification for how variable values will be aggregated into quantiative value shown in bar plot marker.
-        type: QuantitativeOverlayConfig
-      selectedMemberVariables:
-        description: Variables in the provided collection for which marker data should be provided.
-        type: VariableSpec[]
+        type: QuantitativeAggregationConfig
+  CollectionOverlayConfig:
+    type: object
+    properties:
+      collection: CollectionSpec
+      selectedMembers: VariableSpec[]
   CollectionMapMarkerElement:
     description: |
       Data needed to render a collection map marker. Contains geographical data as well as per-variable collection var
@@ -1631,9 +1645,9 @@ types:
     type: object
     properties:
       variableId: string
-      mean: number
-      median: number
-      proportion: number
+      value: number
+      confidenceInterval: NumberRange
+      n: number
   StandaloneCollectionMapMarkerPostResponse:
     type: object
     additionalProperties: false
@@ -2120,19 +2134,23 @@ types:
       - median
   QuantitativeOverlayConfig:
     type: object
+    properties:
+      overlayVariable: VariableSpec
+      aggregationConfig: QuantitativeAggregationConfig
+  QuantitativeAggregationConfig:
+    type: object
     additionalProperties: false
     discriminator: overlayType
     properties:
       overlayType: OverlayType
-      overlayVariable: VariableSpec
-  ContinuousQuantitativeOverlayConfig:
-    type: QuantitativeOverlayConfig
+  ContinuousAggregationConfig:
+    type: QuantitativeAggregationConfig
     additionalProperties: false
     discriminatorValue: continuous
     properties:
       aggregator: Aggregator
-  CategoricalQuantitativeOverlayConfig:
-    type: QuantitativeOverlayConfig
+  CategoricalAggregationConfig:
+    type: QuantitativeAggregationConfig
     discriminatorValue: categorical
     additionalProperties: false
     properties:

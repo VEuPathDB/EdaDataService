@@ -4,7 +4,7 @@ public class CountAggregator implements MarkerAggregator<Integer> {
   private int count = 0;
 
   @Override
-  public void addValue(String ignored) {
+  public void addValue(String[] ignored) {
     count++;
   }
 
