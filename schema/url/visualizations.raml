@@ -192,12 +192,6 @@ types:
       numeratorValues: string[]
       denominatorValues: string[]
 
-  CollectionOverlayConfig:
-    additionalProperties: false
-    properties:
-      collection: CollectionSpec
-      selectedMembers: VariableSpec[]
-
   # make the values optional though, req for line plot but also makes the other cat collection floaters more flexible
   CollectionOverlayConfigWithValues:
     type: CollectionOverlayConfig
