@@ -51,7 +51,7 @@ public class CollectionFloatingLineplotPlugin extends AbstractEmptyComputePlugin
       .pattern()
         .element("xAxisVariable")
           .shapes(APIVariableDataShape.ORDINAL, APIVariableDataShape.CONTINUOUS)
-          .description("Variable must be ordinal, a number, or a date and be the same or a child entity as the variable the map markers are painted with, if any.")
+          .description("Variable must be ordinal, a number, or a date and be the same or a child entity as the variable the map markers are painted with.")
       .done();
   }
 

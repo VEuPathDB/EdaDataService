@@ -29,7 +29,7 @@ public class CollectionFloatingTimeSeriesPlugin extends CollectionFloatingLinepl
       .pattern()
         .element("xAxisVariable")
           .temporal(true)
-          .description("Variable must be temporal and belong to the same or child entity as the variable the map markers are configured with, if any.")
+          .description("Variable must be temporal and belong to the same or child entity as the variable the map markers are configured with.")
       .done();
   }
 }

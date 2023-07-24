@@ -55,7 +55,7 @@ public class CollectionFloatingBoxplotPlugin extends AbstractEmptyComputePlugin<
           .description("Variable Group must be a number.")
         .element("xAxisVariable")
           .maxValues(10)
-          .description("Variable must have 10 or fewer unique values and be the same or a child entity as the variable the map markers are painted with, if any.")
+          .description("Variable must have 10 or fewer unique values and be the same or a child entity as the variable the map markers are painted with.")
         .element("overlayVariable")
       .done();
   }

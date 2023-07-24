@@ -78,7 +78,7 @@ public class AppsMetadata {
           Arrays.asList(VECTORBASE_PROJECT),
           viz("lineplot", new CollectionFloatingLineplotPlugin()),
           viz("barplot", new FloatingBarplotPlugin()),
-          viz("conttable", new CollectionFloatingHistogramPlugin())),
+          viz("histogram", new CollectionFloatingHistogramPlugin())),
       app("pass", "Pass-Through", null,
           "A collection of visualizations designed to support the unbiased exploration of relationships between variables",
           Arrays.asList(CLINEPI_PROJECT, ALLCLINEPI_PROJECT),
