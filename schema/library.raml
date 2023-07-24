@@ -1592,6 +1592,98 @@ types:
     type: DataPluginRequestBase
     properties:
       config: CollectionSpec
+  CollectionFloatingBarplotPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: CollectionFloatingBarplotSpec
+  CollectionFloatingBarplotSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      barMode:
+        type: string
+        enum:
+          - group
+          - stack
+      valueSpec: ValueSpec
+      overlayConfig: CollectionOverlayConfigWithValues
+  CollectionFloatingBoxplotPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: CollectionFloatingBoxplotSpec
+  CollectionFloatingBoxplotSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      xAxisVariable: VariableSpec
+      overlayConfig: CollectionOverlayConfig
+      maxAllowedDataPoints:
+        type: integer
+        required: false
+        format: int64
+  CollectionFloatingContTablePostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: CollectionFloatingContTableSpec
+  CollectionFloatingContTableSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      xAxisVariable: CollectionOverlayConfigWithValues
+  CollectionFloatingHistogramPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: CollectionFloatingHistogramSpec
+  CollectionFloatingHistogramSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      barMode:
+        type: string
+        enum:
+          - overlay
+          - stack
+      valueSpec: ValueSpec
+      overlayConfig: CollectionOverlayConfig
+      binSpec: BinWidthSpec
+      viewport:
+        type: NumericViewport
+        required: false
+  CollectionFloatingLineplotPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: CollectionFloatingLineplotSpec
+  CollectionFloatingLineplotSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      xAxisVariable: VariableSpec
+      yAxisNumeratorValues:
+        type: string[]
+        required: false
+      yAxisDenominatorValues:
+        type: string[]
+        required: false
+      overlayConfig: CollectionOverlayConfigWithValues
+      binSpec:
+        type: BinWidthSpec
+        required: false
+      valueSpec:
+        type: string
+        enum:
+          - median
+          - mean
+          - geometricMean
+          - proportion
+      errorBars: StringBoolean
+      viewport:
+        type: NumericViewport
+        required: false
   StandaloneCollectionMapMarkerPostRequest:
     type: DataPluginRequestBase
     properties:
@@ -2016,6 +2108,17 @@ types:
       value?: number
       units?: BinUnits
       range?: NumberRange | DateRange
+  BinWidthSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      type?:
+        type: string
+        enum:
+          - binWidth
+      value?: number
+      units?: BinUnits
+      range?: NumberRange | DateRange
   NumberRange:
     type: object
     additionalProperties: false
@@ -2156,4 +2259,10 @@ types:
     properties:
       numeratorValues: string[]
       denominatorValues: string[]
+  CollectionOverlayConfigWithValues:
+    type: CollectionOverlayConfig
+    additionalProperties: false
+    properties:
+      selectedValues?: string[]
+  DynamicDataSpec: CollectionSpec | VariableSpec
 

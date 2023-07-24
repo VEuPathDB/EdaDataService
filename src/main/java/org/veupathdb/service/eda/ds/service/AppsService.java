@@ -108,6 +108,12 @@ public class AppsService implements Apps {
   }
 
   @Override
+  public PostAppsStandaloneMapCategoricalCollectionsVisualizationsConttableResponse postAppsStandaloneMapCategoricalCollectionsVisualizationsConttable(CollectionFloatingContTablePostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapCategoricalCollectionsVisualizationsConttableResponse.respond200WithApplicationJson(
+        new FloatingContTablePostResponseStream(processRequest(new CollectionFloatingContTablePlugin(), entity))));
+  }
+
+  @Override
   public PostAppsStandaloneMapXyrelationshipsVisualizationsTimeseriesResponse postAppsStandaloneMapXyrelationshipsVisualizationsTimeseries(FloatingLineplotPostRequest entity) {
     return wrapPlugin(() -> PostAppsStandaloneMapXyrelationshipsVisualizationsTimeseriesResponse.respond200WithApplicationJson(
         new FloatingLineplotPostResponseStream(processRequest(new FloatingTimeSeriesPlugin(), entity))));

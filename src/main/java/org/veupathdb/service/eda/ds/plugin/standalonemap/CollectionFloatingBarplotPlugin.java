@@ -17,6 +17,7 @@ import org.veupathdb.service.eda.generated.model.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,7 @@ import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamRe
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
-public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBarplotPostRequest, FloatingBarplotSpec> {
+public class CollectionFloatingBarplotPlugin extends AbstractEmptyComputePlugin<CollectionFloatingBarplotPostRequest, CollectionFloatingBarplotSpec> {
 
   @Override
   public String getDisplayName() {
@@ -58,45 +59,38 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
   }
 
   @Override
-  protected AbstractPlugin<FloatingBarplotPostRequest, FloatingBarplotSpec, Void>.ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(FloatingBarplotPostRequest.class, FloatingBarplotSpec.class, Void.class);
+  protected AbstractPlugin<CollectionFloatingBarplotPostRequest, CollectionFloatingBarplotSpec, Void>.ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(CollectionFloatingBarplotPostRequest.class, CollectionFloatingBarplotSpec.class, Void.class);
   }
 
   @Override
-  protected void validateVisualizationSpec(FloatingBarplotSpec pluginSpec) throws ValidationException {
-    validateInputs(new DataElementSet()
-      .entity(pluginSpec.getOutputEntityId())
-      .var("overlayVariable", Optional.ofNullable(pluginSpec.getCollectionOverlayConfig())
-          .map(CollectionOverlayConfig::getCollection())
-          .orElse(null)));
+  protected void validateVisualizationSpec(CollectionFloatingBarplotSpec pluginSpec) throws ValidationException {
     ValidationUtils.validateCollectionMembers(getUtil(),
-        pluginSpec.getCollection().getCollection(),
-        pluginSpec.getCollection().getSelectedMembers());
+        pluginSpec.getOverlayConfig().getCollection(),
+        pluginSpec.getOverlayConfig().getSelectedMembers());
     if (pluginSpec.getBarMode() == null) {
       throw new ValidationException("Property 'barMode' is required.");
     }
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(FloatingBarplotSpec pluginSpec) {    
+  protected List<StreamSpec> getRequestedStreams(CollectionFloatingBarplotSpec pluginSpec) {    
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
-        .addVars(getUtil().getChildrenVariables(pluginSpec.getCollectionOverlayConfigWithValues().getCollection())
-      )); 
+        .addVars(pluginSpec.getOverlayConfig().getSelectedMembers())
+      ); 
   }
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    FloatingBarplotSpec spec = getPluginSpec();
+    CollectionFloatingBarplotSpec spec = getPluginSpec();
     PluginUtil util = getUtil();
     String barMode = spec.getBarMode().getValue();
-    String overlayValues = getRBinListAsString(spec.getCollectionOverlayConfigWithValues().getSelectedValues());
-    List<VariableSpec> inputVarSpecs = new ArrayList<>(spec.getCollectionOverlayConfigWithValues().getSelectedMembers());
-    inputVarSpecs.add(spec.getXAxisVariable());
+    String overlayValues = getRBinListAsString(spec.getOverlayConfig().getSelectedValues());
+    List<VariableSpec> inputVarSpecs = new ArrayList<>(spec.getOverlayConfig().getSelectedMembers());
 
-    Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
-    varMap.put("xAxis", spec.getXAxisVariable());
-    varMap.put("overlay", spec.getCollectionOverlayConfigWithValues().getCollection());
+    Map<String, CollectionSpec> varMap = new HashMap<String, CollectionSpec>();
+    varMap.put("overlay", spec.getOverlayConfig().getCollection());
       
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, inputVarSpecs));

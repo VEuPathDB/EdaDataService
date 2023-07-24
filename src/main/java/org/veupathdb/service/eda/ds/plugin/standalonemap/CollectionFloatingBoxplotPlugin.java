@@ -28,7 +28,7 @@ import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamRe
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithProcessedRemoteFiles;
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
-public class CollectionFloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBoxplotPostRequest, FloatingBoxplotSpec> {
+public class CollectionFloatingBoxplotPlugin extends AbstractEmptyComputePlugin<CollectionFloatingBoxplotPostRequest, CollectionFloatingBoxplotSpec> {
   private OverlaySpecification _overlaySpecification = null;
 
   @Override
@@ -62,37 +62,39 @@ public class CollectionFloatingBoxplotPlugin extends AbstractEmptyComputePlugin<
   }
 
   @Override
-  protected AbstractPlugin<FloatingBoxplotPostRequest, FloatingBoxplotSpec, Void>.ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(FloatingBoxplotPostRequest.class, FloatingBoxplotSpec.class, Void.class);
+  protected AbstractPlugin<CollectionFloatingBoxplotPostRequest, CollectionFloatingBoxplotSpec, Void>.ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(CollectionFloatingBoxplotPostRequest.class, CollectionFloatingBoxplotSpec.class, Void.class);
   }
 
   @Override
-  protected void validateVisualizationSpec(FloatingBoxplotSpec pluginSpec) throws ValidationException {
+  protected void validateVisualizationSpec(CollectionFloatingBoxplotSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
       .var("xAxisVariable", pluginSpec.getXAxisVariable()));
-    // TODO general collection validation and make sure its continuous
+    ValidationUtils.validateCollectionMembers(getUtil(),
+        pluginSpec.getOverlayConfig().getCollection(),
+        pluginSpec.getOverlayConfig().getSelectedMembers());
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(FloatingBoxplotSpec pluginSpec) {
+  protected List<StreamSpec> getRequestedStreams(CollectionFloatingBoxplotSpec pluginSpec) {
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
-        .addVars(getUtil().getChildrenVariables(pluginSpec.getCollectionOverlayConfig().getCollection())
+        .addVars(pluginSpec.getOverlayConfig().getSelectedMembers())
         .addVar(pluginSpec.getXAxisVariable())
-      ));
+      );
   }
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PluginUtil util = getUtil();
-    FloatingBoxplotSpec spec = getPluginSpec();
-    List<VariableSpec> inputVarSpecs = new ArrayList<>(spec.getCollectionOverlayConfig().getSelectedMembers());
+    CollectionFloatingBoxplotSpec spec = getPluginSpec();
+    List<VariableSpec> inputVarSpecs = new ArrayList<>(spec.getOverlayConfig().getSelectedMembers());
     inputVarSpecs.add(spec.getXAxisVariable());
-    CollectionSpec overlayVariable = spec.getCollectionOverlayConfigWithValues().getCollection();
-    Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
-    varMap.put("xAxis", spec.getXAxisVariable());
-    varMap.put("overlay", overlayVariable);
+    CollectionSpec overlayVariable = spec.getOverlayConfig().getCollection();
+    Map<String, DynamicDataSpecImpl> varMap = new HashMap<String, DynamicDataSpecImpl>();
+    varMap.put("xAxis", new DynamicDataSpecImpl(spec.getXAxisVariable()));
+    varMap.put("overlay", new DynamicDataSpecImpl(overlayVariable));
     
     List<String> nonStrataVarColNames = new ArrayList<String>();
     nonStrataVarColNames.add(util.toColNameOrEmpty(spec.getXAxisVariable()));
@@ -109,7 +111,6 @@ public class CollectionFloatingBoxplotPlugin extends AbstractEmptyComputePlugin<
       );
 
     useRConnectionWithProcessedRemoteFiles(Resources.RSERVE_URL, filesProcessor, connection -> {
-      String overlayValues = getRBinListAsString(spec.getCollectionOverlayConfig().getSelectedValues());
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String cmd =
           "plot.data::box(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " +
@@ -119,7 +120,7 @@ public class CollectionFloatingBoxplotPlugin extends AbstractEmptyComputePlugin<
               "computeStats=FALSE, " +
               "sampleSizes=FALSE, " +
               "completeCases=FALSE, " +
-              "overlayValues=" + overlayValues + ", " +
+              "overlayValues=NULL, " +
               "evilMode='noVariables')";
       streamResult(connection, cmd, out);
     });

@@ -16,6 +16,7 @@ import org.veupathdb.service.eda.generated.model.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +28,7 @@ import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamRe
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
-public class CollectionFloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingLineplotPostRequest, FloatingLineplotSpec> {
+public class CollectionFloatingLineplotPlugin extends AbstractEmptyComputePlugin<CollectionFloatingLineplotPostRequest, CollectionFloatingLineplotSpec> {
   private OverlaySpecification _overlaySpecification = null;
 
   @Override
@@ -57,52 +58,52 @@ public class CollectionFloatingLineplotPlugin extends AbstractEmptyComputePlugin
   }
 
   @Override
-  protected AbstractPlugin<FloatingLineplotPostRequest, FloatingLineplotSpec, Void>.ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(FloatingLineplotPostRequest.class, FloatingLineplotSpec.class, Void.class);
+  protected AbstractPlugin<CollectionFloatingLineplotPostRequest, CollectionFloatingLineplotSpec, Void>.ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(CollectionFloatingLineplotPostRequest.class, CollectionFloatingLineplotSpec.class, Void.class);
   }
 
   @Override
-  protected void validateVisualizationSpec(FloatingLineplotSpec pluginSpec) throws ValidationException {
+  protected void validateVisualizationSpec(CollectionFloatingLineplotSpec pluginSpec) throws ValidationException {
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
       .var("xAxisVariable", pluginSpec.getXAxisVariable()));
     ValidationUtils.validateCollectionMembers(getUtil(),
-        pluginSpec.getCollection().getCollection(),
-        pluginSpec.getCollection().getSelectedMembers());
+        pluginSpec.getOverlayConfig().getCollection(),
+        pluginSpec.getOverlayConfig().getSelectedMembers());
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(FloatingLineplotSpec pluginSpec) {
+  protected List<StreamSpec> getRequestedStreams(CollectionFloatingLineplotSpec pluginSpec) {
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
-        .addVars(getUtil().getChildrenVariables(pluginSpec.getCollectionOverlayConfigWithValues().getCollection())
+        .addVars(pluginSpec.getOverlayConfig().getSelectedMembers())
         .addVar(pluginSpec.getXAxisVariable())
-      ));
+      );
   }
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PluginUtil util = getUtil();
-    FloatingLineplotSpec spec = getPluginSpec();
-    List<VariableSpec> inputVarSpecs = new ArrayList<>(spec.getCollectionOverlayConfig().getSelectedMembers());
+    CollectionFloatingLineplotSpec spec = getPluginSpec();
+    List<VariableSpec> inputVarSpecs = new ArrayList<>(spec.getOverlayConfig().getSelectedMembers());
     inputVarSpecs.add(spec.getXAxisVariable());
-    CollectionSpec overlayVariable = spec.getCollectionOverlayConfigWithValues().getCollection();
-    Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
-    varMap.put("xAxis", spec.getXAxisVariable());
-    varMap.put("overlay", overlayVariable);
+    CollectionSpec overlayVariable = spec.getOverlayConfig().getCollection();
+    Map<String, DynamicDataSpecImpl> varMap = new HashMap<String, DynamicDataSpecImpl>();
+    varMap.put("xAxis", new DynamicDataSpecImpl(spec.getXAxisVariable()));
+    varMap.put("overlay", new DynamicDataSpecImpl(overlayVariable));
     String errorBars = spec.getErrorBars() != null ? spec.getErrorBars().getValue() : "FALSE";
     String valueSpec = spec.getValueSpec().getValue();
     String collectionType = util.getCollectionType(overlayVariable);
     String numeratorValues = spec.getYAxisNumeratorValues() != null ? util.listToRVector(spec.getYAxisNumeratorValues()) : "NULL";
     String denominatorValues = spec.getYAxisDenominatorValues() != null ? util.listToRVector(spec.getYAxisDenominatorValues()) : "NULL";
-    String overlayValues = getRBinListAsString(spec.getCollectionOverlayConfigWithValues().getSelectedValues());
+    String overlayValues = getRBinListAsString(spec.getOverlayConfig().getSelectedValues());
     
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, inputVarSpecs));
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String viewportRString = getViewportAsRString(spec.getViewport(), collectionType);
       connection.voidEval(viewportRString);
-      BinSpec binSpec = spec.getBinSpec();
+      BinWidthSpec binSpec = spec.getBinSpec();
       validateBinSpec(binSpec, collectionType);
      
       String binWidth = "NULL";

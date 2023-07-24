@@ -406,6 +406,10 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
     // need an error here if it's a date and we don't have a unit?
   }
 
+  public void validateBinSpec(BinWidthSpec binSpec, String xVarType) {
+    validateBinSpec((BinSpec)binSpec, xVarType);
+  }
+
   public static String getBinRangeAsRString(RangeType binRange) {
     if (binRange != null) {
       if (binRange.isNumberRange()) {
@@ -547,23 +551,37 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
         "imputeZero=" + util.getVariableImputeZero(var).toUpperCase() + ")";
   }
 
-  public String getVoidEvalVariableMetadataList(Map<String, VariableSpec> vars) {
+  public String getVoidEvalVariableMetadataList(Map<String, DynamicDataSpecImpl> dataSpecs) {
     return
         // special case if vars is null or all var values are null
-        vars == null || vars.values().stream().allMatch(Objects::isNull)
+        dataSpecs == null || dataSpecs.values().stream().allMatch(Objects::isNull)
         ? "variables <- veupathUtils::VariableMetadataList()"
 
         // otherwise build R-friendly var list
         : "variables <- veupathUtils::VariableMetadataList(S4Vectors::SimpleList(" +
-          vars.entrySet().stream()
+          dataSpecs.entrySet().stream()
             .map(entry -> {
               String plotReference = entry.getKey();
-              VariableSpec var = entry.getValue();
-              return getVariableMetadataRObjectAsString(var, plotReference);
+              DynamicDataSpecImpl dataSpec = entry.getValue();
+              if (dataSpec.isCollectionSpec()) {
+                return getVariableMetadataRObjectAsString(dataSpec.getCollectionSpec(), plotReference);
+              } else {
+                return getVariableMetadataRObjectAsString(dataSpec.getVariableSpec(), plotReference);
+              }
             })
             .filter(Objects::nonNull)
             .collect(Collectors.joining(",")) +
           "))";
+  }
+
+  public String getVoidEvalVariableMetadataList(Map<String, VariableSpec> varSpecs) {
+    Map<String, DynamicDataSpecImpl> dataSpecs = varSpecs.entrySet().stream()
+     .collect(Collectors.toMap(Map.Entry::getKey, e -> new DynamicDataSpecImpl(e.getValue())));
+  }
+
+  public String getVoidEvalVariableMetadataList(Map<String, CollectionSpec> collectionSpecs) {
+    Map<String, DynamicDataSpecImpl> dataSpecs = collectionSpecs.entrySet().stream()
+     .collect(Collectors.toMap(Map.Entry::getKey, e -> new DynamicDataSpecImpl(e.getValue())));
   }
 
   // TODO could be better named since this only deals w labels

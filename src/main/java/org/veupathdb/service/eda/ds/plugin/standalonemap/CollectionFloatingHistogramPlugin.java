@@ -18,6 +18,7 @@ import org.veupathdb.service.eda.generated.model.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,7 @@ import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamRe
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
-public class CollectionFloatingHistogramPlugin extends AbstractEmptyComputePlugin<FloatingHistogramPostRequest, FloatingHistogramSpec> {
+public class CollectionFloatingHistogramPlugin extends AbstractEmptyComputePlugin<CollectionFloatingHistogramPostRequest, CollectionFloatingHistogramSpec> {
   private OverlaySpecification _overlaySpecification = null;
   
   private static final Logger LOG = LogManager.getLogger(FloatingHistogramPlugin.class);
@@ -61,50 +62,47 @@ public class CollectionFloatingHistogramPlugin extends AbstractEmptyComputePlugi
   }
 
   @Override
-  protected AbstractPlugin<FloatingHistogramPostRequest, FloatingHistogramSpec, Void>.ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(FloatingHistogramPostRequest.class, FloatingHistogramSpec.class, Void.class);
+  protected AbstractPlugin<CollectionFloatingHistogramPostRequest, CollectionFloatingHistogramSpec, Void>.ClassGroup getTypeParameterClasses() {
+    return new ClassGroup(CollectionFloatingHistogramPostRequest.class, CollectionFloatingHistogramSpec.class, Void.class);
   }
 
   @Override
-  protected void validateVisualizationSpec(FloatingHistogramSpec pluginSpec) throws ValidationException {
+  protected void validateVisualizationSpec(CollectionFloatingHistogramSpec pluginSpec) throws ValidationException {
     ValidationUtils.validateCollectionMembers(getUtil(),
-        pluginSpec.getCollection().getCollection(),
-        pluginSpec.getCollection().getSelectedMembers());
+        pluginSpec.getOverlayConfig().getCollection(),
+        pluginSpec.getOverlayConfig().getSelectedMembers());
     if (pluginSpec.getBarMode() == null) {
       throw new ValidationException("Property 'barMode' is required.");
     }
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(FloatingHistogramSpec pluginSpec) {
+  protected List<StreamSpec> getRequestedStreams(CollectionFloatingHistogramSpec pluginSpec) {
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
-        .addVars(getUtil().getChildrenVariables(pluginSpec.getCollectionOverlayConfig().getCollection())
-      ));
+        .addVars(pluginSpec.getOverlayConfig().getSelectedMembers())
+      );
   }
   
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PluginUtil util = getUtil();
-    FloatingHistogramSpec spec = getPluginSpec();
-    List<VariableSpec> inputVarSpecs = new ArrayList<>(spec.getCollectionOverlayConfig().getSelectedMembers());
-    CollectionSpec overlayVariable = spec.getCollectionOverlayConfig().getCollection();
-    // TODO figure out how to make this work, im trying to add a CollectionSpec rather than a VariableSpec
-    Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
+    CollectionFloatingHistogramSpec spec = getPluginSpec();
+    List<VariableSpec> inputVarSpecs = new ArrayList<>(spec.getOverlayConfig().getSelectedMembers());
+    CollectionSpec overlayVariable = spec.getOverlayConfig().getCollection();
+    Map<String, CollectionSpec> varMap = new HashMap<String, CollectionSpec>();
     varMap.put("overlay", overlayVariable);
     String barMode = spec.getBarMode().getValue();
     String collectionType = util.getCollectionType(overlayVariable);
 
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
-          spec.getXAxisVariable(),
-          overlayVariable));
+      connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, inputVarSpecs));
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
      
       String viewportRString = getViewportAsRString(spec.getViewport(), collectionType);
       connection.voidEval(viewportRString);
       
-      BinSpec binSpec = spec.getBinSpec();
+      BinWidthSpec binSpec = spec.getBinSpec();
       validateBinSpec(binSpec, collectionType);
       String binReportValue = binSpec.getType().getValue() != null ? binSpec.getType().getValue() : "binWidth";
       
@@ -126,7 +124,7 @@ public class CollectionFloatingHistogramPlugin extends AbstractEmptyComputePlugi
                                   "viewport=viewport, " + 
                                   "sampleSizes=FALSE, " +
                                   "completeCases=FALSE, " +
-                                  "overlayValues=" + overlayValues + ", " +
+                                  "overlayValues=NULL, " +
                                   "evilMode='noVariables')";
                System.err.println(cmd);
       streamResult(connection, cmd, out);
