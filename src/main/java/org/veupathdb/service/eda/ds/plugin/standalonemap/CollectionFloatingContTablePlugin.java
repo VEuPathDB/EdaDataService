@@ -9,6 +9,7 @@ import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.ds.utils.ValidationUtils;
 import org.veupathdb.service.eda.generated.model.FloatingBarplotSpec;
 import org.veupathdb.service.eda.generated.model.FloatingContTablePostRequest;
 import org.veupathdb.service.eda.generated.model.FloatingContTableSpec;
@@ -56,7 +57,9 @@ public class CollectionFloatingContTablePlugin extends AbstractEmptyComputePlugi
 
   @Override
   protected void validateVisualizationSpec(FloatingContTableSpec pluginSpec) throws ValidationException {
-    // TODO replace this w collection specific validation. maybe leave a stub for now, and reuse some collection marker validation once merged.
+    ValidationUtils.validateCollectionMembers(getUtil(),
+        pluginSpec.getCollection().getCollection(),
+        pluginSpec.getCollection().getSelectedMembers());
   }
 
   @Override

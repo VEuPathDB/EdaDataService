@@ -11,6 +11,7 @@ import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.OverlaySpecification;
+import org.veupathdb.service.eda.ds.utils.ValidationUtils;
 import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
@@ -68,9 +69,9 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
       .var("overlayVariable", Optional.ofNullable(pluginSpec.getCollectionOverlayConfig())
           .map(CollectionOverlayConfig::getCollection())
           .orElse(null)));
-    if (pluginSpec.getCollectionOverlayConfig() != null) {
-      // TODO replace this w collection specific validation. maybe leave a stub for now, and reuse some collection marker validation once merged.
-    }
+    ValidationUtils.validateCollectionMembers(getUtil(),
+        pluginSpec.getCollection().getCollection(),
+        pluginSpec.getCollection().getSelectedMembers());
     if (pluginSpec.getBarMode() == null) {
       throw new ValidationException("Property 'barMode' is required.");
     }

@@ -10,6 +10,7 @@ import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.OverlaySpecification;
+import org.veupathdb.service.eda.ds.utils.ValidationUtils;
 import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
@@ -65,7 +66,9 @@ public class CollectionFloatingLineplotPlugin extends AbstractEmptyComputePlugin
     validateInputs(new DataElementSet()
       .entity(pluginSpec.getOutputEntityId())
       .var("xAxisVariable", pluginSpec.getXAxisVariable()));
-    // TODO general collection validation
+    ValidationUtils.validateCollectionMembers(getUtil(),
+        pluginSpec.getCollection().getCollection(),
+        pluginSpec.getCollection().getSelectedMembers());
   }
 
   @Override

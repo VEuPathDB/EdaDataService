@@ -12,6 +12,7 @@ import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.OverlaySpecification;
+import org.veupathdb.service.eda.ds.utils.ValidationUtils;
 import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
@@ -66,7 +67,9 @@ public class CollectionFloatingHistogramPlugin extends AbstractEmptyComputePlugi
 
   @Override
   protected void validateVisualizationSpec(FloatingHistogramSpec pluginSpec) throws ValidationException {
-    // TODO general collection validation plus make sure its a continuous collection
+    ValidationUtils.validateCollectionMembers(getUtil(),
+        pluginSpec.getCollection().getCollection(),
+        pluginSpec.getCollection().getSelectedMembers());
     if (pluginSpec.getBarMode() == null) {
       throw new ValidationException("Property 'barMode' is required.");
     }
