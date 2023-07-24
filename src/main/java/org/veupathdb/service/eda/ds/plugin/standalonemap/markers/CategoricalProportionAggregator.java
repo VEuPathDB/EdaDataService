@@ -11,24 +11,26 @@ public class CategoricalProportionAggregator implements MarkerAggregator<Double>
   private final Set<String> denominatorValues;
   private int numNumeratorMatches = 0;
   private int numDenominatorMatches = 0;
+  private int index;
 
-  public CategoricalProportionAggregator(Set<String> numeratorValues, Set<String> denominatorValues) {
+  public CategoricalProportionAggregator(Set<String> numeratorValues, Set<String> denominatorValues, int index) {
     if (!denominatorValues.containsAll(numeratorValues)) {
       throw new IllegalArgumentException("Numerator values must be a subset of denominator values.");
     }
     this.numeratorValues = numeratorValues;
     this.denominatorValues = denominatorValues;
+    this.index = index;
   }
 
   @Override
-  public void addValue(String s) {
+  public void addValue(String[] s) {
     if (s == null) {
       return;
     }
-    if (numeratorValues.contains(s)) {
+    if (numeratorValues.contains(s[index])) {
       numNumeratorMatches++;
     }
-    if (denominatorValues.contains(s)) {
+    if (denominatorValues.contains(s[index])) {
       numDenominatorMatches++;
     }
   }

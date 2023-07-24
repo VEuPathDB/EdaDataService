@@ -5,7 +5,7 @@ public interface MarkerAggregator<T> {
   /**
    * Add a variable value to incorporate into aggregated result.
    */
-  void addValue(String d);
+  void addValue(String[] d);
 
   /**
    * @return result of aggregated variable values.

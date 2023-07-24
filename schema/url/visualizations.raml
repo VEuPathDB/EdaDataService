@@ -166,23 +166,26 @@ types:
     enum: [ "mean", "median" ]
 
   QuantitativeOverlayConfig:
+    properties:
+      overlayVariable: VariableSpec
+      aggregationConfig: QuantitativeAggregationConfig
+
+  QuantitativeAggregationConfig:
     additionalProperties: false
     discriminator: overlayType
     properties:
       overlayType:
         type: OverlayType
-      overlayVariable:
-        type: VariableSpec
 
-  ContinuousQuantitativeOverlayConfig:
-    type: QuantitativeOverlayConfig
+  ContinuousAggregationConfig:
+    type: QuantitativeAggregationConfig
     additionalProperties: false
     discriminatorValue: continuous
     properties:
       aggregator: Aggregator
 
-  CategoricalQuantitativeOverlayConfig:
-    type: QuantitativeOverlayConfig
+  CategoricalAggregationConfig:
+    type: QuantitativeAggregationConfig
     discriminatorValue: categorical
     additionalProperties: false
     properties:

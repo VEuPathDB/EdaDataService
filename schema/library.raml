@@ -1592,98 +1592,6 @@ types:
     type: DataPluginRequestBase
     properties:
       config: CollectionSpec
-  CollectionFloatingBarplotPostRequest:
-    type: DataPluginRequestBase
-    properties:
-      config: CollectionFloatingBarplotSpec
-  CollectionFloatingBarplotSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      outputEntityId: string
-      barMode:
-        type: string
-        enum:
-          - group
-          - stack
-      valueSpec: ValueSpec
-      overlayConfig: CollectionOverlayConfig
-  CollectionFloatingBoxplotPostRequest:
-    type: DataPluginRequestBase
-    properties:
-      config: CollectionFloatingBoxplotSpec
-  CollectionFloatingBoxplotSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      outputEntityId: string
-      xAxisVariable: VariableSpec
-      overlayConfig: CollectionOverlayConfig
-      maxAllowedDataPoints:
-        type: integer
-        required: false
-        format: int64
-  CollectionFloatingContTablePostRequest:
-    type: DataPluginRequestBase
-    properties:
-      config: CollectionFloatingContTableSpec
-  CollectionFloatingContTableSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      outputEntityId: string
-      xAxisVariable: CollectionOverlayConfig
-  CollectionFloatingHistogramPostRequest:
-    type: DataPluginRequestBase
-    properties:
-      config: CollectionFloatingHistogramSpec
-  CollectionFloatingHistogramSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      outputEntityId: string
-      barMode:
-        type: string
-        enum:
-          - overlay
-          - stack
-      valueSpec: ValueSpec
-      overlayConfig: CollectionOverlayConfig
-      binSpec: BinSpec
-      viewport:
-        type: NumericViewport
-        required: false
-  CollectionFloatingLineplotPostRequest:
-    type: DataPluginRequestBase
-    properties:
-      config: CollectionFloatingLineplotSpec
-  CollectionFloatingLineplotSpec:
-    type: object
-    additionalProperties: false
-    properties:
-      outputEntityId: string
-      xAxisVariable: VariableSpec
-      yAxisNumeratorValues:
-        type: string[]
-        required: false
-      yAxisDenominatorValues:
-        type: string[]
-        required: false
-      overlayConfig: CollectionOverlayConfig
-      binSpec:
-        type: BinSpec
-        required: false
-      valueSpec:
-        type: string
-        enum:
-          - median
-          - mean
-          - geometricMean
-          - proportion
-      errorBars: StringBoolean
-      viewport:
-        type: NumericViewport
-        required: false
   StandaloneCollectionMapMarkerPostRequest:
     type: DataPluginRequestBase
     properties:
@@ -1710,13 +1618,15 @@ types:
         type: GeolocationViewport
       collection:
         description: Collection variable to use for markers.
-        type: CollectionSpec
-      aggregationConfig:
+        type: CollectionOverlayConfig
+      aggregatorConfig:
         description: Specification for how variable values will be aggregated into quantiative value shown in bar plot marker.
-        type: QuantitativeOverlayConfig
-      selectedMemberVariables:
-        description: Variables in the provided collection for which marker data should be provided.
-        type: VariableSpec[]
+        type: QuantitativeAggregationConfig
+  CollectionOverlayConfig:
+    type: object
+    properties:
+      collection: CollectionSpec
+      selectedMembers: VariableSpec[]
   CollectionMapMarkerElement:
     description: |
       Data needed to render a collection map marker. Contains geographical data as well as per-variable collection var
@@ -1735,8 +1645,7 @@ types:
     type: object
     properties:
       variableId: string
-      mean: number
-      median: number
+      value: number
       confidenceInterval: NumberRange
       n: number
   StandaloneCollectionMapMarkerPostResponse:
@@ -2225,28 +2134,26 @@ types:
       - median
   QuantitativeOverlayConfig:
     type: object
+    properties:
+      overlayVariable: VariableSpec
+      aggregationConfig: QuantitativeAggregationConfig
+  QuantitativeAggregationConfig:
+    type: object
     additionalProperties: false
     discriminator: overlayType
     properties:
       overlayType: OverlayType
-      overlayVariable: VariableSpec
-  ContinuousQuantitativeOverlayConfig:
-    type: QuantitativeOverlayConfig
+  ContinuousAggregationConfig:
+    type: QuantitativeAggregationConfig
     additionalProperties: false
     discriminatorValue: continuous
     properties:
       aggregator: Aggregator
-  CategoricalQuantitativeOverlayConfig:
-    type: QuantitativeOverlayConfig
+  CategoricalAggregationConfig:
+    type: QuantitativeAggregationConfig
     discriminatorValue: categorical
     additionalProperties: false
     properties:
       numeratorValues: string[]
       denominatorValues: string[]
-  CollectionOverlayConfig:
-    type: object
-    additionalProperties: false
-    properties:
-      collection: CollectionSpec
-      selectedMembers: VariableSpec[]
 
