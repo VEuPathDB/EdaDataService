@@ -100,7 +100,7 @@ public class CollectionFloatingLineplotPlugin extends AbstractEmptyComputePlugin
     
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, inputVarSpecs));
-      connection.voidEval(getVoidEvalVariableMetadataList(varMap));
+      connection.voidEval(getVoidEvalDynamicDataMetadataList(varMap));
       String viewportRString = getViewportAsRString(spec.getViewport(), collectionType);
       connection.voidEval(viewportRString);
       BinWidthSpec binSpec = spec.getBinSpec();

@@ -551,7 +551,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
         "imputeZero=" + util.getVariableImputeZero(var).toUpperCase() + ")";
   }
 
-  public String getVoidEvalVariableMetadataList(Map<String, DynamicDataSpecImpl> dataSpecs) {
+  public String getVoidEvalDynamicDataMetadataList(Map<String, DynamicDataSpecImpl> dataSpecs) {
     return
         // special case if vars is null or all var values are null
         dataSpecs == null || dataSpecs.values().stream().allMatch(Objects::isNull)
@@ -577,11 +577,15 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
   public String getVoidEvalVariableMetadataList(Map<String, VariableSpec> varSpecs) {
     Map<String, DynamicDataSpecImpl> dataSpecs = varSpecs.entrySet().stream()
      .collect(Collectors.toMap(Map.Entry::getKey, e -> new DynamicDataSpecImpl(e.getValue())));
+
+     return getVoidEvalDynamicDataMetadataList(dataSpecs);
   }
 
-  public String getVoidEvalVariableMetadataList(Map<String, CollectionSpec> collectionSpecs) {
+  public String getVoidEvalCollectionMetadataList(Map<String, CollectionSpec> collectionSpecs) {
     Map<String, DynamicDataSpecImpl> dataSpecs = collectionSpecs.entrySet().stream()
      .collect(Collectors.toMap(Map.Entry::getKey, e -> new DynamicDataSpecImpl(e.getValue())));
+
+     return getVoidEvalDynamicDataMetadataList(dataSpecs);
   }
 
   // TODO could be better named since this only deals w labels
