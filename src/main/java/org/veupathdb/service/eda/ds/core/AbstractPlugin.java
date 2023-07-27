@@ -150,7 +150,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
         .forEach(_referenceMetadata::incorporateDerivedVariable);
 
     // if plugin requires a compute, get computed var metadata and incorporate
-    if (_computeInfo.isPresent())
+    if (_computeInfo.isPresent() && computeGeneratesVars())
       _referenceMetadata.incorporateComputedVariables(getComputedVariableMetadata().getVariables());
 
     // ask subclass to validate the configuration
@@ -188,6 +188,13 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
       StreamingDataClient.buildAndProcessStreams(_requiredStreams, streamGenerator, streamProcessor);
       logRequestTime("Data streams processed; response written; request complete");
     };
+  }
+
+  /**
+   * @return whether the associated compute generates vars (assumes true unless overridden)
+   */
+  protected boolean computeGeneratesVars() {
+    return true;
   }
 
   protected void logRequestTime(String eventDescription) {
@@ -367,6 +374,15 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     return _computeClient.getJobStatistics(getComputeName(), createComputeRequestBody(), expectedStatsClass);
   }
 
+  protected void writeComputeStatsResponseToOutput(OutputStream out) {
+    try (InputStream statsStream = _computeClient.getJobStatistics(getComputeName(), createComputeRequestBody()).getInputStream()) {
+      statsStream.transferTo(out);
+    }
+    catch (Exception e) {
+      throw new RuntimeException("Unable to stream stats response from compute service", e);
+    }
+  }
+
   protected ComputedVariableMetadata getComputedVariableMetadata() {
     return _computeClient.getJobVariableMetadata(getComputeName(), createComputeRequestBody());
   }
@@ -444,17 +460,8 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     }
   }
 
-  // there is probably some JRI util that would make this unnecessary if i were more clever??
-  public static String listToRVector(List<String> values) {
-    return
-        "c(" +
-        values.stream()
-            .map(PluginUtil::doubleQuote)
-            .collect(Collectors.joining(", ")) +
-        ")";
-  }
-
   public String getVariableMetadataRObjectAsString(VariableMapping var) {
+
     if (var == null) return null;
 
     StringBuilder variableMetadata = new StringBuilder(
@@ -480,7 +487,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     }
 
     if (var.getVocabulary() != null)
-      variableMetadata.append(",vocabulary=").append(listToRVector(var.getVocabulary()));
+      variableMetadata.append(",vocabulary=").append(PluginUtil.listToRVector(var.getVocabulary()));
 
     if (var.getMembers() != null)
       variableMetadata.append(",members=").append(getVariableSpecListRObjectAsString(var.getMembers()));

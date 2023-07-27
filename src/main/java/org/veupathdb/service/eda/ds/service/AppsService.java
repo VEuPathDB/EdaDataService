@@ -1,8 +1,5 @@
 package org.veupathdb.service.eda.ds.service;
 
-import java.io.OutputStream;
-import java.util.Map.Entry;
-import java.util.function.Consumer;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.ServerErrorException;
 import jakarta.ws.rs.WebApplicationException;
@@ -17,37 +14,25 @@ import org.veupathdb.lib.container.jaxrs.providers.UserProvider;
 import org.veupathdb.lib.container.jaxrs.server.annotations.Authenticated;
 import org.veupathdb.lib.container.jaxrs.server.annotations.DisableJackson;
 import org.veupathdb.service.eda.common.auth.StudyAccess;
+import org.veupathdb.service.eda.common.client.NonEmptyResultStream.EmptyResultException;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
 import org.veupathdb.service.eda.ds.core.AbstractPlugin;
-import org.veupathdb.service.eda.ds.plugin.abundance.AbundanceBoxplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.abundance.AbundanceScatterplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.differentialabundance.DifferentialAbundanceVolcanoplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.betadiv.BetaDivScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivBoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivScatterplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.betadiv.BetaDivScatterplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.BarplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.BoxplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.ContTablePlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.DensityplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.HeatmapPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.HistogramPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.LineplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.MapPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.MapMarkersOverlayPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.ScatterplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.TablePlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.TimeSeriesPlugin;
-import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
+import org.veupathdb.service.eda.ds.plugin.abundance.AbundanceBoxplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.abundance.AbundanceScatterplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.pass.*;
 import org.veupathdb.service.eda.ds.plugin.sample.*;
-import org.veupathdb.service.eda.common.client.NonEmptyResultStream.EmptyResultException;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingBarplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingBoxplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingHistogramPlugin;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingLineplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingScatterplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.StandaloneMapMarkersPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.*;
 import org.veupathdb.service.eda.generated.model.*;
 import org.veupathdb.service.eda.generated.resources.Apps;
+
+import java.io.OutputStream;
+import java.util.Map.Entry;
+import java.util.function.Consumer;
 
 @Authenticated(allowGuests = true)
 public class AppsService implements Apps {
@@ -69,38 +54,64 @@ public class AppsService implements Apps {
   }
 
   @Override
-  public PostAppsStandaloneMapVisualizationsScatterplotResponse postAppsStandaloneMapVisualizationsScatterplot(FloatingScatterplotPostRequest entity) {
-    return wrapPlugin(() -> PostAppsStandaloneMapVisualizationsScatterplotResponse.respond200WithApplicationJson(
+  public PostAppsStandaloneMapVisualizationsMapMarkersBubblesResponse postAppsStandaloneMapVisualizationsMapMarkersBubbles(StandaloneMapBubblesPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapVisualizationsMapMarkersBubblesResponse.respond200WithApplicationJson(
+        new StandaloneMapBubblesPostResponseStream(processRequest(new BubbleMapMarkersPlugin(), entity))));
+  }
+
+  @Override
+  public PostAppsStandaloneMapVisualizationsMapMarkersBubblesLegendResponse postAppsStandaloneMapVisualizationsMapMarkersBubblesLegend(StandaloneMapBubblesLegendPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapVisualizationsMapMarkersBubblesLegendResponse.respond200WithApplicationJson(
+        new StandaloneMapBubblesLegendPostResponseStream(processRequest(new BubbleMapMarkersLegendPlugin(), entity))));
+  }
+
+  @Override
+  public PostAppsStandaloneMapVisualizationsMapMarkersCollectionsResponse postAppsStandaloneMapVisualizationsMapMarkersCollections(StandaloneCollectionMapMarkerPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapVisualizationsMapMarkersCollectionsResponse.respond200WithApplicationJson(
+        new StandaloneCollectionMapMarkerPostResponseStream(processRequest(new CollectionMapMarkersPlugin(), entity))));
+  }
+
+
+  @Override
+  public PostAppsStandaloneMapXyrelationshipsVisualizationsTimeseriesResponse postAppsStandaloneMapXyrelationshipsVisualizationsTimeseries(FloatingLineplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapXyrelationshipsVisualizationsTimeseriesResponse.respond200WithApplicationJson(
+        new FloatingLineplotPostResponseStream(processRequest(new FloatingTimeSeriesPlugin(), entity))));
+  }
+
+  @Override
+  public PostAppsStandaloneMapXyrelationshipsVisualizationsScatterplotResponse postAppsStandaloneMapXyrelationshipsVisualizationsScatterplot(FloatingScatterplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapXyrelationshipsVisualizationsScatterplotResponse.respond200WithApplicationJson(
         new FloatingScatterplotPostResponseStream(processRequest(new FloatingScatterplotPlugin(), entity))));
   }
 
   @Override
-  public PostAppsStandaloneMapVisualizationsLineplotResponse postAppsStandaloneMapVisualizationsLineplot(FloatingLineplotPostRequest entity) {
-    return wrapPlugin(() -> PostAppsStandaloneMapVisualizationsLineplotResponse.respond200WithApplicationJson(
+  public PostAppsStandaloneMapXyrelationshipsVisualizationsLineplotResponse postAppsStandaloneMapXyrelationshipsVisualizationsLineplot(FloatingLineplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapXyrelationshipsVisualizationsLineplotResponse.respond200WithApplicationJson(
         new FloatingLineplotPostResponseStream(processRequest(new FloatingLineplotPlugin(), entity))));
   }
 
   @Override
-  public PostAppsStandaloneMapVisualizationsHistogramResponse postAppsStandaloneMapVisualizationsHistogram(FloatingHistogramPostRequest entity) {
-    return wrapPlugin(() -> PostAppsStandaloneMapVisualizationsHistogramResponse.respond200WithApplicationJson(
+  public PostAppsStandaloneMapDistributionsVisualizationsHistogramResponse postAppsStandaloneMapDistributionsVisualizationsHistogram(FloatingHistogramPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapDistributionsVisualizationsHistogramResponse.respond200WithApplicationJson(
         new FloatingHistogramPostResponseStream(processRequest(new FloatingHistogramPlugin(), entity))));
   }
 
   @Override
-  public PostAppsStandaloneMapVisualizationsBoxplotResponse postAppsStandaloneMapVisualizationsBoxplot(FloatingBoxplotPostRequest entity) {
-    return wrapPlugin(() -> PostAppsStandaloneMapVisualizationsBoxplotResponse.respond200WithApplicationJson(
+  public PostAppsStandaloneMapDistributionsVisualizationsBoxplotResponse postAppsStandaloneMapDistributionsVisualizationsBoxplot(FloatingBoxplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapDistributionsVisualizationsBoxplotResponse.respond200WithApplicationJson(
         new FloatingBoxplotPostResponseStream(processRequest(new FloatingBoxplotPlugin(), entity))));
   }
 
   @Override
-  public PostAppsStandaloneMapVisualizationsBarplotResponse postAppsStandaloneMapVisualizationsBarplot(FloatingBarplotPostRequest entity) {
-    return wrapPlugin(() -> PostAppsStandaloneMapVisualizationsBarplotResponse.respond200WithApplicationJson(
+  public PostAppsStandaloneMapCountsandproportionsVisualizationsBarplotResponse postAppsStandaloneMapCountsandproportionsVisualizationsBarplot(FloatingBarplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapCountsandproportionsVisualizationsBarplotResponse.respond200WithApplicationJson(
         new FloatingBarplotPostResponseStream(processRequest(new FloatingBarplotPlugin(), entity))));
   }
 
   @Override
-  public PostAppsStandaloneMapVisualizationsConttableResponse postAppsStandaloneMapVisualizationsConttable(FloatingMosaicPostRequest entity) {
-    return null; // TODO
+  public PostAppsStandaloneMapCountsandproportionsVisualizationsConttableResponse postAppsStandaloneMapCountsandproportionsVisualizationsConttable(FloatingContTablePostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapCountsandproportionsVisualizationsConttableResponse.respond200WithApplicationJson(
+        new FloatingContTablePostResponseStream(processRequest(new FloatingContTablePlugin(), entity)))); 
   }
 
   static <T> T wrapPlugin(SupplierWithException<T> supplier) {
@@ -281,6 +292,13 @@ public class AppsService implements Apps {
   public PostAppsBetadivVisualizationsScatterplotResponse postAppsBetadivVisualizationsScatterplot(BetaDivScatterplotPostRequest entity) {
     return wrapPlugin(() -> PostAppsBetadivVisualizationsScatterplotResponse.respond200WithApplicationJson(
         new ScatterplotPostResponseStream(processRequest(new BetaDivScatterplotPlugin(), entity))));
+  }
+
+  @DisableJackson
+  @Override
+  public PostAppsDifferentialabundanceVisualizationsVolcanoplotResponse postAppsDifferentialabundanceVisualizationsVolcanoplot(DifferentialAbundanceVolcanoplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsDifferentialabundanceVisualizationsVolcanoplotResponse.respond200WithApplicationJson(
+        new DifferentialAbundanceStatsResponseStream(processRequest(new DifferentialAbundanceVolcanoplotPlugin(), entity))));
   }
 
   @DisableJackson

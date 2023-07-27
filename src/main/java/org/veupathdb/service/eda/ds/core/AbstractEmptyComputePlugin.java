@@ -17,4 +17,8 @@ public abstract class AbstractEmptyComputePlugin<T extends DataPluginRequestBase
     }
   }
 
+  @Override
+  protected boolean computeGeneratesVars() {
+    return false;
+  }
 }

@@ -61,6 +61,47 @@ securitySchemes:
               application/json:
                 type: lib.StandaloneMapMarkersPostResponse
 
+      /bubbles:
+        post:
+          description: |
+            Returns data required to make bubble markers.
+          body:
+            application/json:
+              type: lib.StandaloneMapBubblesPostRequest
+          responses:
+            200:
+              body:
+                application/json:
+                  type: lib.StandaloneMapBubblesPostResponse
+
+        /legend:
+          post:
+            description: Returns data required to make bubble marker legends
+            body:
+              application/json:
+                type: lib.StandaloneMapBubblesLegendPostRequest
+            responses:
+              200:
+                body:
+                  application/json:
+                    type: lib.StandaloneMapBubblesLegendPostResponse
+      /collections:
+        post:
+          description: |
+            Map marker endpoint for collection variables.
+          body:
+            application/json:
+              type: lib.StandaloneCollectionMapMarkerPostRequest
+          responses:
+            200:
+              body:
+                application/json:
+                  type: lib.StandaloneCollectionMapMarkerPostResponse
+
+
+  /standalone-map-xyrelationships/visualizations:
+    displayName: Available visualizations for the Standalone Map application
+
     /scatterplot:
       post:
         description: Returns data required to create a floating scatterplot visualization in the Standalone Map
@@ -84,6 +125,20 @@ securitySchemes:
             body:
               application/json:
                 type: lib.FloatingLineplotPostResponse
+    /timeseries:
+      post:
+        description: Returns data required to create a floating time series visualization in the Standalone Map
+        body:
+          application/json:
+            type: lib.FloatingLineplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.FloatingLineplotPostResponse
+
+  /standalone-map-distributions/visualizations:
+    displayName: Available visualizations for the Standalone Map application
 
     /histogram:
       post:
@@ -109,6 +164,9 @@ securitySchemes:
               application/json:
                 type: lib.FloatingBoxplotPostResponse
 
+  /standalone-map-countsandproportions/visualizations:
+    displayName: Available visualizations for the Standalone Map application
+
     /barplot:
       post:
         description: Returns data required to create a floating bar plot visualization in the Standalone Map
@@ -126,7 +184,7 @@ securitySchemes:
         description: Returns data required to create a floating RxC mosaic plot visualization in the Standalone Map
         body:
           application/json:
-            type: lib.FloatingMosaicPostRequest
+            type: lib.FloatingContTablePostRequest
         responses:
           200:
             body:
@@ -361,6 +419,21 @@ securitySchemes:
             body:
               application/json:
                 type: lib.ScatterplotPostResponse
+
+  /differentialabundance/visualizations:
+    displayName: Visualizations for interrogating differentially abundant taxa, genes, or pathways
+
+    /volcanoplot:
+      post:
+        description: Returns data required to create a volcanoplot from a differential abundance analysis.
+        body:
+          application/json:
+            type: lib.DifferentialAbundanceVolcanoplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.DifferentialAbundanceStatsResponse
 
   /distributions/visualizations:
     displayName: Visualizations for exploring distributions of data.

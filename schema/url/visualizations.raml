@@ -15,6 +15,10 @@ types:
         required: false
         type: DerivedVariableSpec[]
 
+  EmptyDataPluginSpec:
+    type: object
+    additionalProperties: false
+
   StringBoolean:
     type: string
     enum: [ 'TRUE', 'FALSE' ]
@@ -144,3 +148,34 @@ types:
         type: VariableSpec[]
         maxItems: 2
         required: false
+
+  Aggregator:
+    type: string
+    enum: [ "mean", "median" ]
+
+  QuantitativeOverlayConfig:
+    properties:
+      overlayVariable: VariableSpec
+      aggregationConfig: QuantitativeAggregationConfig
+
+  QuantitativeAggregationConfig:
+    additionalProperties: false
+    discriminator: overlayType
+    properties:
+      overlayType:
+        type: OverlayType
+
+  ContinuousAggregationConfig:
+    type: QuantitativeAggregationConfig
+    additionalProperties: false
+    discriminatorValue: continuous
+    properties:
+      aggregator: Aggregator
+
+  CategoricalAggregationConfig:
+    type: QuantitativeAggregationConfig
+    discriminatorValue: categorical
+    additionalProperties: false
+    properties:
+      numeratorValues: string[]
+      denominatorValues: string[]

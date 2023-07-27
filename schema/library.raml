@@ -613,6 +613,34 @@ types:
     type: object
     properties:
       pcoaVariance: number[]
+  DifferentialAbundancePluginRequest:
+    type: ComputeRequestBase
+    properties:
+      config: DifferentialAbundanceComputeConfig
+  DifferentialAbundanceComputeConfig:
+    type: object
+    properties:
+      collectionVariable: VariableSpec
+      comparator: ComparatorSpec
+      differentialAbundanceMethod: DifferentialAbundanceMethod
+  DifferentialAbundanceMethod:
+    type: string
+    enum:
+      - DESeq
+      - ANCOMBC
+  ComparatorSpec:
+    type: object
+    properties:
+      variable: VariableSpec
+      groupA: string[]
+      groupB: string[]
+  DifferentialAbundanceStatsResponse:
+    type: object
+    properties:
+      log2foldChange: string[]
+      pValue: string[]
+      adjustedPValue: string[]
+      pointId: string[]
   ExamplePluginRequest:
     type: ComputeRequestBase
     properties:
@@ -655,6 +683,10 @@ types:
       name: string
       displayName: string
       description: string
+  ExpiredJobsResponse:
+    type: object
+    properties:
+      numJobsExpired: integer
   AbundanceBoxplotPostRequest:
     type: DataPluginRequestBase
     properties:
@@ -720,6 +752,11 @@ types:
       overlayVariable:
         type: VariableSpec
         required: false
+  DifferentialAbundanceVolcanoplotPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      computeConfig: DifferentialAbundanceComputeConfig
+      config: EmptyDataPluginSpec
   ContinuousVariableMetadataPostRequest:
     type: DataPluginRequestBase
     additionalProperties: false
@@ -1584,6 +1621,67 @@ types:
     type: DataPluginRequestBase
     properties:
       config: CollectionSpec
+  StandaloneCollectionMapMarkerPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: StandaloneCollectionMapMarkerSpec
+  StandaloneCollectionMapMarkerSpec:
+    description: Specification for a map marker
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId:
+        description: Entity ID associated with collection variable of interest.
+        type: string
+      geoAggregateVariable:
+        description: Geohash component variable to group markers by. This is usually determined by zoom level of the client application.
+        type: VariableSpec
+      longitudeVariable:
+        description: Variable representing longitude of output entity.
+        type: VariableSpec
+      latitudeVariable:
+        description: Variable representing latitude of output entity.
+        type: VariableSpec
+      viewport:
+        description: Viewport used to filter markers. Only entities that are contained in the viewport will be grouped into markers.
+        type: GeolocationViewport
+      collection:
+        description: Collection variable to use for markers.
+        type: CollectionOverlayConfig
+      aggregatorConfig:
+        description: Specification for how variable values will be aggregated into quantiative value shown in bar plot marker.
+        type: QuantitativeAggregationConfig
+  CollectionOverlayConfig:
+    type: object
+    properties:
+      collection: CollectionSpec
+      selectedMembers: VariableSpec[]
+  CollectionMapMarkerElement:
+    description: |
+      Data needed to render a collection map marker. Contains geographical data as well as per-variable collection var
+      aggregates needed to render bar plots with error bar.
+    type: object
+    properties:
+      entityCount: number
+      avgLat: number
+      avgLon: number
+      minLat: number
+      minLon: number
+      maxLat: number
+      maxLon: number
+      values: CollectionMemberAggregate[]
+  CollectionMemberAggregate:
+    type: object
+    properties:
+      variableId: string
+      value: number
+      confidenceInterval: NumberRange
+      n: number
+  StandaloneCollectionMapMarkerPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      markers: CollectionMapMarkerElement[]
   FloatingBarplotPostRequest:
     type: DataPluginRequestBase
     properties:
@@ -1639,18 +1737,18 @@ types:
     additionalProperties: false
     properties:
       boxplot: FloatingBoxplot
-  FloatingMosaicPostRequest:
+  FloatingContTablePostRequest:
     type: DataPluginRequestBase
     properties:
-      config: FloatingMosaicSpec
-  FloatingMosaicSpec:
+      config: FloatingContTableSpec
+  FloatingContTableSpec:
     type: object
     additionalProperties: false
     properties:
       outputEntityId: string
       xAxisVariable: VariableSpec
       yAxisVariable: VariableSpec
-  FloatingMosaic:
+  FloatingContTable:
     type: object
     additionalProperties: false
     properties:
@@ -1660,7 +1758,7 @@ types:
     type: object
     additionalProperties: false
     properties:
-      mosaic: FloatingMosaic
+      mosaic: FloatingContTable
       statsTable:
         type: TwoByTwoStatsTable[]
         required: false
@@ -1772,6 +1870,82 @@ types:
     additionalProperties: false
     properties:
       scatterplot: FloatingScatterplot
+  StandaloneMapBubblesLegendPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: StandaloneMapBubblesLegendSpec
+  StandaloneMapBubblesLegendSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      colorLegendConfig: OverlayLegendConfig
+      sizeConfig: SizeLegendConfig
+  OverlayLegendConfig:
+    type: object
+    additionalProperties: false
+    properties:
+      geoAggregateVariable: VariableSpec
+      quantitativeOverlayConfig: QuantitativeOverlayConfig
+  SizeLegendConfig:
+    type: object
+    additionalProperties: false
+    properties:
+      geoAggregateVariable: VariableSpec
+  StandaloneMapBubblesLegendPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      minColorValue: number
+      maxColorValue: number
+      minSizeValue: number
+      maxSizeValue: number
+  StandaloneMapBubblesPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: StandaloneMapBubblesSpec
+  StandaloneMapBubblesSpec:
+    description: Specification for map bubbles.
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId:
+        description: Entity whose cardinality will be reported per marker.
+        type: string
+      geoAggregateVariable:
+        description: Geohash component variable to group markers by. This is usually determined by zoom level of the client application.
+        type: VariableSpec
+      longitudeVariable:
+        description: Variable representing longitude of output entity.
+        type: VariableSpec
+      latitudeVariable:
+        description: Variable representing latitude of output entity.
+        type: VariableSpec
+      overlayConfig?:
+        description: Overlay configuration for quantitative overlay. The quantitative overlay value can be used to render color on the markers.
+        type: QuantitativeOverlayConfig
+      valueSpec: ValueSpec
+      viewport:
+        description: Viewport used to filter markers. Only entities that are contained in the viewport will be grouped into markers.
+        type: GeolocationViewport
+  StandaloneMapBubblesPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      mapElements: ColoredMapElementInfo[]
+  ColoredMapElementInfo:
+    type: object
+    additionalProperties: false
+    properties:
+      geoAggregateValue: string
+      entityCount: number
+      overlayValue: number
+      avgLat: number
+      avgLon: number
+      minLat: number
+      minLon: number
+      maxLat: number
+      maxLon: number
   StandaloneMapMarkersPostRequest:
     type: DataPluginRequestBase
     properties:
@@ -1842,6 +2016,9 @@ types:
       derivedVariables:
         type: DerivedVariableSpec[]
         required: false
+  EmptyDataPluginSpec:
+    type: object
+    additionalProperties: false
   StringBoolean:
     type: string
     enum:
@@ -1974,4 +2151,33 @@ types:
         type: VariableSpec[]
         maxItems: 2
         required: false
+  Aggregator:
+    type: string
+    enum:
+      - mean
+      - median
+  QuantitativeOverlayConfig:
+    type: object
+    properties:
+      overlayVariable: VariableSpec
+      aggregationConfig: QuantitativeAggregationConfig
+  QuantitativeAggregationConfig:
+    type: object
+    additionalProperties: false
+    discriminator: overlayType
+    properties:
+      overlayType: OverlayType
+  ContinuousAggregationConfig:
+    type: QuantitativeAggregationConfig
+    additionalProperties: false
+    discriminatorValue: continuous
+    properties:
+      aggregator: Aggregator
+  CategoricalAggregationConfig:
+    type: QuantitativeAggregationConfig
+    discriminatorValue: categorical
+    additionalProperties: false
+    properties:
+      numeratorValues: string[]
+      denominatorValues: string[]
 

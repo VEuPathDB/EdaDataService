@@ -1,0 +1,69 @@
+#%RAML 1.0 Library
+
+types:
+
+  StandaloneCollectionMapMarkerPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: StandaloneCollectionMapMarkerSpec
+
+  StandaloneCollectionMapMarkerSpec:
+    additionalProperties: false
+    description: Specification for a map marker
+    properties:
+      outputEntityId:
+        required: true
+        type: string
+        description: Entity ID associated with collection variable of interest.
+      geoAggregateVariable:
+        type: VariableSpec
+        description: Geohash component variable to group markers by. This is usually determined by zoom level of the client application.
+      longitudeVariable:
+        type: VariableSpec
+        description: Variable representing longitude of output entity.
+      latitudeVariable:
+        type: VariableSpec
+        description: Variable representing latitude of output entity.
+      viewport:
+        type: GeolocationViewport
+        description: Viewport used to filter markers. Only entities that are contained in the viewport will be grouped into markers.
+      collection:
+        required: true
+        type: CollectionOverlayConfig
+        description: Collection variable to use for markers.
+      aggregatorConfig:
+        required: true
+        type: QuantitativeAggregationConfig
+        description: Specification for how variable values will be aggregated into quantiative value shown in bar plot marker.
+
+  CollectionOverlayConfig:
+    properties:
+      collection: CollectionSpec
+      selectedMembers: VariableSpec[]
+
+  CollectionMapMarkerElement:
+    description: |
+      Data needed to render a collection map marker. Contains geographical data as well as per-variable collection var
+      aggregates needed to render bar plots with error bar.
+    properties:
+      entityCount: number
+      avgLat: number
+      avgLon: number
+      minLat: number
+      minLon: number
+      maxLat: number
+      maxLon: number
+      values: CollectionMemberAggregate[]
+
+  CollectionMemberAggregate:
+    properties:
+      variableId: string
+      value: number
+      confidenceInterval: NumberRange
+      n: number
+
+  StandaloneCollectionMapMarkerPostResponse:
+    additionalProperties: false
+    properties:
+      markers: CollectionMapMarkerElement[]
+

@@ -11,7 +11,6 @@ import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.common.plugin.util.RFileSetProcessor;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.core.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.ds.core.AbstractPlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.OverlaySpecification;
 import org.veupathdb.service.eda.generated.model.*;
 
@@ -51,7 +50,7 @@ public class FloatingScatterplotPlugin extends AbstractEmptyComputePlugin<Floati
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder(List.of("yAxisVariable", "xAxisVariable"), List.of("overlayVariable"))
+      .dependencyOrder(List.of("yAxisVariable"), List.of("xAxisVariable", "overlayVariable"))
       .pattern()
         .element("yAxisVariable")
           .types(APIVariableType.NUMBER, APIVariableType.DATE, APIVariableType.INTEGER) 
@@ -65,8 +64,8 @@ public class FloatingScatterplotPlugin extends AbstractEmptyComputePlugin<Floati
   }
 
   @Override
-  protected AbstractPlugin<FloatingScatterplotPostRequest, FloatingScatterplotSpec, Void>.ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(FloatingScatterplotPostRequest.class, FloatingScatterplotSpec.class, Void.class);
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(FloatingScatterplotPostRequest.class, FloatingScatterplotSpec.class);
   }
 
   @Override
@@ -106,7 +105,7 @@ public class FloatingScatterplotPlugin extends AbstractEmptyComputePlugin<Floati
     PluginUtil util = getUtil();
     FloatingScatterplotSpec spec = getPluginSpec();
     VariableSpec overlayVariable = _overlaySpecification != null ? _overlaySpecification.getOverlayVariable() : null;
-    Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
+    Map<String, VariableSpec> varMap = new HashMap<>();
     varMap.put("xAxis", spec.getXAxisVariable());
     varMap.put("yAxis", spec.getYAxisVariable());
     varMap.put("overlay", overlayVariable);
@@ -118,7 +117,7 @@ public class FloatingScatterplotPlugin extends AbstractEmptyComputePlugin<Floati
       LOG.error("Cannot calculate trend lines for y-axis date variables. The `valueSpec` property must be set to `raw`.");
     }
     
-    List<String> nonStrataVarColNames = new ArrayList<String>();
+    List<String> nonStrataVarColNames = new ArrayList<>();
     nonStrataVarColNames.add(util.toColNameOrEmpty(spec.getXAxisVariable()));
     nonStrataVarColNames.add(util.toColNameOrEmpty(spec.getYAxisVariable()));
 
@@ -137,11 +136,13 @@ public class FloatingScatterplotPlugin extends AbstractEmptyComputePlugin<Floati
     useRConnectionWithProcessedRemoteFiles(Resources.RSERVE_URL, filesProcessor, connection -> {
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String cmd = 
-          "plot.data::scattergl(data=" + DEFAULT_SINGLE_STREAM_NAME + ", variables=variables, '" + 
-              "value=" + valueSpec + "', '" + 
-              "sampleSizes=FALSE, " +
-              "completeCases=FALSE, " + 
-              "overlayValues=" + overlayValues + ",'noVariables')";
+          "plot.data::scattergl(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " + 
+                                  "variables=variables, " + 
+                                  "value='" + valueSpec + "', " + 
+                                  "sampleSizes=FALSE, " +
+                                  "completeCases=FALSE, " + 
+                                  "overlayValues=" + overlayValues + ", " + 
+                                  "evilMode='noVariables')";
       streamResult(connection, cmd, out);
     }); 
   }

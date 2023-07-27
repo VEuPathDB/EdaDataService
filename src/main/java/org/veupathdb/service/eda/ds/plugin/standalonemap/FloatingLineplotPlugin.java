@@ -8,7 +8,6 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.core.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.ds.core.AbstractPlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.OverlaySpecification;
 import org.veupathdb.service.eda.generated.model.*;
 
@@ -46,7 +45,7 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
   @Override
   public ConstraintSpec getConstraintSpec() {
     return new ConstraintSpec()
-      .dependencyOrder(List.of("yAxisVariable"), List.of("xAxisVariable"), List.of("overlayVariable"))
+      .dependencyOrder(List.of("yAxisVariable"), List.of("xAxisVariable", "overlayVariable"))
       .pattern()
         .element("yAxisVariable")
           .description("Variable must be of the same or a child entity as the X-axis variable.")
@@ -59,8 +58,8 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
   }
 
   @Override
-  protected AbstractPlugin<FloatingLineplotPostRequest, FloatingLineplotSpec, Void>.ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(FloatingLineplotPostRequest.class, FloatingLineplotSpec.class, Void.class);
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(FloatingLineplotPostRequest.class, FloatingLineplotSpec.class);
   }
 
   @Override
@@ -97,7 +96,7 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
     PluginUtil util = getUtil();
     FloatingLineplotSpec spec = getPluginSpec();
     VariableSpec overlayVariable = _overlaySpecification != null ? _overlaySpecification.getOverlayVariable() : null;
-    Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
+    Map<String, VariableSpec> varMap = new HashMap<>();
     varMap.put("xAxis", spec.getXAxisVariable());
     varMap.put("yAxis", spec.getYAxisVariable());
     varMap.put("overlay", overlayVariable);
@@ -105,8 +104,8 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
     String valueSpec = spec.getValueSpec().getValue();
     String xVar = util.toColNameOrEmpty(spec.getXAxisVariable());
     String xVarType = util.getVariableType(spec.getXAxisVariable());
-    String numeratorValues = spec.getYAxisNumeratorValues() != null ? listToRVector(spec.getYAxisNumeratorValues()) : "NULL";
-    String denominatorValues = spec.getYAxisDenominatorValues() != null ? listToRVector(spec.getYAxisDenominatorValues()) : "NULL";
+    String numeratorValues = spec.getYAxisNumeratorValues() != null ? PluginUtil.listToRVector(spec.getYAxisNumeratorValues()) : "NULL";
+    String denominatorValues = spec.getYAxisDenominatorValues() != null ? PluginUtil.listToRVector(spec.getYAxisDenominatorValues()) : "NULL";
     String overlayValues = _overlaySpecification == null ? "NULL" : _overlaySpecification.getRBinListAsString();
     
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
@@ -134,25 +133,24 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
           connection.voidEval("binWidth <- NULL");
         }
       } else {
-        String binWidth = "NULL";
-        if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
-          binWidth = binSpec.getValue() == null ? "NULL" : "as.numeric('" + binSpec.getValue() + "')";
-        } else {
-          binWidth = binSpec.getValue() == null ? "NULL" : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
-        }
+        String binWidth =
+            binSpec.getValue() == null ? "NULL" :
+                (xVarType.equals("NUMBER") || xVarType.equals("INTEGER"))
+                ? "as.numeric('" + binSpec.getValue() + "')"
+                : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
         connection.voidEval("binWidth <- " + binWidth);
       }
-      String cmd = "plot.data::lineplot(data=" + DEFAULT_SINGLE_STREAM_NAME + 
-                                        ", variables=variables, binWidth=binWidth, " + 
-                                        "  value=" + singleQuote(valueSpec) + 
-                                        ", errorBars=" + errorBars + 
-                                        ", viewport=viewport" + 
-                                        ", numeratorValues=" + numeratorValues +
-                                        ", denominatorValues=" + denominatorValues + 
-                                        ", samplesSizes=FALSE" +
-                                        ", completeCases=FALSE" +
-                                        ", overlayValues=" + overlayValues + 
-                                        ", 'noVariables')";                          
+      String cmd = "plot.data::lineplot(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " +
+                                        "variables=variables, binWidth=binWidth, " + 
+                                        "value=" + singleQuote(valueSpec) + ", " +
+                                        "errorBars=" + errorBars + ", " +
+                                        "viewport=viewport, " +
+                                        "numeratorValues=" + numeratorValues + ", " +
+                                        "denominatorValues=" + denominatorValues + ", " +
+                                        "sampleSizes=FALSE," +
+                                        "completeCases=FALSE," +
+                                        "overlayValues=" + overlayValues + ", " +
+                                        "evilMode='noVariables')";                          
       streamResult(connection, cmd, out);
     }); 
   }

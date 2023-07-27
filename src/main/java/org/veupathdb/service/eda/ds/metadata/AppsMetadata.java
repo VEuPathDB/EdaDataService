@@ -5,11 +5,12 @@ import java.util.List;
 
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.ds.core.AbstractPlugin;
+import org.veupathdb.service.eda.ds.plugin.differentialabundance.DifferentialAbundanceVolcanoplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.betadiv.BetaDivScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivBoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.abundance.AbundanceBoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.abundance.AbundanceScatterplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.betadiv.BetaDivScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.BarplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.BoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ContTablePlugin;
@@ -21,17 +22,8 @@ import org.veupathdb.service.eda.ds.plugin.pass.MapPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.MapMarkersOverlayPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
-import org.veupathdb.service.eda.ds.plugin.sample.ExampleComputeVizPlugin;
-import org.veupathdb.service.eda.ds.plugin.sample.MultiStreamPlugin;
-import org.veupathdb.service.eda.ds.plugin.sample.RecordCountPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.TestCollectionPlugin;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingBarplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingBoxplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingContTablePlugin;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingHistogramPlugin;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingLineplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingScatterplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.StandaloneMapMarkersPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.*;
 import org.veupathdb.service.eda.ds.plugin.sample.*;
 import org.veupathdb.service.eda.generated.model.*;
 
@@ -46,15 +38,25 @@ public class AppsMetadata {
   // Pass vizs are now different based on mbio vs clinepi so we need to adjust the below array?
   public static final AppsGetResponse APPS = apps(
       app("standalone-map", "Standalone Map", null,
-          "A collection of visualizations designed to support the unbiased exploration of relationships between spatiotemporal variables in a cartographic map",
+          "A collection of visualizations designed to support the unbiased exploration of relationships between spatiotemporal variables in a cartographic map.",
+          Arrays.asList(VECTORBASE_PROJECT),
+          viz("map-markers", new StandaloneMapMarkersPlugin())),
+      app("standalone-map-xyrelationships", "X-Y Relationships", null,
+          "Build plots to explore the relationship between two variables.",
+          Arrays.asList(VECTORBASE_PROJECT),
+          viz("scatterplot", new FloatingScatterplotPlugin()),
+          viz("lineplot", new FloatingLineplotPlugin()),
+          viz("timeseries", new FloatingTimeSeriesPlugin())),
+      app("standalone-map-distributions", "Distributions", null,
+          "Plot simple distributions for any continuous variable, including metadata (e.g. age, height).",
           Arrays.asList(VECTORBASE_PROJECT),
           viz("histogram", new FloatingHistogramPlugin()),
+          viz("boxplot", new FloatingBoxplotPlugin())),
+      app("standalone-map-countsandproportions", "Counts and Proportions", null,
+          "Use standard bar plots and contingency tables to examine and compare frequencies in the data.",
+          Arrays.asList(VECTORBASE_PROJECT),
           viz("barplot", new FloatingBarplotPlugin()),
-          viz("scatterplot", new FloatingScatterplotPlugin()),
-          viz("boxplot", new FloatingBoxplotPlugin()),
-          viz("conttable", new FloatingContTablePlugin()),
-          viz("lineplot", new FloatingLineplotPlugin()),
-          viz("map-markers", new StandaloneMapMarkersPlugin())),
+          viz("conttable", new FloatingContTablePlugin())),
       app("pass", "Pass-Through", null,
           "A collection of visualizations designed to support the unbiased exploration of relationships between variables",
           Arrays.asList(CLINEPI_PROJECT, ALLCLINEPI_PROJECT),
@@ -83,6 +85,10 @@ public class AppsMetadata {
           "Visualize between-sample (beta) comparisons in microbial diversity, using Bray-Curtis dissimilarity, Jensen-Shannon Divergence, or the Jaccard Index",
           List.of(MICROBIOME_PROJECT),
           viz("scatterplot", new BetaDivScatterplotPlugin())),
+      app("differentialabundance", "Differential Abundance", "differentialabundance",
+          "Find taxa or genes that are differentially abundant between two groups.",
+          List.of(MICROBIOME_PROJECT),
+          viz("volcanoplot", new DifferentialAbundanceVolcanoplotPlugin())),
       app("distributions", "Distributions", null,
           "Plot simple distributions for any continuous variable, including metadata (e.g. age, height, etc.) or microbial assay results.",
           List.of(MICROBIOME_PROJECT),

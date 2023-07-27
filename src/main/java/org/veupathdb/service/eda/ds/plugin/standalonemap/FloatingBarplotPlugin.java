@@ -8,7 +8,6 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.core.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.ds.core.AbstractPlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.OverlaySpecification;
 import org.veupathdb.service.eda.generated.model.*;
 
@@ -56,8 +55,8 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
   }
 
   @Override
-  protected AbstractPlugin<FloatingBarplotPostRequest, FloatingBarplotSpec, Void>.ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(FloatingBarplotPostRequest.class, FloatingBarplotSpec.class, Void.class);
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(FloatingBarplotPostRequest.class, FloatingBarplotSpec.class);
   }
 
   @Override
@@ -98,7 +97,7 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
     VariableSpec overlayVariable = _overlaySpecification != null ? _overlaySpecification.getOverlayVariable() : null;
     String overlayValues = _overlaySpecification == null ? "NULL" : _overlaySpecification.getRBinListAsString();
 
-    Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
+    Map<String, VariableSpec> varMap = new HashMap<>();
     varMap.put("xAxis", spec.getXAxisVariable());
     varMap.put("overlay", overlayVariable);
       
@@ -108,10 +107,14 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
           overlayVariable));
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String cmd =
-          "plot.data::bar(data=" + DEFAULT_SINGLE_STREAM_NAME + ", variables=variables, " +
-              "valueSpec='" + spec.getValueSpec().getValue() + "', " +
-              "barMode='" + barMode + "', " +
-              "samplesSizes=FALSE, completeCases=FALSE, overlayValues=" + overlayValues + ", 'noVariables')";
+          "plot.data::bar(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " +
+              "variables=variables, " +
+              "value='" + spec.getValueSpec().getValue() + "', " +
+              "barmode='" + barMode + "', " +
+              "sampleSizes=FALSE, " +
+              "completeCases=FALSE, " + 
+              "overlayValues=" + overlayValues + ", " + 
+              "evilMode='noVariables')";
       streamResult(connection, cmd, out);
     });
   }
