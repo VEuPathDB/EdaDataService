@@ -80,6 +80,9 @@ public class BubbleMapMarkersPlugin extends AbstractEmptyComputePlugin<Standalon
           .orElse(null)));
     if (pluginSpec.getOverlayConfig() != null) {
       try {
+        if (pluginSpec.getOverlayConfig().getAggregationConfig() == null) {
+          throw new ValidationException("aggregationConfig is a required field.");
+        }
         _overlaySpecification = new QuantitativeAggregateConfiguration(pluginSpec.getOverlayConfig().getAggregationConfig(),
             getUtil().getVariableDataShape(pluginSpec.getOverlayConfig().getOverlayVariable()));
       } catch (IllegalArgumentException e) {

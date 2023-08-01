@@ -23,8 +23,7 @@ public class QuantitativeAggregateConfiguration {
   public QuantitativeAggregateConfiguration(QuantitativeAggregationConfig overlayConfig,
                                             String varShape) {
     if (CATEGORICAL.equals(overlayConfig.getOverlayType())) {
-      if (!varShape.equalsIgnoreCase(APIVariableDataShape.CATEGORICAL.getValue())
-          && !varShape.equalsIgnoreCase(APIVariableDataShape.ORDINAL.getValue())) {
+      if (varShape.equalsIgnoreCase(APIVariableDataShape.CONTINUOUS.getValue())) {
         throw new IllegalArgumentException("Incorrect overlay configuration type for categorical var: " + varShape);
       }
       CategoricalAggregationConfig categoricalConfig = (CategoricalAggregationConfig) overlayConfig;
