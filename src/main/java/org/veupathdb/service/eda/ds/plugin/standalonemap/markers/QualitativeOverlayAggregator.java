@@ -19,9 +19,12 @@ public class QualitativeOverlayAggregator implements MarkerAggregator<Map<String
   }
 
   @Override
-  public void addValue(String[] d) {
+  public void addValue(String[] arr) {
+    if (arr[index] == null || arr[index].isEmpty()) {
+      return;
+    }
     // Recode the variable from its raw value. This might be quantizing a continuous or a pass-through function for categoricals.
-    final String overlayValue = overlayRecoder.recode(d[index]);
+    final String overlayValue = overlayRecoder.recode(arr[index]);
     int newCount = count.getOrDefault(overlayValue, 0);
     // Keep track of counts for each overlay var as well as total entity count.
     count.put(overlayValue, newCount + 1);
