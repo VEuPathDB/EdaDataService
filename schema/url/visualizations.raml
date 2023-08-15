@@ -38,6 +38,18 @@ types:
       units?: BinUnits
       range?: NumberRange | DateRange
 
+  # im thinking we should remove support for numBins.
+  # weve never used it and its complicating the logic.
+  BinWidthSpec:
+    additionalProperties: false
+    properties:
+      type?:
+        type: string
+        enum: ['binWidth']
+      value?: number
+      units?: BinUnits
+      range?: NumberRange | DateRange
+
   NumberRange:
     additionalProperties: false
     properties:
@@ -179,3 +191,12 @@ types:
     properties:
       numeratorValues: string[]
       denominatorValues: string[]
+
+  # make the values optional though, req for line plot but also makes the other cat collection floaters more flexible
+  CollectionOverlayConfigWithValues:
+    type: CollectionOverlayConfig
+    properties:
+      selectedValues?: string[]
+
+  DynamicDataSpec:
+    type: CollectionSpec | VariableSpec

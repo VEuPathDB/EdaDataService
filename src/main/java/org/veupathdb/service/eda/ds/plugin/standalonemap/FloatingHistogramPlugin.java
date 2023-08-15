@@ -158,7 +158,6 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
                                   "completeCases=FALSE, " +
                                   "overlayValues=" + overlayValues + ", " +
                                   "evilMode='noVariables')";
-               System.err.println(cmd);
       streamResult(connection, cmd, out);
     });
   }
