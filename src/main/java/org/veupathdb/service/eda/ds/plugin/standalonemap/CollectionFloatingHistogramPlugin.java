@@ -126,7 +126,6 @@ public class CollectionFloatingHistogramPlugin extends AbstractEmptyComputePlugi
                                   "completeCases=FALSE, " +
                                   "overlayValues=NULL, " +
                                   "evilMode='noVariables')";
-               System.err.println(cmd);
       streamResult(connection, cmd, out);
     });
   }
