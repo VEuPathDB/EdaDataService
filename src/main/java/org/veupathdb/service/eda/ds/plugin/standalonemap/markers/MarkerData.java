@@ -50,7 +50,7 @@ public class MarkerData<T> {
   }
 
   public void addRow(double lat, double lon, String[] row) {
-    if (markerAggregator.appliesTo(row)) {
+    if (markerAggregator == null || markerAggregator.appliesTo(row)) {
       count++;
       latLonAvg.addDataPoint(lat, lon);
       minLat = Math.min(minLat, lat);

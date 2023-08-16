@@ -7,6 +7,11 @@ public interface MarkerAggregator<T> {
    */
   void addValue(String[] rec);
 
+  /**
+   * Returns true if
+   * @param rec
+   * @return
+   */
   boolean appliesTo(String[] rec);
 
   /**

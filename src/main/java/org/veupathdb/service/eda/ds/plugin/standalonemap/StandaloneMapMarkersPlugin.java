@@ -134,7 +134,9 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
       mapEle.setMaxLat(data.getMaxLat());
       mapEle.setMinLon(data.getMinLon());
       mapEle.setMaxLon(data.getMaxLon());
-      mapEle.setOverlayValues(convertAggregator(data.getMarkerAggregator(), valueSpec));
+      if (data.getMarkerAggregator() != null) {
+        mapEle.setOverlayValues(convertAggregator(data.getMarkerAggregator(), valueSpec));
+      }
       output.add(mapEle);
     }
     StandaloneMapMarkersPostResponse response = new StandaloneMapMarkersPostResponseImpl();

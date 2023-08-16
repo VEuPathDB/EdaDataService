@@ -147,7 +147,9 @@ public class BubbleMapMarkersPlugin extends AbstractEmptyComputePlugin<Standalon
       mapEle.setMaxLat(data.getMaxLat());
       mapEle.setMinLon(data.getMinLon());
       mapEle.setMaxLon(data.getMaxLon());
-      mapEle.setOverlayValue(data.getMarkerAggregator().finish());
+      if (data.getMarkerAggregator() != null) {
+        mapEle.setOverlayValue(data.getMarkerAggregator().finish());
+      }
       output.add(mapEle);
     }
     StandaloneMapBubblesPostResponse response = new StandaloneMapBubblesPostResponseImpl();
