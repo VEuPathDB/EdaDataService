@@ -1,4 +1,4 @@
-package org.veupathdb.service.eda.ds.plugin.standalonemap.markers;
+package org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator;
 
 
 import java.util.function.Function;
@@ -32,6 +32,11 @@ public class MeanWithConfidenceAggregator implements MarkerAggregator<AveragesWi
     sum += value;
     sumOfSquares += value * value;
     n += 1;
+  }
+
+  @Override
+  public boolean appliesTo(String[] rec) {
+    return rec[index] != null && !rec[index].isEmpty();
   }
 
   @Override

@@ -3,14 +3,14 @@ package org.veupathdb.service.eda.ds.plugin.standalonemap.markers;
 import org.gusdb.fgputil.DelimitedDataParser;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.AveragesWithConfidence;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.CollectionAveragesWithConfidenceAggregator;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.MarkerAggregator;
 import org.veupathdb.service.eda.generated.model.Aggregator;
 import org.veupathdb.service.eda.generated.model.CategoricalAggregationConfig;
 import org.veupathdb.service.eda.generated.model.CategoricalAggregationConfigImpl;
 import org.veupathdb.service.eda.generated.model.ContinuousAggregationConfig;
 import org.veupathdb.service.eda.generated.model.ContinuousAggregationConfigImpl;
-import org.veupathdb.service.eda.generated.model.QuantitativeAggregationConfig;
-import org.veupathdb.service.eda.generated.model.QuantitativeAggregationConfigImpl;
-import org.veupathdb.service.eda.generated.model.QuantitativeOverlayConfig;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;

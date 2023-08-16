@@ -1,4 +1,4 @@
-package org.veupathdb.service.eda.ds.plugin.standalonemap.markers;
+package org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator;
 
 import java.util.Set;
 
@@ -33,6 +33,11 @@ public class CategoricalProportionAggregator implements MarkerAggregator<Double>
     if (denominatorValues.contains(s[index])) {
       numDenominatorMatches++;
     }
+  }
+
+  @Override
+  public boolean appliesTo(String[] rec) {
+    return rec[index] != null && !rec[index].isEmpty();
   }
 
   @Override

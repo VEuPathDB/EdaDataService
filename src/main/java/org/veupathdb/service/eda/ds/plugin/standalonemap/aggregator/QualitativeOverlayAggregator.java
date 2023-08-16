@@ -1,4 +1,6 @@
-package org.veupathdb.service.eda.ds.plugin.standalonemap.markers;
+package org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator;
+
+import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.OverlayRecoder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +31,11 @@ public class QualitativeOverlayAggregator implements MarkerAggregator<Map<String
     // Keep track of counts for each overlay var as well as total entity count.
     count.put(overlayValue, newCount + 1);
     n++;
+  }
+
+  @Override
+  public boolean appliesTo(String[] rec) {
+    return false;
   }
 
   @Override

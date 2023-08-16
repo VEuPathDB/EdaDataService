@@ -1,4 +1,4 @@
-package org.veupathdb.service.eda.ds.plugin.standalonemap.markers;
+package org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,6 +25,11 @@ public class MedianWithConfidenceAggregator implements MarkerAggregator<Averages
       return;
     }
     values.add(Double.parseDouble(arr[index]));
+  }
+
+  @Override
+  public boolean appliesTo(String[] rec) {
+    return rec[index] != null && !rec[index].isEmpty();
   }
 
   @Override
