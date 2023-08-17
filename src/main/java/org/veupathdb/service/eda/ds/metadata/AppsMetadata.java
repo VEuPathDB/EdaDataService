@@ -60,7 +60,6 @@ public class AppsMetadata {
       app("standalone-map-xyrelationships", "X-Y Relationships", null,
           "Build plots to explore the relationship between two variables.",
           Arrays.asList(VECTORBASE_PROJECT),
-          viz("scatterplot", new FloatingScatterplotPlugin()),
           viz("lineplot", new FloatingLineplotPlugin()),
           viz("timeseries", new FloatingTimeSeriesPlugin())),
       app("standalone-map-distributions", "Distributions", null,
