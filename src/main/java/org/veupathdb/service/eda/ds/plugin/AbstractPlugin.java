@@ -565,8 +565,10 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
               DynamicDataSpecImpl dataSpec = entry.getValue();
               if (dataSpec.isCollectionSpec()) {
                 return getVariableMetadataRObjectAsString(dataSpec.getCollectionSpec(), plotReference);
-              } else {
+              } else if (dataSpec.isVariableSpec()) {
                 return getVariableMetadataRObjectAsString(dataSpec.getVariableSpec(), plotReference);
+              } else {
+                return null;
               }
             })
             .filter(Objects::nonNull)

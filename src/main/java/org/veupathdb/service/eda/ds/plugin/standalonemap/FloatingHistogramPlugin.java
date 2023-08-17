@@ -112,11 +112,12 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
           spec.getXAxisVariable(),
           overlayVariable));
+          
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
      
       String viewportRString = getViewportAsRString(spec.getViewport(), xVarType);
       connection.voidEval(viewportRString);
-      
+     
       BinSpec binSpec = spec.getBinSpec();
       validateBinSpec(binSpec, xVarType);
       String binReportValue = binSpec.getType().getValue() != null ? binSpec.getType().getValue() : "binWidth";
