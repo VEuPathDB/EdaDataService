@@ -84,8 +84,11 @@ public class BubbleMapMarkersLegendPlugin extends AbstractEmptyComputePlugin<Sta
         .var("sizeGeoVariable", sizeConfig.map(SizeLegendConfig::getGeoAggregateVariable).orElse(null)));
     if (pluginSpec.getColorLegendConfig() != null) {
       try {
-        _colorSpecification = new QuantitativeAggregateConfiguration(pluginSpec.getColorLegendConfig().getQuantitativeOverlayConfig().getAggregationConfig(),
-            getUtil().getVariableDataShape(pluginSpec.getColorLegendConfig().getQuantitativeOverlayConfig().getOverlayVariable()));
+        final VariableSpec overlayVar = pluginSpec.getColorLegendConfig().getQuantitativeOverlayConfig().getOverlayVariable();
+        _colorSpecification = new QuantitativeAggregateConfiguration(
+            pluginSpec.getColorLegendConfig().getQuantitativeOverlayConfig().getAggregationConfig(),
+            getUtil().getVariableDataShape(overlayVar),
+            getUtil().getVariableType(overlayVar));
       } catch (IllegalArgumentException e) {
         throw new ValidationException(e.getMessage());
       }
@@ -157,9 +160,11 @@ public class BubbleMapMarkersLegendPlugin extends AbstractEmptyComputePlugin<Sta
     if (_pluginSpec.getColorLegendConfig() != null) {
       response.setMaxColorValue(colorValues.stream()
           .max(Comparator.comparingDouble(x -> x == null ? Double.NEGATIVE_INFINITY : x))
+          .map(_colorSpecification::serializeAverage)
           .orElse(null));
       response.setMinColorValue(colorValues.stream()
           .min(Comparator.comparingDouble(x -> x == null ? Double.POSITIVE_INFINITY : x))
+          .map(_colorSpecification::serializeAverage)
           .orElse(null));
     }
     if (_pluginSpec.getSizeConfig() != null) {

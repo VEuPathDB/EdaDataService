@@ -82,7 +82,8 @@ public class CollectionMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
     if (pluginSpec.getAggregatorConfig() != null) {
       try {
         _aggregateConfig = new QuantitativeAggregateConfiguration(pluginSpec.getAggregatorConfig(),
-            getUtil().getCollectionDataShape(pluginSpec.getCollection().getCollection()));
+            getUtil().getCollectionDataShape(pluginSpec.getCollection().getCollection()),
+            getUtil().getCollectionType(pluginSpec.getCollection().getCollection()));
       } catch (IllegalArgumentException e) {
         throw new ValidationException(e.getMessage());
       }

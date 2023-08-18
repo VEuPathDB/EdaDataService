@@ -646,6 +646,10 @@ types:
       name: string
       displayName: string
       description: string
+  ExpiredJobsResponse:
+    type: object
+    properties:
+      numJobsExpired: integer
   AbundanceBoxplotPostRequest:
     type: DataPluginRequestBase
     properties:
@@ -1867,8 +1871,8 @@ types:
     type: object
     additionalProperties: false
     properties:
-      minColorValue: number
-      maxColorValue: number
+      minColorValue: string
+      maxColorValue: string
       minSizeValue: number
       maxSizeValue: number
   StandaloneMapBubblesPostRequest:
@@ -1910,7 +1914,7 @@ types:
     properties:
       geoAggregateValue: string
       entityCount: number
-      overlayValue: number
+      overlayValue: string
       avgLat: number
       avgLon: number
       minLat: number

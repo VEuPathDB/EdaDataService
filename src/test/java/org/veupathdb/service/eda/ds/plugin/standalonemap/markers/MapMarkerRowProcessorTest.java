@@ -55,7 +55,7 @@ public class MapMarkerRowProcessorTest {
         headers::get,
         headerToIndex::get,
         List.of("E1.C1", "E1.C2"), // just collection vars.,
-        new QuantitativeAggregateConfiguration(aggregationConfig, "continuous")
+        new QuantitativeAggregateConfiguration(aggregationConfig, "continuous", "number")
     );
     Map<String, MarkerData<Map<String, AveragesWithConfidence>>> data = collectionAggregator.process(bufferedReader, parser, viewport, aggregator);
     Map<String, AveragesWithConfidence> aMarkerData = data.get("a").getMarkerAggregator().finish();
@@ -96,12 +96,12 @@ public class MapMarkerRowProcessorTest {
         headers::get,
         headerToIndex::get,
         List.of("E1.C1", "E1.C2"), // just collection vars.,
-        new QuantitativeAggregateConfiguration(aggregationConfig, "categorical")
+        new QuantitativeAggregateConfiguration(aggregationConfig, "categorical", "string")
     );
     Map<String, MarkerData<Map<String, AveragesWithConfidence>>> data = collectionAggregator.process(bufferedReader, parser, viewport, aggregator);
     Map<String, AveragesWithConfidence> aMarkerData = data.get("a").getMarkerAggregator().finish();
 
-    Assertions.assertEquals(1.20, aMarkerData.get("E1.C1").getIntervalUpperBound(), 0.01);
+    Assertions.assertEquals(1.00, aMarkerData.get("E1.C1").getIntervalUpperBound(), 0.01);
     Assertions.assertEquals(0.133, aMarkerData.get("E1.C1").getIntervalLowerBound(), 0.01);
     Assertions.assertEquals(0.666, aMarkerData.get("E1.C1").getAverage(), 0.01);
   }
