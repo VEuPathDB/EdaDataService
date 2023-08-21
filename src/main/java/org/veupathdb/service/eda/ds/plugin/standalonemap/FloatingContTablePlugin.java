@@ -88,8 +88,8 @@ public class FloatingContTablePlugin extends AbstractEmptyComputePlugin<Floating
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
           spec.getXAxisVariable(),
           spec.getYAxisVariable()));
-      connection.voidEval(getVoidEvalVariableMetadataList(varMap));
-      String cmd = "plot.data::mosaic(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " + 
+          String inputData = getInputDataWithImputedZeroes(DEFAULT_SINGLE_STREAM_NAME, varMap);
+      String cmd = "plot.data::mosaic(data=" + inputData + ", " + 
                                         "variables=variables, " + 
                                         "statistic='chiSq', " + 
                                         "columnReferenceValue=NA_character_, " + 

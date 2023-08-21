@@ -96,7 +96,7 @@ public class CollectionFloatingHistogramPlugin extends AbstractEmptyComputePlugi
     String collectionType = util.getCollectionType(overlayVariable);
 
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, inputVarSpecs));
+      String inputData = getInputDataWithImputedZeroes(DEFAULT_SINGLE_STREAM_NAME, varMap, inputVarSpecs);
       connection.voidEval(getVoidEvalCollectionMetadataList(varMap));
      
       String viewportRString = getViewportAsRString(spec.getViewport(), collectionType);
@@ -115,7 +115,7 @@ public class CollectionFloatingHistogramPlugin extends AbstractEmptyComputePlugi
       connection.voidEval("binWidth <- " + binWidth);
 
       String cmd =
-          "plot.data::histogram(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " +
+          "plot.data::histogram(data=" + inputData + ", " +
                                   "variables=variables, " +
                                   "binWidth=binWidth, " +
                                   "value='" + spec.getValueSpec().getValue() + "', " +

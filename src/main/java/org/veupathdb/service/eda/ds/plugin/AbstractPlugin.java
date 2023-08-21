@@ -643,4 +643,9 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
     
     // return string reference to dataFileName data
   }
+
+  public String getInputDataWithImputedZeroes(String dataFileName, Map<String, VariableSpec> varSpecs, List<VariableSpec> inputVarSpecs) {
+    // TODO a version for collections?
+    // idk what this is yet
+  }
 }

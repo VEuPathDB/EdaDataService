@@ -93,10 +93,10 @@ public class CollectionFloatingBarplotPlugin extends AbstractEmptyComputePlugin<
     varMap.put("overlay", spec.getOverlayConfig().getCollection());
       
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, inputVarSpecs));
+      String inputData = getInputDataWithImputedZeroes(DEFAULT_SINGLE_STREAM_NAME, varMap, inputVarSpecs);
       connection.voidEval(getVoidEvalCollectionMetadataList(varMap));
       String cmd =
-          "plot.data::bar(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " +
+          "plot.data::bar(data=" + inputData + ", " +
               "variables=variables, " +
               "value='" + spec.getValueSpec().getValue() + "', " +
               "barmode='" + barMode + "', " +

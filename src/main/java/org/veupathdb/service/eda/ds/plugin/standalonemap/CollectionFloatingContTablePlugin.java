@@ -77,9 +77,9 @@ public class CollectionFloatingContTablePlugin extends AbstractEmptyComputePlugi
     varMap.put("xAxis", spec.getXAxisVariable().getCollection());
     
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, inputVarSpecs));
+      String inputData = getInputDataWithImputedZeroes(DEFAULT_SINGLE_STREAM_NAME, varMap, inputVarSpecs);
       connection.voidEval(getVoidEvalCollectionMetadataList(varMap));
-      String cmd = "plot.data::mosaic(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " + 
+      String cmd = "plot.data::mosaic(data=" + inputData + ", " + 
                                         "variables=variables, " + 
                                         "statistic='chiSq', " + 
                                         "columnReferenceValue=NA_character_, " + 

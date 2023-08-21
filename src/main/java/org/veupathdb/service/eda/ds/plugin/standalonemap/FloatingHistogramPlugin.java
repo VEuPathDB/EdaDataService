@@ -109,9 +109,7 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
     String overlayValues = _overlaySpecification == null ? "NULL" : _overlaySpecification.getRBinListAsString();
 
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
-          spec.getXAxisVariable(),
-          overlayVariable));
+      String inputData = getInputDataWithImputedZeroes(DEFAULT_SINGLE_STREAM_NAME, varMap);
           
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
      
@@ -126,7 +124,7 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
       if (binReportValue.equals("numBins")) {
         if (binSpec.getValue() != null) {
           String numBins = binSpec.getValue().toString();
-          connection.voidEval("xVP <- adjustToViewport(data$" + xVar + ", viewport)");
+          connection.voidEval("xVP <- adjustToViewport(" + inputData + "$" + xVar + ", viewport)");
           if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
             connection.voidEval("xRange <- diff(range(xVP))");
             connection.voidEval("binWidth <- xRange/" + numBins);
@@ -148,7 +146,7 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
       }
 
       String cmd =
-          "plot.data::histogram(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " +
+          "plot.data::histogram(data=" + inputData + ", " +
                                   "variables=variables, " +
                                   "binWidth=binWidth, " +
                                   "value='" + spec.getValueSpec().getValue() + "', " +

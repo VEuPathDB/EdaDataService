@@ -111,10 +111,7 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
     String overlayValues = _overlaySpecification == null ? "NULL" : _overlaySpecification.getRBinListAsString();
     
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
-          spec.getXAxisVariable(),
-          spec.getYAxisVariable(),
-          overlayVariable));
+      String inputData = getInputDataWithImputedZeroes(DEFAULT_SINGLE_STREAM_NAME, varMap);
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String viewportRString = getViewportAsRString(spec.getViewport(), xVarType);
       connection.voidEval(viewportRString);
@@ -126,7 +123,7 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
         if (binSpec.getValue() != null) {
           String numBins = binSpec.getValue().toString();
           if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
-            connection.voidEval("binWidth <- plot.data::numBinsToBinWidth(data$" + xVar + ", " + numBins + ")");
+            connection.voidEval("binWidth <- plot.data::numBinsToBinWidth(" + inputData + "$" + xVar + ", " + numBins + ")");
           } else {
             connection.voidEval("binWidth <- ceiling(as.numeric(diff(range(as.Date(data$" + xVar + ")))/" + numBins + "))");
             connection.voidEval("binWidth <- paste(binWidth, 'day')");
@@ -143,7 +140,7 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
         }
         connection.voidEval("binWidth <- " + binWidth);
       }
-      String cmd = "plot.data::lineplot(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " +
+      String cmd = "plot.data::lineplot(data=" + inputData + ", " +
                                         "variables=variables, binWidth=binWidth, " + 
                                         "value=" + singleQuote(valueSpec) + ", " +
                                         "errorBars=" + errorBars + ", " +
