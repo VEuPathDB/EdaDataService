@@ -106,6 +106,11 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
     varMap.put("overlay", overlayVariable);
       
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
+      // hit the study vocab endpoint and store the response
+      // call imputing method
+      // // write a java util for this. and itd call a separate util for validation and then making objects..
+      // change call to plot.data to use imputed dt
+
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
           spec.getXAxisVariable(),
           overlayVariable));

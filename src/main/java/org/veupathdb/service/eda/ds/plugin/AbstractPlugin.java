@@ -332,6 +332,14 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
     return response.getHistogram().stream().collect(Collectors.toMap(HistogramBin::getBinLabel, bin -> Double.valueOf(bin.getValue().toString())));
   }
 
+  protected VocabByRootEntityPostResponse getVocabByRootEntity(VariableSpec varSpec, List<APIFilter> subsetFilters) {
+    return _subsettingClient.getVocabByRootEntity(_referenceMetadata, varSpec, subsetFilters);
+  }
+
+  protected VocabByRootEntityPostResponse getVocabByRootEntity(VariableSpec varSpec) {
+    return getVocabByRootEntity(varSpec, _subsetFilters);
+  }
+
   /*****************************************************************
    *** Compute-related methods
    ****************************************************************/
@@ -610,4 +618,14 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
     return rBinList + "))";
   }
 
+  // util to check if we need to impute zeroes
+  // should take use the reference metadata and take a variable mapping, return a boolean
+
+
+  // util to make StudyVocabulary and Megastudy objects in R
+  // should take the merge service tabular data, hit the study vocab endpoint and return a reference to the megastudy object in R as a string
+
+  // util to impute zeroes
+  // should take the string holding the R Megastudy obj reference, return a similar string reference to a dt w imputed values
+  // since it has to call these other utils it also needs variable mapping and tabular data
 }
