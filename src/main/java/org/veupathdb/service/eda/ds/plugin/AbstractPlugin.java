@@ -618,14 +618,29 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
     return rBinList + "))";
   }
 
-  // util to check if we need to impute zeroes
-  // should take use the reference metadata and take a variable mapping, return a boolean
+  public boolean validateImputeZeroesRequest(Map<String, VariableSpec> varSpecs) {
+    // check a bunch of stuff i no longer remember
+  }
 
+  public String getRMegastudy(String dataFileName) {
+    // getVoidEvalFreadCommand or whatever its called, except keep the ancestor ids and cols (see compute service to remember how i did that)
+    // hit the vocabs endpoint, convert that to R
+    // make the Megastudy object and return its name
+  }
 
-  // util to make StudyVocabulary and Megastudy objects in R
-  // should take the merge service tabular data, hit the study vocab endpoint and return a reference to the megastudy object in R as a string
+  // TODO should this be the stream name and i read it into R here? or should i have already read it and just have the handle here?
+  // TODO should this be named diferently? what exactly are we returning?
+  public String getInputDataWithImputedZeroes(String dataFileName, Map<String, VariableSpec> varSpecs) {
+    // call util to be sure we need to actually do anything
+    boolean validRequest = validateImputeZeroesRequest(varSpecs);
 
-  // util to impute zeroes
-  // should take the string holding the R Megastudy obj reference, return a similar string reference to a dt w imputed values
-  // since it has to call these other utils it also needs variable mapping and tabular data
+    if (validRequest) {
+      // call util to build the megastudy object
+      String megastudyData = getRMegastudy(dataFileName);
+      // call method in R to impute zeroes
+      // return the handle on that data as a string
+    }
+    
+    // return string reference to dataFileName data
+  }
 }
