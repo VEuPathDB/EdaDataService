@@ -1,4 +1,4 @@
-package org.veupathdb.service.eda.ds.plugin.standalonemap.markers;
+package org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator;
 
 /**
  * Data class containing mean, median and confidence interval.

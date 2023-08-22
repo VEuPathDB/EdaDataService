@@ -10,7 +10,7 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.GeolocationViewport;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MarkerAggregator;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.MarkerAggregator;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.QuantitativeAggregateConfiguration;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MapMarkerRowProcessor;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MarkerData;
@@ -127,7 +127,8 @@ public class BubbleMapMarkersPlugin extends AbstractEmptyComputePlugin<Standalon
 
     MapMarkerRowProcessor<Double> processor = new MapMarkerRowProcessor<>(geoVarIndex, latIndex, lonIndex);
 
-    Supplier<MarkerAggregator<Double>> markerAggregatorSupplier = () -> overlayConfig.map(aggregateConfig -> aggregateConfig.getAverageAggregatorProvider(overlayIndex))
+    Supplier<MarkerAggregator<Double>> markerAggregatorSupplier = () -> overlayConfig
+        .map(aggregateConfig -> aggregateConfig.getAverageAggregatorProvider(overlayIndex))
         .orElse(null);
 
     // loop through rows of data stream, aggregating stats into a map from aggregate value to stats object
@@ -146,7 +147,9 @@ public class BubbleMapMarkersPlugin extends AbstractEmptyComputePlugin<Standalon
       mapEle.setMaxLat(data.getMaxLat());
       mapEle.setMinLon(data.getMinLon());
       mapEle.setMaxLon(data.getMaxLon());
-      mapEle.setOverlayValue(data.getMarkerAggregator().finish());
+      if (data.getMarkerAggregator() != null) {
+        mapEle.setOverlayValue(data.getMarkerAggregator().finish());
+      }
       output.add(mapEle);
     }
     StandaloneMapBubblesPostResponse response = new StandaloneMapBubblesPostResponseImpl();

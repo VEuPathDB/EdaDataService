@@ -1,4 +1,4 @@
-package org.veupathdb.service.eda.ds.plugin.standalonemap.markers;
+package org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator;
 
 import java.util.Comparator;
 import java.util.PriorityQueue;
@@ -21,6 +21,11 @@ public enum ContinuousAggregators {
       }
       sum += Double.parseDouble(arr[index]);
       n += 1;
+    }
+
+    @Override
+    public boolean appliesTo(String[] rec) {
+      return rec[index] != null && !rec[index].isEmpty();
     }
 
     @Override
@@ -101,6 +106,11 @@ public enum ContinuousAggregators {
     }
 
     @Override
+    public boolean appliesTo(String[] rec) {
+      return rec[index] != null && !rec[index].isEmpty();
+    }
+
+        @Override
     public Double finish() {
       if (above.size() > below.size()) {
         return (above.poll() + currentMedian) / 2.0;

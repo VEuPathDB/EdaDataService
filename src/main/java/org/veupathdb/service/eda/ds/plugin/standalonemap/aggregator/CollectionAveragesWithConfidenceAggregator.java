@@ -1,4 +1,6 @@
-package org.veupathdb.service.eda.ds.plugin.standalonemap.markers;
+package org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator;
+
+import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.QuantitativeAggregateConfiguration;
 
 import java.util.HashMap;
 import java.util.List;
@@ -44,5 +46,10 @@ public class CollectionAveragesWithConfidenceAggregator implements MarkerAggrega
   public Map<String, AveragesWithConfidence> finish() {
     return averageAggregators.entrySet().stream()
         .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().finish()));
+  }
+
+  @Override
+  public boolean appliesTo(String[] rec) {
+    return averageAggregators.entrySet().stream().anyMatch(a -> a.getValue().appliesTo(rec));
   }
 }

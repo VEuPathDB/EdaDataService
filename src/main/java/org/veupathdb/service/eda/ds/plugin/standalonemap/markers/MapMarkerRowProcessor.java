@@ -1,12 +1,14 @@
 package org.veupathdb.service.eda.ds.plugin.standalonemap.markers;
 
 import org.gusdb.fgputil.DelimitedDataParser;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.MarkerAggregator;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Component responsible for iterating over data stream and aggregating map marker data per geo variable.
@@ -50,6 +52,8 @@ public class MapMarkerRowProcessor<T> {
       nextLine = reader.readLine();
     }
 
-    return aggregatedDataByGeoVal;
+    return aggregatedDataByGeoVal.entrySet().stream()
+        .filter(e -> !e.getValue().isEmpty())
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 }

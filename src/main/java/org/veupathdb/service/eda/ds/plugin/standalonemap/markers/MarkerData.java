@@ -1,10 +1,7 @@
 package org.veupathdb.service.eda.ds.plugin.standalonemap.markers;
 
 import org.gusdb.fgputil.geo.LatLonAverager;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.MarkerAggregator;
 
 public class MarkerData<T> {
 
@@ -44,19 +41,25 @@ public class MarkerData<T> {
     return count;
   }
 
+  public boolean isEmpty() {
+    return count == 0;
+  }
+
   public MarkerAggregator<T> getMarkerAggregator() {
     return markerAggregator;
   }
 
   public void addRow(double lat, double lon, String[] row) {
-    count++;
-    latLonAvg.addDataPoint(lat, lon);
-    minLat = Math.min(minLat, lat);
-    minLon = Math.min(minLon, lon);
-    maxLat = Math.max(maxLat, lat);
-    maxLon = Math.max(maxLon, lon);
-    if (markerAggregator != null) {
-      markerAggregator.addValue(row);
+    if (markerAggregator == null || markerAggregator.appliesTo(row)) {
+      count++;
+      latLonAvg.addDataPoint(lat, lon);
+      minLat = Math.min(minLat, lat);
+      minLon = Math.min(minLon, lon);
+      maxLat = Math.max(maxLat, lat);
+      maxLon = Math.max(maxLon, lon);
+      if (markerAggregator != null) {
+        markerAggregator.addValue(row);
+      }
     }
   }
 }
