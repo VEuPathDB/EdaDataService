@@ -340,6 +340,14 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
     return getVocabByRootEntity(varSpec, _subsetFilters);
   }
 
+  protected List<VocabByRootEntityPostResponse> getVocabByRootEntity(List<VariableSpec> varSpecs, List<APIFilter> subsetFilters) {
+    // TODO
+  }
+
+  protected List<VocabByRootEntityPostResponse> getVocabByRootEntity(List<VariableSpec> varSpecs) {
+    return getVocabByRootEntity(varSpecs, _subsetFilters);
+  }
+
   /*****************************************************************
    *** Compute-related methods
    ****************************************************************/
@@ -619,33 +627,52 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
   }
 
   public boolean validateImputeZeroesRequest(Map<String, VariableSpec> varSpecs) {
-    // check a bunch of stuff i no longer remember
+    // TODO check a bunch of stuff i no longer remember
+    return true;
   }
 
-  public String getRMegastudy(String dataFileName) {
-    // getVoidEvalFreadCommand or whatever its called, except keep the ancestor ids and cols (see compute service to remember how i did that)
-    // hit the vocabs endpoint, convert that to R
-    // make the Megastudy object and return its name
+  public String getRStudyVocabsAsString(VocabByRootEntityPostResponse studyVocab) {
+    // TODO make a string to build the vocabs slot
   }
 
-  // TODO should this be the stream name and i read it into R here? or should i have already read it and just have the handle here?
-  // TODO should this be named diferently? what exactly are we returning?
-  public String getInputDataWithImputedZeroes(String dataFileName, Map<String, VariableSpec> varSpecs) {
-    // call util to be sure we need to actually do anything
+  public Strng getRStudyVocabsAsString(List<VocabByRootEntityPostResponse> studyVocabs) {
+    // TODO loop through and call the other version once for each entry. sandwich that in a R list.
+  }
+
+  public List<VariableSpec> findVariableSpecsWithStudyDependentVocabs(Map<String, VariableSpec> varSpecs) {
+    // TODO for each entry in the map, check the hasStudyDependentVocabulary annotation and add it to the list if true
+  }
+
+  // TODO update plugins, they need to keep reading the data themselves (including ancestor ids now) and passing the handle here
+  public String getRMegastudyAsString(String compressedDataHandle, Map<String, VariableSpec> varSpecs) {
+    // hit the study vocabs endpoint, convert that to R
+    List<VariableSpec> varSpecsWithStudyDependentVocabs = findVariableSpecsWithStudyDependentVocabs(varSpecs);
+    // TODO validate these ^ all have the same entity. other checks?
+    List<VocabByRootEntityPostResponse> studyVocabs= getVocabByRootEntity(varSpecsWithStudyDependentVocabs);
+    String studyVocabsAsRString = getRStudyVocabsAsString(studyVocabs);
+
+    // get ancestor ids, can use first var bc we validate they all have the same entity
+    String entityId = varSpecsWithStudyDependentVocabs.get(0).getEntityId();
+    String ancestorIdsAsRString = getEntityAncestorsAsRVectorString(entityId, _referenceMetadata);
+
+    String megastudyAsRString = "veupathUtils::MegaStudy(" + 
+                                 "data = " + compressedDataHandle + "," +
+                                 "ancestorIdColumns = " + ancestorIdsAsRString + "," +
+                                 "studySpecificVocabularies = " + studyVocabsAsRString + ")";
+
+    return megastudyAsRString;
+  }
+
+  // TODO update plugins for collections bc were no longer thinking we need a collection specific method here
+  // TODO also need to update the R util fxn that imputes zeroes
+  public String getRInputDataWithImputedZeroesAsString(String compressedDataHandle, Map<String, VariableSpec> varSpecs) {
     boolean validRequest = validateImputeZeroesRequest(varSpecs);
 
     if (validRequest) {
-      // call util to build the megastudy object
-      String megastudyData = getRMegastudy(dataFileName);
-      // call method in R to impute zeroes
-      // return the handle on that data as a string
+      String megastudyData = getRMegastudy(compressedDataHandle, varSpecs);
+      return "veupathUtils::getDTWithImputedZeroes(" + megastudyData + ")";
     }
     
-    // return string reference to dataFileName data
-  }
-
-  public String getInputDataWithImputedZeroes(String dataFileName, Map<String, VariableSpec> varSpecs, List<VariableSpec> inputVarSpecs) {
-    // TODO a version for collections?
-    // idk what this is yet
+    return compressedDataHandle;
   }
 }
