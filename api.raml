@@ -125,6 +125,7 @@ securitySchemes:
             body:
               application/json:
                 type: lib.FloatingLineplotPostResponse
+
     /timeseries:
       post:
         description: Returns data required to create a floating time series visualization in the Standalone Map
@@ -185,6 +186,97 @@ securitySchemes:
         body:
           application/json:
             type: lib.FloatingContTablePostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.FloatingContTablePostResponse
+
+  /standalone-map-continuous-collections/visualizations:
+    displayName: Available visualizations for the Standalone Map application
+
+    /lineplot:
+      post:
+        description: Returns data required to create a floating line plot visualization for continuous variable collections in the Standalone Map
+        body:
+          application/json:
+            type: lib.CollectionFloatingLineplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.FloatingLineplotPostResponse
+
+    /timeseries:
+      post:
+        description: Returns data required to create a floating time series visualization for continuous variable collections in the Standalone Map
+        body:
+          application/json:
+            type: lib.CollectionFloatingLineplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.FloatingLineplotPostResponse
+
+    /boxplot:
+      post:
+        description: Returns data required to create a floating box plot visualization for continuous variable collections in the Standalone Map
+        body:
+          application/json:
+            type: lib.CollectionFloatingBoxplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.FloatingBoxplotPostResponse
+
+    /histogram:
+      post:
+        description: Returns data required to create a floating histogram visualization for continuous variable collections in the Standalone Map
+        body:
+          application/json:
+            type: lib.CollectionFloatingHistogramPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.FloatingHistogramPostResponse
+
+  /standalone-map-categorical-collections/visualizations:
+    displayName: Available visualizations for the Standalone Map application
+
+    /lineplot:
+      post:
+        description: Returns data required to create a floating line plot visualization for categorical variable collections in the Standalone Map
+        body:
+          application/json:
+            type: lib.CollectionFloatingLineplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.FloatingLineplotPostResponse
+
+
+    /barplot:
+      post:
+        description: Returns data required to create a floating bar plot visualization for categorical variable collections in the Standalone Map
+        body:
+          application/json:
+            type: lib.CollectionFloatingBarplotPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.FloatingBarplotPostResponse
+
+    /conttable:
+      post:
+        description: Returns data required to create a floating RxC mosaic plot visualization for categorical variable collections in the Standalone Map
+        body:
+          application/json:
+            type: lib.CollectionFloatingContTablePostRequest
         responses:
           200:
             body:

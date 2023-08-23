@@ -26,6 +26,12 @@ import org.veupathdb.service.eda.ds.plugin.sample.ExampleComputeVizPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.MultiStreamPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.RecordCountPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.TestCollectionPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.CollectionFloatingBarplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.CollectionFloatingBoxplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.CollectionFloatingContTablePlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.CollectionFloatingHistogramPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.CollectionFloatingLineplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.CollectionFloatingTimeSeriesPlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingBarplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingBoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.FloatingContTablePlugin;
@@ -54,7 +60,6 @@ public class AppsMetadata {
       app("standalone-map-xyrelationships", "X-Y Relationships", null,
           "Build plots to explore the relationship between two variables.",
           Arrays.asList(VECTORBASE_PROJECT),
-          viz("scatterplot", new FloatingScatterplotPlugin()),
           viz("lineplot", new FloatingLineplotPlugin()),
           viz("timeseries", new FloatingTimeSeriesPlugin())),
       app("standalone-map-distributions", "Distributions", null,
@@ -67,6 +72,18 @@ public class AppsMetadata {
           Arrays.asList(VECTORBASE_PROJECT),
           viz("barplot", new FloatingBarplotPlugin()),
           viz("conttable", new FloatingContTablePlugin())),
+      app("standalone-map-categorical-collections", "Plots for categorical grouped variables", null,
+          "Use line plots, bar plots and contingency tables to explore data from categorical Grouped Variables.",
+          Arrays.asList(VECTORBASE_PROJECT),
+          viz("lineplot", new CollectionFloatingLineplotPlugin()),
+          viz("barplot", new CollectionFloatingBarplotPlugin()),
+          viz("conttable", new CollectionFloatingContTablePlugin())),
+      app("standalone-map-continuous-collections", "Plots for continuous grouped variables", null,
+          "Use line plots, box plots and histograms to explore data from continuous Grouped Variables.",
+          Arrays.asList(VECTORBASE_PROJECT),
+          viz("lineplot", new CollectionFloatingLineplotPlugin()),
+          viz("barplot", new FloatingBarplotPlugin()),
+          viz("histogram", new CollectionFloatingHistogramPlugin())),
       app("pass", "Pass-Through", null,
           "A collection of visualizations designed to support the unbiased exploration of relationships between variables",
           Arrays.asList(CLINEPI_PROJECT, ALLCLINEPI_PROJECT),

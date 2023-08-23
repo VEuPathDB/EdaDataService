@@ -1,0 +1,26 @@
+#%RAML 1.0 Library
+
+types:
+
+  CollectionFloatingHistogramPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: CollectionFloatingHistogramSpec
+
+  CollectionFloatingHistogramSpec:
+    additionalProperties: false
+    properties:
+      outputEntityId:
+        type: string
+      barMode:
+        type: string
+        enum: ['overlay', 'stack']
+      valueSpec: 
+        type: ValueSpec
+      overlayConfig:
+        type: CollectionOverlayConfig
+      binSpec:
+        type: BinWidthSpec
+      viewport:
+        type: NumericViewport
+        required: false

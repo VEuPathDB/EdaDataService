@@ -71,6 +71,47 @@ public class AppsService implements Apps {
         new StandaloneCollectionMapMarkerPostResponseStream(processRequest(new CollectionMapMarkersPlugin(), entity))));
   }
 
+  @Override
+  public PostAppsStandaloneMapContinuousCollectionsVisualizationsTimeseriesResponse postAppsStandaloneMapContinuousCollectionsVisualizationsTimeseries(CollectionFloatingLineplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapContinuousCollectionsVisualizationsTimeseriesResponse.respond200WithApplicationJson(
+        new FloatingLineplotPostResponseStream(processRequest(new CollectionFloatingTimeSeriesPlugin(), entity))));
+  }
+
+  @Override
+  public PostAppsStandaloneMapContinuousCollectionsVisualizationsLineplotResponse postAppsStandaloneMapContinuousCollectionsVisualizationsLineplot(CollectionFloatingLineplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapContinuousCollectionsVisualizationsLineplotResponse.respond200WithApplicationJson(
+        new FloatingLineplotPostResponseStream(processRequest(new CollectionFloatingLineplotPlugin(), entity))));
+  }
+
+  @Override
+  public PostAppsStandaloneMapContinuousCollectionsVisualizationsHistogramResponse postAppsStandaloneMapContinuousCollectionsVisualizationsHistogram(CollectionFloatingHistogramPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapContinuousCollectionsVisualizationsHistogramResponse.respond200WithApplicationJson(
+        new FloatingHistogramPostResponseStream(processRequest(new CollectionFloatingHistogramPlugin(), entity))));
+  }
+
+  @Override
+  public PostAppsStandaloneMapContinuousCollectionsVisualizationsBoxplotResponse postAppsStandaloneMapContinuousCollectionsVisualizationsBoxplot(CollectionFloatingBoxplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapContinuousCollectionsVisualizationsBoxplotResponse.respond200WithApplicationJson(
+        new FloatingBoxplotPostResponseStream(processRequest(new CollectionFloatingBoxplotPlugin(), entity))));
+  }
+
+  @Override
+  public PostAppsStandaloneMapCategoricalCollectionsVisualizationsBarplotResponse postAppsStandaloneMapCategoricalCollectionsVisualizationsBarplot(CollectionFloatingBarplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapCategoricalCollectionsVisualizationsBarplotResponse.respond200WithApplicationJson(
+        new FloatingBarplotPostResponseStream(processRequest(new CollectionFloatingBarplotPlugin(), entity))));
+  }
+
+  @Override
+  public PostAppsStandaloneMapCategoricalCollectionsVisualizationsLineplotResponse postAppsStandaloneMapCategoricalCollectionsVisualizationsLineplot(CollectionFloatingLineplotPostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapCategoricalCollectionsVisualizationsLineplotResponse.respond200WithApplicationJson(
+        new FloatingLineplotPostResponseStream(processRequest(new CollectionFloatingLineplotPlugin(), entity))));
+  }
+
+  @Override
+  public PostAppsStandaloneMapCategoricalCollectionsVisualizationsConttableResponse postAppsStandaloneMapCategoricalCollectionsVisualizationsConttable(CollectionFloatingContTablePostRequest entity) {
+    return wrapPlugin(() -> PostAppsStandaloneMapCategoricalCollectionsVisualizationsConttableResponse.respond200WithApplicationJson(
+        new FloatingContTablePostResponseStream(processRequest(new CollectionFloatingContTablePlugin(), entity))));
+  }
 
   @Override
   public PostAppsStandaloneMapXyrelationshipsVisualizationsTimeseriesResponse postAppsStandaloneMapXyrelationshipsVisualizationsTimeseries(FloatingLineplotPostRequest entity) {

@@ -47,6 +47,7 @@ public enum ContinuousAggregators {
 
   public MarkerAggregator<AveragesWithConfidence> getAverageWithConfidenceAggregator(int index, Function<String, Double> variableValueQuantifier) {
     return factory.createWithConfidence(index, variableValueQuantifier);
+
   }
 
   public static ContinuousAggregators fromExternalString(String name) {
