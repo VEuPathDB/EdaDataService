@@ -341,7 +341,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
   }
 
   protected List<VocabByRootEntityPostResponse> getVocabByRootEntity(List<VariableSpec> varSpecs, List<APIFilter> subsetFilters) {
-    // TODO
+    return varSpecs.stream().map(var -> getVocabByRootEntity(var, subsetFilters)).toList();
   }
 
   protected List<VocabByRootEntityPostResponse> getVocabByRootEntity(List<VariableSpec> varSpecs) {
@@ -631,16 +631,49 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
     return true;
   }
 
-  public String getRStudyVocabsAsString(VocabByRootEntityPostResponse studyVocab) {
-    // TODO make a string to build the vocabs slot
+  public String getRStudyVocabsAsString(VariableSpec varSpec, VocabByRootEntityPostResponse studyVocab) {
+    // TODO figure whether this needs changes to rserve to add dyplyr,and get plugin util here, and check this string lol
+    // this assuming the first ancestor is the root one is a bit hacky, but i did the same in R so...
+    // obviously doing the same awful thing twice makes it ok. but doing any better is higher cost than i have time for right now :(
+    String readStudyVocabInR = "data.table::fread(" + studyVocab + ", header = FALSE)";
+    String studyVocabAsRTibble = "dplyr::reframe(dplyr::group_by(" + readStudyVocabInR + ", V1), " +
+                                         "values=paste0('veupathUtils::StudySpecificVocabulary(variable=veupathUtils::VariableSpec(entityId=" + varSpec.getEntityId() + ", " + 
+                                                                                              "variableId=" + varSpec.getVariableId() + ")" + 
+                                                          "vocabulary=c(',paste(V2, collapse=','),')," +
+                                                          "study=\"',V1,'\"'" +
+                                                          "studyIdColumnName='" + getEntityAncestorsAsRVectorString(varSpec.getEntityId(), _referenceMetadata) + "[1])))";
+  
+    // TODO wrap the rows of this tibble in a SimpleList and return a StudySpecificVocabularyByVariable string representation
   }
 
-  public Strng getRStudyVocabsAsString(List<VocabByRootEntityPostResponse> studyVocabs) {
-    // TODO loop through and call the other version once for each entry. sandwich that in a R list.
+  public String getRStudyVocabsAsString(Map<VariableSpec, VocabByRootEntityPostResponse> studyVocabs) {
+    String studyVocabListRString = "veupathUtils::StudySpecificVocabulariesByVariableList(S4Vectors::SimpleList(";
+    boolean first = true;
+
+    for (Map.Entry<VariableSpec, VocabByRootEntityPostResponse> entry : studyVocabs.entrySet()) {
+      String studyVocabRString = getRStudyVocabsAsString(entry.getKey(), entry.getValue());
+      if (first) {
+        studyVocabListRString = studyVocabListRString + studyVocabRString;
+      } else {
+        studyVocabListRString = studyVocabListRString + "," + studyVocabRString;
+      }
+    }
+    
+    return studyVocabListRString + "))";
   }
 
   public List<VariableSpec> findVariableSpecsWithStudyDependentVocabs(Map<String, VariableSpec> varSpecs) {
-    // TODO for each entry in the map, check the hasStudyDependentVocabulary annotation and add it to the list if true
+    // TODO get util here
+    List<VariableSpec> varsWithStudyDependentVocabs = new ArrayList<>();
+
+    for (VariableSpec var : varSpecs.values()) {
+      // can this return a boolean rather than String?
+      if (util.getHasStudyDependentVocabulary(var).equals("true")) {
+        varsWithStudyDependentVocabs.add(var);
+      } 
+    }
+            
+    return varsWithStudyDependentVocabs;
   }
 
   // TODO update plugins, they need to keep reading the data themselves (including ancestor ids now) and passing the handle here
@@ -648,7 +681,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
     // hit the study vocabs endpoint, convert that to R
     List<VariableSpec> varSpecsWithStudyDependentVocabs = findVariableSpecsWithStudyDependentVocabs(varSpecs);
     // TODO validate these ^ all have the same entity. other checks?
-    List<VocabByRootEntityPostResponse> studyVocabs= getVocabByRootEntity(varSpecsWithStudyDependentVocabs);
+    Map<VariableSpec, VocabByRootEntityPostResponse> studyVocabs= getVocabByRootEntity(varSpecsWithStudyDependentVocabs);
     String studyVocabsAsRString = getRStudyVocabsAsString(studyVocabs);
 
     // get ancestor ids, can use first var bc we validate they all have the same entity
