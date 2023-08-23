@@ -30,6 +30,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -159,11 +160,13 @@ public class BubbleMapMarkersLegendPlugin extends AbstractEmptyComputePlugin<Sta
         .toList();
     if (_pluginSpec.getColorLegendConfig() != null) {
       response.setMaxColorValue(colorValues.stream()
-          .max(Comparator.comparingDouble(x -> x == null ? Double.NEGATIVE_INFINITY : x))
+          .filter(Objects::nonNull)
+          .max(Comparator.comparingDouble(Double::doubleValue))
           .map(_colorSpecification::serializeAverage)
           .orElse(null));
       response.setMinColorValue(colorValues.stream()
-          .min(Comparator.comparingDouble(x -> x == null ? Double.POSITIVE_INFINITY : x))
+          .filter(Objects::nonNull)
+          .min(Comparator.comparingDouble(Double::doubleValue))
           .map(_colorSpecification::serializeAverage)
           .orElse(null));
     }
