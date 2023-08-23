@@ -35,7 +35,7 @@ public class QualitativeOverlayAggregator implements MarkerAggregator<Map<String
 
   @Override
   public boolean appliesTo(String[] rec) {
-    return false;
+    return rec[index] != null && !rec[index].isEmpty();
   }
 
   @Override
