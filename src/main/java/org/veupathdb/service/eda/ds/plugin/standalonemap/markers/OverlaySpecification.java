@@ -57,7 +57,7 @@ public class OverlaySpecification {
 
     boolean first = true;
     for (int i = 0; i < labels.size(); i++) {
-      String rBin = "veupathUtils::Bin(binLabel='" + labels.get(i) + "'";
+      String rBin = "veupathUtils::Bin(binLabel=\"" + labels.get(i) + "\"";
       if (binRanges != null) {
         rBin += ",binStart=" + String.valueOf(binRanges.get(i).getMin()) +
                 ",binEnd=" + String.valueOf(binRanges.get(i).getMax());

@@ -1,5 +1,10 @@
 package org.veupathdb.service.eda.ds.plugin.standalonemap.markers;
 
+import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.AveragesWithConfidence;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.CategoricalProportionAggregator;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.ContinuousAggregators;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.MarkerAggregator;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.ProportionWithConfidenceAggregator;
 import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
 import org.veupathdb.service.eda.generated.model.CategoricalAggregationConfig;
 import org.veupathdb.service.eda.generated.model.ContinuousAggregationConfig;
@@ -23,8 +28,7 @@ public class QuantitativeAggregateConfiguration {
   public QuantitativeAggregateConfiguration(QuantitativeAggregationConfig overlayConfig,
                                             String varShape) {
     if (CATEGORICAL.equals(overlayConfig.getOverlayType())) {
-      if (!varShape.equalsIgnoreCase(APIVariableDataShape.CATEGORICAL.getValue())
-          && !varShape.equalsIgnoreCase(APIVariableDataShape.ORDINAL.getValue())) {
+      if (varShape.equalsIgnoreCase(APIVariableDataShape.CONTINUOUS.getValue())) {
         throw new IllegalArgumentException("Incorrect overlay configuration type for categorical var: " + varShape);
       }
       CategoricalAggregationConfig categoricalConfig = (CategoricalAggregationConfig) overlayConfig;

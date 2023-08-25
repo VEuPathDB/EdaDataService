@@ -231,7 +231,7 @@ types:
     type: object
     additionalProperties: false
     properties:
-      counts: string[][]
+      tabular: string[][]
   EmptyResponse:
     type: object
     additionalProperties: false
@@ -318,6 +318,7 @@ types:
       - number
       - date
       - integer
+      - string
   API_NumberCollection:
     type: API_Collection
     discriminatorValue: number
@@ -336,6 +337,9 @@ types:
     discriminatorValue: date
     properties:
       distributionDefaults: API_DateDistributionDefaults
+  API_StringCollection:
+    type: API_Collection
+    discriminatorValue: string
   API_Variable:
     type: object
     discriminator: type
@@ -390,6 +394,12 @@ types:
       - geoaggregator
       - latitude
       - longitude
+  API_VariableScale:
+    type: string
+    enum:
+      - log
+      - log2
+      - ln
   API_VariablesCategory:
     type: API_Variable
     discriminatorValue: category
@@ -446,14 +456,15 @@ types:
     discriminatorValue: number
     properties:
       distributionDefaults: API_NumberDistributionDefaults
-      units: string
+      units?: string
       precision: number
+      scale?: API_VariableScale
   API_IntegerVariable:
     type: API_VariableWithValues
     discriminatorValue: integer
     properties:
       distributionDefaults: API_IntegerDistributionDefaults
-      units: string
+      units?: string
   API_DateVariable:
     type: API_VariableWithValues
     discriminatorValue: date
@@ -543,6 +554,14 @@ types:
       filters: API_Filter[]
       binSpec?: BinSpecWithRange
       valueSpec: ValueSpec
+  VocabByRootEntityPostRequest:
+    type: object
+    additionalProperties: false
+    properties:
+      filters: API_Filter[]
+  VocabByRootEntityPostResponse:
+    type: EntityTabularPostResponse
+    additionalProperties: false
   HistogramBin:
     type: object
     additionalProperties: false
@@ -1621,6 +1640,98 @@ types:
     type: DataPluginRequestBase
     properties:
       config: CollectionSpec
+  CollectionFloatingBarplotPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: CollectionFloatingBarplotSpec
+  CollectionFloatingBarplotSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      barMode:
+        type: string
+        enum:
+          - group
+          - stack
+      valueSpec: ValueSpec
+      overlayConfig: CollectionOverlayConfigWithValues
+  CollectionFloatingBoxplotPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: CollectionFloatingBoxplotSpec
+  CollectionFloatingBoxplotSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      xAxisVariable: VariableSpec
+      overlayConfig: CollectionOverlayConfig
+      maxAllowedDataPoints:
+        type: integer
+        required: false
+        format: int64
+  CollectionFloatingContTablePostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: CollectionFloatingContTableSpec
+  CollectionFloatingContTableSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      xAxisVariable: CollectionOverlayConfigWithValues
+  CollectionFloatingHistogramPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: CollectionFloatingHistogramSpec
+  CollectionFloatingHistogramSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      barMode:
+        type: string
+        enum:
+          - overlay
+          - stack
+      valueSpec: ValueSpec
+      overlayConfig: CollectionOverlayConfig
+      binSpec: BinWidthSpec
+      viewport:
+        type: NumericViewport
+        required: false
+  CollectionFloatingLineplotPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      config: CollectionFloatingLineplotSpec
+  CollectionFloatingLineplotSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      outputEntityId: string
+      xAxisVariable: VariableSpec
+      yAxisNumeratorValues:
+        type: string[]
+        required: false
+      yAxisDenominatorValues:
+        type: string[]
+        required: false
+      overlayConfig: CollectionOverlayConfigWithValues
+      binSpec:
+        type: BinWidthSpec
+        required: false
+      valueSpec:
+        type: string
+        enum:
+          - median
+          - mean
+          - geometricMean
+          - proportion
+      errorBars: StringBoolean
+      viewport:
+        type: NumericViewport
+        required: false
   StandaloneCollectionMapMarkerPostRequest:
     type: DataPluginRequestBase
     properties:
@@ -2040,6 +2151,17 @@ types:
       value?: number
       units?: BinUnits
       range?: NumberRange | DateRange
+  BinWidthSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      type?:
+        type: string
+        enum:
+          - binWidth
+      value?: number
+      units?: BinUnits
+      range?: NumberRange | DateRange
   NumberRange:
     type: object
     additionalProperties: false
@@ -2180,4 +2302,9 @@ types:
     properties:
       numeratorValues: string[]
       denominatorValues: string[]
+  CollectionOverlayConfigWithValues:
+    type: CollectionOverlayConfig
+    properties:
+      selectedValues?: string[]
+  DynamicDataSpec: CollectionSpec | VariableSpec
 
