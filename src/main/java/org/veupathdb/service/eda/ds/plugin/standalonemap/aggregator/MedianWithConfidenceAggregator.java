@@ -3,6 +3,7 @@ package org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Marker aggregator that keeps track of all values in-memory in order to compute the median and confidence interval.
@@ -14,9 +15,11 @@ public class MedianWithConfidenceAggregator implements MarkerAggregator<Averages
 
   private final List<Double> values = new ArrayList<>();
   private final int index;
+  private final Function<String, Double> valueQuantifier;
 
-  public MedianWithConfidenceAggregator(int index) {
+  public MedianWithConfidenceAggregator(int index, Function<String, Double> valueQuantifier) {
     this.index = index;
+    this.valueQuantifier = valueQuantifier;
   }
 
   @Override
@@ -24,7 +27,7 @@ public class MedianWithConfidenceAggregator implements MarkerAggregator<Averages
     if (arr[index] == null || arr[index].isEmpty()) {
       return;
     }
-    values.add(Double.parseDouble(arr[index]));
+    values.add(valueQuantifier.apply(arr[index]));
   }
 
   @Override

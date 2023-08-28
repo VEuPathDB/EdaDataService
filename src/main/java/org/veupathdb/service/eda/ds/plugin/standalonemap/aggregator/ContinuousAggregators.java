@@ -28,7 +28,7 @@ public enum ContinuousAggregators {
 
         @Override
         public MarkerAggregator<AveragesWithConfidence> createWithConfidence(int index, Function<String, Double> valueQuantifier) {
-          return null;
+          return new MedianWithConfidenceAggregator(index, valueQuantifier);
         }
       });
 
@@ -47,7 +47,6 @@ public enum ContinuousAggregators {
 
   public MarkerAggregator<AveragesWithConfidence> getAverageWithConfidenceAggregator(int index, Function<String, Double> variableValueQuantifier) {
     return factory.createWithConfidence(index, variableValueQuantifier);
-
   }
 
   public static ContinuousAggregators fromExternalString(String name) {
