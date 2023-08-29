@@ -632,7 +632,8 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
   }
 
   public String getRStudyVocabsAsString(VariableSpec varSpec, VocabByRootEntityPostResponse studyVocab) {
-    // TODO figure whether this needs changes to rserve to add dyplyr,and get plugin util here, and check this string lol
+    PluginUtil util = getUtil();
+    
     // this assuming the first ancestor is the root one is a bit hacky, but i did the same in R so...
     // obviously doing the same awful thing twice makes it ok. but doing any better is higher cost than i have time for right now :(
     String readStudyVocabInR = "data.table::fread(" + studyVocab + ", header = FALSE)";
@@ -665,7 +666,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
   }
 
   public List<VariableSpec> findVariableSpecsWithStudyDependentVocabs(Map<String, VariableSpec> varSpecs) {
-    // TODO get util here
+    PluginUtil util = getUtil();
     List<VariableSpec> varsWithStudyDependentVocabs = new ArrayList<>();
 
     for (VariableSpec var : varSpecs.values()) {
@@ -678,7 +679,6 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
     return varsWithStudyDependentVocabs;
   }
 
-  // TODO update plugins, they need to keep reading the data themselves (including ancestor ids now) and passing the handle here
   public String getRMegastudyAsString(String compressedDataHandle, Map<String, VariableSpec> varSpecs) {
     // find and validate variables w study specific vocabs
     List<VariableSpec> varSpecsWithStudyDependentVocabs = findVariableSpecsWithStudyDependentVocabs(varSpecs);
