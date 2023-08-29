@@ -144,12 +144,13 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
     out.flush();
   }
 
-  private List<LabeledRangeWithValue> convertAggregator(MarkerAggregator<Map<String, QualitativeOverlayAggregator.CategoricalOverlayData>> aggregator, String valueSpec) {
+  private List<LegacyLabeledRangeWithCountAndValue> convertAggregator(MarkerAggregator<Map<String, QualitativeOverlayAggregator.CategoricalOverlayData>> aggregator, String valueSpec) {
     return aggregator.finish().entrySet().stream()
         .map(entry -> {
-          LabeledRangeWithValue bin = new LabeledRangeWithValueImpl();
+          LegacyLabeledRangeWithCountAndValue bin = new LegacyLabeledRangeWithCountAndValueImpl();
           bin.setValue(valueSpec.equals(ValueSpec.PROPORTION.getValue()) ? entry.getValue().getProportion() : entry.getValue().getCount());
-          bin.setLabel(entry.getKey());
+          bin.setBinLabel(entry.getKey());
+          bin.setCount(entry.getValue().getCount());
           return bin;
         })
         .collect(Collectors.toList());

@@ -39,16 +39,16 @@ public class NormalizedBinRange {
     if (variableType.equalsIgnoreCase(APIVariableType.DATE.getValue())) {
       return overlayConfig.getOverlayValues().stream()
           .map(binRange -> new NormalizedBinRange(
-              LocalDate.parse(binRange.getMin(), DATE_FORMATTER).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),
-              LocalDate.parse(binRange.getMax(), DATE_FORMATTER).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),
-              binRange.getLabel()))
+              LocalDate.parse(binRange.getBinStart(), DATE_FORMATTER).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),
+              LocalDate.parse(binRange.getBinEnd(), DATE_FORMATTER).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),
+              binRange.getBinLabel()))
           .collect(Collectors.toList());
     } else {
       return overlayConfig.getOverlayValues().stream()
           .map(binRange -> new NormalizedBinRange(
-              Double.parseDouble(binRange.getMin()),
-              Double.parseDouble(binRange.getMax()),
-              binRange.getLabel()))
+              Double.parseDouble(binRange.getBinStart()),
+              Double.parseDouble(binRange.getBinEnd()),
+              binRange.getBinLabel()))
           .collect(Collectors.toList());
     }
   }

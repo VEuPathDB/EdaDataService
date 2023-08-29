@@ -50,7 +50,7 @@ types:
     discriminatorValue: continuous
     properties:
       overlayValues:
-        type: LabeledRange[]
+        type: LegacyLabeledRange[]
 
   CategoricalOverlayConfig:
     type: OverlayConfig
@@ -68,7 +68,7 @@ types:
       entityCount:
         type: number
       overlayValues:
-        type: LabeledRangeWithValue[]
+        type: LegacyLabeledRangeWithCountAndValue[]
       avgLat:
         type: number
       avgLon:

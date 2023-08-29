@@ -2095,7 +2095,7 @@ types:
     discriminatorValue: continuous
     properties:
       overlayValues:
-        type: LabeledRange[]
+        type: LegacyLabeledRange[]
   CategoricalOverlayConfig:
     type: OverlayConfig
     discriminatorValue: categorical
@@ -2109,7 +2109,7 @@ types:
     properties:
       geoAggregateValue: string
       entityCount: number
-      overlayValues: LabeledRangeWithValue[]
+      overlayValues: LegacyLabeledRangeWithCountAndValue[]
       avgLat: number
       avgLon: number
       minLat: number
@@ -2307,4 +2307,17 @@ types:
     properties:
       selectedValues?: string[]
   DynamicDataSpec: CollectionSpec | VariableSpec
+  LegacyLabeledRange:
+    type: object
+    additionalProperties: false
+    properties:
+      binStart: string
+      binEnd: string
+      binLabel: string
+  LegacyLabeledRangeWithCountAndValue:
+    type: LegacyLabeledRange
+    additionalProperties: false
+    properties:
+      value: number
+      count: number
 
