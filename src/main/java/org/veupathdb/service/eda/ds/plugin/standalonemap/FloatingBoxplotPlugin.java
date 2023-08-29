@@ -123,7 +123,8 @@ public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBo
 
     useRConnectionWithProcessedRemoteFiles(Resources.RSERVE_URL, filesProcessor, connection -> {
       String overlayValues = _overlaySpecification == null ? "NULL" : _overlaySpecification.getRBinListAsString();
-      String inputData = getInputDataWithImputedZeroes(DEFAULT_SINGLE_STREAM_NAME, varMap);
+      String inputData = getRInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap);
+      connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String cmd =
           "plot.data::box(data=" + inputData + ", " +
               "variables=variables, " +

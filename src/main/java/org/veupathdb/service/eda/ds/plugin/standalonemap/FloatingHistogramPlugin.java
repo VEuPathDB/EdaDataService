@@ -109,7 +109,10 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
     String overlayValues = _overlaySpecification == null ? "NULL" : _overlaySpecification.getRBinListAsString();
 
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      String inputData = getInputDataWithImputedZeroes(DEFAULT_SINGLE_STREAM_NAME, varMap);
+      connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
+          spec.getXAxisVariable(),
+          overlayVariable));
+      String inputData = getRInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap);
           
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
      

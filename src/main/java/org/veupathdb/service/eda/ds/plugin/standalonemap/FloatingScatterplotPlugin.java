@@ -136,7 +136,9 @@ public class FloatingScatterplotPlugin extends AbstractEmptyComputePlugin<Floati
       );
 
     useRConnectionWithProcessedRemoteFiles(Resources.RSERVE_URL, filesProcessor, connection -> {
-      String inputData = getInputDataWithImputedZeroes(DEFAULT_SINGLE_STREAM_NAME, varMap);
+      String inputData = getRInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap);
+      connection.voidEval(getVoidEvalVariableMetadataList(varMap));
+      
       String cmd = 
           "plot.data::scattergl(data=" + inputData + ", " + 
                                   "variables=variables, " + 

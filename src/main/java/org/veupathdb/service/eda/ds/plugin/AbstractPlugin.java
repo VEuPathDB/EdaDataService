@@ -641,9 +641,11 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
                                                                                               "variableId=" + varSpec.getVariableId() + ")" + 
                                                           "vocabulary=c(',paste(V2, collapse=','),')," +
                                                           "study=\"',V1,'\"'" +
-                                                          "studyIdColumnName='" + getEntityAncestorsAsRVectorString(varSpec.getEntityId(), _referenceMetadata) + "[1])))";
+                                                          "studyIdColumnName='" + util.getEntityAncestorsAsRVectorString(varSpec.getEntityId(), _referenceMetadata) + "[1])))";
   
-    // TODO wrap the rows of this tibble in a SimpleList and return a StudySpecificVocabularyByVariable string representation
+    String studyVocabsListAsRString = "veupathUtils::StudySpecificVocabulariesByVariable(S4Vectors::SimpleList(paste(" + studyVocabAsRTibble + "[2], collapse=',')))";
+    
+    return studyVocabsListAsRString;
   }
 
   public String getRStudyVocabsAsString(Map<VariableSpec, VocabByRootEntityPostResponse> studyVocabs) {
@@ -678,9 +680,14 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
 
   // TODO update plugins, they need to keep reading the data themselves (including ancestor ids now) and passing the handle here
   public String getRMegastudyAsString(String compressedDataHandle, Map<String, VariableSpec> varSpecs) {
-    // hit the study vocabs endpoint, convert that to R
+    // find and validate variables w study specific vocabs
     List<VariableSpec> varSpecsWithStudyDependentVocabs = findVariableSpecsWithStudyDependentVocabs(varSpecs);
-    // TODO validate these ^ all have the same entity. other checks?
+    List<String> entities = varSpecsWithStudyDependentVocabs.stream().map(var -> var.getEntity()).toList();
+    boolean allEqualEntities = entities.isEmpty() || Collections.frequency(entities, entities.get(0)) == entities.size();
+    if (!allEqualEntities) { 
+      // TODO get mad 
+    }
+    // hit the study vocabs endpoint, convert that to R
     Map<VariableSpec, VocabByRootEntityPostResponse> studyVocabs= getVocabByRootEntity(varSpecsWithStudyDependentVocabs);
     String studyVocabsAsRString = getRStudyVocabsAsString(studyVocabs);
 
@@ -696,8 +703,6 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
     return megastudyAsRString;
   }
 
-  // TODO update plugins for collections bc were no longer thinking we need a collection specific method here
-  // TODO also need to update the R util fxn that imputes zeroes
   public String getRInputDataWithImputedZeroesAsString(String compressedDataHandle, Map<String, VariableSpec> varSpecs) {
     boolean validRequest = validateImputeZeroesRequest(varSpecs);
 

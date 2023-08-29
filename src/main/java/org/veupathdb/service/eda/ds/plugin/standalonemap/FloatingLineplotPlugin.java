@@ -111,10 +111,15 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
     String overlayValues = _overlaySpecification == null ? "NULL" : _overlaySpecification.getRBinListAsString();
     
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      String inputData = getInputDataWithImputedZeroes(DEFAULT_SINGLE_STREAM_NAME, varMap);
+      connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
+          spec.getXAxisVariable(),
+          spec.getYAxisVariable(),
+          overlayVariable));
+      String inputData = getRInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap);
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String viewportRString = getViewportAsRString(spec.getViewport(), xVarType);
       connection.voidEval(viewportRString);
+
       BinSpec binSpec = spec.getBinSpec();
       validateBinSpec(binSpec, xVarType);
       // consider refactoring this, does the same as something in histo
@@ -140,6 +145,7 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
         }
         connection.voidEval("binWidth <- " + binWidth);
       }
+
       String cmd = "plot.data::lineplot(data=" + inputData + ", " +
                                         "variables=variables, binWidth=binWidth, " + 
                                         "value=" + singleQuote(valueSpec) + ", " +

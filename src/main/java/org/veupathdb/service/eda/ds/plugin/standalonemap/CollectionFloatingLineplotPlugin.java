@@ -99,7 +99,8 @@ public class CollectionFloatingLineplotPlugin extends AbstractEmptyComputePlugin
     String overlayValues = getRBinListAsString(spec.getOverlayConfig().getSelectedValues());
     
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      String inputData = getInputDataWithImputedZeroes(DEFAULT_SINGLE_STREAM_NAME, varMap, inputVarSpecs);
+      connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, inputVarSpecs));
+      String inputData = getRInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap);
       connection.voidEval(getVoidEvalDynamicDataMetadataList(varMap));
       String viewportRString = getViewportAsRString(spec.getViewport(), collectionType);
       connection.voidEval(viewportRString);
