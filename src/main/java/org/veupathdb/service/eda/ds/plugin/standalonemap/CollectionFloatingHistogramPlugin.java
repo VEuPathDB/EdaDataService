@@ -97,7 +97,7 @@ public class CollectionFloatingHistogramPlugin extends AbstractEmptyComputePlugi
 
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, inputVarSpecs));
-      String inputData = getRInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap);
+      String inputData = getRCollectionInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap);
       connection.voidEval(getVoidEvalCollectionMetadataList(varMap));
      
       String viewportRString = getViewportAsRString(spec.getViewport(), collectionType);

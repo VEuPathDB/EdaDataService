@@ -112,8 +112,7 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
           spec.getXAxisVariable(),
           overlayVariable));
-      String inputData = getRInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap);
-          
+      String inputData = getRVariableInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap); 
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
      
       String viewportRString = getViewportAsRString(spec.getViewport(), xVarType);

@@ -110,7 +110,7 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
           spec.getXAxisVariable(),
           overlayVariable));
 
-      String inputData = getRInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap);
+      String inputData = getRVariableInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap);
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String cmd =
           "plot.data::bar(data=" + inputData + ", " +
