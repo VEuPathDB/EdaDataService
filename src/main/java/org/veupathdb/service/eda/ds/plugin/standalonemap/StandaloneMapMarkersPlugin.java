@@ -18,8 +18,8 @@ import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MarkerAggregator;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.QualitativeOverlayAggregator;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.MarkerAggregator;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.QualitativeOverlayAggregator;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MapMarkerRowProcessor;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MarkerData;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.OverlaySpecification;
@@ -134,7 +134,9 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
       mapEle.setMaxLat(data.getMaxLat());
       mapEle.setMinLon(data.getMinLon());
       mapEle.setMaxLon(data.getMaxLon());
-      mapEle.setOverlayValues(convertAggregator(data.getMarkerAggregator(), valueSpec));
+      if (data.getMarkerAggregator() != null) {
+        mapEle.setOverlayValues(convertAggregator(data.getMarkerAggregator(), valueSpec));
+      }
       output.add(mapEle);
     }
     StandaloneMapMarkersPostResponse response = new StandaloneMapMarkersPostResponseImpl();

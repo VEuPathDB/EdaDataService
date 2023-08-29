@@ -1,4 +1,4 @@
-package org.veupathdb.service.eda.ds.plugin.standalonemap.markers;
+package org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator;
 
 
 import org.veupathdb.service.eda.ds.utils.StatUtils;
@@ -48,6 +48,11 @@ public class ProportionWithConfidenceAggregator implements MarkerAggregator<Aver
         upperBound,
         n
     );
+  }
+
+  @Override
+  public boolean appliesTo(String[] rec) {
+    return rec[index] != null && !rec[index].isEmpty();
   }
 
   public int getN() {
