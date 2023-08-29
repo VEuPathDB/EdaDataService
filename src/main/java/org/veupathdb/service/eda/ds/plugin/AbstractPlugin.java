@@ -332,19 +332,19 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
     return response.getHistogram().stream().collect(Collectors.toMap(HistogramBin::getBinLabel, bin -> Double.valueOf(bin.getValue().toString())));
   }
 
-  protected VocabByRootEntityPostResponse getVocabByRootEntity(VariableSpec varSpec, List<APIFilter> subsetFilters) {
+  protected ResponseFuture getVocabByRootEntity(VariableSpec varSpec, List<APIFilter> subsetFilters) {
     return _subsettingClient.getVocabByRootEntity(_referenceMetadata, varSpec, subsetFilters);
   }
 
-  protected VocabByRootEntityPostResponse getVocabByRootEntity(VariableSpec varSpec) {
+  protected ResponseFuture getVocabByRootEntity(VariableSpec varSpec) {
     return getVocabByRootEntity(varSpec, _subsetFilters);
   }
 
-  protected List<VocabByRootEntityPostResponse> getVocabByRootEntity(List<VariableSpec> varSpecs, List<APIFilter> subsetFilters) {
+  protected List<ResponseFuture> getVocabByRootEntity(List<VariableSpec> varSpecs, List<APIFilter> subsetFilters) {
     return varSpecs.stream().map(var -> getVocabByRootEntity(var, subsetFilters)).toList();
   }
 
-  protected List<VocabByRootEntityPostResponse> getVocabByRootEntity(List<VariableSpec> varSpecs) {
+  protected List<ResponseFuture> getVocabByRootEntity(List<VariableSpec> varSpecs) {
     return getVocabByRootEntity(varSpecs, _subsetFilters);
   }
 
@@ -631,7 +631,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
     return true;
   }
 
-  public String getRStudyVocabsAsString(VariableSpec varSpec, VocabByRootEntityPostResponse studyVocab) {
+  public String getRStudyVocabsAsString(VariableSpec varSpec, ResponseFuture studyVocab) {
     PluginUtil util = getUtil();
     
     // this assuming the first ancestor is the root one is a bit hacky, but i did the same in R so...
@@ -649,7 +649,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
     return studyVocabsListAsRString;
   }
 
-  public String getRStudyVocabsAsString(Map<VariableSpec, VocabByRootEntityPostResponse> studyVocabs) {
+  public String getRStudyVocabsAsString(Map<VariableSpec, ResponseFuture> studyVocabs) {
     String studyVocabListRString = "veupathUtils::StudySpecificVocabulariesByVariableList(S4Vectors::SimpleList(";
     boolean first = true;
 
@@ -682,13 +682,13 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
   public String getRMegastudyAsString(String compressedDataHandle, Map<String, VariableSpec> varSpecs) {
     // find and validate variables w study specific vocabs
     List<VariableSpec> varSpecsWithStudyDependentVocabs = findVariableSpecsWithStudyDependentVocabs(varSpecs);
-    List<String> entities = varSpecsWithStudyDependentVocabs.stream().map(var -> var.getEntity()).toList();
+    List<String> entities = varSpecsWithStudyDependentVocabs.stream().map(var -> var.getEntityId()).toList();
     boolean allEqualEntities = entities.isEmpty() || Collections.frequency(entities, entities.get(0)) == entities.size();
     if (!allEqualEntities) { 
       // TODO get mad 
     }
     // hit the study vocabs endpoint, convert that to R
-    Map<VariableSpec, VocabByRootEntityPostResponse> studyVocabs= getVocabByRootEntity(varSpecsWithStudyDependentVocabs);
+    Map<VariableSpec, ResponseFuture> studyVocabs= getVocabByRootEntity(varSpecsWithStudyDependentVocabs);
     String studyVocabsAsRString = getRStudyVocabsAsString(studyVocabs);
 
     // get ancestor ids, can use first var bc we validate they all have the same entity
@@ -707,7 +707,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
     boolean validRequest = validateImputeZeroesRequest(varSpecs);
 
     if (validRequest) {
-      String megastudyData = getRMegastudy(compressedDataHandle, varSpecs);
+      String megastudyData = getRMegastudyAsString(compressedDataHandle, varSpecs);
       return "veupathUtils::getDTWithImputedZeroes(" + megastudyData + ")";
     }
     
