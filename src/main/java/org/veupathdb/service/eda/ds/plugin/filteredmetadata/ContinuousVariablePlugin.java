@@ -9,14 +9,14 @@ import org.gusdb.fgputil.json.JsonUtil;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.rosuda.REngine.REXP;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
-import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
+import org.veupathdb.service.eda.ds.core.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
+import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.ContinuousVariableMetadataPostRequest;
 import org.veupathdb.service.eda.generated.model.ContinuousVariableMetadataSpec;
 
@@ -97,7 +97,7 @@ public class ContinuousVariablePlugin extends AbstractEmptyComputePlugin<Continu
 
             // Dates are read in as class=character. If we see the variable type is date, let's
             // force the data in R to be have class=date. See veupathUtils #14 for more details.
-            if (util.getVariableType(spec.getVariable()) == "DATE") {
+            if (util.getVariableType(spec.getVariable()).equals(APIVariableType.DATE.toString())) {
               connection.voidEval("x <- as.Date(x)");
             }
 

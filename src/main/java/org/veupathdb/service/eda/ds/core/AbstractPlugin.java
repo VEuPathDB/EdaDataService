@@ -1,4 +1,4 @@
-package org.veupathdb.service.eda.ds.plugin;
+package org.veupathdb.service.eda.ds.core;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.ws.rs.BadRequestException;
@@ -50,7 +50,7 @@ import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuot
  * @param <S> plugin's spec class (must be or extend the generated spec class for this plugin)
  * @param <R> plugin's compute spec class (must be or extend the generated compute spec class for this plugin)
  */
-public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> implements Consumer<OutputStream> {
+public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
 
   private static final Logger LOG = LogManager.getLogger(AbstractPlugin.class);
 
@@ -81,9 +81,10 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
   public ConstraintSpec getConstraintSpec() { return new ConstraintSpec(); }
 
   protected ReferenceMetadata _referenceMetadata;
-  protected S _pluginSpec;
   // stored compute name and typed value of the passed compute config object (if plugin requires compute)
   protected Optional<TwoTuple<String,R>> _computeInfo;
+
+  protected S _pluginSpec;
   protected List<StreamSpec> _requiredStreams;
 
   private Timer _timer;
@@ -104,10 +105,10 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
    * @param appName app name this plugin belongs to; can be null if no compute is expected/allowed
    * @param request incoming plugin request object
    * @param authHeader authentication header observed on request
-   * @return this
+   * @return a consumer for an output stream that will write the response
    * @throws ValidationException if request validation fails
    */
-  public final AbstractPlugin<T,S,R> processRequest(String appName, T request, Entry<String,String> authHeader) throws ValidationException {
+  public final Consumer<OutputStream> processRequest(String appName, T request, Entry<String,String> authHeader) throws ValidationException {
 
     // start request timer (used to profile request performance dynamics)
     _timer = new Timer();
@@ -141,13 +142,16 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
       throw new BadRequestException("Compute results are not available for the requested job.");
     }
 
-    // if plugin requires a compute and metadata is expected for this compute, get computed var metadata
-    List<VariableMapping> computedVars = _computeInfo.isPresent() && computeGeneratesVars()
-        ? getComputedVariableMetadata().getVariables()
-        : Collections.emptyList();
-
     // construct available variables for each entity from metadata and derived variable config
-    _referenceMetadata = new ReferenceMetadata(study, computedVars, _derivedVariableSpecs);
+    _referenceMetadata = new ReferenceMetadata(study);
+
+    // if derived vars present, get derived var metadata and incorporate
+    _mergingClient.getDerivedVariableMetadata(_studyId, _derivedVariableSpecs)
+        .forEach(_referenceMetadata::incorporateDerivedVariable);
+
+    // if plugin requires a compute, get computed var metadata and incorporate
+    if (_computeInfo.isPresent() && computeGeneratesVars())
+      _referenceMetadata.incorporateComputedVariables(getComputedVariableMetadata().getVariables());
 
     // ask subclass to validate the configuration
     validateVisualizationSpec(_pluginSpec);
@@ -161,7 +165,29 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
 
     _requestProcessed = true;
     logRequestTime("Initial request processing complete");
-    return this;
+
+    return out -> {
+      if (!_requestProcessed) {
+        throw new RuntimeException("Output cannot be streamed until request has been processed.");
+      }
+
+      // create stream generator
+      Optional<TwoTuple<String, Object>> typedTuple = _computeInfo.map(info -> new TwoTuple<>(info.getFirst(), info.getSecond()));
+      Function<StreamSpec, ResponseFuture> streamGenerator = spec -> _mergingClient
+          .getTabularDataStream(_referenceMetadata, _subsetFilters, _derivedVariableSpecs, typedTuple, spec);
+
+      // create stream processor
+      // TODO: might make disallowing empty results optional in the future; this is the original implementation
+      //ConsumerWithException<Map<String,InputStream>> streamProcessor = map -> writeResults(out, map);
+      ConsumerWithException<Map<String, InputStream>> streamProcessor = map -> writeResults(out,
+          Functions.mapValues(map, entry -> new NonEmptyResultStream(entry.getKey(), entry.getValue())));
+
+      // build and process streams
+      logRequestTime("Making requests for data streams");
+      LOG.info("Building and processing " + _requiredStreams.size() + " required data streams.");
+      StreamingDataClient.buildAndProcessStreams(_requiredStreams, streamGenerator, streamProcessor);
+      logRequestTime("Data streams processed; response written; request complete");
+    };
   }
 
   /**
@@ -173,30 +199,6 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
 
   protected void logRequestTime(String eventDescription) {
     LOG.info("Request Time: " + _timer.getElapsed() + "ms, " + eventDescription);
-  }
-
-  @Override
-  public final void accept(OutputStream out) {
-    if (!_requestProcessed) {
-      throw new RuntimeException("Output cannot be streamed until request has been processed.");
-    }
-
-    // create stream generator
-    Optional<TwoTuple<String,Object>> typedTuple = _computeInfo.map(info -> new TwoTuple<>(info.getFirst(), info.getSecond()));
-    Function<StreamSpec, ResponseFuture> streamGenerator = spec -> _mergingClient
-        .getTabularDataStream(_referenceMetadata, _subsetFilters, typedTuple, spec);
-
-    // create stream processor
-    // TODO: might make disallowing empty results optional in the future; this is the original implementation
-    //ConsumerWithException<Map<String,InputStream>> streamProcessor = map -> writeResults(out, map);
-    ConsumerWithException<Map<String,InputStream>> streamProcessor = map -> writeResults(out,
-        Functions.mapValues(map, entry -> new NonEmptyResultStream(entry.getKey(), entry.getValue())));
-
-    // build and process streams
-    logRequestTime("Making requests for data streams");
-    LOG.info("Building and processing " + _requiredStreams.size() + " required data streams.");
-    StreamingDataClient.buildAndProcessStreams(_requiredStreams, streamGenerator, streamProcessor);
-    logRequestTime("Data streams processed; response written; request complete");
   }
 
   protected S getPluginSpec() {
@@ -463,7 +465,6 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
   }
 
   public String getVariableMetadataRObjectAsString(VariableMapping var) {
-    PluginUtil util = getUtil();
 
     if (var == null) return null;
 
@@ -490,7 +491,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
     }
 
     if (var.getVocabulary() != null)
-      variableMetadata.append(",vocabulary=").append(util.listToRVector(var.getVocabulary()));
+      variableMetadata.append(",vocabulary=").append(PluginUtil.listToRVector(var.getVocabulary()));
 
     if (var.getMembers() != null)
       variableMetadata.append(",members=").append(getVariableSpecListRObjectAsString(var.getMembers()));

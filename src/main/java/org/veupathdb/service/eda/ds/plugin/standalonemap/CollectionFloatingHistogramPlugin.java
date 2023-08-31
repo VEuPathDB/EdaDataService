@@ -1,17 +1,12 @@
 package org.veupathdb.service.eda.ds.plugin.standalonemap;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
-import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
-import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.OverlaySpecification;
+import org.veupathdb.service.eda.ds.core.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.utils.ValidationUtils;
 import org.veupathdb.service.eda.generated.model.*;
 
@@ -22,17 +17,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
 public class CollectionFloatingHistogramPlugin extends AbstractEmptyComputePlugin<CollectionFloatingHistogramPostRequest, CollectionFloatingHistogramSpec> {
-  private OverlaySpecification _overlaySpecification = null;
-  
-  private static final Logger LOG = LogManager.getLogger(FloatingHistogramPlugin.class);
 
   @Override
   public String getDisplayName() {
@@ -62,8 +52,8 @@ public class CollectionFloatingHistogramPlugin extends AbstractEmptyComputePlugi
   }
 
   @Override
-  protected AbstractPlugin<CollectionFloatingHistogramPostRequest, CollectionFloatingHistogramSpec, Void>.ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(CollectionFloatingHistogramPostRequest.class, CollectionFloatingHistogramSpec.class, Void.class);
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(CollectionFloatingHistogramPostRequest.class, CollectionFloatingHistogramSpec.class);
   }
 
   @Override
@@ -90,7 +80,7 @@ public class CollectionFloatingHistogramPlugin extends AbstractEmptyComputePlugi
     CollectionFloatingHistogramSpec spec = getPluginSpec();
     List<VariableSpec> inputVarSpecs = new ArrayList<>(spec.getOverlayConfig().getSelectedMembers());
     CollectionSpec overlayVariable = spec.getOverlayConfig().getCollection();
-    Map<String, CollectionSpec> varMap = new HashMap<String, CollectionSpec>();
+    Map<String, CollectionSpec> varMap = new HashMap<>();
     varMap.put("overlay", overlayVariable);
     String barMode = spec.getBarMode().getValue();
     String collectionType = util.getCollectionType(overlayVariable);
@@ -106,7 +96,7 @@ public class CollectionFloatingHistogramPlugin extends AbstractEmptyComputePlugi
       validateBinSpec(binSpec, collectionType);
       String binReportValue = binSpec.getType().getValue() != null ? binSpec.getType().getValue() : "binWidth";
       
-      String binWidth = "NULL";
+      String binWidth;
       if (collectionType.equals("NUMBER") || collectionType.equals("INTEGER")) {
         binWidth = binSpec.getValue() == null ? "NULL" : "as.numeric('" + binSpec.getValue() + "')";
       } else {

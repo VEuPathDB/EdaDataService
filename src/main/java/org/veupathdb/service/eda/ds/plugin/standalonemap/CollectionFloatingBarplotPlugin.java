@@ -2,17 +2,16 @@ package org.veupathdb.service.eda.ds.plugin.standalonemap;
 
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
-import org.json.JSONObject;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
-import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
-import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.OverlaySpecification;
+import org.veupathdb.service.eda.ds.core.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.utils.ValidationUtils;
-import org.veupathdb.service.eda.generated.model.*;
+import org.veupathdb.service.eda.generated.model.CollectionFloatingBarplotPostRequest;
+import org.veupathdb.service.eda.generated.model.CollectionFloatingBarplotSpec;
+import org.veupathdb.service.eda.generated.model.CollectionSpec;
+import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,9 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Scanner;
-import java.util.stream.Collectors;
 
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
@@ -59,8 +55,8 @@ public class CollectionFloatingBarplotPlugin extends AbstractEmptyComputePlugin<
   }
 
   @Override
-  protected AbstractPlugin<CollectionFloatingBarplotPostRequest, CollectionFloatingBarplotSpec, Void>.ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(CollectionFloatingBarplotPostRequest.class, CollectionFloatingBarplotSpec.class, Void.class);
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(CollectionFloatingBarplotPostRequest.class, CollectionFloatingBarplotSpec.class);
   }
 
   @Override
@@ -89,7 +85,7 @@ public class CollectionFloatingBarplotPlugin extends AbstractEmptyComputePlugin<
     String overlayValues = getRBinListAsString(spec.getOverlayConfig().getSelectedValues());
     List<VariableSpec> inputVarSpecs = new ArrayList<>(spec.getOverlayConfig().getSelectedMembers());
 
-    Map<String, CollectionSpec> varMap = new HashMap<String, CollectionSpec>();
+    Map<String, CollectionSpec> varMap = new HashMap<>();
     varMap.put("overlay", spec.getOverlayConfig().getCollection());
       
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {

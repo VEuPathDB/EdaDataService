@@ -7,8 +7,7 @@ import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
-import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.ds.core.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.generated.model.FloatingContTablePostRequest;
 import org.veupathdb.service.eda.generated.model.FloatingContTableSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
@@ -56,8 +55,8 @@ public class FloatingContTablePlugin extends AbstractEmptyComputePlugin<Floating
   }
 
   @Override
-  protected AbstractPlugin<FloatingContTablePostRequest, FloatingContTableSpec, Void>.ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(FloatingContTablePostRequest.class, FloatingContTableSpec.class, Void.class);
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(FloatingContTablePostRequest.class, FloatingContTableSpec.class);
   }
 
   @Override
@@ -80,7 +79,7 @@ public class FloatingContTablePlugin extends AbstractEmptyComputePlugin<Floating
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PluginUtil util = getUtil();
     FloatingContTableSpec spec = getPluginSpec();
-    Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
+    Map<String, VariableSpec> varMap = new HashMap<>();
     varMap.put("xAxis", spec.getXAxisVariable());
     varMap.put("yAxis", spec.getYAxisVariable());
     

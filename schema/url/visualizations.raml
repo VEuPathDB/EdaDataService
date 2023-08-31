@@ -65,10 +65,8 @@ types:
   NumericViewport:
     additionalProperties: false
     properties:
-      xMin:
-        type: string
-      xMax:
-        type: string
+      xMin: string
+      xMax: string
 
   LongitudeViewport:
     additionalProperties: false
@@ -200,3 +198,19 @@ types:
 
   DynamicDataSpec:
     type: CollectionSpec | VariableSpec
+
+  # FIXME: eventually convert to LabeledRange (may require DB migration) :(
+  LegacyLabeledRange:
+    additionalProperties: false
+    properties:
+      binStart: string
+      binEnd: string
+      binLabel: string
+
+  # FIXME: eventually extend LabeledRangeWithValue (adding count)
+  LegacyLabeledRangeWithCountAndValue:
+    type: LegacyLabeledRange
+    additionalProperties: false
+    properties:
+      value: number
+      count: number

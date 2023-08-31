@@ -16,8 +16,7 @@ import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
-import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.ds.core.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.MarkerAggregator;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.QualitativeOverlayAggregator;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MapMarkerRowProcessor;
@@ -53,8 +52,8 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
   }
 
   @Override
-  protected AbstractPlugin<StandaloneMapMarkersPostRequest, StandaloneMapMarkersSpec, Void>.ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(StandaloneMapMarkersPostRequest.class, StandaloneMapMarkersSpec.class, Void.class);
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(StandaloneMapMarkersPostRequest.class, StandaloneMapMarkersSpec.class);
   }
 
   @Override
@@ -145,10 +144,10 @@ public class StandaloneMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
     out.flush();
   }
 
-  private List<RangeWithCountAndValue> convertAggregator(MarkerAggregator<Map<String, QualitativeOverlayAggregator.CategoricalOverlayData>> aggregator, String valueSpec) {
+  private List<LegacyLabeledRangeWithCountAndValue> convertAggregator(MarkerAggregator<Map<String, QualitativeOverlayAggregator.CategoricalOverlayData>> aggregator, String valueSpec) {
     return aggregator.finish().entrySet().stream()
         .map(entry -> {
-          RangeWithCountAndValue bin = new RangeWithCountAndValueImpl();
+          LegacyLabeledRangeWithCountAndValue bin = new LegacyLabeledRangeWithCountAndValueImpl();
           bin.setValue(valueSpec.equals(ValueSpec.PROPORTION.getValue()) ? entry.getValue().getProportion() : entry.getValue().getCount());
           bin.setBinLabel(entry.getKey());
           bin.setCount(entry.getValue().getCount());

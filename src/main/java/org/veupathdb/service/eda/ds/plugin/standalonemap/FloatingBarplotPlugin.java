@@ -2,14 +2,12 @@ package org.veupathdb.service.eda.ds.plugin.standalonemap;
 
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
-import org.json.JSONObject;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
-import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.ds.core.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.OverlaySpecification;
 import org.veupathdb.service.eda.generated.model.*;
 
@@ -20,8 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Scanner;
-import java.util.stream.Collectors;
 
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
@@ -59,8 +55,8 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
   }
 
   @Override
-  protected AbstractPlugin<FloatingBarplotPostRequest, FloatingBarplotSpec, Void>.ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(FloatingBarplotPostRequest.class, FloatingBarplotSpec.class, Void.class);
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(FloatingBarplotPostRequest.class, FloatingBarplotSpec.class);
   }
 
   @Override
@@ -101,7 +97,7 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
     VariableSpec overlayVariable = _overlaySpecification != null ? _overlaySpecification.getOverlayVariable() : null;
     String overlayValues = _overlaySpecification == null ? "NULL" : _overlaySpecification.getRBinListAsString();
 
-    Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
+    Map<String, VariableSpec> varMap = new HashMap<>();
     varMap.put("xAxis", spec.getXAxisVariable());
     varMap.put("overlay", overlayVariable);
       

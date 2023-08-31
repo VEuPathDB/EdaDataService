@@ -11,7 +11,7 @@ import org.gusdb.fgputil.json.JsonUtil;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.model.VariableSource;
-import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
+import org.veupathdb.service.eda.ds.core.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
@@ -67,7 +67,7 @@ public class RecordCountPlugin extends AbstractEmptyComputePlugin<RecordCountPos
     return _cachedResponse != null ? Collections.emptyList() : List.of(
       new StreamSpec(pluginSpec.getEntityId(), pluginSpec.getEntityId())
         // add first var in entity to work around no-vars bug in subsetting service
-        .addVar(getReferenceMetadata().getEntity(pluginSpec.getEntityId()).orElseThrow().stream()
+        .addVar(getReferenceMetadata().getEntity(pluginSpec.getEntityId()).orElseThrow().getVariables().stream()
             .filter(var -> VariableSource.NATIVE.equals(var.getSource()))
             .findFirst().orElseThrow())); // should have at least one native var
   }
