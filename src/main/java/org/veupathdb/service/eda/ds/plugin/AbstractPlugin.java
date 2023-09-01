@@ -41,6 +41,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuote;
+import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
+import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 
 /**
  * Base visualization plugin for all other plugins.  Provides access to parts of
@@ -646,22 +648,25 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
     return true;
   }
 
-  public String getRStudyVocabsAsString(DynamicDataSpecImpl dataSpec, ResponseFuture studyVocab) {
+  public String getRStudyVocabsAsString(DynamicDataSpecImpl dataSpec, ResponseFuture studyVocab) throws Exception {
     PluginUtil util = getUtil();
-    
-    // this assuming the first ancestor is the root one is a bit hacky, but i did the same in R so...
-    // obviously doing the same awful thing twice makes it ok. but doing any better is higher cost than i have time for right now :(
-    String readStudyVocabInR = "data.table::fread(" + studyVocab + ", header = FALSE)";
-    String studyVocabAsRTibble = "dplyr::reframe(dplyr::group_by(" + readStudyVocabInR + ", V1), " +
-                                         "values=paste0('veupathUtils::StudySpecificVocabulary(variable=veupathUtils::VariableSpec(entityId=" + getDynamicDataSpecEntityId(dataSpec)+ ", " + 
-                                                                                              "variableId=" + getDynamicDataSpecId(dataSpec) + ")" + 
-                                                          "vocabulary=c(',paste(V2, collapse=','),')," +
-                                                          "study=\"',V1,'\"'" +
-                                                          "studyIdColumnName='" + util.getEntityAncestorsAsRVectorString(getDynamicDataSpecEntityId(dataSpec), _referenceMetadata) + "[1])))";
-  
-    String studyVocabsListAsRString = "veupathUtils::StudySpecificVocabulariesByVariable(S4Vectors::SimpleList(paste(" + studyVocabAsRTibble + "[2], collapse=',')))";
-    
-    return studyVocabsListAsRString;
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    useRConnectionWithRemoteFiles(Resources.RSERVE_URL, Map.of("studyVocab", studyVocab.getInputStream()), connection -> {
+
+      // this assuming the first ancestor is the root one is a bit hacky, but i did the same in R so...
+      // obviously doing the same awful thing twice makes it ok. but doing any better is higher cost than i have time for right now :(
+      connection.voidEval("studyVocab <- data.table::fread(studyVocab, header = FALSE)");
+      connection.voidEval("studyVocabAsRTibble <- dplyr::reframe(dplyr::group_by(studyVocab, V1), " +
+          "values=paste0('veupathUtils::StudySpecificVocabulary(variable=veupathUtils::VariableSpec(entityId=" + getDynamicDataSpecEntityId(dataSpec)+ ", " +
+          "variableId=" + getDynamicDataSpecId(dataSpec) + ")" +
+          "vocabulary=c(',paste(V2, collapse=','),')," +
+          "study=\"',V1,'\"'" +
+          "studyIdColumnName='" + util.getEntityAncestorsAsRVectorString(getDynamicDataSpecEntityId(dataSpec), _referenceMetadata) + "[1])))";
+
+      String cmd = "studyVocabAsRTibble[2]"; // Is this going to send to stdout? Maybe this needs to be a print or something.
+      streamResult(connection, cmd, out);
+    });
+    return "veupathUtils::StudySpecificVocabulariesByVariable(S4Vectors::SimpleList(paste(" + out + "[2], collapse=',')))";
   }
 
   public String getRStudyVocabsAsString(List<DynamicDataSpecImpl> dataSpecs, List<ResponseFuture> studyVocabs) {
@@ -677,7 +682,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
         studyVocabListRString = studyVocabListRString + "," + studyVocabRString;
       }
     }
-    
+
     return studyVocabListRString + "))";
   }
 
