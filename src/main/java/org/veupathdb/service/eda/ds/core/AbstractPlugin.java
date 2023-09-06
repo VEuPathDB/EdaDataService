@@ -336,20 +336,26 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     return response.getHistogram().stream().collect(Collectors.toMap(HistogramBin::getBinLabel, bin -> Double.valueOf(bin.getValue().toString())));
   }
 
-  protected ResponseFuture getVocabByRootEntity(VariableSpec varSpec, List<APIFilter> subsetFilters) {
-    return _subsettingClient.getVocabByRootEntity(_referenceMetadata, varSpec, subsetFilters);
+  protected ResponseFuture getVocabByRootEntity(DynamicDataSpecImpl dataSpec, List<APIFilter> subsetFilters) {
+    if (dataSpec.isVariableSpec()) {
+      return _subsettingClient.getVocabByRootEntity(_referenceMetadata, dataSpec.getVariableSpec(), subsetFilters);
+    } else {
+      // TODO get mad
+    }
+
+    return null;
   }
 
-  protected ResponseFuture getVocabByRootEntity(VariableSpec varSpec) {
-    return getVocabByRootEntity(varSpec, _subsetFilters);
+  protected ResponseFuture getVocabByRootEntity(DynamicDataSpecImpl dataSpec) {
+    return getVocabByRootEntity(dataSpec, _subsetFilters);
   }
 
-  protected List<ResponseFuture> getVocabByRootEntity(List<VariableSpec> varSpecs, List<APIFilter> subsetFilters) {
-    return varSpecs.stream().map(var -> getVocabByRootEntity(var, subsetFilters)).toList();
+  protected List<ResponseFuture> getVocabByRootEntity(List<DynamicDataSpecImpl> dataSpecs, List<APIFilter> subsetFilters) {
+    return dataSpecs.stream().map(dataSpec -> getVocabByRootEntity(dataSpec, subsetFilters)).toList();
   }
 
-  protected List<ResponseFuture> getVocabByRootEntity(List<VariableSpec> varSpecs) {
-    return getVocabByRootEntity(varSpecs, _subsetFilters);
+  protected List<ResponseFuture> getVocabByRootEntity(List<DynamicDataSpecImpl> dataSpecs) {
+    return getVocabByRootEntity(dataSpecs, _subsetFilters);
   }
 
   /*****************************************************************
@@ -686,10 +692,9 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     PluginUtil util = getUtil();
 
     if (dataSpec.isCollectionSpec()) {
-      // TODO write this util
-      return ifelse(util.getHasStudyDependentVocabulary(dataSpec.getCollectionSpec()).equals("true"), true, false);
+      return util.getHasStudyDependentVocabulary(dataSpec.getCollectionSpec());
     } else if (dataSpec.isVariableSpec()) {
-      return ifelse(util.getHasStudyDependentVocabulary(dataSpec.getVariableSpec()).equals("true"), true, false);
+      return util.getHasStudyDependentVocabulary(dataSpec.getVariableSpec());
     } else {
       return false;
     }
@@ -699,7 +704,6 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = new ArrayList<>();
 
     for (DynamicDataSpecImpl dataSpec : dataSpecs.values()) {
-      // can this return a boolean rather than String?
       if (hasStudyDependentVocabulary(dataSpec)) {
         dataSpecsWithStudyDependentVocabs.add(dataSpec);
       } 
@@ -764,7 +768,6 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     return compressedDataHandle;
   }
 
-  // TODO write varSpec and collectionSpec versions that call the dataSpec one
   public String getRCollectionInputDataWithImputedZeroesAsString(String compressedDataHandle, Map<String, CollectionSpec> collectionSpecs) {
     Map<String, DynamicDataSpecImpl> dataSpecs = collectionMapToDynamicDataMap(collectionSpecs);
 
