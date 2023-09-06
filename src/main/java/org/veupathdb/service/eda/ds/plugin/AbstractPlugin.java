@@ -690,7 +690,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> impl
     } else if (dataSpec.isVariableSpec()) {
       return ifelse(util.getHasStudyDependentVocabulary(dataSpec.getVariableSpec()).equals("true"), true, false);
     } else {
-      return null;
+      return false;
     }
   }
 
