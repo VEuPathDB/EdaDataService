@@ -1,0 +1,275 @@
+donuts:
+- expectedMarkerCount: 13
+  body: |
+    {
+      "studyId": "VBP_MEGA",
+      "filters": [],
+      "config": {
+        "geoAggregateVariable": {
+          "entityId": "GAZ_00000448",
+          "variableId": "EUPATH_0043203"
+        },
+        "latitudeVariable": {
+          "entityId": "GAZ_00000448",
+          "variableId": "OBI_0001620"
+        },
+        "longitudeVariable": {
+          "entityId": "GAZ_00000448",
+          "variableId": "OBI_0001621"
+        },
+        "overlayConfig": {
+          "overlayType": "categorical",
+          "overlayVariable": {
+            "variableId": "CHEBI_24852",
+            "entityId": "OBI_0002695"
+          },
+          "overlayValues": [
+            "deltamethrin",
+            "permethrin",
+            "DDT",
+            "bendiocarb",
+            "lambda-cyhalothrin",
+            "malathion",
+            "fenitrothion",
+            "__UNSELECTED__"
+          ]
+        },
+        "outputEntityId": "OBI_0002695",
+        "valueSpec": "count",
+        "viewport": {
+          "latitude": {
+            "xMin": -90,
+            "xMax": 90
+          },
+          "longitude": {
+            "left": -180,
+            "right": 180
+          }
+        }
+      }
+    }
+
+bubbles:
+#- expectedMarkerCount:
+#  body: |
+#    {
+#    "studyId": "2023-maine-ricinus",
+#    "filters": [],
+#    "config": {
+#        "geoAggregateVariable": {
+#            "entityId": "GAZ_00000448",
+#            "variableId": "EUPATH_0043203"
+#        },
+#        "latitudeVariable": {
+#            "entityId": "GAZ_00000448",
+#            "variableId": "OBI_0001620"
+#        },
+#        "longitudeVariable": {
+#            "entityId": "GAZ_00000448",
+#            "variableId": "OBI_0001621"
+#        },
+#        "overlayConfig": {
+#            "overlayVariable": {
+#                "variableId": "EUPATH_0043256",
+#                "entityId": "OBI_0000659"
+#            },
+#            "aggregationConfig": {
+#                "overlayType": "continuous",
+#                "aggregator": "mean"
+#            }
+#        },
+#        "outputEntityId": "OBI_0000659",
+#        "valueSpec": "count",
+#        "viewport": {
+#            "latitude": {
+#                "xMin": -90,
+#                "xMax": 90
+#            },
+#            "longitude": {
+#                "left": -180,
+#                "right": 180
+#            }
+#        }
+#    }
+#}
+
+## Test case with missing data and mean overlay for continuous variable.
+- expectedMarkerCount: 3
+  body: |
+    {
+      "studyId": "VBP_MEGA",
+      "filters": [],
+      "config": {
+        "geoAggregateVariable": {
+          "entityId": "GAZ_00000448",
+          "variableId": "EUPATH_0043203"
+        },
+        "latitudeVariable": {
+          "entityId": "GAZ_00000448",
+          "variableId": "OBI_0001620"
+        },
+        "longitudeVariable": {
+          "entityId": "GAZ_00000448",
+          "variableId": "OBI_0001621"
+        },
+        "overlayConfig": {
+          "overlayVariable": {
+            "variableId": "EUPATH_0043219",
+            "entityId": "OBI_0000435"
+          },
+          "aggregationConfig": {
+            "overlayType": "continuous",
+            "aggregator": "mean"
+          }
+        },
+        "outputEntityId": "OBI_0000435",
+        "valueSpec": "count",
+        "viewport": {
+          "latitude": {
+            "xMin": -37.718590325588146,
+            "xMax": 75.40885422846455
+          },
+          "longitude": {
+            "left": -170.15624999,
+            "right": -170.15625
+          }
+        }
+      }
+    }
+
+  ## Test case with missing data and mean overlay for continuous variable.
+- expectedMarkerCount: 3
+  body: |
+    {
+      "studyId": "VBP_MEGA",
+      "filters": [],
+      "config": {
+        "geoAggregateVariable": {
+          "entityId": "GAZ_00000448",
+          "variableId": "EUPATH_0043203"
+        },
+        "latitudeVariable": {
+          "entityId": "GAZ_00000448",
+          "variableId": "OBI_0001620"
+        },
+        "longitudeVariable": {
+          "entityId": "GAZ_00000448",
+          "variableId": "OBI_0001621"
+        },
+        "overlayConfig": {
+          "overlayVariable": {
+            "variableId": "EUPATH_0043219",
+            "entityId": "OBI_0000435"
+          },
+          "aggregationConfig": {
+            "overlayType": "continuous",
+            "aggregator": "median"
+          }
+        },
+        "outputEntityId": "OBI_0000435",
+        "valueSpec": "count",
+        "viewport": {
+          "latitude": {
+            "xMin": -37.718590325588146,
+            "xMax": 75.40885422846455
+          },
+          "longitude": {
+            "left": -170.15624999,
+            "right": -170.15625
+          }
+        }
+      }
+    }
+
+# Zoomed out picture of maine-ricinus with categorical variable.
+- expectedMarkerCount: 2
+  body: |
+    {
+      "studyId": "2023-maine-ricinus",
+      "filters": [],
+      "config": {
+        "geoAggregateVariable": {
+          "entityId": "GAZ_00000448",
+          "variableId": "EUPATH_0043203"
+        },
+        "latitudeVariable": {
+          "entityId": "GAZ_00000448",
+          "variableId": "OBI_0001620"
+        },
+        "longitudeVariable": {
+          "entityId": "GAZ_00000448",
+          "variableId": "OBI_0001621"
+        },
+        "overlayConfig": {
+          "overlayVariable": {
+            "variableId": "POPBIO_8000010",
+            "entityId": "OBI_0002728"
+          },
+          "aggregationConfig": {
+            "overlayType": "categorical",
+            "numeratorValues": [
+              "present"
+            ],
+            "denominatorValues": [
+              "absent",
+              "present"
+            ]
+          }
+        },
+        "outputEntityId": "OBI_0002728",
+        "valueSpec": "count",
+        "viewport": {
+          "latitude": {
+            "xMin": -90,
+            "xMax": 90
+          },
+          "longitude": {
+            "left": -180,
+            "right": 180
+          }
+        }
+      }
+    }
+
+- expectedMarkerCount: 12
+  body: |
+    {
+        "studyId": "VBP_MEGA",
+        "filters": [],
+        "config": {
+            "geoAggregateVariable": {
+                "entityId": "GAZ_00000448",
+                "variableId": "EUPATH_0043203"
+            },
+            "latitudeVariable": {
+                "entityId": "GAZ_00000448",
+                "variableId": "OBI_0001620"
+            },
+            "longitudeVariable": {
+                "entityId": "GAZ_00000448",
+                "variableId": "OBI_0001621"
+            },
+            "overlayConfig": {
+                "overlayVariable": {
+                    "variableId": "EUPATH_0043064",
+                    "entityId": "OBI_0002695"
+                },
+                "aggregationConfig": {
+                    "overlayType": "continuous",
+                    "aggregator": "mean"
+                }
+            },
+            "outputEntityId": "OBI_0002695",
+            "valueSpec": "count",
+            "viewport": {
+                "latitude": {
+                    "xMin": -37.718590325588146,
+                    "xMax": 75.40885422846455
+                },
+                "longitude": {
+                    "left": -170.15624999,
+                    "right": -170.15625
+                }
+            }
+        }
+    }

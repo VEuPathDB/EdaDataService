@@ -1,0 +1,39 @@
+{
+  "Configuration": {
+    "name": "Default",
+    "status": "error",
+    "Appenders": {
+      "Console": [
+        {
+          "name": "Console_Appender",
+          "target": "SYSTEM_OUT",
+          "PatternLayout": {
+            "pattern": "%highlight{%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %c - %m%n}"
+          }
+        }
+      ]
+    },
+    "Loggers": {
+      "Root": {
+        "level": "debug",
+        "AppenderRef": [
+          {
+            "ref": "Console_Appender"
+          }
+        ]
+      },
+      "Logger": [
+        {
+          "name": "org.apache",
+          "level": "warn",
+          "additivity": false,
+          "AppenderRef": [
+            {
+              "ref": "Console_Appender"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
