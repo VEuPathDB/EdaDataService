@@ -231,7 +231,7 @@ types:
     type: object
     additionalProperties: false
     properties:
-      tabular: string[][]
+      counts: string[][]
   EmptyResponse:
     type: object
     additionalProperties: false
@@ -312,6 +312,8 @@ types:
         format: int64
       memberVariableIds: string[]
       imputeZero: boolean
+      hasStudyDependentVocabulary: boolean
+      variableSpecToImputeZeroesFor: VariableSpec
   API_CollectionType:
     type: string
     enum:
@@ -369,6 +371,8 @@ types:
       isMergeKey: boolean
       isMultiValued: boolean
       imputeZero: boolean
+      hasStudyDependentVocabulary: boolean
+      variableSpecToImputeZeroesFor: VariableSpec
   API_VariableType:
     type: string
     enum:
@@ -394,12 +398,6 @@ types:
       - geoaggregator
       - latitude
       - longitude
-  API_VariableScale:
-    type: string
-    enum:
-      - log
-      - log2
-      - ln
   API_VariablesCategory:
     type: API_Variable
     discriminatorValue: category
@@ -456,15 +454,14 @@ types:
     discriminatorValue: number
     properties:
       distributionDefaults: API_NumberDistributionDefaults
-      units?: string
+      units: string
       precision: number
-      scale?: API_VariableScale
   API_IntegerVariable:
     type: API_VariableWithValues
     discriminatorValue: integer
     properties:
       distributionDefaults: API_IntegerDistributionDefaults
-      units?: string
+      units: string
   API_DateVariable:
     type: API_VariableWithValues
     discriminatorValue: date
@@ -651,8 +648,8 @@ types:
     type: object
     properties:
       variable: VariableSpec
-      groupA: string[]
-      groupB: string[]
+      groupA: LabeledRange[]
+      groupB: LabeledRange[]
   DifferentialAbundanceStatsResponse:
     type: object
     properties:

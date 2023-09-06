@@ -340,11 +340,11 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     PluginUtil util = getUtil();
     ResponseFuture response = _subsettingClient.getVocabByRootEntity(_referenceMetadata, dataSpec, subsetFilters);
 
-    return new HashMap<String, InputStream>(util.toColNameOrNull(dataSpec, response.getInputStream());
+    return new HashMap<String, InputStream>(util.toColNameOrNull(dataSpec), response.getInputStream());
   }
 
   protected Map<String, InputStream> getVocabByRootEntity(DynamicDataSpecImpl dataSpec) {
-    return getVocabByRootEntity(varSpec, _subsetFilters);
+    return getVocabByRootEntity(dataSpec, _subsetFilters);
   }
 
   protected Map<String, InputStream> getVocabByRootEntity(List<DynamicDataSpecImpl> dataSpecs, List<APIFilter> subsetFilters) {
@@ -747,6 +747,8 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
   }
 
   public String getRMegastudyAsString(String compressedDataHandle, Map<String, DynamicDataSpecImpl> dataSpecs) {
+    PluginUtil util = getUtil();
+
     // find and validate variables w study specific vocabs
     List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findDataSpecsWithStudyDependentVocabs(dataSpecs);
     List<String> entities = dataSpecsWithStudyDependentVocabs.stream().map(data -> getDynamicDataSpecEntityId(data)).toList();
@@ -759,7 +761,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
 
     // get ancestor ids, can use first var bc we validate they all have the same entity
     String entityId = entities.get(0);
-    String ancestorIdsAsRString = getEntityAncestorsAsRVectorString(entityId, _referenceMetadata);
+    String ancestorIdsAsRString = util.getEntityAncestorsAsRVectorString(entityId, _referenceMetadata);
 
     String megastudyAsRString = "veupathUtils::MegaStudy(" + 
                                  "data = " + compressedDataHandle + "," +
@@ -778,5 +780,17 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     }
     
     return compressedDataHandle;
+  }
+
+  public String getRCollectionInputDataWithImputedZeroesAsString(String compressedDataHandle, Map<String, CollectionSpec> collectionSpecs) {
+    Map<String, DynamicDataSpecImpl> dataSpecs = collectionMapToDynamicDataMap(collectionSpecs);
+
+    return(getRInputDataWithImputedZeroesAsString(compressedDataHandle, dataSpecs));
+  }
+
+  public String getRVariableInputDataWithImputedZeroesAsString(String compressedDataHandle, Map<String, VariableSpec> varSpecs) {
+    Map<String, DynamicDataSpecImpl> dataSpecs = varMapToDynamicDataMap(varSpecs);
+
+    return(getRInputDataWithImputedZeroesAsString(compressedDataHandle, dataSpecs));
   }
 }
