@@ -336,25 +336,27 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     return response.getHistogram().stream().collect(Collectors.toMap(HistogramBin::getBinLabel, bin -> Double.valueOf(bin.getValue().toString())));
   }
 
-  protected ResponseFuture getVocabByRootEntity(DynamicDataSpecImpl dataSpec, List<APIFilter> subsetFilters) {
-    if (dataSpec.isVariableSpec()) {
-      return _subsettingClient.getVocabByRootEntity(_referenceMetadata, dataSpec.getVariableSpec(), subsetFilters);
-    } else {
-      // TODO get mad
+  protected Map<String, InputStream> getVocabByRootEntity(DynamicDataSpecImpl dataSpec, List<APIFilter> subsetFilters) {
+    PluginUtil util = getUtil();
+    ResponseFuture response = _subsettingClient.getVocabByRootEntity(_referenceMetadata, dataSpec, subsetFilters);
+
+    return new HashMap<String, InputStream>(util.toColNameOrNull(dataSpec, response.getInputStream());
+  }
+
+  protected Map<String, InputStream> getVocabByRootEntity(DynamicDataSpecImpl dataSpec) {
+    return getVocabByRootEntity(varSpec, _subsetFilters);
+  }
+
+  protected Map<String, InputStream> getVocabByRootEntity(List<DynamicDataSpecImpl> dataSpecs, List<APIFilter> subsetFilters) {
+    Map<String, InputStream> studyVocabStreams = new HashMap<String, InputStream>();
+    for (DynamicDataSpecImpl dataSpec : dataSpecs) {
+      studyVocabStreams.putAll(getVocabByRootEntity(dataSpec));
     }
 
-    return null;
+    return studyVocabStreams;
   }
 
-  protected ResponseFuture getVocabByRootEntity(DynamicDataSpecImpl dataSpec) {
-    return getVocabByRootEntity(dataSpec, _subsetFilters);
-  }
-
-  protected List<ResponseFuture> getVocabByRootEntity(List<DynamicDataSpecImpl> dataSpecs, List<APIFilter> subsetFilters) {
-    return dataSpecs.stream().map(dataSpec -> getVocabByRootEntity(dataSpec, subsetFilters)).toList();
-  }
-
-  protected List<ResponseFuture> getVocabByRootEntity(List<DynamicDataSpecImpl> dataSpecs) {
+  protected Map<String, InputStream> getVocabByRootEntity(List<DynamicDataSpecImpl> dataSpecs) {
     return getVocabByRootEntity(dataSpecs, _subsetFilters);
   }
 
@@ -653,13 +655,13 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     return true;
   }
 
-  public String getRStudyVocabsAsString(DynamicDataSpecImpl dataSpec, ResponseFuture studyVocab) {
+  public String getRStudyVocabsAsString(DynamicDataSpecImpl dataSpec) {
     PluginUtil util = getUtil();
     
     // this assuming the first ancestor is the root one is a bit hacky, but i did the same in R so...
     // obviously doing the same awful thing twice makes it ok. but doing any better is higher cost than i have time for right now :(
-    String readStudyVocabInR = "data.table::fread(" + studyVocab + ", header = FALSE)";
-    String studyVocabAsRTibble = "dplyr::reframe(dplyr::group_by(" + readStudyVocabInR + ", V1), " +
+    String studyVocabInR = util.toColNameOrEmpty(dataSpec);
+    String studyVocabAsRTibble = "dplyr::reframe(dplyr::group_by(" + studyVocabInR + ", V1), " +
                                          "values=paste0('veupathUtils::StudySpecificVocabulary(variable=veupathUtils::VariableSpec(entityId=" + getDynamicDataSpecEntityId(dataSpec)+ ", " + 
                                                                                               "variableId=" + getDynamicDataSpecId(dataSpec) + ")" + 
                                                           "vocabulary=c(',paste(V2, collapse=','),')," +
@@ -671,12 +673,12 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     return studyVocabsListAsRString;
   }
 
-  public String getRStudyVocabsAsString(List<DynamicDataSpecImpl> dataSpecs, List<ResponseFuture> studyVocabs) {
+  public String getRStudyVocabsAsString(List<DynamicDataSpecImpl> dataSpecs) {
     String studyVocabListRString = "veupathUtils::StudySpecificVocabulariesByVariableList(S4Vectors::SimpleList(";
     boolean first = true;
 
     for (int i = 0; i < dataSpecs.size(); i++) {
-      String studyVocabRString = getRStudyVocabsAsString(dataSpecs.get(i), studyVocabs.get(i));
+      String studyVocabRString = getRStudyVocabsAsString(dataSpecs.get(i));
       if (first) {
         studyVocabListRString = studyVocabListRString + studyVocabRString;
         first = false;
@@ -712,6 +714,18 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     return dataSpecsWithStudyDependentVocabs;
   }
 
+  public List<DynamicDataSpecImpl> findVariableSpecsWithStudyDependentVocabs(Map<String, VariableSpec> varSpecs) {
+    Map<String, DynamicDataSpecImpl> dataSpecs = varMapToDynamicDataMap(varSpecs);
+
+    return findDataSpecsWithStudyDependentVocabs(dataSpecs);
+  }
+
+  public List<DynamicDataSpecImpl> findCollectionSpecsWithStudyDependentVocabs(Map<String, CollectionSpec> collectionSpecs) {
+    Map<String, DynamicDataSpecImpl> dataSpecs = collectionMapToDynamicDataMap(collectionSpecs);
+
+    return findDataSpecsWithStudyDependentVocabs(dataSpecs);
+  }
+
   public String getDynamicDataSpecEntityId(DynamicDataSpecImpl dataSpec) {
     if (dataSpec.isCollectionSpec()) {
       return dataSpec.getCollectionSpec().getEntityId();
@@ -741,9 +755,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
       // TODO get mad 
     }
 
-    // hit the study vocabs endpoint, convert that to R
-    List<ResponseFuture> studyVocabs= getVocabByRootEntity(dataSpecsWithStudyDependentVocabs);
-    String studyVocabsAsRString = getRStudyVocabsAsString(dataSpecsWithStudyDependentVocabs, studyVocabs);
+    String studyVocabsAsRString = getRStudyVocabsAsString(dataSpecsWithStudyDependentVocabs);
 
     // get ancestor ids, can use first var bc we validate they all have the same entity
     String entityId = entities.get(0);
@@ -766,17 +778,5 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     }
     
     return compressedDataHandle;
-  }
-
-  public String getRCollectionInputDataWithImputedZeroesAsString(String compressedDataHandle, Map<String, CollectionSpec> collectionSpecs) {
-    Map<String, DynamicDataSpecImpl> dataSpecs = collectionMapToDynamicDataMap(collectionSpecs);
-
-    return(getRInputDataWithImputedZeroesAsString(compressedDataHandle, dataSpecs));
-  }
-
-  public String getRVariableInputDataWithImputedZeroesAsString(String compressedDataHandle, Map<String, VariableSpec> varSpecs) {
-    Map<String, DynamicDataSpecImpl> dataSpecs = varMapToDynamicDataMap(varSpecs);
-
-    return(getRInputDataWithImputedZeroesAsString(compressedDataHandle, dataSpecs));
   }
 }

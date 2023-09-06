@@ -121,6 +121,10 @@ public class FloatingScatterplotPlugin extends AbstractEmptyComputePlugin<Floati
     nonStrataVarColNames.add(util.toColNameOrEmpty(spec.getXAxisVariable()));
     nonStrataVarColNames.add(util.toColNameOrEmpty(spec.getYAxisVariable()));
 
+    List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findVariableSpecsWithStudyDependentVocabs(varMap);
+    Map<String, InputStream> studyVocabs = getVocabByRootEntity(dataSpecsWithStudyDependentVocabs);
+    dataStreams.putAll(studyVocabs);
+
     RFileSetProcessor filesProcessor = new RFileSetProcessor(dataStreams)
       .add(DEFAULT_SINGLE_STREAM_NAME, 
         spec.getMaxAllowedDataPoints(), 

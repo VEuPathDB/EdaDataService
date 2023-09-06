@@ -76,7 +76,11 @@ public class CollectionFloatingContTablePlugin extends AbstractEmptyComputePlugi
     List<VariableSpec> inputVarSpecs = new ArrayList<>(spec.getXAxisVariable().getSelectedMembers());
     Map<String, CollectionSpec> varMap = new HashMap<>();
     varMap.put("xAxis", spec.getXAxisVariable().getCollection());
-    
+   
+    List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findCollectionSpecsWithStudyDependentVocabs(varMap);
+    Map<String, InputStream> studyVocabs = getVocabByRootEntity(dataSpecsWithStudyDependentVocabs);
+    dataStreams.putAll(studyVocabs);
+
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, inputVarSpecs));
       String inputData = getRCollectionInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap);

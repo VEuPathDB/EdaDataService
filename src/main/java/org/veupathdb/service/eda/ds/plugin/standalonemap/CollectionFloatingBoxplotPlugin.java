@@ -106,6 +106,10 @@ public class CollectionFloatingBoxplotPlugin extends AbstractEmptyComputePlugin<
         conn.voidEval(util.getVoidEvalFreadCommand(name, inputVarSpecs))
       );
 
+    List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findDataSpecsWithStudyDependentVocabs(varMap);
+    Map<String, InputStream> studyVocabs = getVocabByRootEntity(dataSpecsWithStudyDependentVocabs);
+    dataStreams.putAll(studyVocabs);
+
     useRConnectionWithProcessedRemoteFiles(Resources.RSERVE_URL, filesProcessor, connection -> {
       String inputData = getRInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap);
       connection.voidEval(getVoidEvalDynamicDataMetadataList(varMap));
