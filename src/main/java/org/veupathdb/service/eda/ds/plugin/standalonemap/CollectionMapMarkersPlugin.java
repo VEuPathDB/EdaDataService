@@ -5,34 +5,18 @@ import org.gusdb.fgputil.json.JsonUtil;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
-import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.ds.core.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.AveragesWithConfidence;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.CollectionAveragesWithConfidenceAggregator;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.MarkerAggregator;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.GeolocationViewport;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MapMarkerRowProcessor;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.MarkerAggregator;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.MarkerData;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.QuantitativeAggregateConfiguration;
 import org.veupathdb.service.eda.ds.utils.ValidationUtils;
-import org.veupathdb.service.eda.generated.model.APIVariableType;
-import org.veupathdb.service.eda.generated.model.CollectionMapMarkerElement;
-import org.veupathdb.service.eda.generated.model.CollectionMapMarkerElementImpl;
-import org.veupathdb.service.eda.generated.model.CollectionMemberAggregate;
-import org.veupathdb.service.eda.generated.model.CollectionMemberAggregateImpl;
-import org.veupathdb.service.eda.generated.model.NumberRange;
-import org.veupathdb.service.eda.generated.model.NumberRangeImpl;
-import org.veupathdb.service.eda.generated.model.StandaloneCollectionMapMarkerPostRequest;
-import org.veupathdb.service.eda.generated.model.StandaloneCollectionMapMarkerPostResponse;
-import org.veupathdb.service.eda.generated.model.StandaloneCollectionMapMarkerPostResponseImpl;
-import org.veupathdb.service.eda.generated.model.StandaloneCollectionMapMarkerSpec;
+import org.veupathdb.service.eda.generated.model.*;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -65,10 +49,9 @@ public class CollectionMapMarkersPlugin extends AbstractEmptyComputePlugin<Stand
         .done();
   }
 
-
   @Override
-  protected AbstractPlugin<StandaloneCollectionMapMarkerPostRequest, StandaloneCollectionMapMarkerSpec, Void>.ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(StandaloneCollectionMapMarkerPostRequest.class, StandaloneCollectionMapMarkerSpec.class, Void.class);
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(StandaloneCollectionMapMarkerPostRequest.class, StandaloneCollectionMapMarkerSpec.class);
   }
 
   @Override

@@ -8,9 +8,7 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.common.plugin.util.RFileSetProcessor;
 import org.veupathdb.service.eda.ds.Resources;
-import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.OverlaySpecification;
+import org.veupathdb.service.eda.ds.core.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.utils.ValidationUtils;
 import org.veupathdb.service.eda.generated.model.*;
 
@@ -21,15 +19,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithProcessedRemoteFiles;
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
 public class CollectionFloatingBoxplotPlugin extends AbstractEmptyComputePlugin<CollectionFloatingBoxplotPostRequest, CollectionFloatingBoxplotSpec> {
-  private OverlaySpecification _overlaySpecification = null;
 
   @Override
   public String getDisplayName() {
@@ -62,8 +57,8 @@ public class CollectionFloatingBoxplotPlugin extends AbstractEmptyComputePlugin<
   }
 
   @Override
-  protected AbstractPlugin<CollectionFloatingBoxplotPostRequest, CollectionFloatingBoxplotSpec, Void>.ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(CollectionFloatingBoxplotPostRequest.class, CollectionFloatingBoxplotSpec.class, Void.class);
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(CollectionFloatingBoxplotPostRequest.class, CollectionFloatingBoxplotSpec.class);
   }
 
   @Override
@@ -92,11 +87,11 @@ public class CollectionFloatingBoxplotPlugin extends AbstractEmptyComputePlugin<
     List<VariableSpec> inputVarSpecs = new ArrayList<>(spec.getOverlayConfig().getSelectedMembers());
     inputVarSpecs.add(spec.getXAxisVariable());
     CollectionSpec overlayVariable = spec.getOverlayConfig().getCollection();
-    Map<String, DynamicDataSpecImpl> varMap = new HashMap<String, DynamicDataSpecImpl>();
+    Map<String, DynamicDataSpecImpl> varMap = new HashMap<>();
     varMap.put("xAxis", new DynamicDataSpecImpl(spec.getXAxisVariable()));
     varMap.put("overlay", new DynamicDataSpecImpl(overlayVariable));
     
-    List<String> nonStrataVarColNames = new ArrayList<String>();
+    List<String> nonStrataVarColNames = new ArrayList<>();
     nonStrataVarColNames.add(util.toColNameOrEmpty(spec.getXAxisVariable()));
     // ideally wed find another way to account for the yaxis given its a collection but that seems hard and idk if were even using this feature
     //nonStrataVarColNames.add(util.toColNameOrEmpty(spec.getYAxisVariable()));

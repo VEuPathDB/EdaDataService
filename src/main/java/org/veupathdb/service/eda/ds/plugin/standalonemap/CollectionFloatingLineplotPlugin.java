@@ -7,9 +7,7 @@ import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
-import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.OverlaySpecification;
+import org.veupathdb.service.eda.ds.core.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.utils.ValidationUtils;
 import org.veupathdb.service.eda.generated.model.*;
 
@@ -20,8 +18,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuote;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
@@ -29,7 +25,6 @@ import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConn
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
 public class CollectionFloatingLineplotPlugin extends AbstractEmptyComputePlugin<CollectionFloatingLineplotPostRequest, CollectionFloatingLineplotSpec> {
-  private OverlaySpecification _overlaySpecification = null;
 
   @Override
   public String getDisplayName() {
@@ -58,8 +53,8 @@ public class CollectionFloatingLineplotPlugin extends AbstractEmptyComputePlugin
   }
 
   @Override
-  protected AbstractPlugin<CollectionFloatingLineplotPostRequest, CollectionFloatingLineplotSpec, Void>.ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(CollectionFloatingLineplotPostRequest.class, CollectionFloatingLineplotSpec.class, Void.class);
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(CollectionFloatingLineplotPostRequest.class, CollectionFloatingLineplotSpec.class);
   }
 
   @Override
@@ -88,14 +83,14 @@ public class CollectionFloatingLineplotPlugin extends AbstractEmptyComputePlugin
     List<VariableSpec> inputVarSpecs = new ArrayList<>(spec.getOverlayConfig().getSelectedMembers());
     inputVarSpecs.add(spec.getXAxisVariable());
     CollectionSpec overlayVariable = spec.getOverlayConfig().getCollection();
-    Map<String, DynamicDataSpecImpl> varMap = new HashMap<String, DynamicDataSpecImpl>();
+    Map<String, DynamicDataSpecImpl> varMap = new HashMap<>();
     varMap.put("xAxis", new DynamicDataSpecImpl(spec.getXAxisVariable()));
     varMap.put("overlay", new DynamicDataSpecImpl(overlayVariable));
     String errorBars = spec.getErrorBars() != null ? spec.getErrorBars().getValue() : "FALSE";
     String valueSpec = spec.getValueSpec().getValue();
     String collectionType = util.getCollectionType(overlayVariable);
-    String numeratorValues = spec.getYAxisNumeratorValues() != null ? util.listToRVector(spec.getYAxisNumeratorValues()) : "NULL";
-    String denominatorValues = spec.getYAxisDenominatorValues() != null ? util.listToRVector(spec.getYAxisDenominatorValues()) : "NULL";
+    String numeratorValues = spec.getYAxisNumeratorValues() != null ? PluginUtil.listToRVector(spec.getYAxisNumeratorValues()) : "NULL";
+    String denominatorValues = spec.getYAxisDenominatorValues() != null ? PluginUtil.listToRVector(spec.getYAxisDenominatorValues()) : "NULL";
     String overlayValues = getRBinListAsString(spec.getOverlayConfig().getSelectedValues());
     
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
@@ -107,7 +102,7 @@ public class CollectionFloatingLineplotPlugin extends AbstractEmptyComputePlugin
       BinWidthSpec binSpec = spec.getBinSpec();
       validateBinSpec(binSpec, collectionType);
      
-      String binWidth = "NULL";
+      String binWidth;
       if (collectionType.equals("NUMBER") || collectionType.equals("INTEGER")) {
         binWidth = binSpec.getValue() == null ? "NULL" : "as.numeric('" + binSpec.getValue() + "')";
       } else {
