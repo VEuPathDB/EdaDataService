@@ -8,10 +8,7 @@ import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.core.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.utils.ValidationUtils;
-import org.veupathdb.service.eda.generated.model.CollectionFloatingContTablePostRequest;
-import org.veupathdb.service.eda.generated.model.CollectionFloatingContTableSpec;
-import org.veupathdb.service.eda.generated.model.CollectionSpec;
-import org.veupathdb.service.eda.generated.model.VariableSpec;
+import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
 import java.io.InputStream;

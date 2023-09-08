@@ -340,7 +340,15 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     PluginUtil util = getUtil();
     ResponseFuture response = _subsettingClient.getVocabByRootEntity(_referenceMetadata, dataSpec, subsetFilters);
 
-    return new HashMap<String, InputStream>(util.toColNameOrNull(dataSpec), response.getInputStream());
+    Map<String, InputStream> vocab = new HashMap<String, InputStream>();
+    try (InputStream vocabStream = response.getInputStream()) {
+      vocab.put(util.toColNameOrEmpty(dataSpec), vocabStream);
+    }
+    catch (Exception e) {
+      throw new RuntimeException("Unable to stream study specific vocabulary response.", e);
+    }
+
+    return vocab;
   }
 
   protected Map<String, InputStream> getVocabByRootEntity(DynamicDataSpecImpl dataSpec) {
