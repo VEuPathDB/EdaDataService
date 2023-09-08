@@ -1,0 +1,1 @@
+data class BubbleMarkerTestCase(val expectedMarkerCount: Int, val body: String)
