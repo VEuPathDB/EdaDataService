@@ -78,7 +78,7 @@ jar: build/libs/service.jar
 
 .PHONY: docker
 docker:
-	./gradlew build-docker --stacktrace
+	./gradlew :build-docker --stacktrace
 
 #
 # File based targets
