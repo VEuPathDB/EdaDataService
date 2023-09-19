@@ -16,7 +16,15 @@ public class ProportionWithConfidenceAggregator implements MarkerAggregator<Aver
   private final List<String> denominatorValues;
   private final int index;
 
-  public ProportionWithConfidenceAggregator(int index, List<String> numeratorValues, List<String> denominatorValues) {
+  private final boolean numeratorAlwaysOne;
+  private final boolean denominatorAlwaysOne;
+
+  public ProportionWithConfidenceAggregator(int index,
+                                            List<String> numeratorValues,
+                                            List<String> denominatorValues,
+                                            List<String> overlayVocab) {
+    this.numeratorAlwaysOne = numeratorValues.containsAll(overlayVocab);
+    this.denominatorAlwaysOne = denominatorValues.containsAll(overlayVocab);
     this.index = index;
     this.numeratorValues = numeratorValues;
     this.denominatorValues = denominatorValues;
@@ -27,10 +35,14 @@ public class ProportionWithConfidenceAggregator implements MarkerAggregator<Aver
     if (arr[index] == null || arr[index].isEmpty()) {
       return;
     }
-    if (numeratorValues.contains(arr[index])) {
+    if (numeratorAlwaysOne || numeratorValues.contains(arr[index])) {
       numeratorMatches++;
+      denominatorMatches++;
+      n++;
+      return;
     }
-    if (denominatorValues.contains(arr[index])) {
+
+    if (denominatorAlwaysOne || denominatorValues.contains(arr[index])) {
       n++;
       denominatorMatches++;
     }

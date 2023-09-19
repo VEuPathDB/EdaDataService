@@ -82,8 +82,10 @@ public class BubbleMapMarkersLegendPlugin extends AbstractEmptyComputePlugin<Sta
         .var("sizeGeoVariable", sizeConfig.map(SizeLegendConfig::getGeoAggregateVariable).orElse(null)));
     if (pluginSpec.getColorLegendConfig() != null) {
       try {
-        _colorSpecification = new QuantitativeAggregateConfiguration(pluginSpec.getColorLegendConfig().getQuantitativeOverlayConfig().getAggregationConfig(),
-            getUtil().getVariableDataShape(pluginSpec.getColorLegendConfig().getQuantitativeOverlayConfig().getOverlayVariable()));
+        _colorSpecification = new QuantitativeAggregateConfiguration(
+            pluginSpec.getColorLegendConfig().getQuantitativeOverlayConfig().getAggregationConfig(),
+            getUtil().getVariableDataShape(pluginSpec.getColorLegendConfig().getQuantitativeOverlayConfig().getOverlayVariable()),
+            getUtil().getVocabulary(pluginSpec.getColorLegendConfig().getQuantitativeOverlayConfig().getOverlayVariable()));
       } catch (IllegalArgumentException e) {
         throw new ValidationException(e.getMessage());
       }
