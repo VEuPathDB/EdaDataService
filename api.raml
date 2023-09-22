@@ -22,6 +22,276 @@ securitySchemes:
           type: string
 
 ####################################
+# Subsetting Service Specific Endpoints
+####################################
+
+/clear-metadata-cache:
+  displayName: Clears the metadata cache; useful if new data has been loaded into the database
+  get:
+    responses:
+      200:
+        body:
+          text/plain:
+
+/studies:
+  displayName: Overview of available studies
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: lib.StudiesGetResponse
+
+  /{study-id}:
+    uriParameters:
+      study-id:
+        description: ID of the study of interest
+        type: string
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              type: lib.StudyIdGetResponse
+
+    /entities:
+
+      /{entity-id}:
+        uriParameters:
+          entity-id:
+            description: ID of the entity of interest
+            type: string
+        get:
+          description: Returns entity details, not including its children (which it may or may not have; see study endpoint)
+          responses:
+            200:
+              body:
+                application/json:
+                  type: lib.EntityIdGetResponse
+
+        /count:
+          post:
+            securedBy: header-auth
+            description: |
+              Return a count of entities in this subset.  In the request, `filters` must be a subclass of [Filter](#type:lib.Filter)
+            body:
+              application/json:
+                type: lib.EntityCountPostRequest
+            responses:
+              200:
+                body:
+                  application/json:
+                    type: lib.EntityCountPostResponse
+
+        /tabular:
+          post:
+            securedBy: header-auth
+            description: |
+              Return a tabular report of one or more variables belonging to this entity.  The output will also include all ancestor primary keys.  In the request, `filters` must be a subclass of [Filter](#type:lib.Filter)
+            body:
+              application/json:
+                type: lib.EntityTabularPostRequest
+              application/x-www-form-urlencoded:
+            responses:
+              200:
+                body:
+                  text/tab-separated-values:
+                    type: lib.EntityTabularPostResponse
+                  application/json:
+                    type: lib.EntityTabularPostResponse
+
+        /variables:
+
+          /{variable-id}:
+
+            /root-vocab:
+              description: |
+                Groups values of this variable by their rows' root entity ID (collecting a vocabulary of values specific
+                to each root entity record) and returns them as a tabular result where each row is a distinct 
+                combination of root entity ID and variable value. This is useful for reducing applicable vocabularies 
+                of this variable to only the root entities remaining after a subset operation.
+              post:
+                securedBy: header-auth
+                body:
+                  application/json:
+                    type: lib.VocabByRootEntityPostRequest
+                responses:
+                  200:
+                    body:
+                      text/tab-separated-values:
+                        type: lib.VocabByRootEntityPostResponse
+
+            /distribution:
+              post:
+                securedBy: header-auth
+                description: |
+                  Return the count of entities in the subset that have a value for this variable, and |
+                  a distribution for this variable, i.e., entity counts for each value of this |
+                  variable.  In the request, `filters` must be a subclass of [Filter](#type:lib.Filter)
+                body:
+                  application/json:
+                    type: lib.VariableDistributionPostRequest
+                responses:
+                  200:
+                    body:
+                      application/json:
+                        type: lib.VariableDistributionPostResponse
+
+/ss-internal/studies/{study-id}/entities/{entity-id}:
+
+  /count:
+    post:
+      securedBy: header-auth
+      description: |
+        Return a count of entities in this subset.  In the request, `filters` must be a subclass of [Filter](#type:lib.Filter)
+      body:
+        application/json:
+          type: lib.EntityCountPostRequest
+      responses:
+        200:
+          body:
+            application/json:
+              type: lib.EntityCountPostResponse
+
+  /tabular:
+    post:
+      securedBy: header-auth
+      description: |
+        Return a tabular report of one or more variables belonging to this entity.  The output will also include all ancestor primary keys.  In the request, `filters` must be a subclass of [Filter](#type:lib.Filter)
+      body:
+        application/json:
+          type: lib.EntityTabularPostRequest
+      responses:
+        200:
+          body:
+            text/tab-separated-values:
+              type: lib.EntityTabularPostResponse
+            application/json:
+              type: lib.EntityTabularPostResponse
+
+  /variables/{variable-id}/distribution:
+    post:
+      securedBy: header-auth
+      description: |
+        Return the count of entities in the subset that have a value for this variable, and |
+        a distribution for this variable, i.e., entity counts for each value of this |
+        variable.  In the request, `filters` must be a subclass of [Filter](#type:lib.Filter)
+      body:
+        application/json:
+          type: lib.VariableDistributionPostRequest
+      responses:
+        200:
+          body:
+            application/json:
+              type: lib.VariableDistributionPostResponse
+
+####################################
+# Merging Service Specific Endpoints
+####################################
+
+/merging:
+  /derived-variables:
+    /input-specs:
+      displayName: This endpoint is used only to produce documentation of derived variable configuration types
+      post:
+        body:
+          application/json:
+            type: lib.DerivedVariableDocumentationRequest
+        responses:
+          204:
+
+    /metadata:
+      /variables:
+        displayName: Return metadata about a small collection of derived variables
+        post:
+          body:
+            application/json:
+              type: lib.DerivedVariableBulkMetadataRequest
+          responses:
+            200:
+              body:
+                application/json:
+                  type: lib.DerivedVariableMetadata[]
+      /units:
+        displayName: Return metadata about available unit conversions
+        get:
+          responses:
+            200:
+              body:
+                application/json:
+                  type: lib.UnitConversionMetadataResponse
+
+  /query:
+    displayName: Merged Tabular Data Query
+    post:
+      securedBy: header-auth
+      body:
+        application/json:
+          type: lib.MergedEntityTabularPostRequest
+      responses:
+        200:
+          body:
+            text/tab-separated-values:
+              type: lib.EntityTabularPostResponse
+        400:
+          body:
+            application/json:
+              type: error.BadRequestError
+        422:
+          body:
+            application/json:
+              type: error.UnprocessableEntityError
+        500:
+          body:
+            application/json:
+              type: error.ServerError
+
+####################################
+# Merging Internal Endpoints
+####################################
+
+/merging-internal:
+
+  /derived-variables:
+    /metadata:
+      /variables:
+        displayName: Return metadata about a small collection of derived variables
+        post:
+          body:
+            application/json:
+              type: lib.DerivedVariableBulkMetadataRequest
+          responses:
+            200:
+              body:
+                application/json:
+                  type: lib.DerivedVariableMetadata[]
+
+  /query:
+    displayName: Merged Tabular Data Query
+    post:
+      securedBy: header-auth
+      body:
+        application/json:
+          type: lib.MergedEntityTabularPostRequest
+      responses:
+        200:
+          body:
+            text/tab-separated-values:
+              type: lib.EntityTabularPostResponse
+        400:
+          body:
+            application/json:
+              type: error.BadRequestError
+        422:
+          body:
+            application/json:
+              type: error.UnprocessableEntityError
+        500:
+          body:
+            application/json:
+              type: error.ServerError
+
+####################################
 # Data Service Specific Endpoints
 ####################################
 

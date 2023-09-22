@@ -777,6 +777,129 @@ types:
       overlayVariable:
         type: VariableSpec
         required: false
+  DerivedVariableDocumentationRequest:
+    type: object
+    properties:
+      mean: SingleNumericVarReductionConfig
+      sum: SingleNumericVarReductionConfig
+      concatenation: ConcatenationConfig
+      subsetMembership: SubsetMembershipConfig
+      advancedSubset: AdvancedSubsetConfig
+      unitConversion: UnitConversionConfig
+      bodyMassIndex: BodyMassIndexConfig
+      categoricalRecoding: CategoricalRecodingConfig
+      continuousToOrdinal: ContinuousNumericRecodingConfig
+      ecmaScriptExpressionEval: EcmaScriptExpressionEvalConfig
+      relativeObservationMinTimeInterval: RelatedObservationMinTimeIntervalConfig
+  Unit:
+    type: object
+    properties:
+      displayName: string
+      values: string[]
+  UnitType:
+    type: object
+    properties:
+      displayName: string
+      units: Unit[]
+  UnitConversionMetadataResponse:
+    type: object
+    properties:
+      types: UnitType[]
+  SingleNumericVarReductionConfig:
+    type: object
+    properties:
+      inputVariable: VariableSpec
+      imputeZero?: boolean
+  ConcatenationConfig:
+    type: object
+    properties:
+      prefix?: string
+      delimiter?: string
+      suffix?: string
+      inputVariables: VariableSpec[]
+  CategoricalRecodingRule:
+    type: object
+    properties:
+      inputValues: string[]
+      outputValue: string
+  CategoricalRecodingConfig:
+    type: object
+    properties:
+      inputVariable: VariableSpec
+      rules: CategoricalRecodingRule[]
+      unmappedValue?: string
+  ContinuousNumericRule:
+    type: object
+    properties:
+      minInclusive?: number
+      maxExclusive?: number
+      outputValue: string
+  ContinuousNumericRecodingConfig:
+    type: object
+    properties:
+      inputVariable: VariableSpec
+      rules: ContinuousNumericRule[]
+      unmappedValue?: string
+  BodyMassIndexConfig:
+    type: object
+    properties:
+      heightVariable: VariableSpec
+      weightVariable: VariableSpec
+  SubsetMembershipConfig:
+    type: object
+    properties:
+      subsetFilters: API_Filter[]
+  UnitConversionConfig:
+    type: object
+    properties:
+      inputVariable: VariableSpec
+      outputUnits: string
+  SetOperation:
+    type: string
+    enum:
+      - intersect
+      - union
+      - minus
+  Step:
+    type: object
+    properties:
+      key: string
+      operation: SetOperation
+      leftStepKey?: string
+      leftVariable?: VariableSpec
+      leftVariableTrueValues?: string[]
+      rightStepKey?: string
+      rightVariable?: VariableSpec
+      rightVariableTrueValues?: string[]
+  AdvancedSubsetConfig:
+    type: object
+    properties:
+      rootStepKey: string
+      steps: Step[]
+  VariableReference:
+    type: object
+    properties:
+      name: string
+      variable: VariableSpec
+  EcmaScriptExpressionEvalConfig:
+    type: object
+    properties:
+      ecmaScriptExpression: string
+      nullResultOnAnyMissingInput: boolean
+      inputVariables: VariableReference[]
+      expectedType: API_VariableType
+      expectedShape: API_VariableDataShape
+  RelatedObservationMinTimeIntervalConfig:
+    type: object
+    properties:
+      relatedObservationsSubset: API_Filter[]
+      anchorVariable: VariableSpec
+      anchorVariableTrueValues: string[]
+      anchorTimestampVariable: VariableSpec
+      targetVariable: VariableSpec
+      targetVariableTrueValues: string[]
+      targetTimestampVariable: VariableSpec
+      minimumTimeIntervalDays: integer
   DifferentialAbundanceVolcanoplotPostRequest:
     type: DataPluginRequestBase
     properties:

@@ -1,0 +1,100 @@
+#%RAML 1.0 Library
+
+types:
+
+  SingleNumericVarReductionConfig:
+    properties:
+      inputVariable: VariableSpec
+      imputeZero?: boolean
+
+  ConcatenationConfig:
+    properties:
+      prefix?: string
+      delimiter?: string
+      suffix?: string
+      inputVariables: VariableSpec[]
+
+  CategoricalRecodingRule:
+    properties:
+      inputValues: string[]
+      outputValue: string
+
+  CategoricalRecodingConfig:
+    properties:
+      inputVariable: VariableSpec
+      rules: CategoricalRecodingRule[]
+      unmappedValue?: string
+
+  ContinuousNumericRule:
+    properties:
+      minInclusive?: number
+      maxExclusive?: number
+      outputValue: string
+
+  ContinuousNumericRecodingConfig:
+    properties:
+      inputVariable: VariableSpec
+      rules: ContinuousNumericRule[]
+      unmappedValue?: string
+
+  BodyMassIndexConfig:
+    properties:
+      heightVariable: VariableSpec
+      weightVariable: VariableSpec
+
+  SubsetMembershipConfig:
+    properties:
+      subsetFilters: API_Filter[]
+
+  UnitConversionConfig:
+    properties:
+      inputVariable: VariableSpec
+      outputUnits: string
+
+  SetOperation:
+    type: string
+    enum: [ 'intersect', 'union', 'minus' ]
+
+  Step:
+    properties:
+      # how this step will be identified (throwaway, but must be unique in this 'strategy')
+      key: string
+      # defines the operation that will be performed
+      operation: SetOperation
+      # for left branch, caller must choose either another step key or a variable
+      leftStepKey?: string
+      leftVariable?: VariableSpec
+      leftVariableTrueValues?: string[]   # defaults to [ '1', 'true', 'yes' ]
+      # for right branch, caller must choose either another step key or a variable
+      rightStepKey?: string
+      rightVariable?: VariableSpec
+      rightVariableTrueValues?: string[]   # defaults to [ '1', 'true', 'yes' ]
+
+  AdvancedSubsetConfig:
+    properties:
+      rootStepKey: string
+      steps: Step[]
+
+  VariableReference:
+    properties:
+      name: string
+      variable: VariableSpec
+
+  EcmaScriptExpressionEvalConfig:
+    properties:
+      ecmaScriptExpression: string
+      nullResultOnAnyMissingInput: boolean
+      inputVariables: VariableReference[]
+      expectedType: API_VariableType
+      expectedShape: API_VariableDataShape
+
+  RelatedObservationMinTimeIntervalConfig:
+    properties:
+      relatedObservationsSubset: API_Filter[]
+      anchorVariable: VariableSpec
+      anchorVariableTrueValues: string[]
+      anchorTimestampVariable: VariableSpec
+      targetVariable: VariableSpec
+      targetVariableTrueValues: string[]
+      targetTimestampVariable: VariableSpec
+      minimumTimeIntervalDays: integer

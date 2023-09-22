@@ -31,7 +31,7 @@ containerBuild {
     projectPackage = "org.veupathdb.service.eda"
 
     // Main Class Name
-    mainClassName = "ds.Main"
+    mainClassName = "Main"
   }
 
   // Docker build configuration.
@@ -82,6 +82,8 @@ val coreLib       = "6.16.0"         // Container core lib version
 val edaCompute    = "2.2.0"          // EDA Compute version (used to pull in compute plugin RAML)
 val edaCommon     = "11.5.0"         // EDA Common version
 val fgputil       = "2.12.9-jakarta" // FgpUtil version
+val libSubsetting = "4.9.4"          // lib-eda-subsetting version
+
 
 // use local EDA compute compiled schema if project exists, else use released version;
 //    this mirrors the way we use local EdaCommon code if available
@@ -129,6 +131,7 @@ dependencies {
   // VEuPathDB libs, prefer local checkouts if available
   implementation(findProject(":core") ?: "org.veupathdb.lib:jaxrs-container-core:${coreLib}")
   implementation(findProject(":edaCommon") ?: "org.veupathdb.service.eda:eda-common:${edaCommon}")
+  implementation(findProject(":libSubsetting") ?: "org.veupathdb.eda:lib-eda-subsetting:${libSubsetting}")
 
   // published VEuPathDB libs
   implementation("org.gusdb:fgputil-core:${fgputil}")
