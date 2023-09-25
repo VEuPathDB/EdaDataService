@@ -527,6 +527,21 @@ securitySchemes:
               application/json:
                 type: lib.DifferentialAbundanceStatsResponse
 
+  /correlationassaymetadata/visualizations:
+    displayName: Visualizations for discovering corrleations between assay data and sample metadata
+
+    /bipartitenetwork:
+      post:
+        description: Returns data required to create a volcanoplot from a differential abundance analysis.
+        body:
+          application/json:
+            type: lib.CorrelationAssayMetadataBipartitenetworkPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.CorrelationAssayMetadataStatsResponse
+
   /distributions/visualizations:
     displayName: Visualizations for exploring distributions of data.
 
