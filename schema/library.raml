@@ -70,6 +70,7 @@ types:
       displayRangeMax?: any
       vocabulary?: string[]
       imputeZero: boolean
+      hasStudyDependentVocabulary?: boolean
       isCollection: boolean
       members?: VariableSpec[]
   ComputedVariableMetadata:
@@ -372,7 +373,7 @@ types:
       isMergeKey: boolean
       isMultiValued: boolean
       imputeZero: boolean
-      hasStudySpecificVocabulary?: boolean
+      hasStudyDependentVocabulary?: boolean
       variableSpecToImputeZeroesFor?: VariableSpec
   API_VariableType:
     type: string

@@ -57,6 +57,7 @@ public class CorrelationAssayMetadataBipartitenetworkPlugin extends AbstractPlug
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    writeComputeStatsResponseToOutput(out);
+    System.out.println("I'm writing results!");
+    // writeComputeStatsResponseToOutput(out);
   }
 }
