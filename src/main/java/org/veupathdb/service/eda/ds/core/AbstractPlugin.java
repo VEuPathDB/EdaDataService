@@ -659,7 +659,19 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
   }
 
   public boolean validateImputeZeroesRequest(Map<String, DynamicDataSpecImpl> dataSpecs) {
-    // TODO check a bunch of stuff i no longer remember
+    // TODO keep adding checks as i think of them
+
+    List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findDataSpecsWithStudyDependentVocabs(dataSpecs);
+    List<String> entities = dataSpecsWithStudyDependentVocabs.stream().map(data -> getDynamicDataSpecEntityId(data)).toList();
+    if (entities.size() == 0) {
+      return false;
+    }
+
+    boolean allEqualEntities = entities.isEmpty() || Collections.frequency(entities, entities.get(0)) == entities.size();
+    if (!allEqualEntities) { 
+      return false; 
+    }
+
     return true;
   }
 
@@ -714,6 +726,9 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = new ArrayList<>();
 
     for (DynamicDataSpecImpl dataSpec : dataSpecs.values()) {
+
+      System.out.println("dataSpec: " + getDynamicDataSpecId(dataSpec));
+      System.out.println("hasStudyDependentVocabulary: " + hasStudyDependentVocabulary(dataSpec));
       if (hasStudyDependentVocabulary(dataSpec)) {
         dataSpecsWithStudyDependentVocabs.add(dataSpec);
       } 
@@ -759,15 +774,11 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
 
     // find and validate variables w study specific vocabs
     List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findDataSpecsWithStudyDependentVocabs(dataSpecs);
+    System.out.println("dataSpecsWithStudyDependentVocabs size: " + dataSpecsWithStudyDependentVocabs.size());
     List<String> entities = dataSpecsWithStudyDependentVocabs.stream().map(data -> getDynamicDataSpecEntityId(data)).toList();
-    boolean allEqualEntities = entities.isEmpty() || Collections.frequency(entities, entities.get(0)) == entities.size();
-    if (!allEqualEntities) { 
-      // TODO get mad 
-    }
-
     String studyVocabsAsRString = getRStudyVocabsAsString(dataSpecsWithStudyDependentVocabs);
 
-    // get ancestor ids, can use first var bc we validate they all have the same entity
+    // get ancestor ids, can use first var bc we validate there is at least one and they all have the same entity
     String entityId = entities.get(0);
     String ancestorIdsAsRString = util.getEntityAncestorsAsRVectorString(entityId, _referenceMetadata);
 
