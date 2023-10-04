@@ -11,6 +11,7 @@ import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivBoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.abundance.AbundanceBoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.abundance.AbundanceScatterplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.correlationassaymetadata.CorrelationAssayMetadataBipartitenetworkPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.BarplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.BoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ContTablePlugin;
@@ -113,6 +114,10 @@ public class AppsMetadata {
           "Find taxa or genes that are differentially abundant between two groups.",
           List.of(MICROBIOME_PROJECT),
           viz("volcanoplot", new DifferentialAbundanceVolcanoplotPlugin())),
+      app("correlationassaymetadata", "Correlation", "correlationassaymetadata",
+          "Discover taxa or genes correlated with metadata.",
+          List.of(MICROBIOME_PROJECT),
+          viz("bipartitenetwork", new CorrelationAssayMetadataBipartitenetworkPlugin())),
       app("distributions", "Distributions", null,
           "Plot simple distributions for any continuous variable, including metadata (e.g. age, height, etc.) or microbial assay results.",
           List.of(MICROBIOME_PROJECT),
