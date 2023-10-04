@@ -11,6 +11,7 @@ import org.veupathdb.service.eda.generated.model.ContinuousAggregationConfig;
 import org.veupathdb.service.eda.generated.model.QuantitativeAggregationConfig;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.function.Function;
 
 import static org.veupathdb.service.eda.generated.model.OverlayType.CATEGORICAL;
@@ -26,7 +27,8 @@ public class QuantitativeAggregateConfiguration {
    * with a user-friendly message if there are any user input errors.
    */
   public QuantitativeAggregateConfiguration(QuantitativeAggregationConfig overlayConfig,
-                                            String varShape) {
+                                            String varShape,
+                                            List<String> overlayVocab) {
     if (CATEGORICAL.equals(overlayConfig.getOverlayType())) {
       if (varShape.equalsIgnoreCase(APIVariableDataShape.CONTINUOUS.getValue())) {
         throw new IllegalArgumentException("Incorrect overlay configuration type for categorical var: " + varShape);
@@ -40,7 +42,8 @@ public class QuantitativeAggregateConfiguration {
           new HashSet<>(categoricalConfig.getDenominatorValues()), index);
       averageWithConfAggregatorSupplier = (index) -> new ProportionWithConfidenceAggregator(index,
           categoricalConfig.getNumeratorValues(),
-          categoricalConfig.getDenominatorValues());
+          categoricalConfig.getDenominatorValues(),
+          overlayVocab);
     } else {
       if (!varShape.equalsIgnoreCase(APIVariableDataShape.CONTINUOUS.getValue())) {
         throw new IllegalArgumentException("Incorrect overlay configuration type for continuous var: " + varShape);

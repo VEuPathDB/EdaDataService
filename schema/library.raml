@@ -611,7 +611,7 @@ types:
   AlphaDivComputeConfig:
     type: object
     properties:
-      collectionVariable: VariableSpec
+      collectionVariable: CollectionSpec
       alphaDivMethod: AlphaDivMethod
   AlphaDivMethod:
     type: string
@@ -626,7 +626,7 @@ types:
   BetaDivComputeConfig:
     type: object
     properties:
-      collectionVariable: VariableSpec
+      collectionVariable: CollectionSpec
       betaDivDissimilarityMethod: BetaDivDissimilarityMethod
   BetaDivDissimilarityMethod:
     type: string
@@ -645,7 +645,7 @@ types:
   DifferentialAbundanceComputeConfig:
     type: object
     properties:
-      collectionVariable: VariableSpec
+      collectionVariable: CollectionSpec
       comparator: ComparatorSpec
       differentialAbundanceMethod: DifferentialAbundanceMethod
   DifferentialAbundanceMethod:
@@ -653,19 +653,25 @@ types:
     enum:
       - DESeq
       - ANCOMBC
+      - Maaslin
   ComparatorSpec:
     type: object
     properties:
       variable: VariableSpec
       groupA: LabeledRange[]
       groupB: LabeledRange[]
-  DifferentialAbundanceStatsResponse:
+  DifferentialAbundanceStats:
     type: object
     properties:
-      log2foldChange: string[]
+      effectSize: string[]
       pValue: string[]
       adjustedPValue: string[]
       pointId: string[]
+  DifferentialAbundanceStatsResponse:
+    type: object
+    properties:
+      effectSizeLabel: string
+      statistics: DifferentialAbundanceStats
   ExamplePluginRequest:
     type: ComputeRequestBase
     properties:
@@ -686,7 +692,7 @@ types:
   RankedAbundanceComputeConfig:
     type: object
     properties:
-      collectionVariable: VariableSpec
+      collectionVariable: CollectionSpec
       rankingMethod: RankingMethod
   RankingMethod:
     type: string
