@@ -6,8 +6,7 @@ import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
-import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.ds.core.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.CountAggregator;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.QuantitativeAggregateConfiguration;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.MarkerAggregator;
@@ -62,10 +61,9 @@ public class BubbleMapMarkersLegendPlugin extends AbstractEmptyComputePlugin<Sta
         .done();
   }
 
-
   @Override
-  protected AbstractPlugin<StandaloneMapBubblesLegendPostRequest, StandaloneMapBubblesLegendSpec, Void>.ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(StandaloneMapBubblesLegendPostRequest.class, StandaloneMapBubblesLegendSpec.class, Void.class);
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(StandaloneMapBubblesLegendPostRequest.class, StandaloneMapBubblesLegendSpec.class);
   }
 
   @Override
@@ -89,7 +87,8 @@ public class BubbleMapMarkersLegendPlugin extends AbstractEmptyComputePlugin<Sta
         _colorSpecification = new QuantitativeAggregateConfiguration(
             pluginSpec.getColorLegendConfig().getQuantitativeOverlayConfig().getAggregationConfig(),
             getUtil().getVariableDataShape(overlayVar),
-            getUtil().getVariableType(overlayVar));
+            getUtil().getVariableType(overlayVar),
+            getUtil().getVocabulary(pluginSpec.getColorLegendConfig().getQuantitativeOverlayConfig().getOverlayVariable()));
       } catch (IllegalArgumentException e) {
         throw new ValidationException(e.getMessage());
       }

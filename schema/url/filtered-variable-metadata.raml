@@ -18,26 +18,12 @@ types:
         items:
           enum: ['binRanges', 'median']
 
-  # TODO should the BinRange and BinRangeWithValue live somewhere else?
-  BinRange:
-    additionalProperties: false
-    properties:
-      binStart: string # number | date
-      binEnd: string # number | date
-      binLabel: string
-
-  BinRangeWithValue:
-    additionalProperties: false
-    type: BinRange
-    properties:
-      value: number
-
   AllBinRanges:
     additionalProperties: false
     properties:
-      equalInterval: BinRange[]
-      quantile: BinRange[]
-      standardDeviation: BinRange[]
+      equalInterval: LabeledRange[]
+      quantile: LabeledRange[]
+      standardDeviation: LabeledRange[]
 
   ContinuousVariableMetadataPostResponse:
     additionalProperties: false

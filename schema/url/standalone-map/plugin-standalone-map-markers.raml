@@ -50,7 +50,7 @@ types:
     discriminatorValue: continuous
     properties:
       overlayValues:
-        type: BinRange[]
+        type: LegacyLabeledRange[]
 
   CategoricalOverlayConfig:
     type: OverlayConfig
@@ -60,13 +60,6 @@ types:
       overlayValues:
         type: string[]
 
-  # Value (count or proportion) is specified by ValueSpec while count is always returned as count.
-  RangeWithCountAndValue:
-    additionalProperties: false
-    type: BinRangeWithValue
-    properties:
-      count: number
-
   StandaloneMapElementInfo:
     additionalProperties: false
     properties:
@@ -75,7 +68,7 @@ types:
       entityCount:
         type: number
       overlayValues:
-        type: RangeWithCountAndValue[]
+        type: LegacyLabeledRangeWithCountAndValue[]
       avgLat:
         type: number
       avgLon:

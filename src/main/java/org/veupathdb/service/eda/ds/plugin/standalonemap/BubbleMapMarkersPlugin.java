@@ -7,8 +7,7 @@ import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
-import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.ds.core.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.GeolocationViewport;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.MarkerAggregator;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.QuantitativeAggregateConfiguration;
@@ -64,8 +63,8 @@ public class BubbleMapMarkersPlugin extends AbstractEmptyComputePlugin<Standalon
   }
 
   @Override
-  protected AbstractPlugin<StandaloneMapBubblesPostRequest, StandaloneMapBubblesSpec, Void>.ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(StandaloneMapBubblesPostRequest.class, StandaloneMapBubblesSpec.class, Void.class);
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(StandaloneMapBubblesPostRequest.class, StandaloneMapBubblesSpec.class);
   }
 
   @Override
@@ -83,9 +82,12 @@ public class BubbleMapMarkersPlugin extends AbstractEmptyComputePlugin<Standalon
         if (pluginSpec.getOverlayConfig().getAggregationConfig() == null) {
           throw new ValidationException("aggregationConfig is a required field.");
         }
-        _overlaySpecification = new QuantitativeAggregateConfiguration(pluginSpec.getOverlayConfig().getAggregationConfig(),
+        List<String> overlayVocab = getUtil().getVocabulary(pluginSpec.getOverlayConfig().getOverlayVariable());
+        _overlaySpecification = new QuantitativeAggregateConfiguration(
+            pluginSpec.getOverlayConfig().getAggregationConfig(),
             getUtil().getVariableDataShape(pluginSpec.getOverlayConfig().getOverlayVariable()),
-            getUtil().getVariableType(pluginSpec.getOverlayConfig().getOverlayVariable()));
+            getUtil().getVariableType(pluginSpec.getOverlayConfig().getOverlayVariable()),
+            overlayVocab);
       } catch (IllegalArgumentException e) {
         throw new ValidationException(e.getMessage());
       }

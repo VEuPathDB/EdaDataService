@@ -4,13 +4,14 @@ import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
-import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
-import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.ds.core.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.utils.ValidationUtils;
-import org.veupathdb.service.eda.generated.model.*;
+import org.veupathdb.service.eda.generated.model.CollectionFloatingContTablePostRequest;
+import org.veupathdb.service.eda.generated.model.CollectionFloatingContTableSpec;
+import org.veupathdb.service.eda.generated.model.CollectionSpec;
+import org.veupathdb.service.eda.generated.model.VariableSpec;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,8 +49,8 @@ public class CollectionFloatingContTablePlugin extends AbstractEmptyComputePlugi
   }
 
   @Override
-  protected AbstractPlugin<CollectionFloatingContTablePostRequest, CollectionFloatingContTableSpec, Void>.ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(CollectionFloatingContTablePostRequest.class, CollectionFloatingContTableSpec.class, Void.class);
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(CollectionFloatingContTablePostRequest.class, CollectionFloatingContTableSpec.class);
   }
 
   @Override
@@ -73,7 +74,7 @@ public class CollectionFloatingContTablePlugin extends AbstractEmptyComputePlugi
     CollectionFloatingContTableSpec spec = getPluginSpec();
     String overlayValues = getRBinListAsString(spec.getXAxisVariable().getSelectedValues());
     List<VariableSpec> inputVarSpecs = new ArrayList<>(spec.getXAxisVariable().getSelectedMembers());
-    Map<String, CollectionSpec> varMap = new HashMap<String, CollectionSpec>();
+    Map<String, CollectionSpec> varMap = new HashMap<>();
     varMap.put("xAxis", spec.getXAxisVariable().getCollection());
     
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {

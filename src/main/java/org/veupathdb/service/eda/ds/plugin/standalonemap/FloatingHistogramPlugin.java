@@ -9,8 +9,7 @@ import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
-import org.veupathdb.service.eda.ds.plugin.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
+import org.veupathdb.service.eda.ds.core.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.OverlaySpecification;
 import org.veupathdb.service.eda.generated.model.*;
 
@@ -21,16 +20,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.streamResult;
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 import static org.veupathdb.service.eda.ds.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
 public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<FloatingHistogramPostRequest, FloatingHistogramSpec> {
+
   private OverlaySpecification _overlaySpecification = null;
-  
-  private static final Logger LOG = LogManager.getLogger(FloatingHistogramPlugin.class);
 
   @Override
   public String getDisplayName() {
@@ -61,8 +58,8 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
   }
 
   @Override
-  protected AbstractPlugin<FloatingHistogramPostRequest, FloatingHistogramSpec, Void>.ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(FloatingHistogramPostRequest.class, FloatingHistogramSpec.class, Void.class);
+  protected ClassGroup getTypeParameterClasses() {
+    return new EmptyComputeClassGroup(FloatingHistogramPostRequest.class, FloatingHistogramSpec.class);
   }
 
   @Override
@@ -100,7 +97,7 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
     PluginUtil util = getUtil();
     FloatingHistogramSpec spec = getPluginSpec();
     VariableSpec overlayVariable = _overlaySpecification != null ? _overlaySpecification.getOverlayVariable() : null;
-    Map<String, VariableSpec> varMap = new HashMap<String, VariableSpec>();
+    Map<String, VariableSpec> varMap = new HashMap<>();
     varMap.put("xAxis", spec.getXAxisVariable());
     varMap.put("overlay", overlayVariable);
     String barMode = spec.getBarMode().getValue();
@@ -138,12 +135,11 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
           connection.voidEval("binWidth <- NULL");
         }
       } else {
-        String binWidth = "NULL";
-        if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
-          binWidth = binSpec.getValue() == null ? "NULL" : "as.numeric('" + binSpec.getValue() + "')";
-        } else {
-          binWidth = binSpec.getValue() == null ? "NULL" : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
-        }
+        String binWidth =
+            binSpec.getValue() == null ? "NULL" :
+                (xVarType.equals("NUMBER") || xVarType.equals("INTEGER"))
+                ? "as.numeric('" + binSpec.getValue() + "')"
+                : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
         connection.voidEval("binWidth <- " + binWidth);
       }
 
@@ -159,6 +155,7 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
                                   "completeCases=FALSE, " +
                                   "overlayValues=" + overlayValues + ", " +
                                   "evilMode='noVariables')";
+
       streamResult(connection, cmd, out);
     });
   }

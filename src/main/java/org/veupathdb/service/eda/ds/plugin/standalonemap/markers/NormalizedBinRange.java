@@ -10,26 +10,26 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class NormalizedBinRange {
-  private final double start;
-  private final double end;
-  private final String label;
+  private final double _min;
+  private final double _max;
+  private final String _label;
 
-  public NormalizedBinRange(double start, double end, String label) {
-    this.start = start;
-    this.end = end;
-    this.label = label;
+  public NormalizedBinRange(double min, double max, String label) {
+    _min = min;
+    _max = max;
+    _label = label;
   }
 
-  public double getStart() {
-    return start;
+  public double getMin() {
+    return _min;
   }
 
-  public double getEnd() {
-    return end;
+  public double getMax() {
+    return _max;
   }
 
   public String getLabel() {
-    return label;
+    return _label;
   }
 
   public static List<NormalizedBinRange> fromOverlayConfig(ContinousOverlayConfig overlayConfig, String variableType) {

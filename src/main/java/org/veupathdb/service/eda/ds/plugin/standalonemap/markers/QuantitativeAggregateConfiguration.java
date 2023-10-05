@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.HashSet;
+import java.util.List;
 import java.util.function.Function;
 
 import static org.veupathdb.service.eda.generated.model.OverlayType.CATEGORICAL;
@@ -31,8 +32,9 @@ public class QuantitativeAggregateConfiguration {
    */
   public QuantitativeAggregateConfiguration(QuantitativeAggregationConfig overlayConfig,
                                             String varShape,
-                                            String variableType) {
-    this.variableType = variableType;
+                                            String variableType,
+                                            List<String> overlayVocab) {
+      this.variableType = variableType;
     if (CATEGORICAL.equals(overlayConfig.getOverlayType())) {
       if (varShape.equalsIgnoreCase(APIVariableDataShape.CONTINUOUS.getValue())) {
         throw new IllegalArgumentException("Incorrect overlay configuration type for categorical var: " + varShape);
@@ -53,7 +55,8 @@ public class QuantitativeAggregateConfiguration {
         public MarkerAggregator<AveragesWithConfidence> createWithConfidence(int index, Function<String, Double> valueQuantifier) {
          return new ProportionWithConfidenceAggregator(index,
               categoricalConfig.getNumeratorValues(),
-              categoricalConfig.getDenominatorValues());
+              categoricalConfig.getDenominatorValues(),
+              overlayVocab);
         }
       };
     } else {

@@ -17,13 +17,14 @@ import org.veupathdb.service.eda.common.auth.StudyAccess;
 import org.veupathdb.service.eda.common.client.NonEmptyResultStream.EmptyResultException;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
-import org.veupathdb.service.eda.ds.plugin.AbstractPlugin;
-import org.veupathdb.service.eda.ds.plugin.abundance.AbundanceBoxplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.abundance.AbundanceScatterplotPlugin;
+import org.veupathdb.service.eda.ds.core.AbstractPlugin;
+import org.veupathdb.service.eda.ds.plugin.differentialabundance.DifferentialAbundanceVolcanoplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.correlationassaymetadata.CorrelationAssayMetadataBipartitenetworkPlugin;
+import org.veupathdb.service.eda.ds.plugin.betadiv.BetaDivScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivBoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivScatterplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.betadiv.BetaDivScatterplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.differentialabundance.DifferentialAbundanceVolcanoplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.abundance.AbundanceBoxplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.abundance.AbundanceScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.*;
 import org.veupathdb.service.eda.ds.plugin.sample.*;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.*;
@@ -340,6 +341,13 @@ public class AppsService implements Apps {
   public PostAppsDifferentialabundanceVisualizationsVolcanoplotResponse postAppsDifferentialabundanceVisualizationsVolcanoplot(DifferentialAbundanceVolcanoplotPostRequest entity) {
     return wrapPlugin(() -> PostAppsDifferentialabundanceVisualizationsVolcanoplotResponse.respond200WithApplicationJson(
         new DifferentialAbundanceStatsResponseStream(processRequest(new DifferentialAbundanceVolcanoplotPlugin(), entity))));
+  }
+
+  @DisableJackson
+  @Override
+  public PostAppsCorrelationassaymetadataVisualizationsBipartitenetworkResponse postAppsCorrelationassaymetadataVisualizationsBipartitenetwork(CorrelationAssayMetadataBipartitenetworkPostRequest entity) {
+    return wrapPlugin(() -> PostAppsCorrelationassaymetadataVisualizationsBipartitenetworkResponse.respond200WithApplicationJson(
+        new CorrelationAssayMetadataStatsResponseStream(processRequest(new CorrelationAssayMetadataBipartitenetworkPlugin(), entity))));
   }
 
   @DisableJackson

@@ -59,8 +59,8 @@ public class OverlaySpecification {
     for (int i = 0; i < labels.size(); i++) {
       String rBin = "veupathUtils::Bin(binLabel=\"" + labels.get(i) + "\"";
       if (binRanges != null) {
-        rBin += ",binStart=" + String.valueOf(binRanges.get(i).getStart()) + 
-                ",binEnd=" + String.valueOf(binRanges.get(i).getEnd());
+        rBin += ",binStart=" + String.valueOf(binRanges.get(i).getMin()) +
+                ",binEnd=" + String.valueOf(binRanges.get(i).getMax());
       }
       rBin += ")";
 
@@ -117,8 +117,8 @@ public class OverlaySpecification {
     }
     Map<Double, Double> binEdges = normalizedRanges.stream()
         .collect(Collectors.toMap(
-            NormalizedBinRange::getStart,
-            NormalizedBinRange::getEnd,
+            NormalizedBinRange::getMin,
+            NormalizedBinRange::getMax,
             (u, v) -> {
                throw new IllegalStateException(String.format("Duplicate key %s", u));
             }, 
@@ -139,8 +139,8 @@ public class OverlaySpecification {
     // Binary search?
     return binRanges.stream()
         .filter(bin -> bin.getLabel().startsWith("[") ? 
-                       bin.getStart() <= varValue && bin.getEnd() >= varValue : 
-                       bin.getStart() < varValue && bin.getEnd() >= varValue)
+                       bin.getMin() <= varValue && bin.getMax() >= varValue :
+                       bin.getMin() < varValue && bin.getMax() >= varValue)
         .findFirst()
         .orElseThrow(() -> new IllegalArgumentException("The variable value " + varValue + " is not in any specified bin range."))
         .getLabel();
