@@ -341,7 +341,8 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     ResponseFuture response = _subsettingClient.getVocabByRootEntity(_referenceMetadata, dataSpec, subsetFilters);
 
     Map<String, InputStream> vocab = new HashMap<String, InputStream>();
-    try (InputStream vocabStream = response.getInputStream()) {
+    try {
+      InputStream vocabStream = response.getInputStream();
       vocab.put(util.toColNameOrEmpty(dataSpec), vocabStream);
     }
     catch (Exception e) {
@@ -681,14 +682,14 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     // this assuming the first ancestor is the root one is a bit hacky, but i did the same in R so...
     // obviously doing the same awful thing twice makes it ok. but doing any better is higher cost than i have time for right now :(
     String studyVocabInR = util.toColNameOrEmpty(dataSpec);
-    String studyVocabAsRTibble = "dplyr::reframe(dplyr::group_by(" + studyVocabInR + ", V1), " +
-                                         "values=paste0('veupathUtils::StudySpecificVocabulary(variable=veupathUtils::VariableSpec(entityId=" + getDynamicDataSpecEntityId(dataSpec)+ ", " + 
-                                                                                              "variableId=" + getDynamicDataSpecId(dataSpec) + ")" + 
-                                                          "vocabulary=c(',paste(V2, collapse=','),')," +
-                                                          "study=\"',V1,'\"'" +
-                                                          "studyIdColumnName='" + util.getEntityAncestorsAsRVectorString(getDynamicDataSpecEntityId(dataSpec), _referenceMetadata) + "[1])))";
+    String studyVocabAsRTibble = "dplyr::reframe(dplyr::group_by(data.table::fread(\"" + studyVocabInR + "\", header=FALSE), V1), " +
+                                         "values=paste0(\"veupathUtils::StudySpecificVocabulary(variableSpec=veupathUtils::VariableSpec(entityId='" + getDynamicDataSpecEntityId(dataSpec)+ "'," + 
+                                                                                              "variableId='" + getDynamicDataSpecId(dataSpec) + "')," + 
+                                                          "vocabulary=c('\",paste(V2, collapse=','),\"')," +
+                                                          "study='\",V1,\"'," +
+                                                          "studyIdColumnName=" + util.getEntityAncestorsAsRVectorString(getDynamicDataSpecEntityId(dataSpec), _referenceMetadata) + "[1])\"))";
   
-    String studyVocabsListAsRString = "veupathUtils::StudySpecificVocabulariesByVariable(S4Vectors::SimpleList(paste(" + studyVocabAsRTibble + "[2], collapse=',')))";
+    String studyVocabsListAsRString = "veupathUtils::StudySpecificVocabulariesByVariable(S4Vectors::SimpleList(eval(parse(text=paste0('c(',paste(" + studyVocabAsRTibble + "[[2]], collapse=','), ')')))))";
     
     return studyVocabsListAsRString;
   }
@@ -726,9 +727,6 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = new ArrayList<>();
 
     for (DynamicDataSpecImpl dataSpec : dataSpecs.values()) {
-
-      System.out.println("dataSpec: " + getDynamicDataSpecId(dataSpec));
-      System.out.println("hasStudyDependentVocabulary: " + hasStudyDependentVocabulary(dataSpec));
       if (hasStudyDependentVocabulary(dataSpec)) {
         dataSpecsWithStudyDependentVocabs.add(dataSpec);
       } 
@@ -774,7 +772,6 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
 
     // find and validate variables w study specific vocabs
     List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findDataSpecsWithStudyDependentVocabs(dataSpecs);
-    System.out.println("dataSpecsWithStudyDependentVocabs size: " + dataSpecsWithStudyDependentVocabs.size());
     List<String> entities = dataSpecsWithStudyDependentVocabs.stream().map(data -> getDynamicDataSpecEntityId(data)).toList();
     String studyVocabsAsRString = getRStudyVocabsAsString(dataSpecsWithStudyDependentVocabs);
 
@@ -782,7 +779,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     String entityId = entities.get(0);
     String ancestorIdsAsRString = util.getEntityAncestorsAsRVectorString(entityId, _referenceMetadata);
 
-    String megastudyAsRString = "veupathUtils::MegaStudy(" + 
+    String megastudyAsRString = "veupathUtils::Megastudy(" + 
                                  "data = " + compressedDataHandle + "," +
                                  "ancestorIdColumns = " + ancestorIdsAsRString + "," +
                                  "studySpecificVocabularies = " + studyVocabsAsRString + ")";
@@ -792,10 +789,11 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
 
   public String getRInputDataWithImputedZeroesAsString(String compressedDataHandle, Map<String, DynamicDataSpecImpl> dataSpecs) {
     boolean validRequest = validateImputeZeroesRequest(dataSpecs);
-
+    
     if (validRequest) {
       String megastudyData = getRMegastudyAsString(compressedDataHandle, dataSpecs);
-      return "veupathUtils::getDTWithImputedZeroes(" + megastudyData + ")";
+      // this feels hacky, but bc this has to be called from the plugin and the plugin already has variables in R... im assuming its present.
+      return "veupathUtils::getDTWithImputedZeroes(" + megastudyData + ", variables)";
     }
     
     return compressedDataHandle;

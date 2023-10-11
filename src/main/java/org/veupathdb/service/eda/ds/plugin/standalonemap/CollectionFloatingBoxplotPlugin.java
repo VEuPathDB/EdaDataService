@@ -103,7 +103,7 @@ public class CollectionFloatingBoxplotPlugin extends AbstractEmptyComputePlugin<
         "noVariables", 
         nonStrataVarColNames, 
         (name, conn) ->
-        conn.voidEval(util.getVoidEvalFreadCommand(name, inputVarSpecs))
+        conn.voidEval(name + " <- data.table::fread('" + name + "', na.strings=c(''))")
       );
 
     List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findDataSpecsWithStudyDependentVocabs(varMap);

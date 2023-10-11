@@ -117,10 +117,7 @@ public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBo
         "noVariables", 
         nonStrataVarColNames, 
         (name, conn) ->
-        conn.voidEval(util.getVoidEvalFreadCommand(name,
-          spec.getXAxisVariable(),
-          spec.getYAxisVariable(),
-          overlayVariable))
+        conn.voidEval(name + " <- data.table::fread('" + name + "', na.strings=c(''))")
       );
 
     useRConnectionWithProcessedRemoteFiles(Resources.RSERVE_URL, filesProcessor, connection -> {
@@ -137,6 +134,7 @@ public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBo
               "completeCases=FALSE, " +
               "overlayValues=" + overlayValues + ", " +
               "evilMode='noVariables')";
+              System.out.println("cmd: " + cmd);
       streamResult(connection, cmd, out);
     });
   }

@@ -252,6 +252,7 @@ types:
     additionalProperties: false
     properties:
       value: number
+  DynamicDataSpec: CollectionSpec | VariableSpec
   StudiesGetResponse:
     type: object
     additionalProperties: false
@@ -313,6 +314,8 @@ types:
         format: int64
       memberVariableIds: string[]
       imputeZero: boolean
+      hasStudyDependentVocabulary?: boolean
+      variableSpecToImputeZeroesFor?: VariableSpec
       normalizationMethod: string
       isCompositional: boolean
       isProportion: boolean
@@ -611,7 +614,7 @@ types:
   AlphaDivComputeConfig:
     type: object
     properties:
-      collectionVariable: CollectionSpec
+      collectionVariable: VariableSpec
       alphaDivMethod: AlphaDivMethod
   AlphaDivMethod:
     type: string
@@ -626,7 +629,7 @@ types:
   BetaDivComputeConfig:
     type: object
     properties:
-      collectionVariable: CollectionSpec
+      collectionVariable: VariableSpec
       betaDivDissimilarityMethod: BetaDivDissimilarityMethod
   BetaDivDissimilarityMethod:
     type: string
@@ -645,7 +648,7 @@ types:
   DifferentialAbundanceComputeConfig:
     type: object
     properties:
-      collectionVariable: CollectionSpec
+      collectionVariable: VariableSpec
       comparator: ComparatorSpec
       differentialAbundanceMethod: DifferentialAbundanceMethod
   DifferentialAbundanceMethod:
@@ -653,25 +656,19 @@ types:
     enum:
       - DESeq
       - ANCOMBC
-      - Maaslin
   ComparatorSpec:
     type: object
     properties:
       variable: VariableSpec
       groupA: LabeledRange[]
       groupB: LabeledRange[]
-  DifferentialAbundanceStats:
-    type: object
-    properties:
-      effectSize: string[]
-      pValue: string[]
-      adjustedPValue: string[]
-      pointId: string[]
   DifferentialAbundanceStatsResponse:
     type: object
     properties:
-      effectSizeLabel: string
-      statistics: DifferentialAbundanceStats
+      log2foldChange: string[]
+      pValue: string[]
+      adjustedPValue: string[]
+      pointId: string[]
   ExamplePluginRequest:
     type: ComputeRequestBase
     properties:
@@ -692,7 +689,7 @@ types:
   RankedAbundanceComputeConfig:
     type: object
     properties:
-      collectionVariable: CollectionSpec
+      collectionVariable: VariableSpec
       rankingMethod: RankingMethod
   RankingMethod:
     type: string
@@ -2318,7 +2315,6 @@ types:
     type: CollectionOverlayConfig
     properties:
       selectedValues?: string[]
-  DynamicDataSpec: CollectionSpec | VariableSpec
   LegacyLabeledRange:
     type: object
     additionalProperties: false

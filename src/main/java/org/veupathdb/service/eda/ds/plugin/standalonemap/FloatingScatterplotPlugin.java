@@ -131,10 +131,7 @@ public class FloatingScatterplotPlugin extends AbstractEmptyComputePlugin<Floati
         "noVariables", 
         nonStrataVarColNames, 
         (name, conn) ->
-        conn.voidEval(util.getVoidEvalFreadCommand(name,
-          spec.getXAxisVariable(),
-          spec.getYAxisVariable(),
-          overlayVariable))
+        conn.voidEval(name + " <- data.table::fread('" + name + "', na.strings=c(''))")
       );
 
     useRConnectionWithProcessedRemoteFiles(Resources.RSERVE_URL, filesProcessor, connection -> {
