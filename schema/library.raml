@@ -213,6 +213,10 @@ types:
     properties:
       isRequired: boolean
       isTemporal: boolean
+      isCollection: boolean
+      isCompositional: boolean
+      isProportion: boolean
+      allowedNormalizationMethods: string[]
       minNumVars: number
       maxNumVars: number
       minNumValues: number
@@ -638,6 +642,42 @@ types:
     type: object
     properties:
       pcoaVariance: number[]
+  CorrelationPluginRequest:
+    type: ComputeRequestBase
+    properties:
+      config: CorrelationComputeConfig
+  CorrelationComputeConfig:
+    type: object
+    properties:
+      collectionVariable1:
+        type: CollectionSpec
+        required: false
+      collectionVariable2:
+        type: CollectionSpec
+        required: false
+      correlationMethod: CorrelationMethod
+  CorrelationMethod:
+    type: string
+    enum:
+      - spearman
+      - pearson
+  CorrelationStatsResponse:
+    type: array
+    items: CorrelationPoint
+  CorrelationPoint:
+    type: object
+    properties:
+      data1: string
+      data2: string
+      correlationCoef:
+        type: string
+        required: false
+      pValue:
+        type: string
+        required: false
+      adjustedPValue:
+        type: string
+        required: false
   DifferentialAbundancePluginRequest:
     type: ComputeRequestBase
     properties:
@@ -786,9 +826,25 @@ types:
   CorrelationAssayMetadataBipartitenetworkPostRequest:
     type: DataPluginRequestBase
     properties:
-      computeConfig: EmptyDataPluginSpec
-      config: EmptyDataPluginSpec
-  CorrelationAssayMetadataStatsResponse: DifferentialAbundanceStatsResponse
+      computeConfig: CorrelationComputeConfig
+      config: CorrelationAssayMetadataBipartitenetworkSpec
+  CorrelationAssayMetadataStatsResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      statistics: CorrelationPoint[]
+      data1Metadata: string
+      data2Metadata: string
+  CorrelationAssayMetadataBipartitenetworkSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      significanceThreshold:
+        type: number
+        required: false
+      correlationCoefThreshold:
+        type: number
+        required: false
   DifferentialAbundanceVolcanoplotPostRequest:
     type: DataPluginRequestBase
     properties:
