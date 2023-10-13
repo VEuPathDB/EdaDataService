@@ -1,0 +1,239 @@
+#%RAML 1.0 Library
+
+types:
+
+  # Properties that are present in every representation of an analysis
+  AnalysisBase:
+    additionalProperties: false
+    properties:
+      displayName: string
+      description: string
+      studyId: string
+      studyVersion: string
+      apiVersion: string
+      isPublic: boolean
+
+  OnImportProvenanceProps:
+    additionalProperties: false
+    properties:
+      ownerId:
+        format: int64
+        type: integer
+      ownerName: string
+      ownerOrganization: string
+      analysisId: string
+      analysisName: string
+      creationTime: string
+      modificationTime: string
+      isPublic: boolean
+
+  CurrentProvenanceProps:
+    additionalProperties: false
+    properties:
+      isDeleted: boolean
+      modificationTime?: string
+      isPublic?: boolean
+
+  AnalysisProvenance:
+    additionalProperties: false
+    properties:
+      onImport: OnImportProvenanceProps
+      current: CurrentProvenanceProps
+
+  AnalysisSummary:
+    additionalProperties: false
+    type: AnalysisBase
+    properties:
+      analysisId: string
+      creationTime: string
+      modificationTime: string
+      numFilters: integer
+      numComputations: integer
+      numVisualizations: integer
+      provenance?: AnalysisProvenance
+
+  # supports public analyses endpoint
+  AnalysisSummaryWithUser:
+    additionalProperties: false
+    type: AnalysisSummary
+    properties:
+      userId: number
+      userName: string
+      userOrganization: string
+
+  AnalysisListPostRequest:
+    additionalProperties: false
+    type: AnalysisBase
+    properties:
+      notes?: string
+      descriptor: AnalysisDescriptor
+
+  AnalysisListPostResponse:
+    additionalProperties: false
+    properties:
+      analysisId: string
+
+  AnalysisListPatchRequest:
+    additionalProperties: false
+    properties:
+      analysisIdsToDelete?: string[]
+      inheritOwnershipFrom?:
+        format: int64
+        type: integer
+
+  AnalysisDetail:
+    additionalProperties: false
+    type: AnalysisSummary
+    properties:
+      notes?: string
+      descriptor: AnalysisDescriptor
+
+  SingleAnalysisPatchRequest:
+    additionalProperties: false
+    properties:
+      displayName?: string
+      description?: string
+      notes?: string
+      descriptor?: AnalysisDescriptor
+      isPublic?: boolean
+
+  DataTableConfig:
+    additionalProperties: false
+    properties:
+      variables: VariableSpec[]
+      sorting: SortSpecEntry[]
+
+  DataTableConfigSet:
+    properties:
+      //: # not sure of entity name allowed regex
+        type: DataTableConfig
+
+  AnalysisDescriptor:
+    additionalProperties: false
+    properties:
+      subset:
+        properties:
+          descriptor: object[]
+          uiSettings?: object
+      computations: Computation[]
+      starredVariables: VariableSpec[]
+      dataTableConfig: DataTableConfigSet
+      derivedVariables: string[]
+
+  Computation:
+    additionalProperties: false
+    properties:
+      computationId: string
+      displayName: string
+      descriptor: object
+      visualizations: Visualization[]
+
+  Visualization:
+    additionalProperties: false
+    properties:
+      visualizationId: string
+      displayName: string
+      descriptor: object
+
+  SingleAnalysisPublicInfo:
+    additionalProperties: false
+    properties:
+      studyId: string
+
+  UserAnalysisMetricsResponse:
+    additionalProperties: false
+    properties:
+      startDate: date-only
+      endDate: date-only
+      createdOrModifiedCounts: UserAnalysisCounts
+
+  UserAnalysisCounts:
+    additionalProperties: false
+    properties:
+      analysesCount: integer
+      importedAnalysesCount: integer
+      analysesPerStudy: StudyCount[]
+      importedAnalysesPerStudy: StudyCount[]
+      registeredUsersCount: integer
+      guestUsersCount: integer
+      registeredAnalysesCount: integer
+      guestAnalysesCount: integer
+      registeredFiltersCount: integer
+      guestFiltersCount: integer
+      registeredVisualizationsCount: integer
+      guestVisualizationsCount: integer
+      registeredUsersAnalysesCounts: UsersObjectsCount[]
+      guestUsersAnalysesCounts: UsersObjectsCount[]
+      registeredUsersFiltersCounts: UsersObjectsCount[]
+      guestUsersFiltersCounts: UsersObjectsCount[]
+      registeredUsersVisualizationsCounts: UsersObjectsCount[]
+      guestUsersVisualizationsCounts: UsersObjectsCount[]
+
+  StudyCount:
+    additionalProperties: false
+    properties:
+      studyId: string
+      count: integer
+
+  UsersObjectsCount:
+    additionalProperties: false
+    properties:
+      objectsCount: integer
+      usersCount: integer
+
+  MetricsReportResponse:
+    additionalProperties: false
+    properties:
+      count: integer
+
+  DerivedVariablePostRequest:
+    additionalProperties: false
+    type: object
+    properties:
+      datasetId: string
+      entityId: string
+      displayName:
+        type: string
+        minLength: 1
+        maxLength: 256
+      functionName: string
+      config: object
+      description?:
+        type: string
+        minLength: 0
+        maxLength: 4000
+
+  DerivedVariablePostResponse:
+    additionalProperties: false
+    type: VariableSpec
+
+  DerivedVariableGetResponse:
+    additionalProperties: false
+    type: DerivedVariableSpec
+    properties:
+      datasetId: string
+      description?:
+        type: string
+        minLength: 0
+        maxLength: 4000
+      provenance?: DerivedVariableProvenance
+
+  DerivedVariablePatchRequest:
+    type: object
+    additionalProperties: false
+    properties:
+      displayName?:
+        type: string
+        minLength: 1
+        maxLength: 256
+      description?:
+        type: string
+        minLength: 0
+        maxLength: 4000
+
+  DerivedVariableProvenance:
+    type: object
+    additionalProperties: false
+    properties:
+      copyDate: datetime-only
+      copiedFrom: string

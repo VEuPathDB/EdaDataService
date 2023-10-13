@@ -1,0 +1,100 @@
+####################################################################################################
+#                                                                                                  #
+#   For information about these templates and what variables are available, see                    #
+#   the docs/email-templating.adoc file in the project's GitHub repository                         #
+#                                                                                                  #
+####################################################################################################
+
+# Email sent when a new provider creation was attempted, but the given provider
+# email address was not in our user db.
+provider-register:
+  subject: $dataset.displayName$ Provider Account
+  body: |
+    Hi,
+
+    We would like to add you as a "Study team member" so you can access the data and manage data access requests for $dataset.displayName$ in ClinEpiDB. However, there is currently no ClinEpiDB account associated with this email address in our system.
+
+    Please register for an account at $sign-up-link$ or, if you already have an account, please provide the email address linked to your account.
+
+# Email sent when a new end user creation was attempted but the given end user
+# email address was not in our user db.
+end-user-register:
+  subject: $dataset.displayName$ End User Account
+  body: |
+    Hi,
+
+    We attempted to add you to our database so you may access the study $dataset.name$, but unfortunately your email is not in our system.
+
+    Please register for an account at $sign-up-link$ or, if you already have an account, please provide the email address linked to your account.
+
+# Email sent to providers when an end user updates their access request fields.
+# NOTE: This is not in use currently, as edits are handled on the WDK side.
+# TODO: If we decide to consolidate management of all dataset access in this service, we need to revisit verbiage.
+edit-notification:
+  subject: $dataset.displayName$ Access Request Update
+  body: |
+    <p>$end-user.lastName$, $end-user.firstName$ has edited their access request to the $dataset.displayName$ data.</p>
+
+    <p>Here are the details of their request:</p>
+
+    <table border=1>
+      <tbody>
+        <tr>
+          <td><strong>Date of request</strong></td>
+          <td>$end-user.startDate$</td>
+        </tr>
+        <tr>
+          <td><strong>Name</strong></td>
+          <td>$end-user.lastName$, $end-user.firstName$</td>
+        </tr>
+        <tr>
+          <td><strong>Email</strong></td>
+          <td>$end-user.email$</td>
+        </tr>
+        <tr>
+          <td><strong>Organization</strong></td>
+          <td>$end-user.organization$</td>
+        </tr>
+        <tr>
+          <td><strong>Purpose for which data will be used</strong></td>
+          <td>$end-user.purpose$</td>
+        </tr>
+        <tr>
+          <td><strong>$dataset.priorAuth$</strong></td>
+          <td>$end-user.priorAuth$</td>
+        </tr>
+        <tr>
+          <td><strong>Hypotheses and/or research questions</strong></td>
+          <td>$end-user.researchQuestion$</td>
+        </tr>
+        <tr>
+          <td><strong>Analysis plan</strong></td>
+          <td>$end-user.analysisPlan$</td>
+        </tr>
+        <tr>
+          <td><strong>Planned dissemination of results</strong></td>
+          <td>$end-user.disseminationPlan$</td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <p>$user-specific-content$</p>
+
+
+# Email sent when a dataset access request is approved by a study manager.
+approve-notification:
+  subject: $dataset.displayName$ Access Request Approved
+  body: | 
+    Your request to access $dataset.displayName$ data on ClinEpiDB has been approved. Navigate to the "Download" tab of $dataset.displayName$ to download the data. Please cite that you accessed data via ClinEpiDB.
+    $if(dataset.customApprovalEmailBody)$
+    
+        $dataset.customApprovalEmailBody$
+    $endif$
+    
+    Thank you!
+
+# Email sent when a dataset access request is rejected by a study manager.
+deny-notification:
+  subject: $dataset.displayName$ Access Request Denied
+  body: |
+    Unfortunately, your request to access $dataset.displayName$ data on ClinEpiDB has been denied for the following reason: "$end-user.denialReason$". Please reach out to $manager-emails$ for more information. Thank you!

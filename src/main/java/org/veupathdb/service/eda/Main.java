@@ -5,8 +5,10 @@ import org.gusdb.fgputil.db.slowquery.QueryLogger;
 import org.veupathdb.lib.container.jaxrs.config.Options;
 import org.veupathdb.lib.container.jaxrs.server.ContainerResources;
 import org.veupathdb.lib.container.jaxrs.server.Server;
+import org.veupathdb.service.eda.access.AccessConfig;
 
 public class Main extends Server {
+  public static final AccessConfig config = new AccessConfig();
 
   public static void main(String[] args) {
     new Main().start(args);
@@ -19,6 +21,11 @@ public class Main extends Server {
   @Override
   protected ContainerResources newResourceConfig(Options options) {
     return new Resources(options);
+  }
+
+  @Override
+  protected Options newOptions() {
+    return config;
   }
 
   @Override

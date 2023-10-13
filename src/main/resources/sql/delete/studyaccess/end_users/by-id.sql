@@ -1,0 +1,1 @@
+DELETE FROM studyaccess.end_users WHERE end_user_id = ?

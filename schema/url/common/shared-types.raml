@@ -1,0 +1,86 @@
+#%RAML 1.0 Library
+
+types:
+
+  ###################################################
+  ###  Variable and Collection Identifiers
+  ###################################################
+
+  VariableSpec:
+    additionalProperties: false
+    properties:
+      entityId: string
+      variableId: string
+
+  CollectionSpec:
+    additionalProperties: false
+    properties:
+      entityId: string
+      collectionId: string
+
+  ###################################################
+  ###  Variable Constraints
+  ###################################################
+
+  DataElementConstraint:
+    additionalProperties: false
+    properties:
+      isRequired:
+        type: boolean
+      isTemporal:
+        type: boolean
+      isCollection: boolean
+      isCompositional: boolean
+      isProportion: boolean
+      allowedNormalizationMethods: string[]
+      minNumVars:
+        type: number
+      maxNumVars:
+        type: number
+      minNumValues:
+        type: number
+      maxNumValues:
+        type: number
+      allowedTypes:
+        type: API_VariableType[]
+        required: false
+      allowedShapes:
+        type: API_VariableDataShape[]
+        required: false
+      description:
+        type: string
+
+  DataElementConstraintPattern:
+    properties:
+      //: DataElementConstraint
+
+  #############################################################
+  ###  Shared Response Types
+  #############################################################
+
+  EntityTabularPostResponse:
+    additionalProperties: false
+    properties:
+      tabular: string[][]
+
+  EmptyResponse:
+    type: object
+    additionalProperties: false
+
+  Range:
+    additionalProperties: false
+    properties:
+      min: string  # number | date
+      max: string  # number | date
+
+  LabeledRange:
+    type: Range
+    additionalProperties: false
+    properties:
+      label: string
+
+  LabeledRangeWithValue:
+    type: LabeledRange
+    additionalProperties: false
+    properties:
+      value: number

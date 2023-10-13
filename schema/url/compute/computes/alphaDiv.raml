@@ -1,0 +1,20 @@
+#%RAML 1.0 Library
+
+types:
+
+  AlphaDivPluginRequest:
+    type: ComputeRequestBase
+    properties:
+      config: AlphaDivComputeConfig
+
+  # how do we want to ensure the collectionVariable is a collection variable?
+  # presumably the compute service will check and err
+  # but do we want to talk about constraints?
+  AlphaDivComputeConfig:
+    properties:
+      collectionVariable: CollectionSpec
+      alphaDivMethod: AlphaDivMethod
+
+  AlphaDivMethod:
+    type: string
+    enum: ['shannon', 'simpson', 'evenness']

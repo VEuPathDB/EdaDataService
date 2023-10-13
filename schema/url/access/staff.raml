@@ -1,0 +1,65 @@
+#%RAML 1.0 Library
+
+uses:
+  lib: ./common.raml
+
+types:
+  Staff:
+    type: object
+    properties:
+      staffId: lib.DatastoreId
+      user: lib.UserDetails
+      isOwner: boolean
+    additionalProperties: false
+  StaffList:
+    type: object
+    properties:
+      data:
+        type: Staff[]
+      rows:
+        format: int64
+        type: integer
+        minimum: 0
+      offset:
+        format: int64
+        type: integer
+        minimum: 0
+      total:
+        format: int64
+        type: integer
+        minimum: 0
+    additionalProperties: false
+  NewStaffRequest:
+    type: object
+    properties:
+      userId:
+        format: int64
+        type: integer
+        minimum: 1
+      isOwner: boolean
+  NewStaffResponse:
+    type: object
+    properties:
+      staffId:
+        format: int64
+        type: integer
+        required: true
+        minimum: 1
+    additionalProperties: false
+  StaffPatchRequest:
+    type: array
+    items: StaffPatch
+    maxItems: 1
+    minItems: 1
+  StaffPatch:
+    type: object
+    properties:
+      op:
+        type: string
+        pattern: "^replace$"
+      path:
+        type: string
+        pattern: "^/isOwner$"
+      value:
+        type: boolean
+    additionalProperties: false

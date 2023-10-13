@@ -1,0 +1,38 @@
+= Writing Plugins
+:rootDir: ../../../../../../../../..
+:kDir: {rootDir}/src/main/kotlin/org/veupathdb/service/eda/compute
+
+TODO: Flesh this document out.
+
+*1. Create a plugin package*::
+
+Create a new package folder in this directory for your plugin.  This package will be a home for the various types and
+API implementations that make up your plugin.
++
+See the link:example/[example plugin package].
+
+
+*2. Create a link:{kDir}/plugins/Plugin.kt[Plugin] implementation*::
+
+The core of a plugin is the `Plugin` implementation, this is the type that will be executed to perform the plugin's
+tasks/job(s).
++
+For convenience an link:{kDir}/plugins/AbstractPlugin.kt[abstract plugin implementation] has been provided which should
+be extended by specific plugin implementations.
++
+See the link:example/ExamplePlugin.java[example plugin implementation].
+
+*3. Create a link:{kDir}/plugins/PluginProvider.kt[Plugin Provider] implementation*::
+
+The `PluginProvider` is a simple type that enables the construction of new link:{kDir}/plugins/Plugin.kt[Plugin]
+instances asynchronously at job execution time. (TODO: Define job stages).
++
+Additionally, `PluginProvider` extends the link:{kDir}/plugins/PluginMeta.kt[Plugin Info Container] which provides base
+information about a plugin, such as the plugin's name, url segment, description, and input request type.
++
+See the link:example/ExamplePluginProvider.java[example plugin provider implementation].
+
+*4. Register the new plugin with the link:PluginRegistry.java[Plugin Registry]*::
+
+The `PluginRegistry` class is the root location that tells the service about the existence of the plugins contained
+within it.

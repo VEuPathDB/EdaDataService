@@ -1,0 +1,79 @@
+#%RAML 1.0 Library
+
+types:
+
+  ###################################################
+  ###  Compute Jobs API
+  ###################################################
+
+  JobID: !include https://raw.githubusercontent.com/VEuPathDB/lib-hash-id/v1.1.0/schema/hash-id.raml
+
+  JobStatus:
+    type: string
+    enum:
+      - no-such-job
+      - queued
+      - in-progress
+      - complete
+      - failed
+      - expired
+
+  JobResponse:
+    type: object
+    properties:
+      jobID:
+        type: JobID
+      status:
+        type: JobStatus
+      queuePosition:
+        type: integer
+        format: int32
+        required: false
+    additionalProperties: false
+
+  ComputeRequestBase:
+    type: object
+    properties:
+      studyId:
+        type: string
+      filters:
+        type: array
+        items:
+          type: API_Filter
+        required: false
+      derivedVariables:
+        type: array
+        items:
+          type: DerivedVariableSpec
+
+  ###################################################
+  ###  Computed Variable Metadata
+  ###################################################
+
+  VariableClass:
+    enum: [ 'native', 'derived', 'computed' ]
+
+  PlotReferenceValue:
+    enum: [ 'xAxis', 'yAxis', 'zAxis', 'overlay', 'facet1', 'facet2', 'geo', 'latitude', 'longitude']
+
+  VariableMapping:
+    additionalProperties: false
+    properties:
+      variableClass: VariableClass
+      variableSpec: VariableSpec
+      plotReference: PlotReferenceValue
+      dataType: API_VariableType
+      dataShape: API_VariableDataShape
+      displayName?: string
+      displayRangeMin?: any # number | string
+      displayRangeMax?: any # number | string
+      vocabulary?: string[]
+      imputeZero: boolean
+      hasStudyDependentVocabulary?: boolean
+      isCollection: boolean
+      members?: VariableSpec[] # populated if isCollection is true
+
+  ComputedVariableMetadata:
+    additionalProperties: false
+    properties:
+      variables: VariableMapping[]

@@ -1,6 +1,4 @@
 import org.veupathdb.lib.gradle.container.util.Logger.Level
-import java.io.FileOutputStream
-import java.net.URL
 
 plugins {
   kotlin("jvm") version "1.7.0" // needed for local compute import
@@ -55,6 +53,21 @@ java {
   }
 }
 
+kotlin {
+  jvmToolchain {
+    languageVersion.set(JavaLanguageVersion.of(17))
+  }
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+  kotlinOptions {
+    jvmTarget = "17"
+    freeCompilerArgs = listOf(
+      "-Xjvm-default=all"
+    )
+  }
+}
+
 tasks.shadowJar {
   exclude("**/Log4j2Plugins.dat")
   archiveFileName.set("service.jar")
@@ -78,44 +91,14 @@ repositories {
 //
 
 // versions
-val coreLib       = "6.16.0"         // Container core lib version
-val edaCompute    = "2.2.0"          // EDA Compute version (used to pull in compute plugin RAML)
-val edaCommon     = "11.5.0"         // EDA Common version
-val fgputil       = "2.12.9-jakarta" // FgpUtil version
-val libSubsetting = "4.9.4"          // lib-eda-subsetting version
-
+val coreLib       = "6.16.0"          // Container core lib version
+val edaCompute    = "2.2.0"           // EDA Compute version (used to pull in compute plugin RAML)
+val fgputil       = "2.12.11-jakarta" // FgpUtil version
+val libSubsetting = "4.9.4"           // lib-eda-subsetting version
 
 // use local EDA compute compiled schema if project exists, else use released version;
 //    this mirrors the way we use local EdaCommon code if available
 val commonRamlOutFileName = "$projectDir/schema/eda-compute-lib.raml"
-
-tasks.named("merge-raml") {
-  // Hook into merge-raml to download or fetch EDA Common RAML before merging
-  doFirst {
-    val commonRamlOutFile = File(commonRamlOutFileName)
-    commonRamlOutFile.delete()
-
-    // use local EdaCommon compiled schema if project exists, else use released version;
-    // this mirrors the way we use local EdaCommon code if available
-    val edaComputeProject = file("../service-eda-compute")
-    if (edaComputeProject.exists()) {
-      val commonRamlFile = File("../service-eda-compute/schema/library.raml")
-      logger.lifecycle("Copying file from ${commonRamlFile.path} to ${commonRamlOutFile.path}")
-      commonRamlFile.copyTo(commonRamlOutFile)
-    } else {
-      commonRamlOutFile.createNewFile()
-      val commonRamlUrl = "https://raw.githubusercontent.com/VEuPathDB/service-eda-compute/v${edaCompute}/schema/library.raml"
-      logger.lifecycle("Downloading file contents from $commonRamlUrl")
-      URL(commonRamlUrl).openStream().use { it.transferTo(FileOutputStream(commonRamlOutFile)) }
-    }
-  }
-
-  // After merge is complete, delete the EDA Common RAML from this project.
-  doLast {
-    logger.lifecycle("Deleting file $commonRamlOutFileName")
-    File(commonRamlOutFileName).delete()
-  }
-}
 
 // ensures changing modules are never cached
 configurations.all {
@@ -130,11 +113,12 @@ dependencies {
 
   // VEuPathDB libs, prefer local checkouts if available
   implementation(findProject(":core") ?: "org.veupathdb.lib:jaxrs-container-core:${coreLib}")
-  implementation(findProject(":edaCommon") ?: "org.veupathdb.service.eda:eda-common:${edaCommon}")
   implementation(findProject(":libSubsetting") ?: "org.veupathdb.eda:lib-eda-subsetting:${libSubsetting}")
+  implementation("org.veupathdb.lib:compute-platform:1.5.3")
 
   // published VEuPathDB libs
   implementation("org.gusdb:fgputil-core:${fgputil}")
+  implementation("org.gusdb:fgputil-accountdb:${fgputil}")
   implementation("org.gusdb:fgputil-client:${fgputil}")
   implementation("org.gusdb:fgputil-db:${fgputil}")
 
@@ -144,10 +128,14 @@ dependencies {
   // Jackson
   implementation("com.fasterxml.jackson.core:jackson-databind:2.15.1")
   implementation("com.fasterxml.jackson.core:jackson-annotations:2.15.1")
+  implementation("org.veupathdb.lib:jackson-singleton:3.0.0")
+  implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.2")
 
   // Log4J
   implementation("org.apache.logging.log4j:log4j-api:2.20.0")
   implementation("org.apache.logging.log4j:log4j-core:2.20.0")
+  runtimeOnly("org.apache.logging.log4j:log4j-slf4j-impl:2.20.0")
+  implementation("org.slf4j:slf4j-api:1.7.36")
 
   // Metrics
   implementation("io.prometheus:simpleclient:0.16.0")
@@ -156,6 +144,20 @@ dependencies {
   // Utils
   implementation("io.vulpine.lib:Jackfish:1.1.0")
   implementation("com.devskiller.friendly-id:friendly-id:1.1.0")
+  implementation("io.vulpine.lib:sql-import:0.2.1")
+  implementation("io.vulpine.lib:lib-query-util:2.1.0")
+  implementation("javax.mail", "mail", "1.5.0-b01")
+  implementation("org.antlr", "ST4", "4.3.1") // Access service email template parsing
+
+  // Pico CLI
+  implementation("info.picocli:picocli:4.7.3")
+  annotationProcessor("info.picocli:picocli-codegen:4.7.3")
+
+  // Job IDs
+  implementation("org.veupathdb.lib:hash-id:1.1.0")
+
+  // Stub database
+  implementation("org.hsqldb:hsqldb:2.7.1")
 
   // Unit Testing
   testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.2")

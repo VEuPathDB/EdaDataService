@@ -1,0 +1,14 @@
+#%RAML 1.0 Library
+
+types:
+  # Type name determines the name of the Java class that will be generated.
+  File:
+    additionalProperties: false
+    properties:
+      name: string
+      modifiedDate: string
+      size: string
+
+  FileContentResponse:
+    properties:
+      //: any

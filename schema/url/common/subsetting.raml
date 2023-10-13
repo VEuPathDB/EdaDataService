@@ -1,0 +1,140 @@
+#%RAML 1.0 Library
+
+types:
+
+  ##############################################
+  ###  Subsetting Service Count Endpoint API
+  ##############################################
+
+  EntityCountPostRequest:
+    additionalProperties: false
+    properties:
+      filters: API_Filter[]
+
+  EntityCountPostResponse:
+    additionalProperties: false
+    properties:
+      count:
+        format: int64
+        type: integer
+
+  ##############################################
+  ###  Subsetting Service Tabular Endpoint API
+  ##############################################
+
+  SortDirection:
+    type: string
+    enum: [ 'asc', 'desc' ]
+
+  SortSpecEntry:
+    additionalProperties: false
+    properties:
+      key: string
+      direction: SortDirection
+
+  API_PagingConfig:
+    type: object
+    properties:
+      numRows?:
+        format: int64
+        type: integer
+      offset?:
+        format: int64
+        type: integer
+
+  TabularHeaderFormat:
+    type: string
+    enum: [ 'standard', 'display' ]
+
+  DataSourceType:
+    type: string
+    enum: [ 'database', 'file' ]
+
+  API_TabularReportConfig:
+    type: object
+    properties:
+      sorting?: SortSpecEntry[]
+      paging?: API_PagingConfig
+      headerFormat?: TabularHeaderFormat
+      trimTimeFromDateVars?: boolean
+      dataSource?: DataSourceType
+
+  EntityTabularPostRequest:
+    additionalProperties: false
+    properties:
+      filters: API_Filter[]
+      outputVariableIds: string[]
+      reportConfig?: API_TabularReportConfig
+
+  ###################################################
+  ###  Subsetting Service Distribution Endpoint API
+  ###################################################
+
+  BinUnits:
+    type: string
+    enum: ['day','week','month','year']
+
+  BinSpecWithRange:
+    additionalProperties: false
+    properties:
+      displayRangeMin: any  # number | string
+      displayRangeMax: any  # number | string
+      binWidth: number      # for date, numeric vars
+      binUnits?: BinUnits   # for date vars
+
+  ValueSpec:
+    type: string
+    enum: ['count', 'proportion']
+
+  VariableDistributionPostRequest:
+    additionalProperties: false
+    properties:
+      filters: API_Filter[]
+      binSpec?: BinSpecWithRange
+      valueSpec: ValueSpec
+
+  VocabByRootEntityPostRequest:
+    additionalProperties: false
+    properties:
+      filters: API_Filter[]
+
+  VocabByRootEntityPostResponse:
+    type: EntityTabularPostResponse
+    additionalProperties: false
+
+  HistogramBin:
+    additionalProperties: false
+    properties:
+      value: number
+      binStart: string
+      binEnd: string
+      binLabel: string
+
+  HistogramStats:
+    additionalProperties: false
+    properties:
+      subsetSize:
+        format: int64
+        type: integer
+      subsetMin?: any # number | string
+      subsetMax?: any # number | string
+      subsetMean?: any # number | string
+      numVarValues:
+        format: int64
+        type: integer
+      numDistinctValues:
+        format: int64
+        type: integer
+      numDistinctEntityRecords:
+        format: int64
+        type: integer
+      numMissingCases:
+        format: int64
+        type: integer
+      #multiValueDistribution?: integer[] # TODO: maybe add later
+
+  VariableDistributionPostResponse:
+    additionalProperties: false
+    properties:
+      histogram: HistogramBin[]
+      statistics: HistogramStats

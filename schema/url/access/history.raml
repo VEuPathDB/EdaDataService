@@ -1,0 +1,87 @@
+#%RAML 1.0 Library
+
+types:
+  HistoryResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      meta: HistoryMeta
+      results: HistoryResult[]
+
+  HistoryMeta:
+    type: object
+    additionalProperties: false
+    properties:
+      rows:
+        format: int64
+        type: integer
+      offset:
+        format: int64
+        type: integer
+
+  HistoryResult:
+    type: object
+    additionalProperties: false
+    properties:
+      cause: HistoryCause
+      row: HistoryRow
+
+  HistoryCause:
+    type: object
+    additionalProperties: false
+    properties:
+      user: HistoryUser
+      action:
+        type: string
+        enum:
+          - CREATE
+          - UPDATE
+          - DELETE
+      timestamp: datetime-only
+
+  HistoryUser:
+    type: object
+    additionalProperties: false
+    properties:
+      userID:
+        type: integer
+        format: int64
+      firstName: string
+      lastName: string
+      email: string
+      organization: string
+
+  HistoryRow:
+    type: object
+    additionalProperties: false
+    properties:
+      endUserID:
+        type: integer
+        format: int64
+      user: HistoryUser
+      datasetPresenterID: string
+      restrictionLevel:
+        type: string
+        enum:
+          - PUBLIC
+          - PRERELEASE
+          - PROTECTED
+          - CONTROLLED
+          - PRIVATE
+      approvalStatus:
+        type: string
+        enum:
+          - APPROVED
+          - REQUESTED
+          - DENIED
+      startDate: datetime-only
+      duration:
+        type: integer
+        format: int64
+      purpose: string
+      researchQuestion: string
+      analysisPlan: string
+      priorAuth: string
+      denialReason: string
+      dateDenied: datetime-only
+      allowSelfEdits: boolean

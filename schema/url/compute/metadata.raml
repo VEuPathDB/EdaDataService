@@ -1,0 +1,17 @@
+#%RAML 1.0 Library
+
+types:
+
+  PluginOverview:
+    displayName: Plugin Overview
+    type: object
+    properties:
+      name: string
+      displayName: string
+      description: string
+      dataElementConstraints?: DataElementConstraintPattern[]
+    additionalProperties: false
+
+  ExpiredJobsResponse:
+    properties:
+      numJobsExpired: integer
