@@ -1,23 +1,33 @@
 package org.veupathdb.service.eda.merge.core.request;
 
 import jakarta.ws.rs.BadRequestException;
+import org.gusdb.fgputil.DelimitedDataParser;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.client.ResponseFuture;
+import org.gusdb.fgputil.iterator.CloseableIterator;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.Resources;
 import org.veupathdb.service.eda.common.client.EdaComputeClient;
 import org.veupathdb.service.eda.common.client.spec.EdaMergingSpecValidator;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
+import org.veupathdb.service.eda.common.model.VariableDef;
 import org.veupathdb.service.eda.generated.model.APIFilter;
 import org.veupathdb.service.eda.generated.model.MergedEntityTabularPostRequest;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Predicate;
+
+import static org.gusdb.fgputil.FormatUtil.TAB;
 
 /**
  * Subclass of RequestResources which supplements the superclass's resources with target entity, subset filters, and
@@ -105,6 +115,50 @@ public class MergedTabularRequestResources extends RequestResources {
 
   public ResponseFuture getComputeTabularStream() {
     return _computeSvc.getJobTabularOutput(_computeInfo.orElseThrow().getComputeName(), _computeInfo.get().getRequestBody());
+  }
+
+  public CloseableIterator<Map<String, String>> getInMemoryComputeStream() {
+    List<String> headers = _computeInfo.get().getVariables().stream().map(var -> VariableDef.toDotNotation(var.getVariableSpec())).toList();
+    DelimitedDataParser d = new DelimitedDataParser(headers, TAB, true);
+    try {
+      InputStream is = _computeSvc.getJobTabularOutput(_computeInfo.orElseThrow().getComputeName(), _computeInfo.get().getRequestBody()).getInputStream();
+      InputStreamReader isReader = new InputStreamReader(is);
+      BufferedReader bufferedReader = new BufferedReader(isReader);
+      String headerLine = bufferedReader.readLine();
+
+      if (headerLine == null) {
+        throw new RuntimeException("Compute stream is empty.");
+      }
+
+      // Verify column names.
+
+      return new CloseableIterator<>() {
+        private String nextLine = bufferedReader.readLine();
+
+        @Override
+        public void close() throws Exception {
+          bufferedReader.close();
+        }
+
+        @Override
+        public boolean hasNext() {
+          return nextLine != null;
+        }
+
+        @Override
+        public Map<String, String> next() {
+          Map<String, String> record = d.parseLine(nextLine);
+          try {
+            nextLine = bufferedReader.readLine();
+          } catch (IOException e) {
+            throw new RuntimeException("Failed to read from compute stream buffered reader.", e);
+          }
+          return record;
+        }
+      };
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public List<APIFilter> getSubsetFilters() { return _subsetFilters; }

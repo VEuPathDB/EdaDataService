@@ -22,6 +22,7 @@ import org.veupathdb.service.eda.access.repo.RestrictionLevelRepo;
 import org.veupathdb.service.eda.compute.service.JobsController;
 import org.veupathdb.service.eda.download.DownloadService;
 import org.veupathdb.service.eda.data.AppsService;
+import org.veupathdb.service.eda.ss.model.reducer.BinaryValuesStreamer;
 import org.veupathdb.service.eda.subset.service.ClearMetadataCacheService;
 import org.veupathdb.service.eda.subset.service.FilterAwareMetadataService;
 import org.veupathdb.service.eda.merge.controller.MergingServiceExternal;
@@ -212,6 +213,10 @@ public class Resources extends ContainerResources {
       return dirPath;
     }
     throw new RuntimeException("Configured data dir '" + dirPath + "' is not a readable directory.");
+  }
+
+  public static BinaryValuesStreamer getBinaryValuesStreamer() {
+    return new BinaryValuesStreamer(BINARY_FILES_MANAGER, FILE_READ_THREAD_POOL, DESERIALIZER_THREAD_POOL);
   }
 
 

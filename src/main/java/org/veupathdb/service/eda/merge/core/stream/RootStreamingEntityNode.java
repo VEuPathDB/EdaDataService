@@ -3,6 +3,7 @@ package org.veupathdb.service.eda.merge.core.stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.collection.InitialSizeStringMap;
+import org.gusdb.fgputil.iterator.CloseableIterator;
 import org.gusdb.fgputil.json.JsonUtil;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
@@ -128,7 +129,7 @@ public class RootStreamingEntityNode extends StreamingEntityNode {
   }
 
   @Override
-  public void acceptDataStreams(Map<String, InputStream> dataStreams) {
+  public void acceptDataStreams(Map<String, CloseableIterator<Map<String, String>>> dataStreams) {
     _computeStreamProcessor.ifPresent(s -> s.acceptDataStreams(dataStreams));
     super.acceptDataStreams(dataStreams);
   }
