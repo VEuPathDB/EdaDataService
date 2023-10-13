@@ -80,7 +80,7 @@ public class CollectionFloatingContTablePlugin extends AbstractEmptyComputePlugi
 
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(DEFAULT_SINGLE_STREAM_NAME + " <- data.table::fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
-      String inputData = getRCollectionInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap);
+      String inputData = getRCollectionInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap, "variables");
       connection.voidEval(getVoidEvalCollectionMetadataList(varMap));
       String cmd = "plot.data::mosaic(data=" + inputData + ", " + 
                                         "variables=variables, " + 

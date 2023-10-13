@@ -788,26 +788,37 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
   }
 
   public String getRInputDataWithImputedZeroesAsString(String compressedDataHandle, Map<String, DynamicDataSpecImpl> dataSpecs) {
+    return getRInputDataWithImputedZeroesAsString(compressedDataHandle, dataSpecs, "variables");
+  }
+
+  public String getRInputDataWithImputedZeroesAsString(String compressedDataHandle, Map<String, DynamicDataSpecImpl> dataSpecs, String variableMetadataListHandle) {
     boolean validRequest = validateImputeZeroesRequest(dataSpecs);
-    
+
     if (validRequest) {
       String megastudyData = getRMegastudyAsString(compressedDataHandle, dataSpecs);
-      // this feels hacky, but bc this has to be called from the plugin and the plugin already has variables in R... im assuming its present.
-      return "veupathUtils::getDTWithImputedZeroes(" + megastudyData + ", variables)";
+      return "veupathUtils::getDTWithImputedZeroes(" + megastudyData + ", " + variableMetadataListHandle + ")";
     }
     
     return compressedDataHandle;
   }
 
   public String getRCollectionInputDataWithImputedZeroesAsString(String compressedDataHandle, Map<String, CollectionSpec> collectionSpecs) {
+    return getRCollectionInputDataWithImputedZeroesAsString(compressedDataHandle, collectionSpecs, "variables");
+  }
+
+  public String getRCollectionInputDataWithImputedZeroesAsString(String compressedDataHandle, Map<String, CollectionSpec> collectionSpecs, String variableMetadataListHandle) {
     Map<String, DynamicDataSpecImpl> dataSpecs = collectionMapToDynamicDataMap(collectionSpecs);
 
-    return(getRInputDataWithImputedZeroesAsString(compressedDataHandle, dataSpecs));
+    return(getRInputDataWithImputedZeroesAsString(compressedDataHandle, dataSpecs, variableMetadataListHandle));
   }
 
   public String getRVariableInputDataWithImputedZeroesAsString(String compressedDataHandle, Map<String, VariableSpec> varSpecs) {
+    return getRVariableInputDataWithImputedZeroesAsString(compressedDataHandle, varSpecs, "variables");
+  }
+
+  public String getRVariableInputDataWithImputedZeroesAsString(String compressedDataHandle, Map<String, VariableSpec> varSpecs, String variableMetadataListHandle) {
     Map<String, DynamicDataSpecImpl> dataSpecs = varMapToDynamicDataMap(varSpecs);
 
-    return(getRInputDataWithImputedZeroesAsString(compressedDataHandle, dataSpecs));
+    return(getRInputDataWithImputedZeroesAsString(compressedDataHandle, dataSpecs, variableMetadataListHandle));
   }
 }
