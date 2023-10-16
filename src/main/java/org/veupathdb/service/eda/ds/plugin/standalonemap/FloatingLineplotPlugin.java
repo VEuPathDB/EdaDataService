@@ -107,15 +107,18 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
     String numeratorValues = spec.getYAxisNumeratorValues() != null ? PluginUtil.listToRVector(spec.getYAxisNumeratorValues()) : "NULL";
     String denominatorValues = spec.getYAxisDenominatorValues() != null ? PluginUtil.listToRVector(spec.getYAxisDenominatorValues()) : "NULL";
     String overlayValues = _overlaySpecification == null ? "NULL" : _overlaySpecification.getRBinListAsString();
-    
+   
+    List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findVariableSpecsWithStudyDependentVocabs(varMap);
+    Map<String, InputStream> studyVocabs = getVocabByRootEntity(dataSpecsWithStudyDependentVocabs);
+    dataStreams.putAll(studyVocabs);
+
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
-          spec.getXAxisVariable(),
-          spec.getYAxisVariable(),
-          overlayVariable));
+      connection.voidEval(DEFAULT_SINGLE_STREAM_NAME + " <- data.table::fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
+      String inputData = getRVariableInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap, "variables");
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String viewportRString = getViewportAsRString(spec.getViewport(), xVarType);
       connection.voidEval(viewportRString);
+
       BinSpec binSpec = spec.getBinSpec();
       validateBinSpec(binSpec, xVarType);
       // consider refactoring this, does the same as something in histo
@@ -124,7 +127,7 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
         if (binSpec.getValue() != null) {
           String numBins = binSpec.getValue().toString();
           if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
-            connection.voidEval("binWidth <- plot.data::numBinsToBinWidth(data$" + xVar + ", " + numBins + ")");
+            connection.voidEval("binWidth <- plot.data::numBinsToBinWidth(" + inputData + "$" + xVar + ", " + numBins + ")");
           } else {
             connection.voidEval("binWidth <- ceiling(as.numeric(diff(range(as.Date(data$" + xVar + ")))/" + numBins + "))");
             connection.voidEval("binWidth <- paste(binWidth, 'day')");
@@ -140,7 +143,8 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
                 : "'" + binSpec.getValue().toString() + " " + binSpec.getUnits().toString().toLowerCase() + "'";
         connection.voidEval("binWidth <- " + binWidth);
       }
-      String cmd = "plot.data::lineplot(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " +
+
+      String cmd = "plot.data::lineplot(data=" + inputData + ", " +
                                         "variables=variables, binWidth=binWidth, " + 
                                         "value=" + singleQuote(valueSpec) + ", " +
                                         "errorBars=" + errorBars + ", " +

@@ -96,19 +96,25 @@ public class CollectionFloatingBoxplotPlugin extends AbstractEmptyComputePlugin<
     // ideally wed find another way to account for the yaxis given its a collection but that seems hard and idk if were even using this feature
     //nonStrataVarColNames.add(util.toColNameOrEmpty(spec.getYAxisVariable()));
 
+    // TODO we have this and the inpute fxn below. how do they relate?
     RFileSetProcessor filesProcessor = new RFileSetProcessor(dataStreams)
       .add(DEFAULT_SINGLE_STREAM_NAME, 
         spec.getMaxAllowedDataPoints(), 
         "noVariables", 
         nonStrataVarColNames, 
         (name, conn) ->
-        conn.voidEval(util.getVoidEvalFreadCommand(name, inputVarSpecs))
+        conn.voidEval(name + " <- data.table::fread('" + name + "', na.strings=c(''))")
       );
 
+    List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findDataSpecsWithStudyDependentVocabs(varMap);
+    Map<String, InputStream> studyVocabs = getVocabByRootEntity(dataSpecsWithStudyDependentVocabs);
+    dataStreams.putAll(studyVocabs);
+
     useRConnectionWithProcessedRemoteFiles(Resources.RSERVE_URL, filesProcessor, connection -> {
+      String inputData = getRInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap, "variables");
       connection.voidEval(getVoidEvalDynamicDataMetadataList(varMap));
       String cmd =
-          "plot.data::box(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " +
+          "plot.data::box(data=" + inputData + ", " +
               "variables=variables, " +
               "points='outliers', " +
               "mean=TRUE, " +

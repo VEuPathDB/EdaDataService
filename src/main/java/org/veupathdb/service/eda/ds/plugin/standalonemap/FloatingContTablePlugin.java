@@ -8,9 +8,7 @@ import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.core.AbstractEmptyComputePlugin;
-import org.veupathdb.service.eda.generated.model.FloatingContTablePostRequest;
-import org.veupathdb.service.eda.generated.model.FloatingContTableSpec;
-import org.veupathdb.service.eda.generated.model.VariableSpec;
+import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -82,13 +80,16 @@ public class FloatingContTablePlugin extends AbstractEmptyComputePlugin<Floating
     Map<String, VariableSpec> varMap = new HashMap<>();
     varMap.put("xAxis", spec.getXAxisVariable());
     varMap.put("yAxis", spec.getYAxisVariable());
-    
+   
+    List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findVariableSpecsWithStudyDependentVocabs(varMap);
+    Map<String, InputStream> studyVocabs = getVocabByRootEntity(dataSpecsWithStudyDependentVocabs);
+    dataStreams.putAll(studyVocabs);
+
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
-          spec.getXAxisVariable(),
-          spec.getYAxisVariable()));
+      connection.voidEval(DEFAULT_SINGLE_STREAM_NAME + " <- data.table::fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
+      String inputData = getRVariableInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap, "variables");
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
-      String cmd = "plot.data::mosaic(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " + 
+      String cmd = "plot.data::mosaic(data=" + inputData + ", " + 
                                         "variables=variables, " + 
                                         "statistic='chiSq', " + 
                                         "columnReferenceValue=NA_character_, " + 

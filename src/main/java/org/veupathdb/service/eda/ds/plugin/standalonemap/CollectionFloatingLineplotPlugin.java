@@ -92,9 +92,14 @@ public class CollectionFloatingLineplotPlugin extends AbstractEmptyComputePlugin
     String numeratorValues = spec.getYAxisNumeratorValues() != null ? PluginUtil.listToRVector(spec.getYAxisNumeratorValues()) : "NULL";
     String denominatorValues = spec.getYAxisDenominatorValues() != null ? PluginUtil.listToRVector(spec.getYAxisDenominatorValues()) : "NULL";
     String overlayValues = getRBinListAsString(spec.getOverlayConfig().getSelectedValues());
-    
+   
+    List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findDataSpecsWithStudyDependentVocabs(varMap);
+    Map<String, InputStream> studyVocabs = getVocabByRootEntity(dataSpecsWithStudyDependentVocabs);
+    dataStreams.putAll(studyVocabs);
+     
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, inputVarSpecs));
+      connection.voidEval(DEFAULT_SINGLE_STREAM_NAME + " <- data.table::fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
+      String inputData = getRInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap, "variables");
       connection.voidEval(getVoidEvalDynamicDataMetadataList(varMap));
       String viewportRString = getViewportAsRString(spec.getViewport(), collectionType);
       connection.voidEval(viewportRString);
@@ -109,7 +114,7 @@ public class CollectionFloatingLineplotPlugin extends AbstractEmptyComputePlugin
       }
       connection.voidEval("binWidth <- " + binWidth);
 
-      String cmd = "plot.data::lineplot(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " +
+      String cmd = "plot.data::lineplot(data=" + inputData + ", " +
                                         "variables=variables, binWidth=binWidth, " + 
                                         "value=" + singleQuote(valueSpec) + ", " +
                                         "errorBars=" + errorBars + ", " +

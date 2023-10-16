@@ -107,23 +107,25 @@ public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBo
     nonStrataVarColNames.add(util.toColNameOrEmpty(spec.getXAxisVariable()));
     nonStrataVarColNames.add(util.toColNameOrEmpty(spec.getYAxisVariable()));
 
+    List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findVariableSpecsWithStudyDependentVocabs(varMap);
+    Map<String, InputStream> studyVocabs = getVocabByRootEntity(dataSpecsWithStudyDependentVocabs);
+    dataStreams.putAll(studyVocabs);
+
     RFileSetProcessor filesProcessor = new RFileSetProcessor(dataStreams)
       .add(DEFAULT_SINGLE_STREAM_NAME, 
         spec.getMaxAllowedDataPoints(), 
         "noVariables", 
         nonStrataVarColNames, 
         (name, conn) ->
-        conn.voidEval(util.getVoidEvalFreadCommand(name,
-          spec.getXAxisVariable(),
-          spec.getYAxisVariable(),
-          overlayVariable))
+        conn.voidEval(name + " <- data.table::fread('" + name + "', na.strings=c(''))")
       );
 
     useRConnectionWithProcessedRemoteFiles(Resources.RSERVE_URL, filesProcessor, connection -> {
       String overlayValues = _overlaySpecification == null ? "NULL" : _overlaySpecification.getRBinListAsString();
+      String inputData = getRVariableInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap, "variables");
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String cmd =
-          "plot.data::box(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " +
+          "plot.data::box(data=" + inputData + ", " +
               "variables=variables, " +
               "points='outliers', " +
               "mean=TRUE, " +
@@ -132,6 +134,7 @@ public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBo
               "completeCases=FALSE, " +
               "overlayValues=" + overlayValues + ", " +
               "evilMode='noVariables')";
+              System.out.println("cmd: " + cmd);
       streamResult(connection, cmd, out);
     });
   }

@@ -8,10 +8,7 @@ import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.core.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.utils.ValidationUtils;
-import org.veupathdb.service.eda.generated.model.CollectionFloatingBarplotPostRequest;
-import org.veupathdb.service.eda.generated.model.CollectionFloatingBarplotSpec;
-import org.veupathdb.service.eda.generated.model.CollectionSpec;
-import org.veupathdb.service.eda.generated.model.VariableSpec;
+import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -87,12 +84,17 @@ public class CollectionFloatingBarplotPlugin extends AbstractEmptyComputePlugin<
 
     Map<String, CollectionSpec> varMap = new HashMap<>();
     varMap.put("overlay", spec.getOverlayConfig().getCollection());
-      
+     
+    List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findCollectionSpecsWithStudyDependentVocabs(varMap);
+    Map<String, InputStream> studyVocabs = getVocabByRootEntity(dataSpecsWithStudyDependentVocabs);
+    dataStreams.putAll(studyVocabs);
+
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, inputVarSpecs));
+      connection.voidEval(DEFAULT_SINGLE_STREAM_NAME + " <- data.table::fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
+      String inputData = getRCollectionInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap, "variables");
       connection.voidEval(getVoidEvalCollectionMetadataList(varMap));
       String cmd =
-          "plot.data::bar(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " +
+          "plot.data::bar(data=" + inputData + ", " +
               "variables=variables, " +
               "value='" + spec.getValueSpec().getValue() + "', " +
               "barmode='" + barMode + "', " +
