@@ -213,6 +213,10 @@ types:
     properties:
       isRequired: boolean
       isTemporal: boolean
+      isCollection: boolean
+      isCompositional: boolean
+      isProportion: boolean
+      allowedNormalizationMethods: string[]
       minNumVars: number
       maxNumVars: number
       minNumValues: number
@@ -295,6 +299,7 @@ types:
     properties:
       id: string
       isUserStudy: boolean
+      hasMap: boolean
       rootEntity: API_Entity
   API_Entity:
     type: EntityIdGetResponse
@@ -614,7 +619,7 @@ types:
   AlphaDivComputeConfig:
     type: object
     properties:
-      collectionVariable: VariableSpec
+      collectionVariable: CollectionSpec
       alphaDivMethod: AlphaDivMethod
   AlphaDivMethod:
     type: string
@@ -629,7 +634,7 @@ types:
   BetaDivComputeConfig:
     type: object
     properties:
-      collectionVariable: VariableSpec
+      collectionVariable: CollectionSpec
       betaDivDissimilarityMethod: BetaDivDissimilarityMethod
   BetaDivDissimilarityMethod:
     type: string
@@ -648,7 +653,7 @@ types:
   DifferentialAbundanceComputeConfig:
     type: object
     properties:
-      collectionVariable: VariableSpec
+      collectionVariable: CollectionSpec
       comparator: ComparatorSpec
       differentialAbundanceMethod: DifferentialAbundanceMethod
   DifferentialAbundanceMethod:
@@ -656,19 +661,25 @@ types:
     enum:
       - DESeq
       - ANCOMBC
+      - Maaslin
   ComparatorSpec:
     type: object
     properties:
       variable: VariableSpec
       groupA: LabeledRange[]
       groupB: LabeledRange[]
-  DifferentialAbundanceStatsResponse:
+  DifferentialAbundanceStats:
     type: object
     properties:
-      log2foldChange: string[]
+      effectSize: string[]
       pValue: string[]
       adjustedPValue: string[]
       pointId: string[]
+  DifferentialAbundanceStatsResponse:
+    type: object
+    properties:
+      effectSizeLabel: string
+      statistics: DifferentialAbundanceStats
   ExamplePluginRequest:
     type: ComputeRequestBase
     properties:
@@ -689,7 +700,7 @@ types:
   RankedAbundanceComputeConfig:
     type: object
     properties:
-      collectionVariable: VariableSpec
+      collectionVariable: CollectionSpec
       rankingMethod: RankingMethod
   RankingMethod:
     type: string
@@ -711,6 +722,7 @@ types:
       name: string
       displayName: string
       description: string
+      dataElementConstraints?: DataElementConstraintPattern[]
   ExpiredJobsResponse:
     type: object
     properties:
