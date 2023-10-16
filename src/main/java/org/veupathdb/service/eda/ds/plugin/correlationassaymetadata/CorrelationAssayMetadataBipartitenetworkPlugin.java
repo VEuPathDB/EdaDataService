@@ -2,6 +2,7 @@ package org.veupathdb.service.eda.ds.plugin.correlationassaymetadata;
 
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
+import org.veupathdb.service.eda.common.plugin.util.RServeClient;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.core.AbstractPlugin;
@@ -80,6 +81,17 @@ public class CorrelationAssayMetadataBipartitenetworkPlugin extends AbstractPlug
         
       }
       connection.voidEval("print(head(statsDf))");
+
+      connection.voidEval("bpNet <- plot.data::bipartiteNetwork(" +
+                                                            "df=statsDf," +
+                                                            "sourceNodeColumn='data1'," +
+                                                            "targetNodeColumn='data2'," + 
+                                                            "linkWeightColumn='correlationCoef'," +
+                                                            "linkColorScheme='posneg'," +
+                                                            "verbose=TRUE)");
+
+      String command = "plot.data::writeNetworkToJSON(bpNet, pattern='bipartiteNetwork', verbose=TRUE)";
+      RServeClient.streamResult(connection, command, out);
     });
   }
 }
