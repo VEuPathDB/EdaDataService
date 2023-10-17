@@ -1,5 +1,7 @@
 package org.veupathdb.service.eda.data.plugin.standalonemap;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.DelimitedDataParser;
 import org.gusdb.fgputil.geo.GeographyUtil.GeographicPoint;
 import org.gusdb.fgputil.json.JsonUtil;
@@ -22,6 +24,7 @@ import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesPostRespons
 import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesPostResponseImpl;
 import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
+import org.veupathdb.service.eda.ss.model.db.FilteredResultFactory;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -40,6 +43,7 @@ import static org.gusdb.fgputil.FormatUtil.TAB;
 import static org.veupathdb.service.eda.data.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
 public class BubbleMapMarkersPlugin extends AbstractEmptyComputePlugin<StandaloneMapBubblesPostRequest, StandaloneMapBubblesSpec> {
+  private static final Logger LOG = LogManager.getLogger(BubbleMapMarkersPlugin.class);
   private QuantitativeAggregateConfiguration _overlaySpecification = null;
 
   @Override
@@ -107,7 +111,9 @@ public class BubbleMapMarkersPlugin extends AbstractEmptyComputePlugin<Standalon
     // create scanner and line parser
     InputStreamReader isReader = new InputStreamReader(new BufferedInputStream(dataStreams.get(DEFAULT_SINGLE_STREAM_NAME)));
     BufferedReader reader = new BufferedReader(isReader);
-    DelimitedDataParser parser = new DelimitedDataParser(reader.readLine(), TAB, true);
+    String headerLine = reader.readLine();
+    LOG.info("HEADERS: " + headerLine);
+    DelimitedDataParser parser = new DelimitedDataParser(headerLine, TAB, true);
 
     // establish column header indexes
     StandaloneMapBubblesSpec spec = getPluginSpec();

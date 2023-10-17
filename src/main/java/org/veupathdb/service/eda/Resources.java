@@ -24,7 +24,7 @@ import org.veupathdb.service.eda.download.DownloadService;
 import org.veupathdb.service.eda.data.AppsService;
 import org.veupathdb.service.eda.ss.model.reducer.BinaryValuesStreamer;
 import org.veupathdb.service.eda.subset.service.ClearMetadataCacheService;
-import org.veupathdb.service.eda.subset.service.FilterAwareMetadataService;
+import org.veupathdb.service.eda.data.FilterAwareMetadataService;
 import org.veupathdb.service.eda.merge.controller.MergingServiceExternal;
 import org.veupathdb.service.eda.merge.controller.MergingServiceInternal;
 import org.veupathdb.service.eda.subset.service.MetadataCache;
@@ -127,8 +127,8 @@ public class Resources extends ContainerResources {
     }
 
     if (SUBSET_ENV.isDevelopmentMode()) {
-      enableJerseyTrace();
-      ClientUtil.LOG_RESPONSE_HEADERS = true;
+//      enableJerseyTrace();
+//      ClientUtil.LOG_RESPONSE_HEADERS = true;
     }
 
     if (!USE_IN_MEMORY_TEST_DATABASE) {

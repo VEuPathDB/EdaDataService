@@ -38,7 +38,6 @@ import org.veupathdb.service.eda.data.plugin.standalonemap.StandaloneMapMarkersP
 import org.veupathdb.service.eda.data.plugin.pass.BarplotPlugin;
 import org.veupathdb.service.eda.data.plugin.pass.BoxplotPlugin;
 import org.veupathdb.service.eda.data.plugin.pass.MapPlugin;
-import org.veupathdb.service.eda.ds.plugin.sample.*;
 import org.veupathdb.service.eda.generated.model.*;
 
 public class AppsMetadata {

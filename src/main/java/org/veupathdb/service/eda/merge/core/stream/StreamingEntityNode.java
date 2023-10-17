@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.Tuples.TwoTuple;
 import org.gusdb.fgputil.functional.Functions;
+import org.gusdb.fgputil.iterator.CloseableIterator;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.model.EntityDef;
@@ -18,6 +19,7 @@ import org.veupathdb.service.eda.merge.core.derivedvars.Transform;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -175,7 +177,7 @@ public class StreamingEntityNode extends EntityStream {
   }
 
   @Override
-  public void acceptDataStreams(Map<String, InputStream> dataStreams) {
+  public void acceptDataStreams(Map<String, CloseableIterator<Map<String, String>>> dataStreams) {
     // order matters here; incoming data must be initialized before this node
     //   initializes its first row or required columns will not be present
     _ancestorStreams.forEach(s -> s.acceptDataStreams(dataStreams));
@@ -205,7 +207,14 @@ public class StreamingEntityNode extends EntityStream {
   protected void applyAncestorVars(EntityStream ancestorStream, Map<String,String> row) {
 
     String ancestorIdColName = ancestorStream.getEntityIdColumnName();
-    Predicate<Map<String,String>> isMatch = r -> r.get(ancestorIdColName).equals(row.get(ancestorIdColName));
+    Predicate<Map<String,String>> isMatch = r -> {
+      try {
+        return r.get(ancestorIdColName).equals(row.get(ancestorIdColName));
+      } catch (Exception e) {
+        LOG.error("Failed to test condition: my row: " + new HashMap<>(row) + " ancestor row: " + new HashMap<>(r) + " ancestor id " + ancestorIdColName);
+        throw new RuntimeException(e);
+      }
+    };
     Optional<Map<String,String>> ancestorRow = ancestorStream.getPreviousRowIf(isMatch);
 
     // loop through ancestor rows until we find a match for ours
