@@ -12,6 +12,7 @@ import org.veupathdb.service.eda.generated.resources.FilterAwareMetadataContinuo
 import static org.veupathdb.service.eda.data.AppsService.processRequest;
 import static org.veupathdb.service.eda.data.AppsService.wrapPlugin;
 
+
 @Authenticated(allowGuests = true)
 public class FilterAwareMetadataService implements FilterAwareMetadataContinuousVariable {
 

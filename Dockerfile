@@ -42,6 +42,8 @@ RUN ./gradlew generate-jaxrs generate-raml-docs
 # copy remaining files
 COPY . .
 
+COPY --from=lib-eda-subsetting /dev-dependencies /lib-eda-subsetting
+
 # build the project
 RUN ./gradlew clean test shadowJar
 

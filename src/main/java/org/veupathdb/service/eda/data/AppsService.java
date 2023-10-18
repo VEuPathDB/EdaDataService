@@ -252,7 +252,7 @@ public class AppsService implements Apps {
         new FloatingContTablePostResponseStream(processRequest(new FloatingContTablePlugin(), entity)))); 
   }
 
-  static <T> T wrapPlugin(SupplierWithException<T> supplier) {
+  public static <T> T wrapPlugin(SupplierWithException<T> supplier) {
     try {
       return supplier.get();
     }
@@ -276,7 +276,7 @@ public class AppsService implements Apps {
     return processRequest(plugin, entity, appName, request);
   }
 
-  static <T extends DataPluginRequestBase> Consumer<OutputStream> processRequest(AbstractPlugin<T,?,?> plugin, T entity, String appName, ContainerRequest request) throws ValidationException {
+  public static <T extends DataPluginRequestBase> Consumer<OutputStream> processRequest(AbstractPlugin<T,?,?> plugin, T entity, String appName, ContainerRequest request) throws ValidationException {
     Entry<String,String> authHeader = UserProvider.getSubmittedAuth(request).orElseThrow();
     StudyAccess.confirmPermission(authHeader, Resources.DATASET_ACCESS_SERVICE_URL,
         entity.getStudyId(), StudyAccess::allowVisualizations);
