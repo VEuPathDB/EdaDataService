@@ -62,25 +62,23 @@ public class CorrelationAssayMetadataBipartitenetworkPlugin extends AbstractPlug
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    System.out.println("I'm writing results!");
+
     CorrelationAssayMetadataStatsResponse stats = getComputeResultStats(CorrelationAssayMetadataStatsResponse.class);
 
 
     
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      connection.voidEval("print('im in R')");
       
-      // TEMP there's probably a much more elegant solution, please advise!
+      // Take the stats response object and write it into R
+      // as a data.frame. There's probably a much more elegant solution, please advise!
       connection.voidEval("statsDf <- data.frame(correlationCoef = character(), data1 = character(), data2 = character(), stringsAsFactors=FALSE)");
       for (int i = 0; i < stats.getStatistics().toArray().length; i++) {
         CorrelationPoint point = stats.getStatistics().get(i);
         String newRow = "list(correlationCoef='" + point.getCorrelationCoef() + "', data1='" + point.getData1() + "', data2='" + point.getData2() + "')";
         connection.voidEval("newRow <- " + newRow);
         connection.voidEval("statsDf <- rbind(statsDf, newRow)");
-        System.out.println(newRow);
         
       }
-      connection.voidEval("print(head(statsDf))");
 
       connection.voidEval("bpNet <- plot.data::bipartiteNetwork(" +
                                                             "df=statsDf," +
