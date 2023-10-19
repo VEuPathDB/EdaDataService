@@ -44,6 +44,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -59,11 +60,13 @@ import static org.gusdb.fgputil.runtime.ProjectSpecificProperties.PropertySpec.r
 public class Resources extends ContainerResources {
   private static final Logger LOG = LogManager.getLogger(Resources.class);
 
+
   // Subsetting Config
+  private static final CountDownLatch DB_INIT_SIGNAL = new CountDownLatch(1);
   private static final SubsetEnvironment SUBSET_ENV = new SubsetEnvironment();
   private static final BinaryFilesManager BINARY_FILES_MANAGER = new BinaryFilesManager(
       new SimpleStudyFinder(Resources.getBinaryFilesDirectory().toString()));
-  private static final MetadataCache METADATA_CACHE = new MetadataCache(BINARY_FILES_MANAGER);
+  private static final MetadataCache METADATA_CACHE = new MetadataCache(BINARY_FILES_MANAGER, DB_INIT_SIGNAL);
   private static final ExecutorService FILE_READ_THREAD_POOL = Executors.newCachedThreadPool();
   private static final ExecutorService DESERIALIZER_THREAD_POOL = Executors.newFixedThreadPool(16);
 
@@ -135,6 +138,9 @@ public class Resources extends ContainerResources {
       DbManager.initApplicationDatabase(opts);
       LOG.info("Using application DB connection URL: " +
           DbManager.getInstance().getApplicationDatabase().getConfig().getConnectionUrl());
+
+      // Signal to dependencies that database is available.
+      DB_INIT_SIGNAL.countDown();
     }
   }
 
@@ -151,6 +157,7 @@ public class Resources extends ContainerResources {
   }
 
   public static DataSource getApplicationDataSource() {
+    LOG.info("In memory data source?: " + USE_IN_MEMORY_TEST_DATABASE);
     return USE_IN_MEMORY_TEST_DATABASE
       ? StubDb.getDataSource()
       : DbManager.applicationDatabase().getDataSource();

@@ -1,7 +1,9 @@
 package org.veupathdb.service.eda.subset.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.gusdb.fgputil.json.JsonUtil;
 import org.veupathdb.service.eda.Resources;
 import org.veupathdb.service.eda.ss.model.Study;
 import org.veupathdb.service.eda.ss.model.StudyOverview;
@@ -17,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -33,11 +36,13 @@ public class MetadataCache implements StudyProvider {
   private final Map<String, Study> _studies = new HashMap<>(); // cache the studies
   private final Map<String, Boolean> _studyHasFilesCache = new HashMap<>();
   private final ScheduledExecutorService _scheduledThreadPool = Executors.newScheduledThreadPool(1); // Shut this down.
+  private final Optional<CountDownLatch> _dbInitSignal;
 
-  public MetadataCache(BinaryFilesManager binaryFilesManager) {
+  public MetadataCache(BinaryFilesManager binaryFilesManager, CountDownLatch dbInitSignal) {
     _binaryFilesManager = binaryFilesManager;
     _sourceStudyProvider = this::getCuratedStudyFactory; // Lazily initialize to ensure database connection is established before construction.
     _scheduledThreadPool.scheduleAtFixedRate(this::invalidateOutOfDateStudies, 0L, 5L, TimeUnit.MINUTES);
+    _dbInitSignal = Optional.of(dbInitSignal);
   }
 
   // Visible for testing
@@ -48,6 +53,7 @@ public class MetadataCache implements StudyProvider {
     _sourceStudyProvider = () -> sourceStudyProvider;
     _scheduledThreadPool.scheduleAtFixedRate(this::invalidateOutOfDateStudies, 0L,
         refreshInterval.toMillis(), TimeUnit.MILLISECONDS);
+    _dbInitSignal = Optional.empty();
   }
 
   @Override
@@ -58,9 +64,15 @@ public class MetadataCache implements StudyProvider {
 
   @Override
   public synchronized List<StudyOverview> getStudyOverviews() {
-    if (_studyOverviews == null) {
+    try {
+      LOG.info("BEFORE: " + JsonUtil.Jackson.writeValueAsString(_studyOverviews));
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
+    if (_studyOverviews == null || _studyOverviews.isEmpty()) {
       _studyOverviews = _sourceStudyProvider.get().getStudyOverviews();
     }
+    LOG.info("AFTER: "+ _studyOverviews.size());
     return Collections.unmodifiableList(_studyOverviews);
   }
 
@@ -93,6 +105,14 @@ public class MetadataCache implements StudyProvider {
   }
 
   private void invalidateOutOfDateStudies() {
+    _dbInitSignal.ifPresent(signal -> {
+      try {
+        signal.await();
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        throw new RuntimeException(e);
+      }
+    });
     LOG.info("Checking which studies are out of date in cache.");
     List<StudyOverview> dbStudies = _sourceStudyProvider.get().getStudyOverviews();
     List<Study> studiesToRemove = _studies.values().stream()
