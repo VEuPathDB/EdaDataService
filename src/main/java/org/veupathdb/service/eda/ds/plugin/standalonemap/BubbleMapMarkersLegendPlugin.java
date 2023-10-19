@@ -29,6 +29,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -82,9 +83,11 @@ public class BubbleMapMarkersLegendPlugin extends AbstractEmptyComputePlugin<Sta
         .var("sizeGeoVariable", sizeConfig.map(SizeLegendConfig::getGeoAggregateVariable).orElse(null)));
     if (pluginSpec.getColorLegendConfig() != null) {
       try {
+        final VariableSpec overlayVar = pluginSpec.getColorLegendConfig().getQuantitativeOverlayConfig().getOverlayVariable();
         _colorSpecification = new QuantitativeAggregateConfiguration(
             pluginSpec.getColorLegendConfig().getQuantitativeOverlayConfig().getAggregationConfig(),
-            getUtil().getVariableDataShape(pluginSpec.getColorLegendConfig().getQuantitativeOverlayConfig().getOverlayVariable()),
+            getUtil().getVariableDataShape(overlayVar),
+            getUtil().getVariableType(overlayVar),
             getUtil().getVocabulary(pluginSpec.getColorLegendConfig().getQuantitativeOverlayConfig().getOverlayVariable()));
       } catch (IllegalArgumentException e) {
         throw new ValidationException(e.getMessage());
@@ -156,10 +159,14 @@ public class BubbleMapMarkersLegendPlugin extends AbstractEmptyComputePlugin<Sta
         .toList();
     if (_pluginSpec.getColorLegendConfig() != null) {
       response.setMaxColorValue(colorValues.stream()
-          .max(Comparator.comparingDouble(x -> x == null ? Double.NEGATIVE_INFINITY : x))
+          .filter(Objects::nonNull)
+          .max(Comparator.comparingDouble(Double::doubleValue))
+          .map(_colorSpecification::serializeAverage)
           .orElse(null));
       response.setMinColorValue(colorValues.stream()
-          .min(Comparator.comparingDouble(x -> x == null ? Double.POSITIVE_INFINITY : x))
+          .filter(Objects::nonNull)
+          .min(Comparator.comparingDouble(Double::doubleValue))
+          .map(_colorSpecification::serializeAverage)
           .orElse(null));
     }
     if (_pluginSpec.getSizeConfig() != null) {
