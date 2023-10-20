@@ -3,14 +3,20 @@ apply {
   from("https://raw.githubusercontent.com/VEuPathDB/lib-gradle-container-utils/v4.8.9/includes/common.settings.gradle.kts")
 }
 
-val core = file("../lib-jaxrs-container-core");
+val core = file("../lib-jaxrs-container-core")
 if (core.exists()) {
   include(":core")
   project(":core").projectDir = core
 }
 
-val edaCommon = file("../lib-eda-subsetting");
-if (edaCommon.exists()) {
+val libSubsetting = file("../lib-eda-subsetting")
+if (libSubsetting.exists()) {
   include(":libSubsetting")
-  project(":libSubsetting").projectDir = edaCommon
+  project(":libSubsetting").projectDir = libSubsetting
+}
+
+val edaCommon = file("../EdaCommon")
+if (edaCommon.exists()) {
+  include(":edaCommon")
+  project(":edaCommon").projectDir = edaCommon
 }

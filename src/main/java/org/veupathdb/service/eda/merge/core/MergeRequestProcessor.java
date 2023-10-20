@@ -99,15 +99,14 @@ public class MergeRequestProcessor {
             // need to get compute stream from compute service
             ? _resources.getInMemoryComputeStream()
             // all other streams come from subsetting service
-            : FilteredResultFactory.produceUnformattedTabularSubsetFromFiles(study,
+            : FilteredResultFactory.produceUnformattedTabularSubset(study,
             study.getEntity(spec.getEntityId()).orElseThrow(),
             spec.stream()
                 .map(varSpec -> study.getEntity(spec.getEntityId()).orElseThrow().getVariableOrThrow(varSpec.getVariableId()))
                 .map(var -> (VariableWithValues) var)
                 .collect(Collectors.toList()),
             ApiConversionUtil.toInternalFilters(study, spec.getFiltersOverride().orElse(_resources.getSubsetFilters()), Resources.getAppDbSchema()), // Move this up?
-            Resources.getBinaryValuesStreamer());
-
+            Resources.getBinaryValuesStreamer(), false, Resources.getApplicationDataSource(), Resources.getAppDbSchema());
     return out -> {
 
       // create stream processor
