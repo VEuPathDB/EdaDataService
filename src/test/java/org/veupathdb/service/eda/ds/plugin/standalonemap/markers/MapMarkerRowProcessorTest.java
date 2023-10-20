@@ -36,11 +36,9 @@ public class MapMarkerRowProcessorTest {
         -2,
         2
     );
-    String inputData = new StringBuilder()
-        .append(generateTabularRow(0.1, 0.1, "a", "1.0", "1.0"))
-        .append(generateTabularRow(0.1, 0.1, "a", "90.0", "1.0"))
-        .append(generateTabularRow(0.1, 0.1, "a", "500.0", "1.0"))
-        .toString();
+    String inputData = generateTabularRow(0.1, 0.1, "a", "1.0", "1.0") +
+        generateTabularRow(0.1, 0.1, "a", "90.0", "1.0") +
+        generateTabularRow(0.1, 0.1, "a", "500.0", "1.0");
     InputStream inputStream = new ByteArrayInputStream(inputData.getBytes(StandardCharsets.UTF_8));
     Reader reader = new InputStreamReader(inputStream);
     BufferedReader bufferedReader = new BufferedReader(reader);
@@ -55,7 +53,7 @@ public class MapMarkerRowProcessorTest {
         headers::get,
         headerToIndex::get,
         List.of("E1.C1", "E1.C2"), // just collection vars.,
-        new QuantitativeAggregateConfiguration(aggregationConfig, "continuous", "number", List.of("1.0", "90.0", "500.0"))
+        new QuantitativeAggregateConfiguration(aggregationConfig, "continuous", "number", () -> List.of("1.0", "90.0", "500.0"))
     );
     Map<String, MarkerData<Map<String, AveragesWithConfidence>>> data = collectionAggregator.process(bufferedReader, parser, viewport, aggregator);
     Map<String, AveragesWithConfidence> aMarkerData = data.get("a").getMarkerAggregator().finish();
@@ -75,11 +73,9 @@ public class MapMarkerRowProcessorTest {
         -2,
         2
     );
-    String inputData = new StringBuilder()
-        .append(generateTabularRow(0.1, 0.1, "a", "a", "b"))
-        .append(generateTabularRow(0.1, 0.1, "a", "a", "b"))
-        .append(generateTabularRow(0.1, 0.1, "a", "b", "a"))
-        .toString();
+    String inputData = generateTabularRow(0.1, 0.1, "a", "a", "b") +
+        generateTabularRow(0.1, 0.1, "a", "a", "b") +
+        generateTabularRow(0.1, 0.1, "a", "b", "a");
     InputStream inputStream = new ByteArrayInputStream(inputData.getBytes(StandardCharsets.UTF_8));
     Reader reader = new InputStreamReader(inputStream);
     BufferedReader bufferedReader = new BufferedReader(reader);
@@ -96,7 +92,7 @@ public class MapMarkerRowProcessorTest {
         headers::get,
         headerToIndex::get,
         List.of("E1.C1", "E1.C2"), // just collection vars.,
-        new QuantitativeAggregateConfiguration(aggregationConfig, "categorical", "string", List.of("a", "b"))
+        new QuantitativeAggregateConfiguration(aggregationConfig, "categorical", "string", () -> List.of("a", "b"))
     );
     Map<String, MarkerData<Map<String, AveragesWithConfidence>>> data = collectionAggregator.process(bufferedReader, parser, viewport, aggregator);
     Map<String, AveragesWithConfidence> aMarkerData = data.get("a").getMarkerAggregator().finish();

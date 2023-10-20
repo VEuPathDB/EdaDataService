@@ -88,7 +88,7 @@ public class BubbleMapMarkersLegendPlugin extends AbstractEmptyComputePlugin<Sta
             pluginSpec.getColorLegendConfig().getQuantitativeOverlayConfig().getAggregationConfig(),
             getUtil().getVariableDataShape(overlayVar),
             getUtil().getVariableType(overlayVar),
-            getUtil().getVocabulary(pluginSpec.getColorLegendConfig().getQuantitativeOverlayConfig().getOverlayVariable()));
+            () -> getUtil().getVocabulary(pluginSpec.getColorLegendConfig().getQuantitativeOverlayConfig().getOverlayVariable()));
       } catch (IllegalArgumentException e) {
         throw new ValidationException(e.getMessage());
       }

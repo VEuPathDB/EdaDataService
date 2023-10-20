@@ -17,6 +17,7 @@ import java.time.ZoneOffset;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.veupathdb.service.eda.generated.model.OverlayType.CATEGORICAL;
 
@@ -33,7 +34,7 @@ public class QuantitativeAggregateConfiguration {
   public QuantitativeAggregateConfiguration(QuantitativeAggregationConfig overlayConfig,
                                             String varShape,
                                             String variableType,
-                                            List<String> overlayVocab) {
+                                            Supplier<List<String>> vocabSupplier) {
       this.variableType = variableType;
     if (CATEGORICAL.equals(overlayConfig.getOverlayType())) {
       if (varShape.equalsIgnoreCase(APIVariableDataShape.CONTINUOUS.getValue())) {
@@ -56,7 +57,7 @@ public class QuantitativeAggregateConfiguration {
          return new ProportionWithConfidenceAggregator(index,
               categoricalConfig.getNumeratorValues(),
               categoricalConfig.getDenominatorValues(),
-              overlayVocab);
+              vocabSupplier.get());
         }
       };
     } else {
