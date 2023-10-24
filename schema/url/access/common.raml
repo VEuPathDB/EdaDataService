@@ -1,0 +1,34 @@
+#%RAML 1.0 Library
+
+types:
+  DatastoreId:
+    type: integer
+    format: int64
+    minimum: 1
+  UserDetails:
+    type: object
+    properties:
+      userId:
+        type: integer
+        format: int64
+        minimum: 1
+      firstName: string
+      lastName: string
+      organization: string
+      email: string
+    additionalProperties: false
+  RestrictionLevel:
+    type: string
+    enum:
+      - public
+      - prerelease
+      - protected
+      - controlled
+      - private
+  ApprovalStatus:
+    type: string
+    enum:
+      - unrequested
+      - approved
+      - requested
+      - denied

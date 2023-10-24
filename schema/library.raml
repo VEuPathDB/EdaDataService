@@ -7,6 +7,428 @@
 ################################################################################
 
 types:
+  DatastoreId:
+    type: integer
+    format: int64
+    minimum: 1
+  UserDetails:
+    type: object
+    additionalProperties: false
+    properties:
+      userId:
+        type: integer
+        format: int64
+        minimum: 1
+      firstName: string
+      lastName: string
+      organization: string
+      email: string
+  RestrictionLevel:
+    type: string
+    enum:
+      - public
+      - prerelease
+      - protected
+      - controlled
+      - private
+  ApprovalStatus:
+    type: string
+    enum:
+      - unrequested
+      - approved
+      - requested
+      - denied
+  EndUser:
+    type: object
+    additionalProperties: false
+    properties:
+      user: UserDetails
+      datasetId: string
+      startDate?: datetime
+      duration?:
+        type: integer
+        format: int64
+      restrictionLevel: RestrictionLevel
+      purpose: string
+      researchQuestion: string
+      analysisPlan: string
+      disseminationPlan: string
+      approvalStatus: ApprovalStatus
+      denialReason?: string
+      priorAuth: string
+      allowEdit: boolean
+  EndUserCreateRequest:
+    description: |
+      New end user request body.
+
+      Body MUST contain either `userId` property or the `email` property.
+
+      If the `email` property is used, the service will attempt to locate a user
+      account with that email.  If one is found, a new record will be created
+      and it's ID returned in the response.  If one is not found, an email will
+      be sent to the given address requesting the user create an account and
+      **NO NEW RECORD WILL BE CREATED**.
+    type: object
+    additionalProperties: false
+    properties:
+      userId?:
+        type: integer
+        format: int64
+        minimum: 1
+      email?: string
+      purpose: string
+      researchQuestion: string
+      analysisPlan: string
+      disseminationPlan: string
+      priorAuth: string
+      datasetId: string
+      startDate?: datetime
+      duration?: integer
+      restrictionLevel?: RestrictionLevel
+      approvalStatus?: ApprovalStatus
+      denialReason?: string
+  EndUserCreateResponse:
+    description: |
+      End user creation response.
+
+      Returns a flag indicating whether or not the record was actually created
+      or not.  If `created == true` then the `endUserId` property will be
+      present and contain the new end user record's ID.  If `created == false`
+      then the `endUserId` property will NOT be present, and the successful
+      response indicates that an email was sent to the email address given in
+      the request.
+
+      If the creation request used the `userId` property instead of the `email`
+      property, a new record will always have been created on a success
+      response.
+    type: object
+    additionalProperties: false
+    properties:
+      created: boolean
+      endUserId?: string
+  EndUserList:
+    type: object
+    additionalProperties: false
+    properties:
+      data: EndUser[]
+      rows:
+        type: integer
+        format: int64
+        minimum: 0
+      offset:
+        type: integer
+        format: int64
+        minimum: 0
+      total:
+        type: integer
+        format: int64
+        minimum: 0
+  EndUserPatch:
+    type: object
+    additionalProperties: false
+    properties:
+      op:
+        type: string
+        enum:
+          - add
+          - remove
+          - replace
+      path:
+        type: string
+        pattern: ^/.+$
+      value?: any
+      from?: string
+  DatasetProvider:
+    type: object
+    additionalProperties: false
+    properties:
+      providerId: DatastoreId
+      datasetId: string
+      user: UserDetails
+      isManager: boolean
+  DatasetProviderList:
+    type: object
+    additionalProperties: false
+    properties:
+      data: DatasetProvider[]
+      rows:
+        type: integer
+        format: int64
+        minimum: 0
+      offset:
+        type: integer
+        format: int64
+        minimum: 0
+      total:
+        type: integer
+        format: int64
+        minimum: 0
+  DatasetProviderCreateRequest:
+    type: object
+    additionalProperties: false
+    properties:
+      datasetId: string
+      userId?:
+        type: integer
+        format: int64
+        minimum: 1
+      email?: string
+      isManager: boolean
+  DatasetProviderCreateResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      created:
+        description: |
+          Indicates whether a new provider record was created or not.
+
+          If this value is `false` the `"providerId"` property will not be set.
+          This happens when the request was sent using an email address that is
+          not in our user database.  In this case no provider record was created
+          but instead an email was sent to the given address requesting that the
+          user register.
+
+          If this value is `true` the `"providerId"` property will be set
+          containing the primary key value of the newly created provider record.
+        type: boolean
+      providerId?:
+        type: integer
+        format: int64
+        minimum: 1
+  DatasetProviderPatchRequest:
+    type: array
+    minItems: 1
+    maxItems: 1
+    items: DatasetProviderPatch
+  DatasetProviderPatch:
+    type: object
+    additionalProperties: false
+    properties:
+      op:
+        type: string
+        pattern: ^replace$
+      path:
+        type: string
+        pattern: ^/isManager$
+      value: boolean
+  HistoryResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      meta: HistoryMeta
+      results: HistoryResult[]
+  HistoryMeta:
+    type: object
+    additionalProperties: false
+    properties:
+      rows:
+        type: integer
+        format: int64
+      offset:
+        type: integer
+        format: int64
+  HistoryResult:
+    type: object
+    additionalProperties: false
+    properties:
+      cause: HistoryCause
+      row: HistoryRow
+  HistoryCause:
+    type: object
+    additionalProperties: false
+    properties:
+      user: HistoryUser
+      action:
+        type: string
+        enum:
+          - CREATE
+          - UPDATE
+          - DELETE
+      timestamp: datetime-only
+  HistoryUser:
+    type: object
+    additionalProperties: false
+    properties:
+      userID:
+        type: integer
+        format: int64
+      firstName: string
+      lastName: string
+      email: string
+      organization: string
+  HistoryRow:
+    type: object
+    additionalProperties: false
+    properties:
+      endUserID:
+        type: integer
+        format: int64
+      user: HistoryUser
+      datasetPresenterID: string
+      restrictionLevel:
+        type: string
+        enum:
+          - PUBLIC
+          - PRERELEASE
+          - PROTECTED
+          - CONTROLLED
+          - PRIVATE
+      approvalStatus:
+        type: string
+        enum:
+          - APPROVED
+          - REQUESTED
+          - DENIED
+      startDate: datetime-only
+      duration:
+        type: integer
+        format: int64
+      purpose: string
+      researchQuestion: string
+      analysisPlan: string
+      priorAuth: string
+      denialReason: string
+      dateDenied: datetime-only
+      allowSelfEdits: boolean
+  PermissionsGetResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      isStaff?:
+        description: |
+          Indicates whether the current user is listed in the service's staff
+          entries.
+        type: boolean
+        default: false
+      isOwner?:
+        description: |
+          Indicates whether the current user is listed in the service's staff
+          entries _and_ is marked as a site owner.
+        type: boolean
+        default: false
+      perDataset?:
+        description: |
+          If the current user is a provider or an end user of one or more
+          datasets, these datasets will be listed here with the user's
+          permission level for each specific dataset.
+
+          If the user is not a provider or end user for any datasets, this field
+          will be omitted.
+        type: object
+        additionalProperties: false
+        properties:
+          //: DatasetPermissionEntry
+  ActionList:
+    type: object
+    additionalProperties: false
+    properties:
+      studyMetadata:
+        description: study metadata
+        type: boolean
+      subsetting:
+        description: count, distribution
+        type: boolean
+      visualizations:
+        description: all viz plugins
+        type: boolean
+      resultsFirstPage:
+        description: 'offset:0, numRecords: <=20'
+        type: boolean
+      resultsAll:
+        description: any other tabular response
+        type: boolean
+  StudyPermissionInfo:
+    type: object
+    additionalProperties: false
+    properties:
+      studyId: string
+      datasetId: string
+      isUserStudy: boolean
+      actionAuthorization: ActionList
+  DatasetPermissionEntry:
+    type: object
+    additionalProperties: false
+    properties:
+      studyId: string
+      sha1Hash: string
+      isUserStudy: boolean
+      displayName: string
+      shortDisplayName: string
+      description: string
+      type: DatasetPermissionLevel
+      actionAuthorization: ActionList
+      isManager?:
+        description: |
+          For providers, this field indicates whether the current user is marked
+          as a manager for the dataset represented by the containing permission
+          entry.
+
+          This field will only be present if the containing permission entry
+          type = `provider`.
+        type: boolean
+        default: false
+      accessRequestStatus: ApprovalStatus
+  DatasetPermissionLevel:
+    type: string
+    enum:
+      - provider
+      - end-user
+  Staff:
+    type: object
+    additionalProperties: false
+    properties:
+      staffId: DatastoreId
+      user: UserDetails
+      isOwner: boolean
+  StaffList:
+    type: object
+    additionalProperties: false
+    properties:
+      data: Staff[]
+      rows:
+        type: integer
+        format: int64
+        minimum: 0
+      offset:
+        type: integer
+        format: int64
+        minimum: 0
+      total:
+        type: integer
+        format: int64
+        minimum: 0
+  NewStaffRequest:
+    type: object
+    properties:
+      userId:
+        type: integer
+        format: int64
+        minimum: 1
+      isOwner: boolean
+  NewStaffResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      staffId:
+        type: integer
+        format: int64
+        minimum: 1
+  StaffPatchRequest:
+    type: array
+    minItems: 1
+    maxItems: 1
+    items: StaffPatch
+  StaffPatch:
+    type: object
+    additionalProperties: false
+    properties:
+      op:
+        type: string
+        pattern: ^replace$
+      path:
+        type: string
+        pattern: ^/isOwner$
+      value: boolean
   JobID: !include https://raw.githubusercontent.com/VEuPathDB/lib-hash-id/v1.1.0/schema/hash-id.raml
   JobStatus:
     type: string
@@ -213,6 +635,10 @@ types:
     properties:
       isRequired: boolean
       isTemporal: boolean
+      isCollection: boolean
+      isCompositional: boolean
+      isProportion: boolean
+      allowedNormalizationMethods: string[]
       minNumVars: number
       maxNumVars: number
       minNumValues: number
@@ -294,6 +720,7 @@ types:
     properties:
       id: string
       isUserStudy: boolean
+      hasMap: boolean
       rootEntity: API_Entity
   API_Entity:
     type: EntityIdGetResponse
@@ -611,7 +1038,7 @@ types:
   AlphaDivComputeConfig:
     type: object
     properties:
-      collectionVariable: VariableSpec
+      collectionVariable: CollectionSpec
       alphaDivMethod: AlphaDivMethod
   AlphaDivMethod:
     type: string
@@ -626,7 +1053,7 @@ types:
   BetaDivComputeConfig:
     type: object
     properties:
-      collectionVariable: VariableSpec
+      collectionVariable: CollectionSpec
       betaDivDissimilarityMethod: BetaDivDissimilarityMethod
   BetaDivDissimilarityMethod:
     type: string
@@ -645,7 +1072,7 @@ types:
   DifferentialAbundanceComputeConfig:
     type: object
     properties:
-      collectionVariable: VariableSpec
+      collectionVariable: CollectionSpec
       comparator: ComparatorSpec
       differentialAbundanceMethod: DifferentialAbundanceMethod
   DifferentialAbundanceMethod:
@@ -653,19 +1080,25 @@ types:
     enum:
       - DESeq
       - ANCOMBC
+      - Maaslin
   ComparatorSpec:
     type: object
     properties:
       variable: VariableSpec
       groupA: LabeledRange[]
       groupB: LabeledRange[]
-  DifferentialAbundanceStatsResponse:
+  DifferentialAbundanceStats:
     type: object
     properties:
-      log2foldChange: string[]
+      effectSize: string[]
       pValue: string[]
       adjustedPValue: string[]
       pointId: string[]
+  DifferentialAbundanceStatsResponse:
+    type: object
+    properties:
+      effectSizeLabel: string
+      statistics: DifferentialAbundanceStats
   ExamplePluginRequest:
     type: ComputeRequestBase
     properties:
@@ -686,7 +1119,7 @@ types:
   RankedAbundanceComputeConfig:
     type: object
     properties:
-      collectionVariable: VariableSpec
+      collectionVariable: CollectionSpec
       rankingMethod: RankingMethod
   RankingMethod:
     type: string
@@ -708,6 +1141,7 @@ types:
       name: string
       displayName: string
       description: string
+      dataElementConstraints?: DataElementConstraintPattern[]
   ExpiredJobsResponse:
     type: object
     properties:
@@ -2326,4 +2760,361 @@ types:
     properties:
       value: number
       count: number
+  File:
+    type: object
+    additionalProperties: false
+    properties:
+      name: string
+      modifiedDate: string
+      size: string
+  FileContentResponse:
+    type: object
+    properties:
+      //: any
+  DerivedVariableDocumentationRequest:
+    type: object
+    properties:
+      mean: SingleNumericVarReductionConfig
+      sum: SingleNumericVarReductionConfig
+      concatenation: ConcatenationConfig
+      subsetMembership: SubsetMembershipConfig
+      advancedSubset: AdvancedSubsetConfig
+      unitConversion: UnitConversionConfig
+      bodyMassIndex: BodyMassIndexConfig
+      categoricalRecoding: CategoricalRecodingConfig
+      continuousToOrdinal: ContinuousNumericRecodingConfig
+      ecmaScriptExpressionEval: EcmaScriptExpressionEvalConfig
+      relativeObservationMinTimeInterval: RelatedObservationMinTimeIntervalConfig
+  Unit:
+    type: object
+    properties:
+      displayName: string
+      values: string[]
+  UnitType:
+    type: object
+    properties:
+      displayName: string
+      units: Unit[]
+  UnitConversionMetadataResponse:
+    type: object
+    properties:
+      types: UnitType[]
+  SingleNumericVarReductionConfig:
+    type: object
+    properties:
+      inputVariable: VariableSpec
+      imputeZero?: boolean
+  ConcatenationConfig:
+    type: object
+    properties:
+      prefix?: string
+      delimiter?: string
+      suffix?: string
+      inputVariables: VariableSpec[]
+  CategoricalRecodingRule:
+    type: object
+    properties:
+      inputValues: string[]
+      outputValue: string
+  CategoricalRecodingConfig:
+    type: object
+    properties:
+      inputVariable: VariableSpec
+      rules: CategoricalRecodingRule[]
+      unmappedValue?: string
+  ContinuousNumericRule:
+    type: object
+    properties:
+      minInclusive?: number
+      maxExclusive?: number
+      outputValue: string
+  ContinuousNumericRecodingConfig:
+    type: object
+    properties:
+      inputVariable: VariableSpec
+      rules: ContinuousNumericRule[]
+      unmappedValue?: string
+  BodyMassIndexConfig:
+    type: object
+    properties:
+      heightVariable: VariableSpec
+      weightVariable: VariableSpec
+  SubsetMembershipConfig:
+    type: object
+    properties:
+      subsetFilters: API_Filter[]
+  UnitConversionConfig:
+    type: object
+    properties:
+      inputVariable: VariableSpec
+      outputUnits: string
+  SetOperation:
+    type: string
+    enum:
+      - intersect
+      - union
+      - minus
+  Step:
+    type: object
+    properties:
+      key: string
+      operation: SetOperation
+      leftStepKey?: string
+      leftVariable?: VariableSpec
+      leftVariableTrueValues?: string[]
+      rightStepKey?: string
+      rightVariable?: VariableSpec
+      rightVariableTrueValues?: string[]
+  AdvancedSubsetConfig:
+    type: object
+    properties:
+      rootStepKey: string
+      steps: Step[]
+  VariableReference:
+    type: object
+    properties:
+      name: string
+      variable: VariableSpec
+  EcmaScriptExpressionEvalConfig:
+    type: object
+    properties:
+      ecmaScriptExpression: string
+      nullResultOnAnyMissingInput: boolean
+      inputVariables: VariableReference[]
+      expectedType: API_VariableType
+      expectedShape: API_VariableDataShape
+  RelatedObservationMinTimeIntervalConfig:
+    type: object
+    properties:
+      relatedObservationsSubset: API_Filter[]
+      anchorVariable: VariableSpec
+      anchorVariableTrueValues: string[]
+      anchorTimestampVariable: VariableSpec
+      targetVariable: VariableSpec
+      targetVariableTrueValues: string[]
+      targetTimestampVariable: VariableSpec
+      minimumTimeIntervalDays: integer
+  AnalysisBase:
+    type: object
+    additionalProperties: false
+    properties:
+      displayName: string
+      description: string
+      studyId: string
+      studyVersion: string
+      apiVersion: string
+      isPublic: boolean
+  OnImportProvenanceProps:
+    type: object
+    additionalProperties: false
+    properties:
+      ownerId:
+        type: integer
+        format: int64
+      ownerName: string
+      ownerOrganization: string
+      analysisId: string
+      analysisName: string
+      creationTime: string
+      modificationTime: string
+      isPublic: boolean
+  CurrentProvenanceProps:
+    type: object
+    additionalProperties: false
+    properties:
+      isDeleted: boolean
+      modificationTime?: string
+      isPublic?: boolean
+  AnalysisProvenance:
+    type: object
+    additionalProperties: false
+    properties:
+      onImport: OnImportProvenanceProps
+      current: CurrentProvenanceProps
+  AnalysisSummary:
+    type: AnalysisBase
+    additionalProperties: false
+    properties:
+      analysisId: string
+      creationTime: string
+      modificationTime: string
+      numFilters: integer
+      numComputations: integer
+      numVisualizations: integer
+      provenance?: AnalysisProvenance
+  AnalysisSummaryWithUser:
+    type: AnalysisSummary
+    additionalProperties: false
+    properties:
+      userId: number
+      userName: string
+      userOrganization: string
+  AnalysisListPostRequest:
+    type: AnalysisBase
+    additionalProperties: false
+    properties:
+      notes?: string
+      descriptor: AnalysisDescriptor
+  AnalysisListPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      analysisId: string
+  AnalysisListPatchRequest:
+    type: object
+    additionalProperties: false
+    properties:
+      analysisIdsToDelete?: string[]
+      inheritOwnershipFrom?:
+        type: integer
+        format: int64
+  AnalysisDetail:
+    type: AnalysisSummary
+    additionalProperties: false
+    properties:
+      notes?: string
+      descriptor: AnalysisDescriptor
+  SingleAnalysisPatchRequest:
+    type: object
+    additionalProperties: false
+    properties:
+      displayName?: string
+      description?: string
+      notes?: string
+      descriptor?: AnalysisDescriptor
+      isPublic?: boolean
+  DataTableConfig:
+    type: object
+    additionalProperties: false
+    properties:
+      variables: VariableSpec[]
+      sorting: SortSpecEntry[]
+  DataTableConfigSet:
+    type: object
+    properties:
+      //: DataTableConfig
+  AnalysisDescriptor:
+    type: object
+    additionalProperties: false
+    properties:
+      subset:
+        type: object
+        properties:
+          descriptor: object[]
+          uiSettings?: object
+      computations: Computation[]
+      starredVariables: VariableSpec[]
+      dataTableConfig: DataTableConfigSet
+      derivedVariables: string[]
+  Computation:
+    type: object
+    additionalProperties: false
+    properties:
+      computationId: string
+      displayName: string
+      descriptor: object
+      visualizations: Visualization[]
+  Visualization:
+    type: object
+    additionalProperties: false
+    properties:
+      visualizationId: string
+      displayName: string
+      descriptor: object
+  SingleAnalysisPublicInfo:
+    type: object
+    additionalProperties: false
+    properties:
+      studyId: string
+  UserAnalysisMetricsResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      startDate: date-only
+      endDate: date-only
+      createdOrModifiedCounts: UserAnalysisCounts
+  UserAnalysisCounts:
+    type: object
+    additionalProperties: false
+    properties:
+      analysesCount: integer
+      importedAnalysesCount: integer
+      analysesPerStudy: StudyCount[]
+      importedAnalysesPerStudy: StudyCount[]
+      registeredUsersCount: integer
+      guestUsersCount: integer
+      registeredAnalysesCount: integer
+      guestAnalysesCount: integer
+      registeredFiltersCount: integer
+      guestFiltersCount: integer
+      registeredVisualizationsCount: integer
+      guestVisualizationsCount: integer
+      registeredUsersAnalysesCounts: UsersObjectsCount[]
+      guestUsersAnalysesCounts: UsersObjectsCount[]
+      registeredUsersFiltersCounts: UsersObjectsCount[]
+      guestUsersFiltersCounts: UsersObjectsCount[]
+      registeredUsersVisualizationsCounts: UsersObjectsCount[]
+      guestUsersVisualizationsCounts: UsersObjectsCount[]
+  StudyCount:
+    type: object
+    additionalProperties: false
+    properties:
+      studyId: string
+      count: integer
+  UsersObjectsCount:
+    type: object
+    additionalProperties: false
+    properties:
+      objectsCount: integer
+      usersCount: integer
+  MetricsReportResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      count: integer
+  DerivedVariablePostRequest:
+    type: object
+    additionalProperties: false
+    properties:
+      datasetId: string
+      entityId: string
+      displayName:
+        type: string
+        minLength: 1
+        maxLength: 256
+      functionName: string
+      config: object
+      description?:
+        type: string
+        maxLength: 4000
+  DerivedVariablePostResponse:
+    type: VariableSpec
+    additionalProperties: false
+  DerivedVariableGetResponse:
+    type: DerivedVariableSpec
+    additionalProperties: false
+    properties:
+      datasetId: string
+      description?:
+        type: string
+        minLength: 0
+        maxLength: 4000
+      provenance?: DerivedVariableProvenance
+  DerivedVariablePatchRequest:
+    type: object
+    additionalProperties: false
+    properties:
+      displayName?:
+        type: string
+        minLength: 1
+        maxLength: 256
+      description?:
+        type: string
+        maxLength: 4000
+  DerivedVariableProvenance:
+    type: object
+    additionalProperties: false
+    properties:
+      copyDate: datetime-only
+      copiedFrom: string
 

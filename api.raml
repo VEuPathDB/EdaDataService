@@ -21,9 +21,637 @@ securitySchemes:
           description: Authorization header.
           type: string
 
-####################################
-# Data Service Specific Endpoints
-####################################
+# # # # # # # # # # # # # # # # # # #
+#                                   #
+# Subsetting Endpoints              #
+#                                   #
+# # # # # # # # # # # # # # # # # # #
+
+/clear-metadata-cache:
+  displayName: Clears the metadata cache; useful if new data has been loaded into the database
+  get:
+    responses:
+      200:
+        body:
+          text/plain:
+
+/studies:
+  displayName: Overview of available studies
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: lib.StudiesGetResponse
+
+  /{study-id}:
+    uriParameters:
+      study-id:
+        description: ID of the study of interest
+        type: string
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              type: lib.StudyIdGetResponse
+
+    /entities:
+
+      /{entity-id}:
+        uriParameters:
+          entity-id:
+            description: ID of the entity of interest
+            type: string
+        get:
+          description: Returns entity details, not including its children (which it may or may not have; see study endpoint)
+          responses:
+            200:
+              body:
+                application/json:
+                  type: lib.EntityIdGetResponse
+
+        /count:
+          post:
+            securedBy: header-auth
+            description: |
+              Return a count of entities in this subset.  In the request, `filters` must be a subclass of [Filter](#type:lib.Filter)
+            body:
+              application/json:
+                type: lib.EntityCountPostRequest
+            responses:
+              200:
+                body:
+                  application/json:
+                    type: lib.EntityCountPostResponse
+
+        /tabular:
+          post:
+            securedBy: header-auth
+            description: |
+              Return a tabular report of one or more variables belonging to this entity.  The output will also include all ancestor primary keys.  In the request, `filters` must be a subclass of [Filter](#type:lib.Filter)
+            body:
+              application/json:
+                type: lib.EntityTabularPostRequest
+              application/x-www-form-urlencoded:
+            responses:
+              200:
+                body:
+                  text/tab-separated-values:
+                    type: lib.EntityTabularPostResponse
+                  application/json:
+                    type: lib.EntityTabularPostResponse
+
+        /variables:
+
+          /{variable-id}:
+
+            /root-vocab:
+              description: |
+                Groups values of this variable by their rows' root entity ID (collecting a vocabulary of values specific
+                to each root entity record) and returns them as a tabular result where each row is a distinct 
+                combination of root entity ID and variable value. This is useful for reducing applicable vocabularies 
+                of this variable to only the root entities remaining after a subset operation.
+              post:
+                securedBy: header-auth
+                body:
+                  application/json:
+                    type: lib.VocabByRootEntityPostRequest
+                responses:
+                  200:
+                    body:
+                      text/tab-separated-values:
+                        type: lib.VocabByRootEntityPostResponse
+
+            /distribution:
+              post:
+                securedBy: header-auth
+                description: |
+                  Return the count of entities in the subset that have a value for this variable, and |
+                  a distribution for this variable, i.e., entity counts for each value of this |
+                  variable.  In the request, `filters` must be a subclass of [Filter](#type:lib.Filter)
+                body:
+                  application/json:
+                    type: lib.VariableDistributionPostRequest
+                responses:
+                  200:
+                    body:
+                      application/json:
+                        type: lib.VariableDistributionPostResponse
+
+/ss-internal/studies/{study-id}/entities/{entity-id}:
+
+  /count:
+    post:
+      securedBy: header-auth
+      description: |
+        Return a count of entities in this subset.  In the request, `filters` must be a subclass of [Filter](#type:lib.Filter)
+      body:
+        application/json:
+          type: lib.EntityCountPostRequest
+      responses:
+        200:
+          body:
+            application/json:
+              type: lib.EntityCountPostResponse
+
+  /tabular:
+    post:
+      securedBy: header-auth
+      description: |
+        Return a tabular report of one or more variables belonging to this entity.  The output will also include all ancestor primary keys.  In the request, `filters` must be a subclass of [Filter](#type:lib.Filter)
+      body:
+        application/json:
+          type: lib.EntityTabularPostRequest
+      responses:
+        200:
+          body:
+            text/tab-separated-values:
+              type: lib.EntityTabularPostResponse
+            application/json:
+              type: lib.EntityTabularPostResponse
+
+  /variables/{variable-id}/distribution:
+    post:
+      securedBy: header-auth
+      description: |
+        Return the count of entities in the subset that have a value for this variable, and |
+        a distribution for this variable, i.e., entity counts for each value of this |
+        variable.  In the request, `filters` must be a subclass of [Filter](#type:lib.Filter)
+      body:
+        application/json:
+          type: lib.VariableDistributionPostRequest
+      responses:
+        200:
+          body:
+            application/json:
+              type: lib.VariableDistributionPostResponse
+
+# # # # # # # # # # # # # # # # # # #
+#                                   #
+# Merging Service Endpoints         #
+#                                   #
+# # # # # # # # # # # # # # # # # # #
+
+/merging:
+  /derived-variables:
+    /input-specs:
+      displayName: This endpoint is used only to produce documentation of derived variable configuration types
+      post:
+        body:
+          application/json:
+            type: lib.DerivedVariableDocumentationRequest
+        responses:
+          204:
+
+    /metadata:
+      /variables:
+        displayName: Return metadata about a small collection of derived variables
+        post:
+          body:
+            application/json:
+              type: lib.DerivedVariableBulkMetadataRequest
+          responses:
+            200:
+              body:
+                application/json:
+                  type: lib.DerivedVariableMetadata[]
+      /units:
+        displayName: Return metadata about available unit conversions
+        get:
+          responses:
+            200:
+              body:
+                application/json:
+                  type: lib.UnitConversionMetadataResponse
+
+  /query:
+    displayName: Merged Tabular Data Query
+    post:
+      securedBy: header-auth
+      body:
+        application/json:
+          type: lib.MergedEntityTabularPostRequest
+      responses:
+        200:
+          body:
+            text/tab-separated-values:
+              type: lib.EntityTabularPostResponse
+        400:
+          body:
+            application/json:
+              type: error.BadRequestError
+        422:
+          body:
+            application/json:
+              type: error.UnprocessableEntityError
+        500:
+          body:
+            application/json:
+              type: error.ServerError
+
+# # # # # # # # # # # # # # # # # # #
+#                                   #
+# Merging Internal Endpoints        #
+#                                   #
+# # # # # # # # # # # # # # # # # # #
+
+/merging-internal:
+
+  /derived-variables:
+    /metadata:
+      /variables:
+        displayName: Return metadata about a small collection of derived variables
+        post:
+          body:
+            application/json:
+              type: lib.DerivedVariableBulkMetadataRequest
+          responses:
+            200:
+              body:
+                application/json:
+                  type: lib.DerivedVariableMetadata[]
+
+  /query:
+    displayName: Merged Tabular Data Query
+    post:
+      securedBy: header-auth
+      body:
+        application/json:
+          type: lib.MergedEntityTabularPostRequest
+      responses:
+        200:
+          body:
+            text/tab-separated-values:
+              type: lib.EntityTabularPostResponse
+        400:
+          body:
+            application/json:
+              type: error.BadRequestError
+        422:
+          body:
+            application/json:
+              type: error.UnprocessableEntityError
+        500:
+          body:
+            application/json:
+              type: error.ServerError
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#                                                                           #
+#  Compute Service                                                          #
+#                                                                           #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+/computes:
+  displayName: Available Plugins
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: array
+            items:
+              type: lib.PluginOverview
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#                                                                           #
+#  Begin Compute Plugin Endpoint Definitions                                #
+#                                                                           #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+  /example:
+    post:
+      queryParameters:
+        autostart:
+          type: boolean
+          required: false
+          default: true
+      body:
+        application/json: lib.ExamplePluginRequest
+      responses:
+        200:
+          body:
+            application/json: lib.JobResponse
+    /{file}:
+      uriParameters:
+        file:
+          type: string
+          description: MUST be one of "meta", "tabular", "statistics".
+      post:
+        body:
+          application/json: lib.ExamplePluginRequest
+        responses:
+          200:
+            body:
+              text/plain: any
+
+
+  /betadiv:
+    post:
+      queryParameters:
+        autostart:
+          type: boolean
+          required: false
+          default: true
+      body:
+        application/json: lib.BetaDivPluginRequest
+      responses:
+        200:
+          body:
+            application/json: lib.JobResponse
+    /{file}:
+      uriParameters:
+        file:
+          type: string
+          description: MUST be one of "meta", "tabular", "statistics".
+      post:
+        body:
+          application/json: lib.BetaDivPluginRequest
+        responses:
+          200:
+            body:
+              text/plain: any
+
+  /alphadiv:
+    post:
+      queryParameters:
+        autostart:
+          type: boolean
+          required: false
+          default: true
+      body:
+        application/json: lib.AlphaDivPluginRequest
+      responses:
+        200:
+          body:
+            application/json: lib.JobResponse
+    /{file}:
+      uriParameters:
+        file:
+          type: string
+          description: MUST be one of "meta", "tabular", "statistics".
+      post:
+        body:
+          application/json: lib.AlphaDivPluginRequest
+        responses:
+          200:
+            body:
+              text/plain: any
+
+  /rankedabundance:
+    post:
+      queryParameters:
+        autostart:
+          type: boolean
+          required: false
+          default: true
+      body:
+        application/json: lib.RankedAbundancePluginRequest
+      responses:
+        200:
+          body:
+            application/json: lib.JobResponse
+    /{file}:
+      uriParameters:
+        file:
+          type: string
+          description: MUST be one of "meta", "tabular", "statistics".
+      post:
+        body:
+          application/json: lib.RankedAbundancePluginRequest
+        responses:
+          200:
+            body:
+              text/plain: any
+
+  /differentialabundance:
+    post:
+      queryParameters:
+        autostart:
+          type: boolean
+          required: false
+          default: true
+      body:
+        application/json: lib.DifferentialAbundancePluginRequest
+      responses:
+        200:
+          body:
+            application/json: lib.JobResponse
+    /statistics:
+      post:
+        body:
+          application/json: lib.DifferentialAbundancePluginRequest
+        responses:
+          200:
+            body:
+              application/json: lib.DifferentialAbundanceStatsResponse
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#                                                                           #
+#  End Compute Plugin Endpoint Definitions                                  #
+#                                                                           #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#                                                                           #
+# Compute Service Specific Endpoints                                        #
+#                                                                           #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+/expire-compute-jobs:
+  get:
+    description: Expire jobs based on criteria
+    queryParameters:
+      job-id:
+        type: string
+      study-id:
+        type: string
+      plugin-name:
+        type: string
+      admin-auth-token:
+        type: string
+    responses:
+      200:
+        body:
+          application/json:
+            type: lib.ExpiredJobsResponse
+
+# NOTE: jobs endpoint is NOT publicly exposed for this service
+/jobs:
+  /{job-id}:
+    uriParameters:
+      job-id:
+        type: string
+        minLength: 32
+        maxLength: 32
+        pattern: '^[\dA-Fa-f]{32}$'
+    delete:
+      description: Deletes a target job by ID
+      responses:
+        204:
+          description: Success
+        404:
+          description: Not Found
+          body:
+            application/json:
+              type: error.NotFoundError
+        500:
+          description: Server Error
+          body:
+            application/json:
+              type: error.ServerError
+    get:
+      description: Gets the status of the target job.
+      responses:
+        200:
+          description: |
+            Success
+            
+            The target job exists and its status returned.
+          body:
+            application/json:
+              type: lib.JobResponse
+              examples:
+                queued:
+                  strict: true
+                  value:
+                    jobID: 9ab9a5886d6abb9ebc82a40f770a1db3
+                    status: queued
+                    queuePosition: 3
+                in-progress:
+                  strict: true
+                  value:
+                    jobID: 9ab9a5886d6abb9ebc82a40f770a1db3
+                    status: in-progress
+                complete:
+                  strict: true
+                  value:
+                    jobID: 9ab9a5886d6abb9ebc82a40f770a1db3
+                    status: complete
+                failed:
+                  strict: true
+                  value:
+                    jobID: 9ab9a5886d6abb9ebc82a40f770a1db3
+                    status: failed
+                expired:
+                  strict: true
+                  value:
+                    jobID: 9ab9a5886d6abb9ebc82a40f770a1db3
+                    status: expired
+        404:
+          description: |
+            Not Found
+            
+            The target `{job-id}` was not found.
+          body:
+            application/json:
+              type: error.NotFoundError
+        500:
+          description: |
+            Internal Server Error
+            
+            An unexpected exception was thrown while attempting to process
+            the request.
+          body:
+            application/json:
+              type: error.ServerError
+    /files:
+      get:
+        description: |
+          Lists the files available for a completed job.
+        responses:
+          200:
+            description: |
+              Success
+              
+              The job has completed and has files available.
+            body:
+              application/json:
+                type: string[]
+                example:
+                  - output
+          403:
+            description: |
+              Forbidden
+              
+              The job has not yet completed and thus cannot yet be queried for
+              files.
+            body:
+              application/json:
+                type: error.ForbiddenError
+          404:
+            description: |
+              Not Found
+              
+              The target `{job-id}` was not found.
+            body:
+              application/json:
+                type: error.NotFoundError
+          500:
+            description: |
+              Internal Server Error
+              
+              An unexpected exception was thrown while attempting to process
+              the request.
+            body:
+              application/json:
+                type: error.ServerError
+      /{file-name}:
+        uriParameters:
+          file-name:
+            type: string
+            minLength: 1
+        get:
+          description: |
+            Returns the target file from a completed job.
+          responses:
+            200:
+              description: |
+                Success
+                
+                The job has completed and the target file exists to return.
+              headers:
+                Content-Disposition:
+                  type: string
+                  example:
+                    value: attachment; filename=output.txt
+              body:
+                text/plain:
+                  type: any
+                  example: dlrow olleh
+            403:
+              description: |
+                Forbidden
+                
+                The job has not yet completed and thus cannot yet be queried for
+                files.
+              body:
+                application/json:
+                  type: error.ForbiddenError
+            404:
+              description: |
+                Not Found
+                
+                Either the target `{job-id}` was not found or no file with the
+                name `{file-name}` exists.
+              body:
+                application/json:
+                  type: error.NotFoundError
+            500:
+              description: |
+                Internal Server Error
+                
+                An unexpected exception was thrown while attempting to process
+                the request.
+              body:
+                application/json:
+                  type: error.ServerError
+
+# # # # # # # # # # # # # # # # # # #
+#                                   #
+# Data Service Specific Endpoints   #
+#                                   #
+# # # # # # # # # # # # # # # # # # #
 
 /filter-aware-metadata/continuous-variable:
   post:
@@ -45,6 +673,12 @@ securitySchemes:
         body:
           application/json:
             type: lib.AppsGetResponse
+
+# # # # # # # # # # # # # # # # # # #
+#                                   #
+# Data Service Plugins              #
+#                                   #
+# # # # # # # # # # # # # # # # # # #
 
   /standalone-map/visualizations:
     displayName: Available visualizations for the Standalone Map application
@@ -685,3 +1319,557 @@ securitySchemes:
             body:
               application/json:
                 type: lib.ExampleComputeVizPostResponse
+
+# # # # # # # # # # # # # # # # # # #
+#                                   #
+# End Data Service Plugins          #
+#                                   #
+# # # # # # # # # # # # # # # # # # #
+
+
+# # # # # # # # # # # # # # # # # # #
+#                                   #
+# Dataset Access Endpoints          #
+#                                   #
+# # # # # # # # # # # # # # # # # # #
+/staff:
+  get:
+    displayName: Staff List
+    description: List dataset staff in ascending order by ID.
+    queryParameters:
+      limit?:
+        type: integer
+        format: int64
+        minimum: 0
+        default: 1000
+        description: Number of rows to include in the result
+      offset?:
+        type: integer
+        format: int64
+        minimum: 0
+        default: 0
+        description: Number of rows to skip from the result
+    responses:
+      200:
+        body:
+          type: lib.StaffList
+  post:
+    displayName: New Staff Entry
+    description: Create a new dataset staff record.
+    body: lib.NewStaffRequest
+    responses:
+      200:
+        body: lib.NewStaffResponse
+
+  /{staff-id}:
+    uriParameters:
+      staff-id:
+        type: lib.DatastoreId
+    patch:
+      displayName: Update Staff Entry
+      description: Update dataset staff.
+      body: lib.StaffPatch[]
+      responses:
+        204:
+    delete:
+      displayName: Delete Staff Entry
+      description: Delete dataset staff.
+      responses:
+        204:
+
+/dataset-providers:
+  get:
+    displayName: Provider List
+    description: Get a list of providers for this dataset.
+    queryParameters:
+      datasetId:
+        type: string
+        required: true
+      limit?:
+        type: integer
+        format: int64
+        minimum: 0
+        default: 1000
+        description: Number of rows to include in the result
+      offset?:
+        type: integer
+        format: int64
+        minimum: 0
+        default: 0
+        description: Number of rows to skip from the result
+    responses:
+      200:
+        body: lib.DatasetProviderList
+
+  post:
+    displayName: New Provider
+    description: Create a new dataset provider record.
+    body: lib.DatasetProviderCreateRequest
+    responses:
+      200:
+        body: lib.DatasetProviderCreateResponse
+
+  /{provider-id}:
+    uriParameters:
+      provider-id:
+        description: Dataset provider ID.
+        type: lib.DatastoreId
+    patch:
+      displayName: Update Provider
+      description: Update a dataset provider record.
+      body: lib.DatasetProviderPatch[]
+      responses:
+        204:
+    delete:
+      displayName: Delete Provider
+      description: Delete a dataset provider record.
+      responses:
+        204:
+
+/dataset-end-users:
+  get:
+    displayName: List End Users
+    description: Get a list of all end-users for the specified dataset.
+    queryParameters:
+      datasetId:
+        displayName: Dataset ID
+        type: string
+      limit?:
+        displayName: Result Limit
+        description: Number of rows to include in the result
+        type: integer
+        format: int64
+        minimum: 0
+        default: 100
+      offset?:
+        displayName: Result Offset
+        description: Number of rows to skip from the result
+        type: integer
+        format: int64
+        minimum: 0
+        default: 0
+      approval?:
+        displayName: Approval Status
+        description: Filter results by the approval status of the users.
+        type: lib.ApprovalStatus
+    responses:
+      200:
+        body: lib.EndUserList
+  post:
+    displayName: New End User
+    description: Create a new dataset end-user record.
+    body: lib.EndUserCreateRequest
+    responses:
+      200:
+        body: lib.EndUserCreateResponse
+
+  /{end-user-id}:
+    uriParameters:
+      end-user-id:
+        description: |
+          ID of a specific end-user record.  This ID consists of the WDK user ID
+          for the user followed by a single dash (`-`) character followed by
+          the dataset ID. Example: `82-DS_897fe55e6f`.
+        type: string
+        pattern: "^\\d+-\\w+$"
+    get:
+      displayName: End User Details
+      description: Get the details of an end-user record.
+      responses:
+        200:
+          body: lib.EndUser
+    delete:
+      displayName: Delete End User
+      description: Delete an end user access grant.
+      responses:
+        204:
+          description: Success
+    patch:
+      displayName: Update End User
+      description: |
+        Update an end user record.
+
+        The following rules apply to end user self updates:
+
+        1. The user may only submit updates while their access request is in the
+           "requested" status.
+        2. Only the following fields may be updated:
+            1. `purpose`
+            2. `researchQuestion`
+            3. `analysisPlan`
+            4. `disseminationPlan`
+
+        This endpoint supports only the listed JSON Patch operations on the
+        listed paths.  All other JSON paths or operations will result in a 403
+        error.
+
+        **`/startDate`**
+
+        * `add`
+        * `remove`
+        * `replace`
+
+        This field may only be altered by site owners and dataset managers.
+
+        **`/duration`**
+
+        * `add`
+        * `remove`
+        * `replace`
+
+        This field may only be altered by site owners and dataset managers.
+
+        **`/restrictionLevel`**
+
+        * `replace`
+
+        This field may only be altered by site owners and dataset managers.
+
+        **`/purpose`**
+
+        * `replace`
+
+        Type: `string`
+
+        This field may be altered by site owners and dataset managers at any
+        time.
+
+        This field may only be altered by end users while their access request
+        is in the "requested" status.
+
+        **`/researchQuestion`**
+
+        * `replace`
+
+        Type: `string`
+
+        This field may be altered by site owners and dataset managers at any
+        time.
+
+        This field may only be altered by end users while their access request
+        is in the "requested" status.
+
+        **`/analysisPlan`**
+
+        * `replace`
+
+        Type: `string`
+
+        This field may be altered by site owners and dataset managers at any
+        time.
+
+        This field may only be altered by end users while their access request
+        is in the "requested" status.
+
+        **`/disseminationPlan`**
+
+        * `replace`
+
+        Type: `string`
+
+        This field may be altered by site owners and dataset managers at any
+        time.
+
+        This field may only be altered by end users while their access request
+        is in the "requested" status.
+
+        **`priorAuth`**
+
+        * `replace`
+
+        Type: `string`
+
+        This field may be altered by site owners and dataset managers at any
+        time.
+
+        This field may only be altered by end users while their access request
+        is in the "requested" status.
+
+        **`/approvalStatus`**
+
+        * `replace`
+
+        This field may only be altered by site owners and dataset managers.
+
+        **`/denialReason`**
+
+        * `add`
+        * `remove`
+        * `replace`
+
+        This field may only be altered by site owners and dataset managers.
+      body: lib.EndUserPatch[]
+      responses:
+        204:
+
+/permissions:
+  get:
+    responses:
+      200:
+        body: lib.PermissionsGetResponse
+
+  /{dataset-id}:
+    get:
+      responses:
+        200:
+          body: lib.StudyPermissionInfo
+
+/history:
+  get:
+    queryParameters:
+      limit:
+        type: integer
+        format: int64
+        minimum: 1
+        maximum: 100
+        default: 100
+      offset:
+        type: integer
+        format: int64
+        minimum: 0
+        default: 0
+    responses:
+      200:
+        body: lib.HistoryResponse
+
+/approve-eligible-access-requests:
+  post:
+    queryParameters:
+      admin-auth-token:
+        type: string
+    description: Approve protected study requests in which auto-approval duration has elapsed
+    responses:
+      204:
+        description: Success
+
+# # # # # # # # # # # # # # # # # # #
+#                                   #
+# Dataset Download Endpoints        #
+#                                   #
+# # # # # # # # # # # # # # # # # # #
+/download:
+  /{project}:
+    /{study-id}:
+      displayName: Get release listing for this study ID
+      get:
+        responses:
+          200:
+            body:
+              application/json:
+                type: string[]
+
+      /{release}:
+        displayName: Get file listing for this release
+        get:
+          responses:
+            200:
+              body:
+                application/json:
+                  type: lib.File[]
+
+        /{file}:
+          displayName: Download a single file
+          securedBy: header-auth
+          get:
+            responses:
+              200:
+                body:
+                  text/plain:
+                    type: lib.FileContentResponse
+
+# # # # # # # # # # # # # # # # # # #
+#                                   #
+# User Service Endpoints            #
+#                                   #
+# # # # # # # # # # # # # # # # # # #
+/public/analyses/{project-id}:
+  displayName: Provide a list of public analyses
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: lib.AnalysisSummaryWithUser[]
+
+# Note this is identical to the analyses/{id}/copy endpoint without the user validation
+/import-analysis/{project-id}:
+
+  /{analysis-id}:
+    displayName: Copy an existing analysis
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              type: lib.AnalysisListPostResponse
+
+    /info:
+      displayName: Returns public information about an analysis
+      get:
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.SingleAnalysisPublicInfo
+
+/metrics/user/{project-id}/analyses:
+  displayName: Get usage metrics for EDA users by time period
+  get:
+    queryParameters:
+      startDate:
+        description: optional start date (yyyy-mm-dd)
+        type: string
+      endDate:
+        description: optional end date (yyyy-mm-dd)
+        type: string
+      studyType:
+        enum: [ALL, USER, CURATED]
+        default: ALL
+    responses:
+      200:
+        body:
+          application/json:
+            type: lib.UserAnalysisMetricsResponse
+
+  /reports:
+    displayName: Download usage metric reports for a given month
+    get:
+      queryParameters:
+        reportMonth:
+          description: Required report month (yyyy-mm)
+          type: string
+      responses:
+        200:
+          body:
+            application/zip:
+              type: lib.MetricsReportResponse
+
+/users/{user-id}:
+
+  /preferences/{project-id}:
+    displayName: EDA-related user preferences
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              type: string
+    put:
+      body:
+        application/json:
+          type: string
+      responses:
+        202:
+
+  /analyses/{project-id}:
+    displayName: Analyses of a single user
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              type: lib.AnalysisSummary[]
+    post:
+      body:
+        application/json:
+          type: lib.AnalysisListPostRequest
+      responses:
+        200:
+          body:
+            application/json:
+              type: lib.AnalysisListPostResponse
+    patch:
+      body:
+        application/json:
+          type: lib.AnalysisListPatchRequest
+      responses:
+        202:
+
+    /{analysis-id}:
+      displayName: Single analysis
+      get:
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.AnalysisDetail
+      patch:
+        body:
+          application/json:
+            type: lib.SingleAnalysisPatchRequest
+        responses:
+          202:
+      delete:
+        responses:
+          202:
+
+      /copy:
+        displayName: Copy an existing analysis
+        post:
+          responses:
+            200:
+              body:
+                application/json:
+                  type: lib.AnalysisListPostResponse
+
+  /derived-variables/{project-id}:
+    uriParameters:
+      project-id: string
+
+    displayName: Derived Variables
+
+    get:
+      displayName: List Derived Variables
+      responses:
+        200:
+          body:
+            application/json:
+              type: lib.DerivedVariableGetResponse[]
+        401:
+        404:
+        500:
+
+    post:
+      displayName: Create a Derived Variable
+      body:
+        application/json:
+          type: lib.DerivedVariablePostRequest
+      responses:
+        200:
+          body:
+            application/json:
+              type: lib.DerivedVariablePostResponse
+        400:
+        401:
+        403:
+        404:
+        422:
+        500:
+
+    /{derived-variable-id}:
+      uriParameters:
+        derived-variable-id: string
+
+      get:
+        displayName: Look up a Derived Variable
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.DerivedVariableGetResponse
+          401:
+          404:
+          500:
+
+      patch:
+        displayName: Update Derived Variable
+        body:
+          application/json:
+            type: lib.DerivedVariablePatchRequest
+        responses:
+          204:
+          401:
+          403:
+          404:
+          422:
+          500:

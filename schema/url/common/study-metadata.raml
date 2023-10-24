@@ -1,0 +1,224 @@
+#%RAML 1.0 Library
+
+types:
+
+  ########################################################
+  ###  Study, Entity, and Native Variable Metadata Types
+  ########################################################
+
+  StudiesGetResponse:
+    additionalProperties: false
+    properties:
+      studies: API_StudyOverview[]
+
+  StudyIdGetResponse:
+    additionalProperties: false
+    properties:
+      study: API_StudyDetail
+
+  StudySourceType:
+    enum: [ 'curated', 'user_submitted' ]
+
+  API_StudyOverview:
+    type: object
+    properties:
+      id: string
+      datasetId: string
+      sha1hash: string
+      sourceType: StudySourceType
+      displayName: string
+      shortDisplayName: string
+      lastModified: datetime
+      description: string
+
+  EntityIdGetResponse:
+    type: object
+    properties:
+      id: string
+      idColumnName: string
+      displayName: string
+      displayNamePlural: string
+      description: string
+      isManyToOneWithParent: boolean
+      variables: API_Variable[]
+      collections: API_Collection[]
+
+  API_StudyDetail:
+    type: object
+    properties:
+      id: string
+      isUserStudy: boolean
+      hasMap: boolean
+      rootEntity: API_Entity
+
+  API_Entity:
+    type: EntityIdGetResponse
+    properties:
+      children?: API_Entity[]
+
+  API_Collection:
+    type: object
+    discriminator: type
+    properties: 
+      id: string
+      displayName: string
+      type: API_CollectionType
+      dataShape: API_VariableDataShape
+      vocabulary?: string[]
+      distinctValuesCount?:
+        type: integer
+        format: int64
+      memberVariableIds: string[]
+      imputeZero: boolean
+      normalizationMethod: string
+      isCompositional: boolean
+      isProportion: boolean
+
+  API_CollectionType:
+    enum: [ 'number', 'date', 'integer', 'string' ]
+
+  API_NumberCollection:
+    type: API_Collection
+    discriminatorValue: number
+    properties:
+      distributionDefaults: API_NumberDistributionDefaults
+      units: string
+      precision: number
+
+  API_IntegerCollection:
+    type: API_Collection
+    discriminatorValue: integer
+    properties:
+      distributionDefaults: API_IntegerDistributionDefaults
+      units: string
+
+  API_DateCollection:
+    type: API_Collection
+    discriminatorValue: date
+    properties:
+      distributionDefaults: API_DateDistributionDefaults
+
+  API_StringCollection:
+    type: API_Collection
+    discriminatorValue: string
+
+  API_Variable:
+    type: object
+    discriminator: type
+    properties:
+      id: string
+      parentId?: string
+      providerLabel: string
+      displayName: string
+      definition?: string
+      displayType: API_VariableDisplayType
+      displayOrder?:
+        type: integer
+        format: int64
+      isCategory: string
+      type: API_VariableType
+      hideFrom: string[]
+
+  API_VariableWithValues:
+    type: API_Variable
+    properties:
+      dataShape?: API_VariableDataShape
+      vocabulary?: string[]
+      distinctValuesCount:
+        type: integer
+        format: int64
+      isTemporal: boolean
+      isFeatured: boolean
+      isMergeKey: boolean
+      isMultiValued: boolean
+      imputeZero: boolean
+      hasStudyDependentVocabulary?: boolean
+      variableSpecToImputeZeroesFor?: VariableSpec
+
+  API_VariableType:
+    enum: [ 'category', 'string', 'number', 'date', 'longitude', 'integer' ]
+
+  API_VariableDataShape:
+    enum: [ 'continuous', 'categorical', 'ordinal', 'binary' ]
+
+  API_VariableDisplayType:
+    enum: [ 'default', 'hidden', 'multifilter', 'geoaggregator', 'latitude', 'longitude' ]
+
+  API_VariableScale:
+    enum: [ 'log', 'log2', 'ln' ]
+
+  API_VariablesCategory:
+    type: API_Variable
+    discriminatorValue: category
+
+  API_StringVariable:
+    type: API_VariableWithValues
+    discriminatorValue: string
+
+  API_LongitudeVariable:
+    type: API_VariableWithValues
+    discriminatorValue: longitude
+    properties:
+      precision: number
+
+  API_NumberDistributionDefaults:
+    properties:
+      displayRangeMin?: number
+      displayRangeMax?: number
+      rangeMin?: number
+      rangeMax?: number
+      binWidth?: number
+      binWidthOverride?: number
+
+  API_IntegerDistributionDefaults:
+    properties:
+      displayRangeMin?:
+        type: integer
+        format: int64
+      displayRangeMax?:
+        type: integer
+        format: int64
+      rangeMin?:
+        type: integer
+        format: int64
+      rangeMax?:
+        type: integer
+        format: int64
+      binWidth?:
+        type: integer
+        format: int64
+      binWidthOverride?:
+        type: integer
+        format: int64
+
+  API_DateDistributionDefaults:
+    properties:
+      displayRangeMin?: string
+      displayRangeMax?: string
+      rangeMin?: string
+      rangeMax?: string
+      binWidth?: integer
+      binWidthOverride?: integer
+      binUnits?: BinUnits
+
+  API_NumberVariable:
+    type: API_VariableWithValues
+    discriminatorValue: number
+    properties:
+      distributionDefaults: API_NumberDistributionDefaults
+      units?: string
+      precision: number
+      scale?: API_VariableScale
+
+  API_IntegerVariable:
+    type: API_VariableWithValues
+    discriminatorValue: integer
+    properties:
+      distributionDefaults: API_IntegerDistributionDefaults
+      units?: string
+
+  API_DateVariable:
+    type: API_VariableWithValues
+    discriminatorValue: date
+    properties:
+      distributionDefaults: API_DateDistributionDefaults

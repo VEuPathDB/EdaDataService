@@ -1,0 +1,114 @@
+#%RAML 1.0 Library
+
+uses:
+  lib: ./common.raml
+
+types:
+  EndUser:
+    type: object
+    properties:
+      user: lib.UserDetails
+      datasetId: string
+      startDate?: datetime
+      duration?:
+        type: integer
+        format: int64
+      restrictionLevel: lib.RestrictionLevel
+      purpose: string
+      researchQuestion: string
+      analysisPlan: string
+      disseminationPlan: string
+      approvalStatus: lib.ApprovalStatus
+      denialReason?: string
+      priorAuth: string
+      allowEdit: boolean
+    additionalProperties: false
+
+  EndUserCreateRequest:
+    description: |
+      New end user request body.
+
+      Body MUST contain either `userId` property or the `email` property.
+
+      If the `email` property is used, the service will attempt to locate a user
+      account with that email.  If one is found, a new record will be created
+      and it's ID returned in the response.  If one is not found, an email will
+      be sent to the given address requesting the user create an account and
+      **NO NEW RECORD WILL BE CREATED**.
+    type: object
+    properties:
+      userId?:
+        type: integer
+        format: int64
+        minimum: 1
+      email?: string
+      purpose: string
+      researchQuestion: string
+      analysisPlan: string
+      disseminationPlan: string
+      priorAuth: string
+      datasetId: string
+
+      # Fields available only if the user is a manager or owner
+      startDate?: datetime
+      duration?: integer
+      restrictionLevel?: lib.RestrictionLevel
+      approvalStatus?: lib.ApprovalStatus
+      denialReason?: string
+    additionalProperties: false
+
+  EndUserCreateResponse:
+    description: |
+      End user creation response.
+
+      Returns a flag indicating whether or not the record was actually created
+      or not.  If `created == true` then the `endUserId` property will be
+      present and contain the new end user record's ID.  If `created == false`
+      then the `endUserId` property will NOT be present, and the successful
+      response indicates that an email was sent to the email address given in
+      the request.
+
+      If the creation request used the `userId` property instead of the `email`
+      property, a new record will always have been created on a success
+      response.
+    type: object
+    properties:
+      created: boolean
+      endUserId?: string
+    additionalProperties: false
+
+  EndUserList:
+    type: object
+    properties:
+      data:
+        type: EndUser[]
+      rows:
+        type: integer
+        format: int64
+        minimum: 0
+      offset:
+        type: integer
+        format: int64
+        minimum: 0
+      total:
+        type: integer
+        format: int64
+        minimum: 0
+    additionalProperties: false
+  EndUserPatch:
+    type: object
+    properties:
+      op:
+        type: string
+        enum:
+        - add
+        - remove
+        - replace
+      path:
+        type: string
+        pattern: "^/.+$"
+      value?:
+        type: any
+      from?:
+        type: string
+    additionalProperties: false

@@ -1,0 +1,31 @@
+#%RAML 1.0 Library
+
+types:
+
+  DerivedVariableDocumentationRequest:
+    properties:
+      mean: SingleNumericVarReductionConfig
+      sum: SingleNumericVarReductionConfig
+      concatenation: ConcatenationConfig
+      subsetMembership: SubsetMembershipConfig
+      advancedSubset: AdvancedSubsetConfig
+      unitConversion: UnitConversionConfig
+      bodyMassIndex: BodyMassIndexConfig
+      categoricalRecoding: CategoricalRecodingConfig
+      continuousToOrdinal: ContinuousNumericRecodingConfig
+      ecmaScriptExpressionEval: EcmaScriptExpressionEvalConfig
+      relativeObservationMinTimeInterval: RelatedObservationMinTimeIntervalConfig
+
+  Unit:
+    properties:
+      displayName: string
+      values: string[]
+
+  UnitType:
+    properties:
+      displayName: string
+      units: Unit[]
+
+  UnitConversionMetadataResponse:
+    properties:
+      types: UnitType[]

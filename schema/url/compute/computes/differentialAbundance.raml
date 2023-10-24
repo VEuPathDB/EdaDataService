@@ -1,0 +1,37 @@
+#%RAML 1.0 Library
+
+types:
+
+  DifferentialAbundancePluginRequest:
+    type: ComputeRequestBase
+    properties:
+      config: DifferentialAbundanceComputeConfig
+
+  DifferentialAbundanceComputeConfig:
+    properties:
+      collectionVariable: CollectionSpec
+      comparator: ComparatorSpec
+      differentialAbundanceMethod: DifferentialAbundanceMethod
+
+  DifferentialAbundanceMethod:
+    type: string
+    enum: ['DESeq','ANCOMBC','Maaslin']
+
+  ComparatorSpec:
+    type: object
+    properties:
+      variable: VariableSpec
+      groupA: LabeledRange[]
+      groupB: LabeledRange[]
+
+  DifferentialAbundanceStats:
+    properties:
+      effectSize: string[]
+      pValue: string[]
+      adjustedPValue: string[]
+      pointId: string[]
+
+  DifferentialAbundanceStatsResponse:
+    properties:
+      effectSizeLabel: string
+      statistics: DifferentialAbundanceStats

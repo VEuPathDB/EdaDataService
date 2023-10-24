@@ -1,0 +1,22 @@
+#%RAML 1.0 Library
+
+types:
+
+  BetaDivPluginRequest:
+    type: ComputeRequestBase
+    properties:
+      config: BetaDivComputeConfig
+
+  BetaDivComputeConfig:
+    properties:
+      collectionVariable: CollectionSpec
+      betaDivDissimilarityMethod: BetaDivDissimilarityMethod
+
+  BetaDivDissimilarityMethod:
+    type: string
+    # RD: what happened to these (were in data service)? 'unifrac', 'wunifrac', 'jensen-shannon'
+    enum: ['bray', 'jaccard', 'jsd']
+
+  BetaDivStats:
+    properties:
+      pcoaVariance: number[]

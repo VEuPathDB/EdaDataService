@@ -1,0 +1,22 @@
+#%RAML 1.0 Library
+
+types:
+
+  RankedAbundancePluginRequest:
+    type: ComputeRequestBase
+    properties:
+      config: RankedAbundanceComputeConfig
+
+  RankedAbundanceComputeConfig:
+    properties:
+      collectionVariable: CollectionSpec
+      rankingMethod: RankingMethod
+
+  RankingMethod:
+    type: string
+    enum: ['median', 'q3', 'variance', 'max']
+
+  RankedAbundanceStats:
+    additionalProperties: false
+    properties:
+      isCutoff: boolean

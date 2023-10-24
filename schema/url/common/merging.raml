@@ -1,0 +1,58 @@
+#%RAML 1.0 Library
+
+types:
+
+  ###################################################
+  ###  Merge Service Request APIs
+  ###################################################
+
+  DerivedVariableSpec:
+    type: VariableSpec
+    properties:
+      functionName: string
+      displayName: string
+      config: object # varies by plugin
+
+  ComputeSpecForMerging:
+    additionalProperties: false
+    properties:
+      computeName: string
+      computeConfig: object
+
+  DerivedVariableBulkMetadataRequest:
+    additionalProperties: false
+    properties:
+      studyId: string
+      derivedVariables: DerivedVariableSpec[]
+
+  MergedEntityTabularPostRequest:
+    type: DerivedVariableBulkMetadataRequest
+    additionalProperties: false
+    properties:
+      filters: API_Filter[]
+      entityId: string
+      outputVariables: VariableSpec[]
+      computeSpec?: ComputeSpecForMerging
+
+  ###################################################
+  ###  Derived Variable Metadata
+  ###################################################
+
+  DerivationType:
+    type: string
+    enum: [ 'transform', 'reduction' ]
+
+  DerivedVariableMetadata:
+    type: VariableSpec
+    properties:
+      derivationType: DerivationType
+      variableType: API_VariableType
+      dataShape: API_VariableDataShape
+      vocabulary?: string[]
+      units?: string
+      dataRange?: Range
+      #precision: number
+      #binWidth?: number
+      #distinctValuesCount: integer
+      #isTemporal: boolean
+      #imputeZero: boolean

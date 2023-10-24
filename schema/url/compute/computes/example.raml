@@ -1,0 +1,16 @@
+#%RAML 1.0 Library
+
+types:
+  ExamplePluginRequest:
+    type: ComputeRequestBase
+    properties:
+      config: ExampleComputeConfig
+
+  ExampleComputeConfig:
+    properties:
+      inputVariable: VariableSpec
+      valueSuffix: string
+
+  ExamplePluginStats:
+    properties:
+      numEmptyValues: integer

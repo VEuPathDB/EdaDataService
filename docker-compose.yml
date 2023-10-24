@@ -1,0 +1,183 @@
+version: "3.5"
+
+services:
+
+  data:
+    image: veupathdb/eda-data:${DATA_TAG:-latest}
+    networks:
+      internal:
+        aliases:
+          - data-internal
+      traefik:
+      monitoring-ext:
+    volumes:
+      - type: bind
+        source: ${MACHINE_BINARY_FILES_DIR:-/var/www/Common/apiSiteFilesMirror/webServices}
+        target: ${SERVICE_BINARY_FILES_MOUNT:-/binaryFiles}
+        read_only: true
+      - type: bind
+        source: ${DOWNLOAD_FILES_DIR:-/var/www/Common/apiSiteFilesMirror/downloadSite}
+        target: /downloadFiles
+        read_only: true
+    environment:
+      # port providing the service
+      SERVER_PORT: ${DATA_SERVER_PORT:-8080}
+
+      # URLs of required services
+      SUBSETTING_SERVICE_URL: ${SUBSETTING_SERVICE_URL:-http://localhost}:${SUBSETTING_SERVER_PORT:-8080}
+      MERGING_SERVICE_URL: ${MERGING_SERVICE_URL:-http://localhost}:${MERGING_SERVER_PORT:-8080}
+      COMPUTE_SERVICE_URL: ${COMPUTE_SERVICE_URL:-http://compute-internal}:${COMPUTE_SERVER_PORT:-8080}
+      RSERVE_URL: ${RSERVE_URL:-http://rserve-internal:6311}
+      DATASET_ACCESS_SERVICE_URL: ${DATASET_ACCESS_SERVICE_URL:-http://dataset-access-internal}:${DATASET_ACCESS_SERVER_PORT:-8080}
+
+      # LDAP values to look up DBs
+      LDAP_SERVER: ${LDAP_SERVER}
+      ORACLE_BASE_DN: ${ORACLE_BASE_DN}
+
+      # Application Database
+      APP_DB_TNS_NAME: ${APP_DB_TNS_NAME}
+      APP_DB_USER: ${APP_DB_USER}
+      APP_DB_PASS: ${APP_DB_PASS}
+      APP_DB_SCHEMA: ${APP_DB_SCHEMA:-eda.}
+      APP_DB_POOL_SIZE: ${APP_DB_POOL_SIZE:-20}
+      USER_STUDY_SCHEMA: ${USER_STUDY_SCHEMA:-apidbuserdatasets.}
+
+      # Account Database
+      ACCT_DB_TNS_NAME: ${ACCT_DB_TNS_NAME}
+      ACCT_DB_USER: ${ACCT_DB_USER}
+      ACCT_DB_PASS: ${ACCT_DB_PASS}
+      ACCT_DB_POOL_SIZE: ${ACCT_DB_POOL_SIZE:-3}
+
+      # User Database
+      USER_DB_TNS_NAME: ${USER_DB_TNS_NAME}
+      USER_DB_USER: ${USER_DB_USER}
+      USER_DB_PASS: ${USER_DB_PASS}
+      USER_DB_POOL_SIZE: ${USER_DB_POOL_SIZE:-3}
+      USER_DB_SCHEMA: ${USER_DB_SCHEMA:-userlogins5}
+
+      # Auth Secret (needed along with user/acct DBs for auth)
+      AUTH_SECRET_KEY: ${AUTH_SECRET_KEY}
+
+      # Map-reduce subsetting method configuraton
+      BINARY_FILES_DIR: ${SERVICE_BINARY_FILES_DIR:-VEuPathDB/edaBinaryFiles/%DB_BUILD%}
+      BINARY_FILES_MOUNT: ${SERVICE_BINARY_FILES_MOUNT:-/binaryFiles}
+      DB_BUILD: ${DB_BUILD}
+      FILE_SUBSETTING_ENABLED: ${FILE_SUBSETTING_ENABLED:-false}
+
+      # Email Config
+      SMTP_HOST: ${SMTP_HOST?required}
+      SUPPORT_EMAIL: ${SUPPORT_EMAIL?required}
+      EMAIL_DEBUG: ${EMAIL_DEBUG:-true}
+      ENABLE_EMAIL: ${ENABLE_EMAIL:-true}
+
+      # Parent directory for raw download files
+      DOWNLOAD_FILES_MOUNT_PATH: ${DOWNLOAD_FILES_MOUNT_PATH:-/downloadFiles}
+
+      # Project-specific properties for raw files parent directory
+      PROJECT_SPECIFIC_PROP_CE_PROJECT_ID: ClinEpiDB
+      PROJECT_SPECIFIC_PROP_CE_RAW_FILES_DIR: ClinEpiDB
+      PROJECT_SPECIFIC_PROP_CE_USER_SCHEMA: edauserce
+
+      PROJECT_SPECIFIC_PROP_ACE_PROJECT_ID: AllClinEpiDB
+      PROJECT_SPECIFIC_PROP_ACE_RAW_FILES_DIR: ClinEpiDB
+      PROJECT_SPECIFIC_PROP_ACE_USER_SCHEMA: edauserce
+
+      PROJECT_SPECIFIC_PROP_MB_PROJECT_ID: MicrobiomeDB
+      PROJECT_SPECIFIC_PROP_MB_RAW_FILES_DIR: MicrobiomeDB
+      PROJECT_SPECIFIC_PROP_MB_USER_SCHEMA: edausermb
+
+      PROJECT_SPECIFIC_PROP_VB_PROJECT_ID: VectorBase
+      PROJECT_SPECIFIC_PROP_VB_RAW_FILES_DIR: VectorBase
+      PROJECT_SPECIFIC_PROP_VB_USER_SCHEMA: edauservb
+
+      # Queue Platform Postgres
+      QUEUE_DB_NAME: ${COMPUTE_POSTGRES_DB:-computedb}
+      QUEUE_DB_HOST: ${COMPUTE_POSTGRES_HOST:-compute-queue-db}
+      QUEUE_DB_PORT: ${COMPUTE_POSTGRES_PORT:-5432}
+      QUEUE_DB_USERNAME: ${COMPUTE_POSTGRES_USER:-postgresuser}
+      QUEUE_DB_PASSWORD: ${COMPUTE_POSTGRES_PASS}
+      QUEUE_DB_POOL_SIZE: ${COMPUTE_POSTGRES_POOL_SIZE:-10}
+
+      # Queue Platform RabbitMQ
+      JOB_QUEUE_USERNAME: ${COMPUTE_QUEUE_USER:-rabbituser}
+      JOB_QUEUE_PASSWORD: ${COMPUTE_QUEUE_PASS}
+      JOB_QUEUE_HOST: ${COMPUTE_QUEUE_HOST:-compute-queue}
+      JOB_QUEUE_PORT: ${COMPUTE_QUEUE_PORT:-5672}
+      SLOW_QUEUE_NAME: ${COMPUTE_QUEUE_SLOW_NAME:-slow-queue}
+      SLOW_QUEUE_WORKERS: ${COMPUTE_QUEUE_SLOW_WORKERS:-2}
+      FAST_QUEUE_NAME: ${COMPUTE_QUEUE_FAST_NAME:-fast-queue}
+      FAST_QUEUE_WORKERS: ${COMPUTE_QUEUE_FAST_WORKERS:-5}
+
+      # Queue Platform Minio
+      S3_HOST: ${COMPUTE_S3_HOST}
+      S3_PORT: ${COMPUTE_S3_PORT:-443}
+      S3_BUCKET: ${COMPUTE_S3_BUCKET}
+      S3_ACCESS_TOKEN: ${COMPUTE_S3_ACCESS_TOKEN}
+      S3_SECRET_KEY: ${COMPUTE_S3_SECRET_KEY}
+      S3_USE_HTTPS: ${COMPUTE_S3_USE_HTTPS:-true}
+
+      # Job Settings
+      JOB_CACHE_TIMEOUT_DAYS: ${JOB_CACHE_TIMEOUT_DAYS:-30}
+
+      SITE_URL: ${SITE_URL}                     # e.g. https://clinepidb.org/ce
+      REGISTRATION_PATH: /app/user/registration # unused for now
+      APPLICATION_PATH: /app/study-access       # unused for now
+
+      ADMIN_AUTH_TOKEN: ${ADMIN_AUTH_TOKEN}     # Auth token
+
+    labels:
+    - "prometheus.scrape_enabled=true"
+    - "com.centurylinklabs.watchtower.enable=${DATA_WATCHTOWER:-false}"
+    - "traefik.http.services.${TRAEFIK_DATA_ROUTER:-edadata-dev}.loadbalancer.server.port=${DATA_SERVER_PORT:-8080}"
+    - "traefik.http.routers.${TRAEFIK_DATA_ROUTER:-edadata-dev}.rule=Host(`${TRAEFIK_DATA_HOST:-edadata-dev.local.apidb.org}`)"
+    - "traefik.http.routers.${TRAEFIK_DATA_ROUTER:-edadata-dev}.tls=${USE_TRAEFIK_SSL:-true}"
+    - "traefik.http.routers.${TRAEFIK_DATA_ROUTER:-edadata-dev}.entrypoints=${TRAEFIK_ENTRYPOINTS:-local}"
+    - "traefik.docker.network=traefik"
+
+  compute-queue-db:
+    image: postgres:14.3-alpine3.16
+    environment:
+      POSTGRES_USER: ${COMPUTE_POSTGRES_USER:-postgresuser}
+      POSTGRES_PASSWORD: ${COMPUTE_POSTGRES_PASS}
+      POSTGRES_DB: ${COMPUTE_POSTGRES_DB:-computedb}
+    volumes:
+      - eda-compute-db:/var/lib/postgresql/data
+    networks:
+      - internal
+    labels:
+      - "com.centurylinklabs.watchtower.enable=${POSTGRES_WATCHTOWER:-false}"
+      - "traefik.enable=false"
+
+  compute-queue:
+    image: rabbitmq:3.10.5-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${COMPUTE_QUEUE_USER:-rabbituser}
+      RABBITMQ_DEFAULT_PASS: ${COMPUTE_QUEUE_PASS}
+    networks:
+      - internal
+    labels:
+      - "com.centurylinklabs.watchtower.enable=${RABBITMQ_WATCHTOWER:-false}"
+      - "traefik.enable=false"
+
+  rserve:
+    image: veupathdb/rserve:${RSERVE_TAG:-latest}
+    networks:
+      internal:
+        aliases:
+          - rserve-internal
+    labels:
+    - "com.centurylinklabs.watchtower.enable=${RSERVE_WATCHTOWER:-false}"
+
+
+networks:
+  # external network used for containers that need to reach outside
+  external:
+  traefik:
+    external: true
+  internal:
+    internal: true
+  monitoring-ext:
+    external: true
+
+volumes:
+  eda-compute-db:

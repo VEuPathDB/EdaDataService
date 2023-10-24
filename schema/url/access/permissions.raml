@@ -1,0 +1,90 @@
+#%RAML 1.0 Library
+
+types:
+  PermissionsGetResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      isStaff?:
+        description: |
+          Indicates whether the current user is listed in the service's staff
+          entries.
+        type: boolean
+        default: false
+      isOwner?:
+        description: |
+          Indicates whether the current user is listed in the service's staff
+          entries _and_ is marked as a site owner.
+        type: boolean
+        default: false
+      perDataset?:
+        description: |
+          If the current user is a provider or an end user of one or more
+          datasets, these datasets will be listed here with the user's
+          permission level for each specific dataset.
+
+          If the user is not a provider or end user for any datasets, this field
+          will be omitted.
+        type: object
+        additionalProperties: false
+        properties:
+          //: DatasetPermissionEntry
+
+  ActionList:
+    type: object
+    additionalProperties: false
+    properties:
+      studyMetadata:
+        type: boolean
+        description: study metadata
+      subsetting:
+        type: boolean
+        description: count, distribution
+      visualizations:
+        type: boolean
+        description: all viz plugins
+      resultsFirstPage:
+        type: boolean
+        description: "offset:0, numRecords: <=20"
+      resultsAll:
+        type: boolean
+        description: any other tabular response
+
+  # providing less information here because it will be provided regardless
+  #   of whether user has permission to access this study
+  StudyPermissionInfo:
+    type: object
+    additionalProperties: false
+    properties:
+      studyId: string
+      datasetId: string
+      isUserStudy: boolean
+      actionAuthorization: ActionList
+
+  DatasetPermissionEntry:
+    type: object
+    additionalProperties: false
+    properties:
+      studyId: string
+      sha1Hash: string
+      isUserStudy: boolean
+      displayName: string
+      shortDisplayName: string
+      description: string
+      type: DatasetPermissionLevel
+      actionAuthorization: ActionList
+      isManager?:
+        description: |
+          For providers, this field indicates whether the current user is marked
+          as a manager for the dataset represented by the containing permission
+          entry.
+
+          This field will only be present if the containing permission entry
+          type = `provider`.
+        type: boolean
+        default: false
+      accessRequestStatus: ApprovalStatus
+
+  DatasetPermissionLevel:
+    type: string
+    enum: [ provider, end-user ]
