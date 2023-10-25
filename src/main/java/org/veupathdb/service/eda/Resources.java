@@ -128,7 +128,7 @@ public class Resources extends ContainerResources {
     catch (Exception e) {
       throw new RuntimeException(e);
     }
-    
+
     if (!USE_IN_MEMORY_TEST_DATABASE) {
       DbManager.initApplicationDatabase(opts);
       LOG.info("Using application DB connection URL: " +
@@ -152,7 +152,6 @@ public class Resources extends ContainerResources {
   }
 
   public static DataSource getApplicationDataSource() {
-    LOG.info("In memory data source?: " + USE_IN_MEMORY_TEST_DATABASE);
     return USE_IN_MEMORY_TEST_DATABASE
       ? StubDb.getDataSource()
       : DbManager.applicationDatabase().getDataSource();

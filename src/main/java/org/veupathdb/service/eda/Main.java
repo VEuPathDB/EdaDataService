@@ -37,21 +37,6 @@ public class Main extends Server {
   }
 
   @Override
-  protected void postCliParse(Options opt) {
-    System.out.println(opt.getAcctDbOpts().displayName());
-    System.out.println(opt.getAcctDbOpts().port());
-    System.out.println(opt.getAcctDbOpts().host());
-    System.out.println(opt.getAcctDbOpts().name());
-
-    System.out.println(opt.getAppDbOpts().displayName());
-    System.out.println(opt.getAppDbOpts().port());
-    System.out.println(opt.getAppDbOpts().host());
-    System.out.println(opt.getAppDbOpts().name());
-
-    System.out.println(opt.getClass().getCanonicalName());
-  }
-
-  @Override
   protected void onShutdown() {
     Resources.getDeserializerThreadPool().shutdown();
     Resources.getFileChannelThreadPool().shutdown();
