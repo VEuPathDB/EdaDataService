@@ -20,3 +20,9 @@ if (edaCommon.exists()) {
   include(":edaCommon")
   project(":edaCommon").projectDir = edaCommon
 }
+
+val libSubsetting = file("../lib-eda-subsetting");
+if (libSubsetting.exists()) {
+  include(":libSubsetting")
+  project(":libSubsetting").projectDir = libSubsetting
+}
