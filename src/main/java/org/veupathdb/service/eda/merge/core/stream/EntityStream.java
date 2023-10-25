@@ -127,7 +127,6 @@ public class EntityStream implements Iterator<Map<String,String>> {
 
   // returns null if no more rows
   private Map<String, String> readRow() {
-    LOG.info("Attempting to readRow()");
     return !_dataStream.hasNext() ? null : applyDerivedVars(_dataStream.next());
   }
 

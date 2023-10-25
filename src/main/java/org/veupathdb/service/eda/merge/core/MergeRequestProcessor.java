@@ -2,7 +2,6 @@ package org.veupathdb.service.eda.merge.core;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.gusdb.fgputil.client.ResponseFuture;
 import org.gusdb.fgputil.functional.FunctionalInterfaces.ConsumerWithException;
 import org.gusdb.fgputil.functional.Functions;
 import org.gusdb.fgputil.iterator.CloseableIterator;
@@ -18,7 +17,6 @@ import org.veupathdb.service.eda.generated.model.VariableSpec;
 import org.veupathdb.service.eda.merge.core.request.ComputeInfo;
 import org.veupathdb.service.eda.merge.core.request.MergedTabularRequestResources;
 import org.veupathdb.service.eda.merge.core.stream.RootStreamingEntityNode;
-import org.veupathdb.service.eda.ss.model.Entity;
 import org.veupathdb.service.eda.ss.model.Study;
 import org.veupathdb.service.eda.ss.model.db.FilteredResultFactory;
 import org.veupathdb.service.eda.ss.model.variable.VariableWithValues;
@@ -79,7 +77,6 @@ public class MergeRequestProcessor {
     // request validated; convert requested entity and vars to defs
     EntityDef targetEntity = metadata.getEntity(targetEntityId).orElseThrow();
     List<VariableDef> outputVarDefs = metadata.getTabularColumns(targetEntity, outputVarSpecs);
-    List<VariableSpec> outputVars = new ArrayList<>(outputVarDefs.stream().map(v -> (VariableSpec)v).toList());
 
     // build entity node tree to aggregate the data into a streaming response
     RootStreamingEntityNode targetStream = new RootStreamingEntityNode(targetEntity, outputVarDefs,
@@ -88,10 +85,8 @@ public class MergeRequestProcessor {
 
     // get stream specs for streams needed by the node tree, which will be merged into this request's response
     Map<String, StreamSpec> requiredStreams = Functions.getMapFromValues(targetStream.getRequiredStreamSpecs(), StreamSpec::getStreamName);
-    Entity entity = study.getEntity(_resources.getTargetEntityId()).orElseThrow();
-    List<VariableWithValues> variables = entity.getVariables().stream()
-        .filter(var -> _resources.getOutputVariableSpecs().stream().anyMatch(outputVar -> var.getId().equals(outputVar.getVariableId())))
-        .map(var -> (VariableWithValues) var).toList();
+
+    final boolean fileBasedSubsetting = Resources.isFileBasedSubsettingEnabled() && Resources.getMetadataCache().studyHasFiles(study.getStudyId());
 
     // create stream generator
     Function<StreamSpec, CloseableIterator<Map<String, String>>> streamGenerator = spec ->
@@ -99,14 +94,14 @@ public class MergeRequestProcessor {
             // need to get compute stream from compute service
             ? _resources.getInMemoryComputeStream()
             // all other streams come from subsetting service
-            : FilteredResultFactory.produceUnformattedTabularSubset(study,
+            : FilteredResultFactory.tabularSubsetIterator(study,
             study.getEntity(spec.getEntityId()).orElseThrow(),
             spec.stream()
                 .map(varSpec -> study.getEntity(spec.getEntityId()).orElseThrow().getVariableOrThrow(varSpec.getVariableId()))
                 .map(var -> (VariableWithValues) var)
                 .collect(Collectors.toList()),
             ApiConversionUtil.toInternalFilters(study, spec.getFiltersOverride().orElse(_resources.getSubsetFilters()), Resources.getAppDbSchema()), // Move this up?
-            Resources.getBinaryValuesStreamer(), false, Resources.getApplicationDataSource(), Resources.getAppDbSchema());
+            Resources.getBinaryValuesStreamer(), fileBasedSubsetting, Resources.getApplicationDataSource(), Resources.getAppDbSchema());
     return out -> {
 
       // create stream processor

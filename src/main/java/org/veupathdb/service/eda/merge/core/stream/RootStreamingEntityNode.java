@@ -16,7 +16,6 @@ import org.veupathdb.service.eda.generated.model.VariableSpec;
 import org.veupathdb.service.eda.merge.core.derivedvars.DerivedVariableFactory;
 import org.veupathdb.service.eda.merge.core.request.ComputeInfo;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

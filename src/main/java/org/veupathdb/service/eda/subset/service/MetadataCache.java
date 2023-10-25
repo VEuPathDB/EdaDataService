@@ -76,7 +76,7 @@ public class MetadataCache implements StudyProvider {
     return Collections.unmodifiableList(_studyOverviews);
   }
 
-  private synchronized boolean studyHasFiles(String studyId) {
+  public synchronized boolean studyHasFiles(String studyId) {
     _studyHasFilesCache.computeIfAbsent(studyId, _binaryFilesManager::studyHasFiles);
     return _studyHasFilesCache.get(studyId);
   }
