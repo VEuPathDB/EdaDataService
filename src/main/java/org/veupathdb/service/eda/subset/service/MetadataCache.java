@@ -64,15 +64,9 @@ public class MetadataCache implements StudyProvider {
 
   @Override
   public synchronized List<StudyOverview> getStudyOverviews() {
-    try {
-      LOG.info("BEFORE: " + JsonUtil.Jackson.writeValueAsString(_studyOverviews));
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
-    }
     if (_studyOverviews == null || _studyOverviews.isEmpty()) {
       _studyOverviews = _sourceStudyProvider.get().getStudyOverviews();
     }
-    LOG.info("AFTER: "+ _studyOverviews.size());
     return Collections.unmodifiableList(_studyOverviews);
   }
 

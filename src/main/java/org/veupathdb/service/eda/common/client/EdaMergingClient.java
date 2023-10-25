@@ -27,8 +27,6 @@ import org.veupathdb.service.eda.generated.model.DerivedVariableSpec;
 import org.veupathdb.service.eda.generated.model.MergedEntityTabularPostRequest;
 import org.veupathdb.service.eda.generated.model.MergedEntityTabularPostRequestImpl;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
-import org.veupathdb.service.eda.merge.core.MergeRequestProcessor;
-import org.veupathdb.service.eda.merge.core.request.MergedTabularRequestResources;
 
 import java.io.InputStream;
 import java.util.Collections;
@@ -95,13 +93,6 @@ public class EdaMergingClient extends StreamingDataClient {
       computeSpec.setComputeConfig(computeInfo.getSecond());
       request.setComputeSpec(computeSpec);
     }
-//    try {
-//      final MergeRequestProcessor m = new MergeRequestProcessor(new MergedTabularRequestResources(request, getAuthHeaderMap().entrySet().stream().findFirst().get()));
-//      m.createMergedResponseSupplier().accept();
-//
-//    } catch (Exception e) {
-//
-//    }
     // make request
     return ClientUtil.makeAsyncPostRequest(getUrl("/merging-internal/query"), request, MimeTypes.TEXT_TABULAR, getAuthHeaderMap());
   }

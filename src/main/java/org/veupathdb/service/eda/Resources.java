@@ -128,12 +128,7 @@ public class Resources extends ContainerResources {
     catch (Exception e) {
       throw new RuntimeException(e);
     }
-
-    if (SUBSET_ENV.isDevelopmentMode()) {
-//      enableJerseyTrace();
-//      ClientUtil.LOG_RESPONSE_HEADERS = true;
-    }
-
+    
     if (!USE_IN_MEMORY_TEST_DATABASE) {
       DbManager.initApplicationDatabase(opts);
       LOG.info("Using application DB connection URL: " +

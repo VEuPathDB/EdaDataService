@@ -17,9 +17,7 @@ import org.veupathdb.service.eda.merge.core.derivedvars.DerivedVariableFactory;
 import org.veupathdb.service.eda.merge.core.derivedvars.Reduction;
 import org.veupathdb.service.eda.merge.core.derivedvars.Transform;
 
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -207,14 +205,7 @@ public class StreamingEntityNode extends EntityStream {
   protected void applyAncestorVars(EntityStream ancestorStream, Map<String,String> row) {
 
     String ancestorIdColName = ancestorStream.getEntityIdColumnName();
-    Predicate<Map<String,String>> isMatch = r -> {
-      try {
-        return r.get(ancestorIdColName).equals(row.get(ancestorIdColName));
-      } catch (Exception e) {
-        LOG.error("Failed to test condition: my row: " + new HashMap<>(row) + " ancestor row: " + new HashMap<>(r) + " ancestor id " + ancestorIdColName);
-        throw new RuntimeException(e);
-      }
-    };
+    Predicate<Map<String,String>> isMatch = r ->  r.get(ancestorIdColName).equals(row.get(ancestorIdColName));
     Optional<Map<String,String>> ancestorRow = ancestorStream.getPreviousRowIf(isMatch);
 
     // loop through ancestor rows until we find a match for ours

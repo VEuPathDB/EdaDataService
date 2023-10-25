@@ -1,6 +1,5 @@
 package org.veupathdb.service.eda.subset.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import org.apache.logging.log4j.LogManager;
@@ -8,7 +7,6 @@ import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.FormatUtil;
 import org.gusdb.fgputil.SortDirection;
 import org.gusdb.fgputil.functional.TreeNode;
-import org.gusdb.fgputil.json.JsonUtil;
 import org.veupathdb.service.eda.common.client.DatasetAccessClient.StudyDatasetInfo;
 import org.veupathdb.service.eda.common.model.VariableDef;
 import org.veupathdb.service.eda.generated.model.APICollection;
@@ -370,16 +368,11 @@ public class ApiConversionUtil {
   public static List<APIStudyOverview> toApiStudyOverviews(
       Map<String, StudyDatasetInfo> datasetInfoMap,
       Map<String, StudyOverview> overviewMap) {
-    try {
-      LOG.info("Study overviews: " + JsonUtil.Jackson.writeValueAsString(overviewMap));
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
-    }
     return datasetInfoMap.keySet().stream()
         .filter(studyId -> {
           final boolean studyInOverviews = overviewMap.containsKey(studyId);
           if (!studyInOverviews) {
-            LOG.warn("Found study " + studyId + " in visible studies but not it's not being returned from canoncial list of studies.");
+            LOG.warn("Found study " + studyId + " in visible studies but not it's not being returned from study table.");
           }
           return studyInOverviews;
         })

@@ -95,24 +95,6 @@ public class EntityStream implements Iterator<Map<String,String>> {
     LOG.info("Received a stream with stream spec {} and headers {}", _streamSpec, _lastRowRead.keySet());
   }
 
-  private CloseableIterator<Map<String, String>> beginValidatedInput(CloseableIterator<Map<String, String>> inStream) {
-    // capture the header and validate response
-    if (!inStream.hasNext()) {
-      throw new RuntimeException("Subsetting service tabular endpoint did not return header row");
-    }
-    Map<String, String> header = inStream.next(); // validates counts
-    List<String> received = new ArrayList<>(header.values());
-    for (int i = 0; i < received.size(); i++) {
-      if (!received.get(i).equals(_expectedNativeColumns.get(i).getVariableId())) { // validates header names
-        throw new RuntimeException("Tabular subsetting result of type '" +
-            _streamSpec.getEntityId() + "' contained unexpected header." + NL + "Expected:" +
-            _expectedNativeColumns.stream().map(VariableSpecImpl::getVariableId).collect(Collectors.joining(",")) +
-            NL + "Found   : " + String.join(",", received));
-      }
-    }
-    return inStream;
-  }
-
   /**
    * By default this class does not apply derived or inherited vars.  This way it can still be used stand-alone to
    * process computed variable tabular data streams, and could be used (but is not) in cases where no derived or

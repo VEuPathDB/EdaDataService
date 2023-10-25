@@ -24,7 +24,6 @@ import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesPostRespons
 import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesPostResponseImpl;
 import org.veupathdb.service.eda.generated.model.StandaloneMapBubblesSpec;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
-import org.veupathdb.service.eda.ss.model.db.FilteredResultFactory;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -111,9 +110,7 @@ public class BubbleMapMarkersPlugin extends AbstractEmptyComputePlugin<Standalon
     // create scanner and line parser
     InputStreamReader isReader = new InputStreamReader(new BufferedInputStream(dataStreams.get(DEFAULT_SINGLE_STREAM_NAME)));
     BufferedReader reader = new BufferedReader(isReader);
-    String headerLine = reader.readLine();
-    LOG.info("HEADERS: " + headerLine);
-    DelimitedDataParser parser = new DelimitedDataParser(headerLine, TAB, true);
+    DelimitedDataParser parser = new DelimitedDataParser(reader.readLine(), TAB, true);
 
     // establish column header indexes
     StandaloneMapBubblesSpec spec = getPluginSpec();
