@@ -9,12 +9,6 @@ if (core.exists()) {
   project(":core").projectDir = core
 }
 
-val libSubsetting = file("../lib-eda-subsetting")
-if (libSubsetting.exists()) {
-  include(":libSubsetting")
-  project(":libSubsetting").projectDir = libSubsetting
-}
-
 val edaCommon = file("../EdaCommon")
 if (edaCommon.exists()) {
   include(":edaCommon")

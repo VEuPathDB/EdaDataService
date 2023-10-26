@@ -73,7 +73,6 @@ public class EntityStream implements Iterator<Map<String,String>> {
     _entityIdColumnName = VariableDef.toDotNotation(entity.getIdColumnDef());
     LOG.info("Entity ID column name: " + _entityIdColumnName);
     _expectedNativeColumns = _metadata.getTabularColumns(entity, streamSpec);
-    List<String> nativeHeaders = VariableDef.toDotNotation(_expectedNativeColumns);
     return this;
   }
 
