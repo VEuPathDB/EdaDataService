@@ -72,7 +72,7 @@ public class MergeRequestProcessor {
     List<VariableSpec> outputVarSpecs = _resources.getOutputVariableSpecs();
     ReferenceMetadata metadata = _resources.getMetadata();
     Optional<ComputeInfo> computeInfo = _resources.getComputeInfo();
-    Study study = StudiesService.getStudyResolver().getStudyById(_resources.getMetadata().getStudyId());
+    Study study = Resources.getMetadataCache().getStudyById(_resources.getMetadata().getStudyId());
 
     // request validated; convert requested entity and vars to defs
     EntityDef targetEntity = metadata.getEntity(targetEntityId).orElseThrow();

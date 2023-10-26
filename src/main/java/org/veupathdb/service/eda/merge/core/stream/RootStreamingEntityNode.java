@@ -47,7 +47,7 @@ public class RootStreamingEntityNode extends StreamingEntityNode {
   public static final String COMPUTED_VAR_STREAM_NAME = "__COMPUTED_VAR_STREAM__";
 
   private final String[] _outputVars;
-  private final InitialSizeStringMap _outputRow;
+  private final InitialSizeStringMap.Builder _outputRowBuilder;
 
   private final Optional<EntityStream> _computeStreamProcessor;
   private final boolean _computeEntityMatchesOurs;
@@ -73,7 +73,7 @@ public class RootStreamingEntityNode extends StreamingEntityNode {
 
     _outputVars = getOrderedOutputColumns(fullOutputVarDefs);
     LOG.info("Root stream final output vars: " + String.join(", ", _outputVars));
-    _outputRow = new InitialSizeStringMap.Builder(_outputVars).build();
+    _outputRowBuilder = new InitialSizeStringMap.Builder(_outputVars);
   }
 
   private String[] getOrderedOutputColumns(List<VariableSpec> fullOutputVarDefs) throws ValidationException {
@@ -144,11 +144,15 @@ public class RootStreamingEntityNode extends StreamingEntityNode {
     _computeStreamProcessor.ifPresent(computeStream -> applyCompute(row, computeStream));
 
     // return only requested vars and in the correct order
-    _outputRow.clear();
+    final InitialSizeStringMap outputRow = _outputRowBuilder.build();
+    final String[] outputVals = new String[_outputVars.length];
+    int i = 0;
     for (String col : _outputVars) {
-      _outputRow.put(col, row.get(col));
+      outputVals[i++] = row.get(col);
     }
-    return _outputRow;
+
+    outputRow.putAll(outputVals);
+    return outputRow;
   }
 
   private void applyCompute(Map<String, String> row, EntityStream computeStream) {
