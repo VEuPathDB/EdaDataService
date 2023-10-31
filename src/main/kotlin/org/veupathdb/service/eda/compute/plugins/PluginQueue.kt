@@ -1,6 +1,6 @@
 package org.veupathdb.service.eda.compute.plugins
 
-import org.veupathdb.service.eda.compute.service.ServiceOptions
+import org.veupathdb.service.eda.Main
 
 /**
  * Plugin Queue
@@ -42,7 +42,7 @@ enum class PluginQueue {
    */
   val queueName
     get() = when(this) {
-      Fast -> ServiceOptions.fastQueueName
-      Slow -> ServiceOptions.slowQueueName
+      Fast -> Main.config.fastQueueName
+      Slow -> Main.config.slowQueueName
     }
 }

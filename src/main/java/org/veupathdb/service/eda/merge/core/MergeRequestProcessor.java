@@ -92,7 +92,7 @@ public class MergeRequestProcessor {
     Function<StreamSpec, CloseableIterator<Map<String, String>>> streamGenerator = spec ->
         COMPUTED_VAR_STREAM_NAME.equals(spec.getStreamName())
             // need to get compute stream from compute service
-            ? _resources.getInMemoryComputeStream()
+            ? _resources.getInMemoryComputeStream(study)
             // all other streams come from subsetting service
             : FilteredResultFactory.tabularSubsetIterator(study,
             study.getEntity(spec.getEntityId()).orElseThrow(),

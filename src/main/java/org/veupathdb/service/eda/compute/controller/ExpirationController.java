@@ -10,8 +10,8 @@ import org.veupathdb.lib.compute.platform.job.JobFileReference;
 import org.veupathdb.lib.compute.platform.job.JobStatus;
 import org.veupathdb.lib.compute.platform.model.JobReference;
 import org.veupathdb.lib.hash_id.HashID;
+import org.veupathdb.service.eda.Main;
 import org.veupathdb.service.eda.compute.jobs.ReservedFiles;
-import org.veupathdb.service.eda.compute.service.ServiceOptions;
 import org.veupathdb.service.eda.generated.model.ExpiredJobsResponse;
 import org.veupathdb.service.eda.generated.model.ExpiredJobsResponseImpl;
 import org.veupathdb.service.eda.generated.resources.ExpireComputeJobs;
@@ -37,7 +37,7 @@ public class ExpirationController implements ExpireComputeJobs {
 
   @Override
   public GetExpireComputeJobsResponse getExpireComputeJobs(String jobId, String studyId, String pluginName, String adminAuthToken) {
-    if (adminAuthToken == null || !adminAuthToken.equals(ServiceOptions.getAdminAuthToken())) {
+    if (adminAuthToken == null || !adminAuthToken.equals(Main.config.getAdminAuthToken().get())) {
       throw new ForbiddenException();
     }
     if (jobId != null && (studyId != null || pluginName != null)) {

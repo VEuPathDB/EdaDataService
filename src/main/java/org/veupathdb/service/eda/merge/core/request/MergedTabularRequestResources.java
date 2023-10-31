@@ -1,6 +1,8 @@
 package org.veupathdb.service.eda.merge.core.request;
 
 import jakarta.ws.rs.BadRequestException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.DelimitedDataParser;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.client.ResponseFuture;
@@ -11,9 +13,12 @@ import org.veupathdb.service.eda.common.client.EdaComputeClient;
 import org.veupathdb.service.eda.common.client.spec.EdaMergingSpecValidator;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.model.VariableDef;
+import org.veupathdb.service.eda.compute.controller.ComputeController;
 import org.veupathdb.service.eda.generated.model.APIFilter;
 import org.veupathdb.service.eda.generated.model.MergedEntityTabularPostRequest;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
+import org.veupathdb.service.eda.ss.model.Entity;
+import org.veupathdb.service.eda.ss.model.Study;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -26,6 +31,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static org.gusdb.fgputil.FormatUtil.TAB;
 
@@ -36,6 +42,7 @@ import static org.gusdb.fgputil.FormatUtil.TAB;
  * variable tabular stream, all by querying the compute service.
  */
 public class MergedTabularRequestResources extends RequestResources {
+  private static final Logger LOG = LogManager.getLogger(MergedTabularRequestResources.class);
 
   private final EdaComputeClient _computeSvc;
   private final List<APIFilter> _subsetFilters;
@@ -117,15 +124,24 @@ public class MergedTabularRequestResources extends RequestResources {
     return _computeSvc.getJobTabularOutput(_computeInfo.orElseThrow().getComputeName(), _computeInfo.get().getRequestBody());
   }
 
-  public CloseableIterator<Map<String, String>> getInMemoryComputeStream() {
-    List<String> headers = _computeInfo.get().getVariables().stream().map(var -> VariableDef.toDotNotation(var.getVariableSpec())).toList();
+  public CloseableIterator<Map<String, String>> getInMemoryComputeStream(Study study) {
+    Entity computeEntity = study.getEntity(_computeInfo.get().getComputeEntity()).orElseThrow();
+    List<String> headers = Stream.concat(Stream.of(computeEntity.getId() + "." + computeEntity.getPKColName()), Stream.concat(
+            computeEntity.getAncestorPkColNames().stream()
+                .map(pk -> computeEntity.getId() + "." + pk),
+            _computeInfo.get().getVariables().stream()
+                .map(var -> VariableDef.toDotNotation(var.getVariableSpec()))
+        ))
+        .toList();
+    LOG.info("Headers: " + headers);
     DelimitedDataParser d = new DelimitedDataParser(headers, TAB, true);
     try {
       InputStream is = _computeSvc.getJobTabularOutput(_computeInfo.orElseThrow().getComputeName(), _computeInfo.get().getRequestBody()).getInputStream();
       InputStreamReader isReader = new InputStreamReader(is);
       BufferedReader bufferedReader = new BufferedReader(isReader);
       String headerLine = bufferedReader.readLine();
-
+      // TODO Move method to compute client and use metadata to tack entity ID in front of variable IDs and other IDs
+      LOG.info("Actual header line: " + headerLine);
       if (headerLine == null) {
         throw new RuntimeException("Compute stream is empty.");
       }

@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.veupathdb.lib.container.jaxrs.providers.UserProvider;
 import org.veupathdb.lib.container.jaxrs.server.annotations.Authenticated;
+import org.veupathdb.service.eda.Main;
 import org.veupathdb.service.eda.common.client.EdaMergingClient;
 import org.veupathdb.service.eda.common.model.ReferenceMetadata;
 import org.veupathdb.service.eda.compute.EDA;
@@ -25,7 +26,6 @@ import org.veupathdb.service.eda.compute.plugins.betadiv.BetaDivPluginProvider;
 import org.veupathdb.service.eda.compute.plugins.differentialabundance.DifferentialAbundancePluginProvider;
 import org.veupathdb.service.eda.compute.plugins.example.ExamplePluginProvider;
 import org.veupathdb.service.eda.compute.plugins.rankedabundance.RankedAbundancePluginProvider;
-import org.veupathdb.service.eda.compute.service.ServiceOptions;
 import org.veupathdb.service.eda.generated.model.AlphaDivPluginRequest;
 import org.veupathdb.service.eda.generated.model.BetaDivPluginRequest;
 import org.veupathdb.service.eda.generated.model.ComputeRequestBase;
@@ -195,7 +195,7 @@ public class ComputeController implements Computes {
               .orElseThrow(() -> new BadRequestException("Invalid study ID: " + studyId)));
       var derivedVars = Optional.ofNullable(requestObject.getDerivedVariables()).orElse(Collections.emptyList());
       if (!derivedVars.isEmpty()) {
-        var mergeClient = new EdaMergingClient(ServiceOptions.INSTANCE.getEdaMergeHost(), auth);
+        var mergeClient = new EdaMergingClient(Main.config.getEdaMergeHost(), auth);
         for (var derivedVar : mergeClient.getDerivedVariableMetadata(studyId, derivedVars)) {
           meta.incorporateDerivedVariable(derivedVar);
         }
