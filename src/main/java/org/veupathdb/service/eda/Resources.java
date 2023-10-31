@@ -19,6 +19,8 @@ import org.veupathdb.service.eda.access.controller.ProviderController;
 import org.veupathdb.service.eda.access.controller.StaffController;
 import org.veupathdb.service.eda.access.repo.ApprovalStatusRepo;
 import org.veupathdb.service.eda.access.repo.RestrictionLevelRepo;
+import org.veupathdb.service.eda.compute.controller.ComputeController;
+import org.veupathdb.service.eda.compute.controller.ExpirationController;
 import org.veupathdb.service.eda.compute.service.JobsController;
 import org.veupathdb.service.eda.download.DownloadService;
 import org.veupathdb.service.eda.data.AppsService;
@@ -238,6 +240,8 @@ public class Resources extends ContainerResources {
         MergingServiceInternal.class,
         // Compute
         JobsController.class,
+        ComputeController.class,
+        ExpirationController.class,
         // Access
         ApproveEligibleStudiesController.class,
         ProviderController.class,

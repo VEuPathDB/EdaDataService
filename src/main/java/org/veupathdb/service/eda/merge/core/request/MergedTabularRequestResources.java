@@ -1,6 +1,8 @@
 package org.veupathdb.service.eda.merge.core.request;
 
 import jakarta.ws.rs.BadRequestException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.ListBuilder;
 import org.gusdb.fgputil.client.ResponseFuture;
 import org.gusdb.fgputil.validation.ValidationException;
@@ -26,6 +28,7 @@ import java.util.function.Predicate;
  * variable tabular stream, all by querying the compute service.
  */
 public class MergedTabularRequestResources extends RequestResources {
+  private static final Logger LOG = LogManager.getLogger(MergedTabularRequestResources.class);
 
   private final EdaComputeClient _computeSvc;
   private final List<APIFilter> _subsetFilters;

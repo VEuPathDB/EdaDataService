@@ -2,9 +2,9 @@ package org.veupathdb.service.eda.compute
 
 import org.gusdb.fgputil.functional.FunctionalInterfaces.ConsumerWithException
 import org.rosuda.REngine.Rserve.RConnection
+import org.veupathdb.service.eda.Main
 import org.veupathdb.service.eda.common.plugin.util.RFileSetProcessor
 import org.veupathdb.service.eda.common.plugin.util.RServeClient
-import org.veupathdb.service.eda.compute.service.ServiceOptions
 import java.io.InputStream
 import java.io.OutputStream
 
@@ -19,15 +19,15 @@ object RServe {
 
   @JvmStatic
   fun useRConnection(consumer: ConsumerWithException<RConnection>) =
-    RServeClient.useRConnection(ServiceOptions.rServeHost, consumer)
+    RServeClient.useRConnection(Main.config.rServeHost, consumer)
 
   @JvmStatic
   fun useRConnectionWithRemoteFiles(dataStreams: Map<String, InputStream>, consumer: ConsumerWithException<RConnection>) =
-    RServeClient.useRConnectionWithRemoteFiles(ServiceOptions.rServeHost, dataStreams, consumer)
+    RServeClient.useRConnectionWithRemoteFiles(Main.config.rServeHost, dataStreams, consumer)
 
   @JvmStatic
   fun useRConnectionWithProcessedRemoteFiles(filesProcessor: RFileSetProcessor, consumer: ConsumerWithException<RConnection>) =
-    RServeClient.useRConnectionWithProcessedRemoteFiles(ServiceOptions.rServeHost, filesProcessor, consumer)
+    RServeClient.useRConnectionWithProcessedRemoteFiles(Main.config.rServeHost, filesProcessor, consumer)
 
   @JvmStatic
   fun streamResult(connection: RConnection, cmd: String, out: OutputStream) =

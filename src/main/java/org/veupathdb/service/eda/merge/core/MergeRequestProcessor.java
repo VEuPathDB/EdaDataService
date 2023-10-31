@@ -86,7 +86,6 @@ public class MergeRequestProcessor {
         ? _resources.getComputeTabularStream()
         // all other streams come from subsetting service
         : _resources.getSubsettingTabularStream(spec);
-
     return out -> {
 
       // create stream processor

@@ -6,6 +6,7 @@ import org.veupathdb.lib.compute.platform.job.JobContext
 import org.veupathdb.lib.compute.platform.job.JobExecutor
 import org.veupathdb.lib.compute.platform.job.JobResult
 import org.veupathdb.lib.jackson.Json
+import org.veupathdb.service.eda.Main
 import org.veupathdb.service.eda.common.client.EdaMergingClient
 import org.veupathdb.service.eda.compute.EDA
 import org.veupathdb.service.eda.compute.jobs.ReservedFiles
@@ -13,7 +14,6 @@ import org.veupathdb.service.eda.compute.plugins.Plugin
 import org.veupathdb.service.eda.compute.plugins.AbstractPlugin
 import org.veupathdb.service.eda.compute.plugins.PluginRegistry
 import org.veupathdb.service.eda.compute.plugins.PluginWorkspace
-import org.veupathdb.service.eda.compute.service.ServiceOptions
 
 /**
  * Standard set of files we will attempt to persist to S3 on "successful" job
@@ -137,7 +137,7 @@ class PluginExecutor : JobExecutor {
       it.workspace = PluginWorkspace(ctx.workspace)
       it.jobContext = ComputeJobContext(ctx.jobID)
       it.pluginMeta = provider
-      it.mergingClient = EdaMergingClient(ServiceOptions.edaMergeHost, authHeader)
+      it.mergingClient = EdaMergingClient(Main.config.edaMergeHost, authHeader)
     }.build()
 
     // Create the plugin.
