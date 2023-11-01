@@ -34,13 +34,13 @@ public class MetadataCache implements StudyProvider {
   private final Map<String, Study> _studies = new HashMap<>(); // cache the studies
   private final Map<String, Boolean> _studyHasFilesCache = new HashMap<>();
   private final ScheduledExecutorService _scheduledThreadPool = Executors.newScheduledThreadPool(1); // Shut this down.
-  private final CountDownLatch _appDbInitSignal;
+  private final Optional<CountDownLatch> _dbInitSignal;
 
-  public MetadataCache(BinaryFilesManager binaryFilesManager, CountDownLatch appDbInitSignal) {
+  public MetadataCache(BinaryFilesManager binaryFilesManager, CountDownLatch dbInitSignal) {
     _binaryFilesManager = binaryFilesManager;
     _sourceStudyProvider = this::getCuratedStudyFactory; // Lazily initialize to ensure database connection is established before construction.
     _scheduledThreadPool.scheduleAtFixedRate(this::invalidateOutOfDateStudies, 0L, 5L, TimeUnit.MINUTES);
-    _appDbInitSignal = appDbInitSignal;
+    _dbInitSignal = Optional.of(dbInitSignal);
   }
 
   // Visible for testing
@@ -51,7 +51,7 @@ public class MetadataCache implements StudyProvider {
     _sourceStudyProvider = () -> sourceStudyProvider;
     _scheduledThreadPool.scheduleAtFixedRate(this::invalidateOutOfDateStudies, 0L,
         refreshInterval.toMillis(), TimeUnit.MILLISECONDS);
-    _appDbInitSignal = null;
+    _dbInitSignal = Optional.empty();
   }
 
   @Override
@@ -62,13 +62,13 @@ public class MetadataCache implements StudyProvider {
 
   @Override
   public synchronized List<StudyOverview> getStudyOverviews() {
-    if (_studyOverviews == null) {
+    if (_studyOverviews == null || _studyOverviews.isEmpty()) {
       _studyOverviews = _sourceStudyProvider.get().getStudyOverviews();
     }
     return Collections.unmodifiableList(_studyOverviews);
   }
 
-  private synchronized boolean studyHasFiles(String studyId) {
+  public synchronized boolean studyHasFiles(String studyId) {
     _studyHasFilesCache.computeIfAbsent(studyId, _binaryFilesManager::studyHasFiles);
     return _studyHasFilesCache.get(studyId);
   }
@@ -97,13 +97,14 @@ public class MetadataCache implements StudyProvider {
   }
 
   private void invalidateOutOfDateStudies() {
-    if (_appDbInitSignal != null) {
+    _dbInitSignal.ifPresent(signal -> {
       try {
-        _appDbInitSignal.await();
+        signal.await();
       } catch (InterruptedException e) {
-        return;
+        Thread.currentThread().interrupt();
+        throw new RuntimeException(e);
       }
-    }
+    });
     LOG.info("Checking which studies are out of date in cache.");
     List<StudyOverview> dbStudies = _sourceStudyProvider.get().getStudyOverviews();
     List<Study> studiesToRemove = _studies.values().stream()

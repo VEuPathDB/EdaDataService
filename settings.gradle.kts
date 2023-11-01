@@ -3,13 +3,13 @@ apply {
   from("https://raw.githubusercontent.com/VEuPathDB/lib-gradle-container-utils/v4.8.9/includes/common.settings.gradle.kts")
 }
 
-val core = file("../lib-jaxrs-container-core");
+val core = file("../lib-jaxrs-container-core")
 if (core.exists()) {
   include(":core")
   project(":core").projectDir = core
 }
 
-val edaCommon = file("../EdaCommon");
+val edaCommon = file("../EdaCommon")
 if (edaCommon.exists()) {
   include(":edaCommon")
   project(":edaCommon").projectDir = edaCommon

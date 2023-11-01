@@ -93,7 +93,6 @@ public class EdaMergingClient extends StreamingDataClient {
       computeSpec.setComputeConfig(computeInfo.getSecond());
       request.setComputeSpec(computeSpec);
     }
-
     // make request
     return ClientUtil.makeAsyncPostRequest(getUrl("/merging-internal/query"), request, MimeTypes.TEXT_TABULAR, getAuthHeaderMap());
   }

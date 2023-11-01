@@ -1,5 +1,7 @@
 package org.veupathdb.service.eda.data.plugin.standalonemap;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.DelimitedDataParser;
 import org.gusdb.fgputil.geo.GeographyUtil.GeographicPoint;
 import org.gusdb.fgputil.json.JsonUtil;
@@ -40,6 +42,7 @@ import static org.gusdb.fgputil.FormatUtil.TAB;
 import static org.veupathdb.service.eda.data.metadata.AppsMetadata.VECTORBASE_PROJECT;
 
 public class BubbleMapMarkersPlugin extends AbstractEmptyComputePlugin<StandaloneMapBubblesPostRequest, StandaloneMapBubblesSpec> {
+  private static final Logger LOG = LogManager.getLogger(BubbleMapMarkersPlugin.class);
   private QuantitativeAggregateConfiguration _overlaySpecification = null;
 
   @Override

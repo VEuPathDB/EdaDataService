@@ -53,7 +53,23 @@ public abstract class StreamingDataClient extends ServiceClient {
       cSwallow(streamProcessor).accept(streamMap);
     }
   }
-  
+
+  public static void buildAndProcessIteratorStreams(ArrayList<StreamSpec> requiredStreams,
+                                                    Function<StreamSpec, CloseableIterator<Map<String, String>>> streamGenerator,
+                                                    FunctionalInterfaces.ConsumerWithException<Map<String, CloseableIterator<Map<String, String>>>> streamProcessor) {
+    try (AutoCloseableList<CloseableIterator<Map<String, String>>> streams = new AutoCloseableList<>(requiredStreams.stream()
+        .map(streamGenerator::apply)
+        .collect(Collectors.toList()))) {
+      // convert auto-closeable list into a named stream map for processing
+      Map<String, CloseableIterator<Map<String, String>>> streamMap = new LinkedHashMap<>();
+
+      for (int i = 0; i < streams.size(); i++) {
+        streamMap.put(requiredStreams.get(i).getStreamName(), streams.get(i));
+      }
+      cSwallow(streamProcessor).accept(streamMap);
+    }
+  }
+
   private static AutoCloseableList<InputStream> buildDataStreams(
       List<StreamSpec> requiredStreams,
       Function<StreamSpec,ResponseFuture> streamGenerator) {

@@ -3,6 +3,7 @@ package org.veupathdb.service.eda.merge.core.stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.collection.InitialSizeStringMap;
+import org.gusdb.fgputil.iterator.CloseableIterator;
 import org.gusdb.fgputil.json.JsonUtil;
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
@@ -15,7 +16,6 @@ import org.veupathdb.service.eda.generated.model.VariableSpec;
 import org.veupathdb.service.eda.merge.core.derivedvars.DerivedVariableFactory;
 import org.veupathdb.service.eda.merge.core.request.ComputeInfo;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -47,7 +47,7 @@ public class RootStreamingEntityNode extends StreamingEntityNode {
   public static final String COMPUTED_VAR_STREAM_NAME = "__COMPUTED_VAR_STREAM__";
 
   private final String[] _outputVars;
-  private final InitialSizeStringMap _outputRow;
+  private final InitialSizeStringMap.Builder _outputRowBuilder;
 
   private final Optional<EntityStream> _computeStreamProcessor;
   private final boolean _computeEntityMatchesOurs;
@@ -73,7 +73,7 @@ public class RootStreamingEntityNode extends StreamingEntityNode {
 
     _outputVars = getOrderedOutputColumns(fullOutputVarDefs);
     LOG.info("Root stream final output vars: " + String.join(", ", _outputVars));
-    _outputRow = new InitialSizeStringMap.Builder(_outputVars).build();
+    _outputRowBuilder = new InitialSizeStringMap.Builder(_outputVars);
   }
 
   private String[] getOrderedOutputColumns(List<VariableSpec> fullOutputVarDefs) throws ValidationException {
@@ -128,7 +128,7 @@ public class RootStreamingEntityNode extends StreamingEntityNode {
   }
 
   @Override
-  public void acceptDataStreams(Map<String, InputStream> dataStreams) {
+  public void acceptDataStreams(Map<String, CloseableIterator<Map<String, String>>> dataStreams) {
     _computeStreamProcessor.ifPresent(s -> s.acceptDataStreams(dataStreams));
     super.acceptDataStreams(dataStreams);
   }
@@ -144,11 +144,15 @@ public class RootStreamingEntityNode extends StreamingEntityNode {
     _computeStreamProcessor.ifPresent(computeStream -> applyCompute(row, computeStream));
 
     // return only requested vars and in the correct order
-    _outputRow.clear();
+    final InitialSizeStringMap outputRow = _outputRowBuilder.build();
+    final String[] outputVals = new String[_outputVars.length];
+    int i = 0;
     for (String col : _outputVars) {
-      _outputRow.put(col, row.get(col));
+      outputVals[i++] = row.get(col);
     }
-    return _outputRow;
+
+    outputRow.putAll(outputVals);
+    return outputRow;
   }
 
   private void applyCompute(Map<String, String> row, EntityStream computeStream) {

@@ -3,7 +3,6 @@ package org.veupathdb.service.eda;
 import jakarta.ws.rs.NotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.gusdb.fgputil.client.ClientUtil;
 import org.gusdb.fgputil.db.platform.DBPlatform;
 import org.gusdb.fgputil.db.platform.Oracle;
 import org.gusdb.fgputil.runtime.Environment;
@@ -24,8 +23,9 @@ import org.veupathdb.service.eda.compute.controller.ExpirationController;
 import org.veupathdb.service.eda.compute.service.JobsController;
 import org.veupathdb.service.eda.download.DownloadService;
 import org.veupathdb.service.eda.data.AppsService;
+import org.veupathdb.service.eda.ss.model.reducer.BinaryValuesStreamer;
 import org.veupathdb.service.eda.subset.service.ClearMetadataCacheService;
-import org.veupathdb.service.eda.subset.service.FilterAwareMetadataService;
+import org.veupathdb.service.eda.data.FilterAwareMetadataService;
 import org.veupathdb.service.eda.merge.controller.MergingServiceExternal;
 import org.veupathdb.service.eda.merge.controller.MergingServiceInternal;
 import org.veupathdb.service.eda.subset.service.MetadataCache;
@@ -60,6 +60,7 @@ import static org.gusdb.fgputil.runtime.ProjectSpecificProperties.PropertySpec.r
  */
 public class Resources extends ContainerResources {
   private static final Logger LOG = LogManager.getLogger(Resources.class);
+
 
   // Subsetting Config
   private static final SubsetEnvironment SUBSET_ENV = new SubsetEnvironment();
@@ -129,15 +130,11 @@ public class Resources extends ContainerResources {
       throw new RuntimeException(e);
     }
 
-    if (SUBSET_ENV.isDevelopmentMode()) {
-      enableJerseyTrace();
-      ClientUtil.LOG_RESPONSE_HEADERS = true;
-    }
-
     if (!USE_IN_MEMORY_TEST_DATABASE) {
       DbManager.initApplicationDatabase(opts);
       LOG.info("Using application DB connection URL: " +
           DbManager.getInstance().getApplicationDatabase().getConfig().getConnectionUrl());
+      // Signal to dependencies that database is available.
       APP_DB_INIT_SIGNAL.countDown();
     }
   }
@@ -217,6 +214,10 @@ public class Resources extends ContainerResources {
       return dirPath;
     }
     throw new RuntimeException("Configured data dir '" + dirPath + "' is not a readable directory.");
+  }
+
+  public static BinaryValuesStreamer getBinaryValuesStreamer() {
+    return new BinaryValuesStreamer(BINARY_FILES_MANAGER, FILE_READ_THREAD_POOL, DESERIALIZER_THREAD_POOL);
   }
 
 

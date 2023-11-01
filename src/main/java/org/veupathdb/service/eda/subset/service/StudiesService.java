@@ -404,7 +404,7 @@ public class StudiesService implements Studies {
   }
 
 
-  private static StudyProvider getStudyResolver() {
+  public static StudyProvider getStudyResolver() {
     final BinaryFilesManager binaryFilesManager = Resources.getBinaryFilesManager();
     final MetadataFileBinaryProvider metadataFileBinaryProvider = new MetadataFileBinaryProvider(binaryFilesManager);
     final VariableFactory variableFactory = new VariableFactory(Resources.getApplicationDataSource(),

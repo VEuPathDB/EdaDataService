@@ -372,7 +372,7 @@ public class ApiConversionUtil {
         .filter(studyId -> {
           final boolean studyInOverviews = overviewMap.containsKey(studyId);
           if (!studyInOverviews) {
-            LOG.warn("Found study " + studyId + " in visible studies but not it's not being returned from canoncial list of studies.");
+            LOG.warn("Found study " + studyId + " in visible studies but not it's not being returned from study table.");
           }
           return studyInOverviews;
         })

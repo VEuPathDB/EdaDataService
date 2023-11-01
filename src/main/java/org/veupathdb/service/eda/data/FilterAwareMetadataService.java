@@ -1,4 +1,4 @@
-package org.veupathdb.service.eda.subset.service;
+package org.veupathdb.service.eda.data;
 
 import jakarta.ws.rs.core.Context;
 import org.glassfish.jersey.server.ContainerRequest;
