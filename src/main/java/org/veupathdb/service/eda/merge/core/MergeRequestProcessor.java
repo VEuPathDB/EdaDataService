@@ -21,7 +21,6 @@ import org.veupathdb.service.eda.ss.model.Study;
 import org.veupathdb.service.eda.ss.model.db.FilteredResultFactory;
 import org.veupathdb.service.eda.ss.model.variable.VariableWithValues;
 import org.veupathdb.service.eda.subset.service.ApiConversionUtil;
-import org.veupathdb.service.eda.subset.service.StudiesService;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -109,7 +108,7 @@ public class MergeRequestProcessor {
           dataStreams -> writeMergedStream(targetStream, dataStreams, out);
 
       // build and process streams
-      StreamingDataClient.buildAndProcessInMemoryStreams(new ArrayList<>(requiredStreams.values()), streamGenerator, streamProcessor);
+      StreamingDataClient.buildAndProcessIteratorStreams(new ArrayList<>(requiredStreams.values()), streamGenerator, streamProcessor);
     };
   }
 

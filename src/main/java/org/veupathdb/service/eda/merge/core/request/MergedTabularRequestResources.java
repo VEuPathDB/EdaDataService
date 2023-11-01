@@ -125,6 +125,8 @@ public class MergedTabularRequestResources extends RequestResources {
 
   public CloseableIterator<Map<String, String>> getInMemoryComputeStream(Study study) {
     Entity computeEntity = study.getEntity(_computeInfo.get().getComputeEntity()).orElseThrow();
+
+    // Construct headers from metadata.
     List<String> headers = Stream.concat(Stream.of(computeEntity.getId() + "." + computeEntity.getPKColName()), Stream.concat(
             computeEntity.getAncestorPkColNames().stream()
                 .map(pk -> computeEntity.getId() + "." + pk),
@@ -132,26 +134,27 @@ public class MergedTabularRequestResources extends RequestResources {
                 .map(var -> VariableDef.toDotNotation(var.getVariableSpec()))
         ))
         .toList();
-    LOG.info("Headers: " + headers);
+
     DelimitedDataParser d = new DelimitedDataParser(headers, TAB, true);
     try {
       InputStream is = _computeSvc.getJobTabularOutput(_computeInfo.orElseThrow().getComputeName(), _computeInfo.get().getRequestBody()).getInputStream();
       InputStreamReader isReader = new InputStreamReader(is);
       BufferedReader bufferedReader = new BufferedReader(isReader);
       String headerLine = bufferedReader.readLine();
-      // TODO Move method to compute client and use metadata to tack entity ID in front of variable IDs and other IDs
-      LOG.info("Actual header line: " + headerLine);
+
+      // Validate header line exists, but skip in favor of using metadata to construct column names.
       if (headerLine == null) {
         throw new RuntimeException("Compute stream is empty.");
       }
 
-      // Verify column names.
-
+      // Convert from InputStream to iterator.
       return new CloseableIterator<>() {
         private String nextLine = bufferedReader.readLine();
 
         @Override
         public void close() throws Exception {
+          is.close();
+          isReader.close();
           bufferedReader.close();
         }
 

@@ -54,7 +54,7 @@ public abstract class StreamingDataClient extends ServiceClient {
     }
   }
 
-  public static void buildAndProcessInMemoryStreams(ArrayList<StreamSpec> requiredStreams,
+  public static void buildAndProcessIteratorStreams(ArrayList<StreamSpec> requiredStreams,
                                                     Function<StreamSpec, CloseableIterator<Map<String, String>>> streamGenerator,
                                                     FunctionalInterfaces.ConsumerWithException<Map<String, CloseableIterator<Map<String, String>>>> streamProcessor) {
     try (AutoCloseableList<CloseableIterator<Map<String, String>>> streams = new AutoCloseableList<>(requiredStreams.stream()
