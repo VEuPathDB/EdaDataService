@@ -3,7 +3,6 @@ package org.veupathdb.service.eda;
 import jakarta.ws.rs.NotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.gusdb.fgputil.client.ClientUtil;
 import org.gusdb.fgputil.db.platform.DBPlatform;
 import org.gusdb.fgputil.db.platform.Oracle;
 import org.gusdb.fgputil.runtime.Environment;
@@ -64,11 +63,11 @@ public class Resources extends ContainerResources {
 
 
   // Subsetting Config
-  private static final CountDownLatch DB_INIT_SIGNAL = new CountDownLatch(1);
   private static final SubsetEnvironment SUBSET_ENV = new SubsetEnvironment();
+  private static final CountDownLatch APP_DB_INIT_SIGNAL = new CountDownLatch(1);
   private static final BinaryFilesManager BINARY_FILES_MANAGER = new BinaryFilesManager(
       new SimpleStudyFinder(Resources.getBinaryFilesDirectory().toString()));
-  private static final MetadataCache METADATA_CACHE = new MetadataCache(BINARY_FILES_MANAGER, DB_INIT_SIGNAL);
+  private static final MetadataCache METADATA_CACHE = new MetadataCache(BINARY_FILES_MANAGER, APP_DB_INIT_SIGNAL);
   private static final ExecutorService FILE_READ_THREAD_POOL = Executors.newCachedThreadPool();
   private static final ExecutorService DESERIALIZER_THREAD_POOL = Executors.newFixedThreadPool(16);
 
@@ -135,9 +134,8 @@ public class Resources extends ContainerResources {
       DbManager.initApplicationDatabase(opts);
       LOG.info("Using application DB connection URL: " +
           DbManager.getInstance().getApplicationDatabase().getConfig().getConnectionUrl());
-
       // Signal to dependencies that database is available.
-      DB_INIT_SIGNAL.countDown();
+      APP_DB_INIT_SIGNAL.countDown();
     }
   }
 

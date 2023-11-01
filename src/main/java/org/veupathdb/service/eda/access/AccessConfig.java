@@ -4,8 +4,6 @@ import org.jetbrains.annotations.Nullable;
 import org.veupathdb.lib.container.jaxrs.config.Options;
 import picocli.CommandLine;
 
-import java.util.Optional;
-
 public class AccessConfig extends Options {
   private static final String
     DEFAULT_REGISTRATION_PATH = "/app/user/registration",

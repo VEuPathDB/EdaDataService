@@ -13,7 +13,6 @@ import org.veupathdb.service.eda.common.client.EdaComputeClient;
 import org.veupathdb.service.eda.common.client.spec.EdaMergingSpecValidator;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.common.model.VariableDef;
-import org.veupathdb.service.eda.compute.controller.ComputeController;
 import org.veupathdb.service.eda.generated.model.APIFilter;
 import org.veupathdb.service.eda.generated.model.MergedEntityTabularPostRequest;
 import org.veupathdb.service.eda.generated.model.VariableSpec;
