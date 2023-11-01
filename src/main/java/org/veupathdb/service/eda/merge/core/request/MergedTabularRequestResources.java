@@ -123,7 +123,7 @@ public class MergedTabularRequestResources extends RequestResources {
     return _computeSvc.getJobTabularOutput(_computeInfo.orElseThrow().getComputeName(), _computeInfo.get().getRequestBody());
   }
 
-  public CloseableIterator<Map<String, String>> getInMemoryComputeStream(Study study) {
+  public CloseableIterator<Map<String, String>> getComputeSteamIterator(Study study) {
     Entity computeEntity = study.getEntity(_computeInfo.get().getComputeEntity()).orElseThrow();
 
     // Construct headers from metadata.

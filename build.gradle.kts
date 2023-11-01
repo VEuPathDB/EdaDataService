@@ -94,7 +94,7 @@ repositories {
 val coreLib       = "6.16.0"          // Container core lib version
 val edaCompute    = "2.2.0"           // EDA Compute version (used to pull in compute plugin RAML)
 val fgputil       = "2.12.12-jakarta-SNAPSHOT" // FgpUtil version
-val libSubsetting = "4.9.4"           // lib-eda-subsetting version
+val libSubsetting = "4.11.1"           // lib-eda-subsetting version
 
 // use local EDA compute compiled schema if project exists, else use released version;
 //    this mirrors the way we use local EdaCommon code if available
