@@ -646,6 +646,49 @@ types:
     type: object
     properties:
       pcoaVariance: number[]
+  CorrelationComputeConfig:
+    type: object
+    properties:
+      correlationMethod: CorrelationMethod
+  CorrelationMethod:
+    type: string
+    enum:
+      - spearman
+      - pearson
+  Correlation1Collection:
+    type: CorrelationComputeConfig
+    properties:
+      collectionVariable: CollectionSpec
+  Correlation2Collections:
+    type: CorrelationComputeConfig
+    properties:
+      collectionVariable1: CollectionSpec
+      collectionVariable2: CollectionSpec
+  CorrelationAssayMetadataPluginRequest:
+    type: ComputeRequestBase
+    properties:
+      config: Correlation1Collection
+  CorrelationStatsResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      statistics: CorrelationPoint[]
+      data1Metadata: string
+      data2Metadata: string
+  CorrelationPoint:
+    type: object
+    properties:
+      data1: string
+      data2: string
+      correlationCoef:
+        type: string
+        required: false
+      pValue:
+        type: string
+        required: false
+      adjustedPValue:
+        type: string
+        required: false
   DifferentialAbundancePluginRequest:
     type: ComputeRequestBase
     properties:
@@ -656,6 +699,9 @@ types:
       collectionVariable: CollectionSpec
       comparator: ComparatorSpec
       differentialAbundanceMethod: DifferentialAbundanceMethod
+      pValueFloor:
+        type: string
+        required: false
   DifferentialAbundanceMethod:
     type: string
     enum:
@@ -680,6 +726,12 @@ types:
     properties:
       effectSizeLabel: string
       statistics: DifferentialAbundanceStats
+      pvalueFloor:
+        type: string
+        required: false
+      adjustedPValueFloor:
+        type: string
+        required: false
   ExamplePluginRequest:
     type: ComputeRequestBase
     properties:

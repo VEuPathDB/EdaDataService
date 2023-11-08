@@ -545,17 +545,33 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
   }
 
   public String getVariableSpecRObjectAsString(VariableSpec var) {
-    return var == null ? null :
-        "veupathUtils::VariableSpec(variableId=" + singleQuote(var.getVariableId()) + ",entityId=" + singleQuote(var.getEntityId()) + ")";
+    return getVariableSpecRObjectAsString(var, false);
+  }
+
+  public String getVariableSpecRObjectAsString(VariableSpec var, boolean returnEmptyIfNull) {
+    if (var == null) return returnEmptyIfNull ? "veupathUtils::VariableSpec()" : null;
+    return "veupathUtils::VariableSpec(variableId=" + singleQuote(var.getVariableId()) + ",entityId=" + singleQuote(var.getEntityId()) + ")";
   }
 
   public String getVariableSpecListRObjectAsString(List<? extends VariableSpec> vars) {
-    return vars == null ? null :
-        "veupathUtils::VariableSpecList(S4Vectors::SimpleList(" +
-        vars.stream()
-            .map(this::getVariableSpecRObjectAsString)
-            .collect(Collectors.joining(",")) +
-        "))";
+    return getVariableSpecListRObjectAsString(vars, false);
+  }
+
+  public String getVariableSpecListRObjectAsString(List<? extends VariableSpec> vars, boolean returnEmptyIfNull) {
+    if (vars == null) return returnEmptyIfNull ? "veupathUtils::VariableSpec()" : null;
+  
+    StringBuilder sb = new StringBuilder();
+    sb.append("veupathUtils::VariableSpecList(S4Vectors::SimpleList(");
+  
+    for (VariableSpec var : vars) {
+      sb.append(getVariableSpecRObjectAsString(var));
+      sb.append(",");
+    }
+  
+    sb.deleteCharAt(sb.length() - 1);
+    sb.append("))");
+  
+    return sb.toString();
   }
 
   public String getVariableMetadataRObjectAsString(CollectionSpec collection, String plotReference) {
@@ -577,6 +593,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
   public String getVariableMetadataRObjectAsString(VariableSpec var, String plotReference) {
     if (var == null) return null;
     PluginUtil util = getUtil();
+    String hasStudyDependentVocabulary = util.getHasStudyDependentVocabulary(var) ? "TRUE" : "FALSE";
     return
         "veupathUtils::VariableMetadata(" +
         "variableClass=veupathUtils::VariableClass(value='native')," +
@@ -584,7 +601,9 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
         "plotReference=veupathUtils::PlotReference(value=" + singleQuote(plotReference) + ")," +
         "dataType=veupathUtils::DataType(value=" + singleQuote(util.getVariableType(var)) + ")," +
         "dataShape=veupathUtils::DataShape(value=" + singleQuote(util.getVariableDataShape(var)) + ")," +
-        "imputeZero=" + util.getVariableImputeZero(var).toUpperCase() + ")";
+        "imputeZero=" + util.getVariableImputeZero(var).toUpperCase() + "," +
+        "weightingVariableSpec=" + getVariableSpecRObjectAsString(util.getVariableSpecToImputeZeroesFor(var), true) + "," +
+        "hasStudyDependentVocabulary=" + hasStudyDependentVocabulary + ")";
   }
 
   public String getVoidEvalDynamicDataMetadataList(Map<String, DynamicDataSpecImpl> dataSpecs) {
@@ -687,7 +706,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
                                                                                               "variableId='" + getDynamicDataSpecId(dataSpec) + "')," + 
                                                           "vocabulary=c('\",paste(V2, collapse=','),\"')," +
                                                           "study='\",V1,\"'," +
-                                                          "studyIdColumnName=" + util.getEntityAncestorsAsRVectorString(getDynamicDataSpecEntityId(dataSpec), _referenceMetadata) + "[1])\"))";
+                                                          "studyIdColumnName=rev(" + util.getEntityAncestorsAsRVectorString(getDynamicDataSpecEntityId(dataSpec), _referenceMetadata) + ")[1])\"))";
   
     String studyVocabsListAsRString = "veupathUtils::StudySpecificVocabulariesByVariable(S4Vectors::SimpleList(eval(parse(text=paste0('c(',paste(" + studyVocabAsRTibble + "[[2]], collapse=','), ')')))))";
     
@@ -777,11 +796,11 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
 
     // get ancestor ids, can use first var bc we validate there is at least one and they all have the same entity
     String entityId = entities.get(0);
-    String ancestorIdsAsRString = util.getEntityAncestorsAsRVectorString(entityId, _referenceMetadata);
+    String ancestorIdsAsRString = util.getEntityAncestorsAsRVectorString(entityId, _referenceMetadata, true);
 
     String megastudyAsRString = "veupathUtils::Megastudy(" + 
                                  "data = " + compressedDataHandle + "," +
-                                 "ancestorIdColumns = " + ancestorIdsAsRString + "," +
+                                 "ancestorIdColumns = rev(" + ancestorIdsAsRString + ")," +
                                  "studySpecificVocabularies = " + studyVocabsAsRString + ")";
 
     return megastudyAsRString;
