@@ -13,7 +13,7 @@ ARG GITHUB_TOKEN
 WORKDIR /workspace
 
 RUN jlink --compress=2 --module-path /opt/jdk/jmods \
-       --add-modules java.base,java.net.http,java.security.jgss,java.logging,java.xml,java.desktop,java.management,java.sql,java.naming \
+       --add-modules java.base,java.net.http,java.security.jgss,java.logging,java.xml,java.desktop,java.management,jdk.management,java.sql,java.naming \
        --output /jlinked \
     && apk add --no-cache git sed findutils coreutils make npm curl gawk jq \
     && git config --global advice.detachedHead false
