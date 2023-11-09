@@ -138,6 +138,7 @@ public class AppsMetadata {
           "Map visualizations for any geographic data",
           List.of(MICROBIOME_PROJECT),
           // i think we could switch to StandaloneMapMarkersPlugin if we wanted to, need mockups frontend though
+          // also if we did, id like to consider splitting bubbles into their own viz
           viz("map-markers", new MapPlugin()),
           viz("map-markers-overlay", new MapMarkersOverlayPlugin())),
       app("sample", "Sample", null,
