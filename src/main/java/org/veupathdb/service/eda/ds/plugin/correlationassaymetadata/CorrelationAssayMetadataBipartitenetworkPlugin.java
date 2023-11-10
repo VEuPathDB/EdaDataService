@@ -72,54 +72,60 @@ public class CorrelationAssayMetadataBipartitenetworkPlugin extends AbstractPlug
 
     CorrelationAssayMetadataStatsResponse stats = getComputeResultStats(CorrelationAssayMetadataStatsResponse.class);
 
-    // Don't even use R at all?
-    // Print out stats as they are
+    // TEMPORARY: Reshape data using java instead of calling out to R+plot.data
+    // The goal is to transform the response from the correlation app (CorrelationAssayMetadataStatsResponse)
+    // into a BipartiteNetwork that can be sent to the frontend. The BipartiteNetwork is composed
+    // of nodes, links, column1NodeIDs, and column2NodeIDs.
+
+    // Prep objects
     JSONObject bipartiteNetwork = new JSONObject();
     JSONArray links = new JSONArray();
     ArrayList<String> nodeIDs = new ArrayList<>();
-
-    // Create the column ids. Just need the unique values from data1, then from data2
     ArrayList<String> column1NodeIDs = new ArrayList<>();
     ArrayList<String> column2NodeIDs = new ArrayList<>();
 
-    // Just loop through stats and add to col ids, links, etc. That'll be way easier. Then at the end union ids to get nodes. Voila!
-    stats.getStatistics().forEach((point) -> {
+    // All the information we need is contained in the stats object. Each row of stats corresponds to a link.
+    // We want to grab the link, the nodes associated with the link, and make note of column assignments for
+    // each node.
+    stats.getStatistics().forEach((correlationRow) -> {
 
-      // Skip links that have a correlation coeff less than 0.7
-      // if (point.getCorrelationCoef() == null) return;
-      
+      // First add the node ids (data1 and data2 from this row) to our growing list of node ids
+      // We'll worry about duplicates later.
+      nodeIDs.add(correlationRow.getData1());
+      nodeIDs.add(correlationRow.getData2());
+
+      // Add the data1 ids to column 1, and data2 ids to column 2. Again we'll address duplicates later.
+      column1NodeIDs.add(correlationRow.getData1());
+      column2NodeIDs.add(correlationRow.getData2());
+
+      // Next create links
+      // Skip rows that have no correlation coefficient or a correlation coef that is too small
+      if (correlationRow.getCorrelationCoef() == null) return;
+      if (Math.abs(Float.parseFloat(correlationRow.getCorrelationCoef())) < 0.2) return;
+
+      // Create source and target objects.
       JSONObject sourceNode = new JSONObject();
-      sourceNode.put("id", point.getData1());
+      sourceNode.put("id", correlationRow.getData1());
       JSONObject targetNode = new JSONObject();
-      targetNode.put("id", point.getData2());
+      targetNode.put("id", correlationRow.getData2());
       
-      nodeIDs.add(point.getData1());
-      nodeIDs.add(point.getData2());
-      
-      column1NodeIDs.add(point.getData1());
-      column2NodeIDs.add(point.getData2());
-      
-      if (point.getCorrelationCoef() == null) return;
-      if (Math.abs(Float.parseFloat(point.getCorrelationCoef())) < 0.2) return;
-
+      // Create link with the data from this row and add to links array.
       JSONObject link = new JSONObject();
       link.put("source", sourceNode);
       link.put("target", targetNode);
-      link.put("strokeWidth", point.getCorrelationCoef());
+      link.put("strokeWidth", correlationRow.getCorrelationCoef());
       // Link color is the sign of the correlation
-      String color = Float.parseFloat(point.getCorrelationCoef()) < 0 ? "-1" : "1";
+      String color = Float.parseFloat(correlationRow.getCorrelationCoef()) < 0 ? "-1" : "1";
       link.put("color", color);
       links.put(link);
     });
 
-
+    // Get unique IDs
     List<String> uniqueColumn1IDs = column1NodeIDs.stream().distinct().collect(Collectors.toList());
     List<String> uniqueColumn2IDs = column2NodeIDs.stream().distinct().collect(Collectors.toList());
-
     List<String> uniqueNodeIDs = nodeIDs.stream().distinct().collect(Collectors.toList());
-    System.out.println(nodeIDs);
-    System.out.println(uniqueNodeIDs);
 
+    // Turn the node ids into an array of Node objects, each with an id property
     JSONArray nodes = new JSONArray();
     uniqueNodeIDs.forEach((nodeID) -> {
       JSONObject node = new JSONObject();
@@ -127,46 +133,16 @@ public class CorrelationAssayMetadataBipartitenetworkPlugin extends AbstractPlug
       nodes.put(node);
     });
 
+    // Finally create the bipartite network and send it off!
     bipartiteNetwork.put("nodes", nodes);
     bipartiteNetwork.put("links", links);
     bipartiteNetwork.put("column1NodeIDs", uniqueColumn1IDs);
     bipartiteNetwork.put("column2NodeIDs", uniqueColumn2IDs);
-
-    System.out.println(bipartiteNetwork.toString());
 
     out.write(bipartiteNetwork
         .toString()
         .getBytes(StandardCharsets.UTF_8)
       );
 
-
-    
-    
-    // useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-  
-    //   // TEMPORARY - will be removed after plot.data #234 is complete
-    //   // Take the stats response object and write it into R
-    //   // as a data.frame. There's probably a much more elegant solution, please advise!
-    //   connection.voidEval("statsDf <- data.frame(correlationCoef = character(), data1 = character(), data2 = character(), stringsAsFactors=FALSE)");
-    //   for (int i = 0; i < stats.getStatistics().toArray().length; i++) {
-    //       CorrelationPoint point = stats.getStatistics().get(i);
-    //       String newRow = "list(correlationCoef='" + point.getCorrelationCoef() + "', data1='" + point.getData1() + "', data2='" + point.getData2() + "')";
-    //       connection.voidEval("newRow <- " + newRow);
-    //       connection.voidEval("statsDf <- rbind(statsDf, newRow)");
-        
-    //     }
-        
-    //   // The following will be revived later when we have improved the plot.data network classes (plot.data #234)
-    //   // connection.voidEval("bpNet <- plot.data::bipartiteNetwork(" +
-    //   //                                                       "df=statsDf," +
-    //   //                                                       "sourceNodeColumn='data1'," +
-    //   //                                                       "targetNodeColumn='data2'," + 
-    //   //                                                       "linkWeightColumn='correlationCoef'," +
-    //   //                                                       "linkColorScheme='posneg'," +
-    //   //                                                       "verbose=TRUE)");
-
-    //   // String command = "plot.data::writeNetworkToJSON(bpNet, pattern='bipartiteNetwork', verbose=TRUE)";
-    //   // RServeClient.streamResult(connection, command, out);
-    // });
   }
 }
