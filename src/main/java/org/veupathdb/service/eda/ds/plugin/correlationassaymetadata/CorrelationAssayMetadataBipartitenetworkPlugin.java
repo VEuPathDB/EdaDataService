@@ -71,6 +71,8 @@ public class CorrelationAssayMetadataBipartitenetworkPlugin extends AbstractPlug
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
 
     CorrelationAssayMetadataStatsResponse stats = getComputeResultStats(CorrelationAssayMetadataStatsResponse.class);
+    Number correlationCoefThreshold = getPluginSpec().getCorrelationCoefThreshold() != null ? getPluginSpec().getCorrelationCoefThreshold() : 0.2;
+
 
     // TEMPORARY: Reshape data using java instead of calling out to R+plot.data
     // The goal is to transform the response from the correlation app (CorrelationAssayMetadataStatsResponse)
@@ -101,7 +103,7 @@ public class CorrelationAssayMetadataBipartitenetworkPlugin extends AbstractPlug
       // Next create links
       // Skip rows that have no correlation coefficient or a correlation coef that is too small
       if (correlationRow.getCorrelationCoef() == null) return;
-      if (Math.abs(Float.parseFloat(correlationRow.getCorrelationCoef())) < 0.2) return;
+      if (Math.abs(Float.parseFloat(correlationRow.getCorrelationCoef())) < correlationCoefThreshold.floatValue()) return;
 
       // Create source and target objects.
       JSONObject sourceNode = new JSONObject();
