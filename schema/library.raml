@@ -256,6 +256,7 @@ types:
     additionalProperties: false
     properties:
       value: number
+  DynamicDataSpec: CollectionSpec | VariableSpec
   StudiesGetResponse:
     type: object
     additionalProperties: false
@@ -298,6 +299,7 @@ types:
     properties:
       id: string
       isUserStudy: boolean
+      hasMap: boolean
       rootEntity: API_Entity
   API_Entity:
     type: EntityIdGetResponse
@@ -317,6 +319,8 @@ types:
         format: int64
       memberVariableIds: string[]
       imputeZero: boolean
+      hasStudyDependentVocabulary?: boolean
+      variableSpecToImputeZeroesFor?: VariableSpec
       normalizationMethod: string
       isCompositional: boolean
       isProportion: boolean
@@ -642,28 +646,35 @@ types:
     type: object
     properties:
       pcoaVariance: number[]
-  CorrelationPluginRequest:
-    type: ComputeRequestBase
-    properties:
-      config: CorrelationComputeConfig
   CorrelationComputeConfig:
     type: object
     properties:
-      collectionVariable1:
-        type: CollectionSpec
-        required: false
-      collectionVariable2:
-        type: CollectionSpec
-        required: false
       correlationMethod: CorrelationMethod
   CorrelationMethod:
     type: string
     enum:
       - spearman
       - pearson
+  Correlation1Collection:
+    type: CorrelationComputeConfig
+    properties:
+      collectionVariable: CollectionSpec
+  Correlation2Collections:
+    type: CorrelationComputeConfig
+    properties:
+      collectionVariable1: CollectionSpec
+      collectionVariable2: CollectionSpec
+  CorrelationAssayMetadataPluginRequest:
+    type: ComputeRequestBase
+    properties:
+      config: Correlation1Collection
   CorrelationStatsResponse:
-    type: array
-    items: CorrelationPoint
+    type: object
+    additionalProperties: false
+    properties:
+      statistics: CorrelationPoint[]
+      data1Metadata: string
+      data2Metadata: string
   CorrelationPoint:
     type: object
     properties:
@@ -688,6 +699,9 @@ types:
       collectionVariable: CollectionSpec
       comparator: ComparatorSpec
       differentialAbundanceMethod: DifferentialAbundanceMethod
+      pValueFloor:
+        type: string
+        required: false
   DifferentialAbundanceMethod:
     type: string
     enum:
@@ -712,6 +726,12 @@ types:
     properties:
       effectSizeLabel: string
       statistics: DifferentialAbundanceStats
+      pvalueFloor:
+        type: string
+        required: false
+      adjustedPValueFloor:
+        type: string
+        required: false
   ExamplePluginRequest:
     type: ComputeRequestBase
     properties:
@@ -754,6 +774,7 @@ types:
       name: string
       displayName: string
       description: string
+      dataElementConstraints?: DataElementConstraintPattern[]
   ExpiredJobsResponse:
     type: object
     properties:
@@ -880,6 +901,27 @@ types:
     properties:
       binRanges?: AllBinRanges
       median?: number
+  Node:
+    type: object
+    properties:
+      id: string
+  Link:
+    type: object
+    properties:
+      source: Node
+      target: Node
+      strokeWidth: string
+      color: string
+  Network:
+    type: object
+    properties:
+      nodes: Node[]
+      links: Link[]
+  BipartiteNetwork:
+    type: Network
+    properties:
+      column1NodeIDs: string[]
+      column2NodeIDs: string[]
   BarplotPostRequest:
     type: DataPluginRequestBase
     properties:
@@ -2380,7 +2422,6 @@ types:
     type: CollectionOverlayConfig
     properties:
       selectedValues?: string[]
-  DynamicDataSpec: CollectionSpec | VariableSpec
   LegacyLabeledRange:
     type: object
     additionalProperties: false
