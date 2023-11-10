@@ -105,11 +105,13 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
     String xVarType = util.getVariableType(spec.getXAxisVariable());
     String overlayValues = _overlaySpecification == null ? "NULL" : _overlaySpecification.getRBinListAsString();
 
+    List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findVariableSpecsWithStudyDependentVocabs(varMap);
+    Map<String, InputStream> studyVocabs = getVocabByRootEntity(dataSpecsWithStudyDependentVocabs);
+    dataStreams.putAll(studyVocabs);
+
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME,
-          spec.getXAxisVariable(),
-          overlayVariable));
-          
+      connection.voidEval(DEFAULT_SINGLE_STREAM_NAME + " <- data.table::fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
+      String inputData = getRVariableInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap, "variables"); 
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
      
       String viewportRString = getViewportAsRString(spec.getViewport(), xVarType);
@@ -123,7 +125,7 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
       if (binReportValue.equals("numBins")) {
         if (binSpec.getValue() != null) {
           String numBins = binSpec.getValue().toString();
-          connection.voidEval("xVP <- adjustToViewport(data$" + xVar + ", viewport)");
+          connection.voidEval("xVP <- adjustToViewport(" + inputData + "$" + xVar + ", viewport)");
           if (xVarType.equals("NUMBER") || xVarType.equals("INTEGER")) {
             connection.voidEval("xRange <- diff(range(xVP))");
             connection.voidEval("binWidth <- xRange/" + numBins);
@@ -144,7 +146,7 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
       }
 
       String cmd =
-          "plot.data::histogram(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " +
+          "plot.data::histogram(data=" + inputData + ", " +
                                   "variables=variables, " +
                                   "binWidth=binWidth, " +
                                   "value='" + spec.getValueSpec().getValue() + "', " +

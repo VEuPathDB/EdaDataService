@@ -8,10 +8,7 @@ import org.veupathdb.service.eda.common.plugin.util.PluginUtil;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.core.AbstractEmptyComputePlugin;
 import org.veupathdb.service.eda.ds.utils.ValidationUtils;
-import org.veupathdb.service.eda.generated.model.CollectionFloatingContTablePostRequest;
-import org.veupathdb.service.eda.generated.model.CollectionFloatingContTableSpec;
-import org.veupathdb.service.eda.generated.model.CollectionSpec;
-import org.veupathdb.service.eda.generated.model.VariableSpec;
+import org.veupathdb.service.eda.generated.model.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -76,11 +73,16 @@ public class CollectionFloatingContTablePlugin extends AbstractEmptyComputePlugi
     List<VariableSpec> inputVarSpecs = new ArrayList<>(spec.getXAxisVariable().getSelectedMembers());
     Map<String, CollectionSpec> varMap = new HashMap<>();
     varMap.put("xAxis", spec.getXAxisVariable().getCollection());
-    
+   
+    List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findCollectionSpecsWithStudyDependentVocabs(varMap);
+    Map<String, InputStream> studyVocabs = getVocabByRootEntity(dataSpecsWithStudyDependentVocabs);
+    dataStreams.putAll(studyVocabs);
+
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, inputVarSpecs));
+      connection.voidEval(DEFAULT_SINGLE_STREAM_NAME + " <- data.table::fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
+      String inputData = getRCollectionInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap, "variables");
       connection.voidEval(getVoidEvalCollectionMetadataList(varMap));
-      String cmd = "plot.data::mosaic(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " + 
+      String cmd = "plot.data::mosaic(data=" + inputData + ", " + 
                                         "variables=variables, " + 
                                         "statistic='chiSq', " + 
                                         "columnReferenceValue=NA_character_, " + 

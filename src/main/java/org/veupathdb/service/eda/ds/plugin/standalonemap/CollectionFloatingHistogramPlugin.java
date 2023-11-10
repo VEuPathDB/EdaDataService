@@ -85,8 +85,13 @@ public class CollectionFloatingHistogramPlugin extends AbstractEmptyComputePlugi
     String barMode = spec.getBarMode().getValue();
     String collectionType = util.getCollectionType(overlayVariable);
 
+    List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findCollectionSpecsWithStudyDependentVocabs(varMap);
+    Map<String, InputStream> studyVocabs = getVocabByRootEntity(dataSpecsWithStudyDependentVocabs);
+    dataStreams.putAll(studyVocabs);
+
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      connection.voidEval(util.getVoidEvalFreadCommand(DEFAULT_SINGLE_STREAM_NAME, inputVarSpecs));
+      connection.voidEval(DEFAULT_SINGLE_STREAM_NAME + " <- data.table::fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
+      String inputData = getRCollectionInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap, "variables");
       connection.voidEval(getVoidEvalCollectionMetadataList(varMap));
      
       String viewportRString = getViewportAsRString(spec.getViewport(), collectionType);
@@ -105,7 +110,7 @@ public class CollectionFloatingHistogramPlugin extends AbstractEmptyComputePlugi
       connection.voidEval("binWidth <- " + binWidth);
 
       String cmd =
-          "plot.data::histogram(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " +
+          "plot.data::histogram(data=" + inputData + ", " +
                                   "variables=variables, " +
                                   "binWidth=binWidth, " +
                                   "value='" + spec.getValueSpec().getValue() + "', " +

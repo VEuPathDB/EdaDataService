@@ -121,22 +121,25 @@ public class FloatingScatterplotPlugin extends AbstractEmptyComputePlugin<Floati
     nonStrataVarColNames.add(util.toColNameOrEmpty(spec.getXAxisVariable()));
     nonStrataVarColNames.add(util.toColNameOrEmpty(spec.getYAxisVariable()));
 
+    List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findVariableSpecsWithStudyDependentVocabs(varMap);
+    Map<String, InputStream> studyVocabs = getVocabByRootEntity(dataSpecsWithStudyDependentVocabs);
+    dataStreams.putAll(studyVocabs);
+
     RFileSetProcessor filesProcessor = new RFileSetProcessor(dataStreams)
       .add(DEFAULT_SINGLE_STREAM_NAME, 
         spec.getMaxAllowedDataPoints(), 
         "noVariables", 
         nonStrataVarColNames, 
         (name, conn) ->
-        conn.voidEval(util.getVoidEvalFreadCommand(name,
-          spec.getXAxisVariable(),
-          spec.getYAxisVariable(),
-          overlayVariable))
+        conn.voidEval(name + " <- data.table::fread('" + name + "', na.strings=c(''))")
       );
 
     useRConnectionWithProcessedRemoteFiles(Resources.RSERVE_URL, filesProcessor, connection -> {
+      String inputData = getRVariableInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap, "variables");
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
+      
       String cmd = 
-          "plot.data::scattergl(data=" + DEFAULT_SINGLE_STREAM_NAME + ", " + 
+          "plot.data::scattergl(data=" + inputData + ", " + 
                                   "variables=variables, " + 
                                   "value='" + valueSpec + "', " + 
                                   "sampleSizes=FALSE, " +

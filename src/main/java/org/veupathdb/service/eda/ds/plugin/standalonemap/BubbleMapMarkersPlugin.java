@@ -82,11 +82,11 @@ public class BubbleMapMarkersPlugin extends AbstractEmptyComputePlugin<Standalon
         if (pluginSpec.getOverlayConfig().getAggregationConfig() == null) {
           throw new ValidationException("aggregationConfig is a required field.");
         }
-        List<String> overlayVocab = getUtil().getVocabulary(pluginSpec.getOverlayConfig().getOverlayVariable());
         _overlaySpecification = new QuantitativeAggregateConfiguration(
             pluginSpec.getOverlayConfig().getAggregationConfig(),
             getUtil().getVariableDataShape(pluginSpec.getOverlayConfig().getOverlayVariable()),
-            overlayVocab);
+            getUtil().getVariableType(pluginSpec.getOverlayConfig().getOverlayVariable()),
+            () -> getUtil().getVocabulary(pluginSpec.getOverlayConfig().getOverlayVariable()));
       } catch (IllegalArgumentException e) {
         throw new ValidationException(e.getMessage());
       }
@@ -150,7 +150,7 @@ public class BubbleMapMarkersPlugin extends AbstractEmptyComputePlugin<Standalon
       mapEle.setMinLon(data.getMinLon());
       mapEle.setMaxLon(data.getMaxLon());
       if (data.getMarkerAggregator() != null) {
-        mapEle.setOverlayValue(data.getMarkerAggregator().finish());
+        mapEle.setOverlayValue(overlayConfig.get().serializeAverage(data.getMarkerAggregator().finish()));
       }
       output.add(mapEle);
     }

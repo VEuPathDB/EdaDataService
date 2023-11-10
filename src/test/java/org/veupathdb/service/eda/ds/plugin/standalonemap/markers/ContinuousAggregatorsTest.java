@@ -11,7 +11,7 @@ public class ContinuousAggregatorsTest {
   @Test
   @DisplayName("Balanced Sequence, Odd number of elements")
   public void test() {
-    final MarkerAggregator<Double> agg = ContinuousAggregators.Median.getAggregatorSupplier(0);
+    final MarkerAggregator<Double> agg = ContinuousAggregators.Median.getAggregatorFactory().create(0, Double::valueOf);
     agg.addValue(new String[] { "5" });
     agg.addValue(new String[] { "1" });
     agg.addValue(new String[] { "10" });
@@ -23,7 +23,7 @@ public class ContinuousAggregatorsTest {
   @Test
   @DisplayName("Balanced Sequence, Even number of elements with dupes")
   public void test1() {
-    final MarkerAggregator<Double> agg = ContinuousAggregators.Median.getAggregatorSupplier(0);
+    final MarkerAggregator<Double> agg = ContinuousAggregators.Median.getAggregatorFactory().create(0, Double::valueOf);
     agg.addValue(new String[] { "5" });
     agg.addValue(new String[] { "5" });
     agg.addValue(new String[] { "1" });
@@ -36,7 +36,7 @@ public class ContinuousAggregatorsTest {
   @Test
   @DisplayName("Balanced Sequence, Even number of elements no dupes")
   public void test2() {
-    final MarkerAggregator<Double> agg = ContinuousAggregators.Median.getAggregatorSupplier(0);
+    final MarkerAggregator<Double> agg = ContinuousAggregators.Median.getAggregatorFactory().create(0, Double::valueOf);
     agg.addValue(new String[] { "4" });
     agg.addValue(new String[] { "5" });
     agg.addValue(new String[] { "1" });
@@ -49,7 +49,7 @@ public class ContinuousAggregatorsTest {
   @Test
   @DisplayName("Increasing Sequence, Even number of elements")
   public void test3() {
-    final MarkerAggregator<Double> agg = ContinuousAggregators.Median.getAggregatorSupplier(0);
+    final MarkerAggregator<Double> agg = ContinuousAggregators.Median.getAggregatorFactory().create(0, Double::valueOf);
     agg.addValue(new String[] { "1" });
     agg.addValue(new String[] { "2" });
     agg.addValue(new String[] { "3" });
@@ -62,7 +62,7 @@ public class ContinuousAggregatorsTest {
   @Test
   @DisplayName("Decreasing Sequence, Even number of elements")
   public void test4() {
-    final MarkerAggregator<Double> agg = ContinuousAggregators.Median.getAggregatorSupplier(0);
+    final MarkerAggregator<Double> agg = ContinuousAggregators.Median.getAggregatorFactory().create(0, Double::valueOf);
     agg.addValue(new String[] { "6" });
     agg.addValue(new String[] { "5" });
     agg.addValue(new String[] { "4" });
