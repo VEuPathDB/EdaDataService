@@ -9,8 +9,8 @@ import org.veupathdb.service.eda.common.plugin.util.RServeClient;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
 import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.core.AbstractPlugin;
-import org.veupathdb.service.eda.generated.model.CorrelationAssayMetadataBipartitenetworkPostRequest;
-import org.veupathdb.service.eda.generated.model.CorrelationAssayMetadataBipartitenetworkSpec;
+import org.veupathdb.service.eda.generated.model.CorrelationBipartitenetworkPostRequest;
+import org.veupathdb.service.eda.generated.model.CorrelationBipartitenetworkSpec;
 import org.veupathdb.service.eda.generated.model.CorrelationComputeConfig;
 import org.veupathdb.service.eda.generated.model.CorrelationPoint;
 import org.veupathdb.service.eda.generated.model.CorrelationStatsResponse;
@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class CorrelationAssayMetadataBipartitenetworkPlugin extends AbstractPlugin<CorrelationAssayMetadataBipartitenetworkPostRequest, CorrelationAssayMetadataBipartitenetworkSpec, CorrelationComputeConfig> {
+public class CorrelationAssayMetadataBipartitenetworkPlugin extends AbstractPlugin<CorrelationBipartitenetworkPostRequest, CorrelationBipartitenetworkSpec, CorrelationComputeConfig> {
 
   @Override
   public String getDisplayName() {
@@ -48,7 +48,7 @@ public class CorrelationAssayMetadataBipartitenetworkPlugin extends AbstractPlug
 
   @Override
   protected ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(CorrelationAssayMetadataBipartitenetworkPostRequest.class, CorrelationAssayMetadataBipartitenetworkSpec.class, CorrelationComputeConfig.class);
+    return new ClassGroup(CorrelationBipartitenetworkPostRequest.class, CorrelationBipartitenetworkSpec.class, CorrelationComputeConfig.class);
   }
 
   @Override
@@ -57,12 +57,12 @@ public class CorrelationAssayMetadataBipartitenetworkPlugin extends AbstractPlug
   }
 
   @Override
-  protected void validateVisualizationSpec(CorrelationAssayMetadataBipartitenetworkSpec pluginSpec) throws ValidationException {
+  protected void validateVisualizationSpec(CorrelationBipartitenetworkSpec pluginSpec) throws ValidationException {
     // nothing to do here
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(CorrelationAssayMetadataBipartitenetworkSpec pluginSpec) {
+  protected List<StreamSpec> getRequestedStreams(CorrelationBipartitenetworkSpec pluginSpec) {
     // this plugin only uses the stats result of the compute; no tabular data streams needed
     return Collections.emptyList();
   }
