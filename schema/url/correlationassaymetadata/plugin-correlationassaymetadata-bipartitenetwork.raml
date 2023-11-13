@@ -9,12 +9,7 @@ types:
       computeConfig: CorrelationComputeConfig
       config: CorrelationAssayMetadataBipartitenetworkSpec
 
-  CorrelationAssayMetadataStatsResponse:
-    additionalProperties: false
-    properties:
-      statistics: CorrelationPoint[]
-      data1Metadata: string
-      data2Metadata: string
+  # CorrelationAssayMetadataStatsResponse: its just CorrelationStatsResponse
 
   CorrelationAssayMetadataBipartitenetworkSpec:
     additionalProperties: false
@@ -25,3 +20,38 @@ types:
       correlationCoefThreshold:
         type: number
         required: false
+
+# CorrelationStatsResponse:
+#     additionalProperties: false
+#     properties:
+#       statistics: CorrelationPoint[]
+#       data1Metadata: string
+#       data2Metadata: string
+
+#   CorrelationPoint:
+#     properties: 
+#       data1: string
+#       data2: string
+#       correlationCoef: 
+#         type: string
+#         required: false
+#       pValue: 
+#         type: string
+#         required: false
+#       adjustedPValue:
+#         type: string
+#         required: false
+
+#   CorrelationComputeConfig:
+#     properties:
+#       collectionVariable1: 
+#         type: CollectionSpec
+#         required: false
+#       collectionVariable2:
+#         type: CollectionSpec
+#         required: false
+#       correlationMethod: CorrelationMethod
+
+#   CorrelationMethod:
+#     type: string
+#     enum: ['spearman','pearson']

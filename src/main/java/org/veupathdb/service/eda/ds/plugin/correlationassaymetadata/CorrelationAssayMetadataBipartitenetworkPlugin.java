@@ -13,7 +13,7 @@ import org.veupathdb.service.eda.generated.model.CorrelationAssayMetadataBiparti
 import org.veupathdb.service.eda.generated.model.CorrelationAssayMetadataBipartitenetworkSpec;
 import org.veupathdb.service.eda.generated.model.CorrelationComputeConfig;
 import org.veupathdb.service.eda.generated.model.CorrelationPoint;
-import org.veupathdb.service.eda.generated.model.CorrelationAssayMetadataStatsResponse;
+import org.veupathdb.service.eda.generated.model.CorrelationStatsResponse;
 import org.veupathdb.service.eda.generated.model.ExamplePluginStats;
 
 
@@ -70,12 +70,12 @@ public class CorrelationAssayMetadataBipartitenetworkPlugin extends AbstractPlug
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
 
-    CorrelationAssayMetadataStatsResponse stats = getComputeResultStats(CorrelationAssayMetadataStatsResponse.class);
+    CorrelationStatsResponse stats = getComputeResultStats(CorrelationStatsResponse.class);
     Number correlationCoefThreshold = getPluginSpec().getCorrelationCoefThreshold() != null ? getPluginSpec().getCorrelationCoefThreshold() : 0.2;
 
 
     // TEMPORARY: Reshape data using java instead of calling out to R+plot.data
-    // The goal is to transform the response from the correlation app (CorrelationAssayMetadataStatsResponse)
+    // The goal is to transform the response from the correlation app (CorrelationStatsResponse)
     // into a BipartiteNetwork that can be sent to the frontend. The BipartiteNetwork is composed
     // of nodes, links, column1NodeIDs, and column2NodeIDs.
 
@@ -90,6 +90,11 @@ public class CorrelationAssayMetadataBipartitenetworkPlugin extends AbstractPlug
     // We want to grab the link, the nodes associated with the link, and make note of column assignments for
     // each node.
     stats.getStatistics().forEach((correlationRow) -> {
+      
+      // Skip rows that have no correlation coefficient or a correlation coef that is too small. Filtering here prevents us
+      // from showing nodes with no links.
+      if (correlationRow.getCorrelationCoef() == null) return;
+      if (Math.abs(Float.parseFloat(correlationRow.getCorrelationCoef())) < correlationCoefThreshold.floatValue()) return;
 
       // First add the node ids (data1 and data2 from this row) to our growing list of node ids
       // We'll worry about duplicates later.
@@ -101,10 +106,6 @@ public class CorrelationAssayMetadataBipartitenetworkPlugin extends AbstractPlug
       column2NodeIDs.add(correlationRow.getData2());
 
       // Next create links
-      // Skip rows that have no correlation coefficient or a correlation coef that is too small
-      if (correlationRow.getCorrelationCoef() == null) return;
-      if (Math.abs(Float.parseFloat(correlationRow.getCorrelationCoef())) < correlationCoefThreshold.floatValue()) return;
-
       // Create source and target objects.
       JSONObject sourceNode = new JSONObject();
       sourceNode.put("id", correlationRow.getData1());
