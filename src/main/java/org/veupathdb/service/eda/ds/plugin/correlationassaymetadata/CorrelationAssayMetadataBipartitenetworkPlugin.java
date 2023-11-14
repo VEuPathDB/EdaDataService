@@ -2,27 +2,29 @@ package org.veupathdb.service.eda.ds.plugin.correlationassaymetadata;
 
 import org.gusdb.fgputil.json.JsonUtil;
 import org.gusdb.fgputil.validation.ValidationException;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
-import org.veupathdb.service.eda.common.plugin.util.RServeClient;
 import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
-import org.veupathdb.service.eda.ds.Resources;
 import org.veupathdb.service.eda.ds.core.AbstractPlugin;
+import org.veupathdb.service.eda.generated.model.BipartiteNetwork;
+import org.veupathdb.service.eda.generated.model.BipartiteNetworkConfig;
+import org.veupathdb.service.eda.generated.model.BipartiteNetworkConfigImpl;
+import org.veupathdb.service.eda.generated.model.BipartiteNetworkData;
+import org.veupathdb.service.eda.generated.model.BipartiteNetworkDataImpl;
+import org.veupathdb.service.eda.generated.model.BipartiteNetworkImpl;
+import org.veupathdb.service.eda.generated.model.BipartiteNetworkPostResponse;
+import org.veupathdb.service.eda.generated.model.BipartiteNetworkPostResponseImpl;
 import org.veupathdb.service.eda.generated.model.CorrelationBipartitenetworkPostRequest;
 import org.veupathdb.service.eda.generated.model.CorrelationBipartitenetworkSpec;
 import org.veupathdb.service.eda.generated.model.CorrelationComputeConfig;
-import org.veupathdb.service.eda.generated.model.CorrelationPoint;
 import org.veupathdb.service.eda.generated.model.CorrelationStatsResponse;
-import org.veupathdb.service.eda.generated.model.ExamplePluginStats;
-
-
-import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
+import org.veupathdb.service.eda.generated.model.LinkData;
+import org.veupathdb.service.eda.generated.model.LinkDataImpl;
+import org.veupathdb.service.eda.generated.model.NodeData;
+import org.veupathdb.service.eda.generated.model.NodeDataImpl;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -80,8 +82,7 @@ public class CorrelationAssayMetadataBipartitenetworkPlugin extends AbstractPlug
     // of nodes, links, column1NodeIDs, and column2NodeIDs.
 
     // Prep objects
-    JSONObject bipartiteNetwork = new JSONObject();
-    JSONArray links = new JSONArray();
+    ArrayList<LinkData> links = new ArrayList<LinkData>();
     ArrayList<String> nodeIDs = new ArrayList<>();
     ArrayList<String> column1NodeIDs = new ArrayList<>();
     ArrayList<String> column2NodeIDs = new ArrayList<>();
@@ -107,20 +108,20 @@ public class CorrelationAssayMetadataBipartitenetworkPlugin extends AbstractPlug
 
       // Next create links
       // Create source and target objects.
-      JSONObject sourceNode = new JSONObject();
-      sourceNode.put("id", correlationRow.getData1());
-      JSONObject targetNode = new JSONObject();
-      targetNode.put("id", correlationRow.getData2());
+      NodeData sourceNode = new NodeDataImpl();
+      sourceNode.setId(correlationRow.getData1());
+      NodeData targetNode = new NodeDataImpl();
+      targetNode.setId(correlationRow.getData2());
       
       // Create link with the data from this row and add to links array.
-      JSONObject link = new JSONObject();
-      link.put("source", sourceNode);
-      link.put("target", targetNode);
-      link.put("strokeWidth", correlationRow.getCorrelationCoef());
+      LinkData link = new LinkDataImpl();
+      link.setSource(sourceNode);
+      link.setTarget(targetNode);
+      link.setStrokeWidth(correlationRow.getCorrelationCoef());
       // Link color is the sign of the correlation
       String color = Float.parseFloat(correlationRow.getCorrelationCoef()) < 0 ? "-1" : "1";
-      link.put("color", color);
-      links.put(link);
+      link.setColor(color);
+      links.add(link);
     });
 
     // Get unique IDs
@@ -129,23 +130,33 @@ public class CorrelationAssayMetadataBipartitenetworkPlugin extends AbstractPlug
     List<String> uniqueNodeIDs = nodeIDs.stream().distinct().collect(Collectors.toList());
 
     // Turn the node ids into an array of Node objects, each with an id property
-    JSONArray nodes = new JSONArray();
+    ArrayList<NodeData> nodes = new ArrayList<NodeData>();
     uniqueNodeIDs.forEach((nodeID) -> {
-      JSONObject node = new JSONObject();
-      node.put("id", nodeID);
-      nodes.put(node);
+      NodeData node = new NodeDataImpl();
+      node.setId(nodeID);
+      nodes.add(node);
     });
 
-    // Finally create the bipartite network and send it off!
-    bipartiteNetwork.put("nodes", nodes);
-    bipartiteNetwork.put("links", links);
-    bipartiteNetwork.put("column1NodeIDs", uniqueColumn1IDs);
-    bipartiteNetwork.put("column2NodeIDs", uniqueColumn2IDs);
+    // Finally create the bipartite network response and send it off!
+    BipartiteNetworkData bipartiteNetworkData = new BipartiteNetworkDataImpl();
+    bipartiteNetworkData.setLinks(links);
+    bipartiteNetworkData.setNodes(nodes);
+    bipartiteNetworkData.setColumn1NodeIDs(uniqueColumn1IDs);
+    bipartiteNetworkData.setColumn2NodeIDs(uniqueColumn2IDs);
 
-    out.write(bipartiteNetwork
-        .toString()
-        .getBytes(StandardCharsets.UTF_8)
-      );
+    BipartiteNetworkConfig bipartiteNetworkConfig = new BipartiteNetworkConfigImpl();
+    bipartiteNetworkConfig.setColumn1Metadata(stats.getData1Metadata());
+    bipartiteNetworkConfig.setColumn2Metadata(stats.getData2Metadata());
+
+    BipartiteNetwork bipartiteNetwork = new BipartiteNetworkImpl();
+    bipartiteNetwork.setData(bipartiteNetworkData);
+    bipartiteNetwork.setConfig(bipartiteNetworkConfig);
+
+    BipartiteNetworkPostResponse response = new BipartiteNetworkPostResponseImpl();
+    response.setBipartitenetwork(bipartiteNetwork);
+
+    JsonUtil.Jackson.writeValue(out, response);
+    out.flush();
 
   }
 }

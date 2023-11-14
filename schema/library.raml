@@ -894,27 +894,49 @@ types:
     properties:
       binRanges?: AllBinRanges
       median?: number
-  Node:
+  NodeData:
     type: object
     properties:
       id: string
-  Link:
+  LinkData:
     type: object
     properties:
-      source: Node
-      target: Node
+      source: NodeData
+      target: NodeData
       strokeWidth: string
       color: string
-  Network:
+  NetworkData:
     type: object
     properties:
-      nodes: Node[]
-      links: Link[]
-  BipartiteNetwork:
-    type: Network
+      nodes: NodeData[]
+      links: LinkData[]
+  NetworkConfig:
+    type: object
+    properties:
+      variables:
+        type: VariableMapping[]
+        required: false
+  BipartiteNetworkConfig:
+    type: NetworkConfig
+    properties:
+      column1Metadata: string
+      column2Metadata: string
+  BipartiteNetworkData:
+    type: NetworkData
     properties:
       column1NodeIDs: string[]
       column2NodeIDs: string[]
+  BipartiteNetwork:
+    type: object
+    additionalProperties: false
+    properties:
+      data: BipartiteNetworkData
+      config: BipartiteNetworkConfig
+  BipartiteNetworkPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      bipartitenetwork: BipartiteNetwork
   BarplotPostRequest:
     type: DataPluginRequestBase
     properties:
