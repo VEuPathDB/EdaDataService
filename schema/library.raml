@@ -844,12 +844,21 @@ types:
       overlayVariable:
         type: VariableSpec
         required: false
-  CorrelationAssayMetadataBipartitenetworkPostRequest:
+  CorrelationBipartitenetworkPostRequest:
     type: DataPluginRequestBase
     properties:
-      computeConfig: EmptyDataPluginSpec
-      config: EmptyDataPluginSpec
-  CorrelationAssayMetadataStatsResponse: DifferentialAbundanceStatsResponse
+      computeConfig: CorrelationComputeConfig
+      config: CorrelationBipartitenetworkSpec
+  CorrelationBipartitenetworkSpec:
+    type: object
+    additionalProperties: false
+    properties:
+      significanceThreshold:
+        type: number
+        required: false
+      correlationCoefThreshold:
+        type: number
+        required: false
   DifferentialAbundanceVolcanoplotPostRequest:
     type: DataPluginRequestBase
     properties:
@@ -885,6 +894,49 @@ types:
     properties:
       binRanges?: AllBinRanges
       median?: number
+  NodeData:
+    type: object
+    properties:
+      id: string
+  LinkData:
+    type: object
+    properties:
+      source: NodeData
+      target: NodeData
+      strokeWidth: string
+      color: string
+  NetworkData:
+    type: object
+    properties:
+      nodes: NodeData[]
+      links: LinkData[]
+  NetworkConfig:
+    type: object
+    properties:
+      variables:
+        type: VariableMapping[]
+        required: false
+  BipartiteNetworkConfig:
+    type: NetworkConfig
+    properties:
+      column1Metadata: string
+      column2Metadata: string
+  BipartiteNetworkData:
+    type: NetworkData
+    properties:
+      column1NodeIDs: string[]
+      column2NodeIDs: string[]
+  BipartiteNetwork:
+    type: object
+    additionalProperties: false
+    properties:
+      data: BipartiteNetworkData
+      config: BipartiteNetworkConfig
+  BipartiteNetworkPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      bipartitenetwork: BipartiteNetwork
   BarplotPostRequest:
     type: DataPluginRequestBase
     properties:

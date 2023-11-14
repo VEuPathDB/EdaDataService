@@ -1,0 +1,55 @@
+#%RAML 1.0 Library
+
+types:
+  # Type name determines the name of the Java class that will be generated.
+
+  NodeData:
+    properties:
+      id: string
+  
+  LinkData:
+    properties:
+      source: NodeData
+      target: NodeData
+      strokeWidth: string
+      color: string
+  
+  NetworkData:
+    properties:
+      nodes: NodeData[]
+      links: LinkData[]
+
+  # I don't think eda variables will be used as nodes or links for years. That'd be a quite complicated
+  # setup. Instead, i'm leaving this here for if we use computed vars for nodes, edges, color, etc. Seems
+  # a reasonable place to start at least.
+  NetworkConfig:
+    properties:
+      variables: 
+        type: VariableMapping[]
+        required: false
+
+  BipartiteNetworkConfig:
+    type: NetworkConfig
+    properties:
+      column1Metadata: string
+      column2Metadata: string
+
+  BipartiteNetworkData:
+    type: NetworkData
+    properties:
+      column1NodeIDs: string[]
+      column2NodeIDs: string[]
+
+
+  BipartiteNetwork:
+    additionalProperties: false
+    properties:
+      data: BipartiteNetworkData
+      config: BipartiteNetworkConfig
+
+  BipartiteNetworkPostResponse:
+    additionalProperties: false
+    properties:
+      bipartitenetwork:
+        type: BipartiteNetwork
+      # Eventually could have stats such as number isolated nodes, degree distribution, etc. That all can go here.
