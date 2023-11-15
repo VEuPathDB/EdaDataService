@@ -704,7 +704,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     String studyVocabAsRTibble = "dplyr::reframe(dplyr::group_by(data.table::fread(\"" + studyVocabInR + "\", header=FALSE), V1), " +
                                          "values=paste0(\"veupathUtils::StudySpecificVocabulary(variableSpec=veupathUtils::VariableSpec(entityId='" + getDynamicDataSpecEntityId(dataSpec)+ "'," + 
                                                                                               "variableId='" + getDynamicDataSpecId(dataSpec) + "')," + 
-                                                          "vocabulary=c('\",paste(V2, collapse=','),\"')," +
+                                                          "vocabulary=c('\",paste(V2, collapse='\',\''),\"')," +
                                                           "study='\",V1,\"'," +
                                                           "studyIdColumnName=rev(" + util.getEntityAncestorsAsRVectorString(getDynamicDataSpecEntityId(dataSpec), _referenceMetadata) + ")[1])\"))";
   
