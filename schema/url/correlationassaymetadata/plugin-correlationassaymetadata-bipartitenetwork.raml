@@ -2,12 +2,19 @@
 
 types:
 
-# Temporary until the backend is really ready
-  CorrelationAssayMetadataBipartitenetworkPostRequest:
+  CorrelationBipartitenetworkPostRequest:
     type: DataPluginRequestBase
     properties:
-      computeConfig: EmptyDataPluginSpec
-      config: EmptyDataPluginSpec
+      computeConfig: CorrelationComputeConfig
+      config: CorrelationBipartitenetworkSpec
 
-  CorrelationAssayMetadataStatsResponse:
-    type: DifferentialAbundanceStatsResponse
+  CorrelationBipartitenetworkSpec:
+    additionalProperties: false
+    properties:
+      significanceThreshold:
+        type: number
+        required: false
+      correlationCoefThreshold:
+        type: number
+        required: false
+
