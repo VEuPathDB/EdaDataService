@@ -7,11 +7,11 @@ import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.ds.core.AbstractPlugin;
 import org.veupathdb.service.eda.ds.plugin.differentialabundance.DifferentialAbundanceVolcanoplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.betadiv.BetaDivScatterplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.correlation.correlationassaymetadata.CorrelationAssayMetadataBipartitenetworkPlugin;
 import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivBoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.abundance.AbundanceBoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.abundance.AbundanceScatterplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.correlationassaymetadata.CorrelationAssayMetadataBipartitenetworkPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.BarplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.BoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ContTablePlugin;
@@ -118,6 +118,10 @@ public class AppsMetadata {
           "Discover taxa or genes correlated with metadata.",
           List.of(MICROBIOME_PROJECT),
           viz("bipartitenetwork", new CorrelationAssayMetadataBipartitenetworkPlugin())),
+      app("correlationassayassay", "Functional Associations", "correlationassayassay",
+          "Discover taxa or genes correlated with other taxa or genes.",
+          List.of(MICROBIOME_PROJECT),
+          viz("bipartitenetwork", new CorrelationAssayAssayBipartitenetworkPlugin())),
       app("distributions", "Distributions", null,
           "Plot simple distributions for any continuous variable, including metadata (e.g. age, height, etc.) or microbial assay results.",
           List.of(MICROBIOME_PROJECT),
