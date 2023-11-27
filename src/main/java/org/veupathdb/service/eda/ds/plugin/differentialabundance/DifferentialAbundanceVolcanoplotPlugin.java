@@ -24,7 +24,7 @@ public class DifferentialAbundanceVolcanoplotPlugin extends AbstractPlugin<Diffe
 
   @Override
   public String getDescription() {
-    return "Display fold change vs. significance for a differential abundance analysis.";
+    return "Display effect size vs. significance for a differential abundance analysis.";
   }
 
   @Override

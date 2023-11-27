@@ -149,10 +149,15 @@ public class BubbleMapMarkersPlugin extends AbstractEmptyComputePlugin<Standalon
       mapEle.setMaxLat(data.getMaxLat());
       mapEle.setMinLon(data.getMinLon());
       mapEle.setMaxLon(data.getMaxLon());
-      if (data.getMarkerAggregator() != null) {
-        mapEle.setOverlayValue(overlayConfig.get().serializeAverage(data.getMarkerAggregator().finish()));
+      MarkerAggregator<Double> aggregator = data.getMarkerAggregator();
+      if (aggregator != null) {
+        Double aggregation = aggregator.finish();
+        if (aggregation != null) {
+          mapEle.setOverlayValue(overlayConfig.map(oc -> oc.serializeAverage(aggregation)).orElse(null));
+	  // only output marker data where there are overlay values (issue #334)
+	  output.add(mapEle);
+	}
       }
-      output.add(mapEle);
     }
     StandaloneMapBubblesPostResponse response = new StandaloneMapBubblesPostResponseImpl();
     response.setMapElements(output);
