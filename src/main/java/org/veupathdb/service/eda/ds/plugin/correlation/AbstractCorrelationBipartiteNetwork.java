@@ -11,9 +11,11 @@ import java.util.stream.Collectors;
 
 import org.gusdb.fgputil.json.JsonUtil;
 import org.gusdb.fgputil.validation.ValidationException;
+import org.veupathdb.service.eda.common.client.spec.StreamSpec;
+import org.veupathdb.service.eda.ds.core.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.*;
 
-public class AbstractCorrelationBipartiteNetwork extends AbstractCorrelationPlugin<CorrelationBipartitenetworkPostRequest, CorrelationBipartitenetworkSpec> {
+public abstract class AbstractCorrelationBipartiteNetwork<T extends DataPluginRequestBase, R extends CorrelationComputeConfig> extends AbstractPlugin<T, CorrelationBipartitenetworkSpec, R> {
     
   @Override
   public String getDisplayName() {
@@ -26,8 +28,8 @@ public class AbstractCorrelationBipartiteNetwork extends AbstractCorrelationPlug
   }
 
   @Override
-  protected ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(CorrelationBipartitenetworkPostRequest.class, CorrelationBipartitenetworkSpec.class, CorrelationComputeConfig.class);
+  public boolean computeGeneratesVars() {
+    return false;
   }
 
   @Override
