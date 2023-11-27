@@ -2,12 +2,6 @@
 
 types:
 
-  CorrelationBipartitenetworkPostRequest:
-    type: DataPluginRequestBase
-    properties:
-      computeConfig: CorrelationComputeConfig
-      config: CorrelationBipartitenetworkSpec
-
   CorrelationBipartitenetworkSpec:
     additionalProperties: false
     properties:
@@ -17,4 +11,3 @@ types:
       correlationCoefThreshold:
         type: number
         required: false
-
