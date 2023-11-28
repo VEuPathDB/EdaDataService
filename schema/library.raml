@@ -664,6 +664,18 @@ types:
     properties:
       collectionVariable1: CollectionSpec
       collectionVariable2: CollectionSpec
+  CorrelationAssaySelfPluginRequest:
+    type: ComputeRequestBase
+    properties:
+      config: Correlation1Collection
+  CorrelationMetadataSelfPluginRequest:
+    type: ComputeRequestBase
+    properties:
+      config: CorrelationComputeConfig
+  CorrelationAssayAssayPluginRequest:
+    type: ComputeRequestBase
+    properties:
+      config: Correlation2Collections
   CorrelationAssayMetadataPluginRequest:
     type: ComputeRequestBase
     properties:
@@ -844,11 +856,6 @@ types:
       overlayVariable:
         type: VariableSpec
         required: false
-  CorrelationBipartitenetworkPostRequest:
-    type: DataPluginRequestBase
-    properties:
-      computeConfig: CorrelationComputeConfig
-      config: CorrelationBipartitenetworkSpec
   CorrelationBipartitenetworkSpec:
     type: object
     additionalProperties: false
@@ -859,6 +866,16 @@ types:
       correlationCoefThreshold:
         type: number
         required: false
+  CorrelationAssayAssayBipartitenetworkPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      computeConfig: Correlation2Collections
+      config: CorrelationBipartitenetworkSpec
+  CorrelationAssayMetadataBipartitenetworkPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      computeConfig: Correlation1Collection
+      config: CorrelationBipartitenetworkSpec
   DifferentialAbundanceVolcanoplotPostRequest:
     type: DataPluginRequestBase
     properties:
