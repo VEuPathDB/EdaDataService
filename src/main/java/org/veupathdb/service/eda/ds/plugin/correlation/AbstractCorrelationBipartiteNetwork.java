@@ -71,7 +71,9 @@ public abstract class AbstractCorrelationBipartiteNetwork<T extends DataPluginRe
       // from showing nodes with no links.
       if (correlationRow.getCorrelationCoef() == null) return;
       if (Math.abs(Float.parseFloat(correlationRow.getCorrelationCoef())) < correlationCoefThreshold.floatValue()) return;
-      if (Float.parseFloat(correlationRow.getPValue()) > pValueThreshold.floatValue()) return;
+      if (correlationRow.getPValue() != null) {
+        if (Float.parseFloat(correlationRow.getPValue()) > pValueThreshold.floatValue()) return;
+      }
 
       // First add the node ids (data1 and data2 from this row) to our growing list of node ids
       // We'll worry about duplicates later.
