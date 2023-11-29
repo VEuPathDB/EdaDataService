@@ -48,6 +48,7 @@ public abstract class AbstractCorrelationBipartiteNetwork<T extends DataPluginRe
 
     CorrelationStatsResponse stats = getComputeResultStats(CorrelationStatsResponse.class);
     Number correlationCoefThreshold = getPluginSpec().getCorrelationCoefThreshold() != null ? getPluginSpec().getCorrelationCoefThreshold() : 0.2;
+    Number pValueThreshold = getPluginSpec().getSignificanceThreshold() != null ? getPluginSpec().getSignificanceThreshold() : 0.05;
 
 
     // TEMPORARY: Reshape data using java instead of calling out to R+plot.data
@@ -70,6 +71,7 @@ public abstract class AbstractCorrelationBipartiteNetwork<T extends DataPluginRe
       // from showing nodes with no links.
       if (correlationRow.getCorrelationCoef() == null) return;
       if (Math.abs(Float.parseFloat(correlationRow.getCorrelationCoef())) < correlationCoefThreshold.floatValue()) return;
+      if (Float.parseFloat(correlationRow.getPValue()) > pValueThreshold.floatValue()) return;
 
       // First add the node ids (data1 and data2 from this row) to our growing list of node ids
       // We'll worry about duplicates later.
