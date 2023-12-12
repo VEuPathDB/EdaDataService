@@ -154,7 +154,8 @@ public class FloatingLineplotPlugin extends AbstractEmptyComputePlugin<FloatingL
                                         "sampleSizes=FALSE," +
                                         "completeCases=FALSE," +
                                         "overlayValues=" + overlayValues + ", " +
-                                        "evilMode='noVariables')";                          
+                                        "evilMode='noVariables')";  
+      System.out.println(cmd);                        
       streamResult(connection, cmd, out);
     }); 
   }
