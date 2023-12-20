@@ -68,24 +68,28 @@ public class CollectionFloatingHistogramPlugin extends AbstractEmptyComputePlugi
 
   @Override
   protected List<StreamSpec> getRequestedStreams(CollectionFloatingHistogramSpec pluginSpec) {
+    String outputEntityId = pluginSpec.getOutputEntityId();
+    List<VariableSpec> plotVariableSpecs = new ArrayList<VariableSpec>();
+    plotVariableSpecs.addAll(pluginSpec.getOverlayConfig().getSelectedMembers());
+
     return ListBuilder.asList(
-      new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
-        .addVars(pluginSpec.getOverlayConfig().getSelectedMembers())
-      );
+      new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, outputEntityId)
+        .addVars(plotVariableSpecs)
+        // TODO can we make this automagical?
+        .addVars(getVariableSpecsWithStudyDependentVocabs(pluginSpec.getOutputEntityId(), plotVariableSpecs)));
   }
   
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PluginUtil util = getUtil();
     CollectionFloatingHistogramSpec spec = getPluginSpec();
-    List<VariableSpec> inputVarSpecs = new ArrayList<>(spec.getOverlayConfig().getSelectedMembers());
     CollectionSpec overlayVariable = spec.getOverlayConfig().getCollection();
     Map<String, CollectionSpec> varMap = new HashMap<>();
     varMap.put("overlay", overlayVariable);
     String barMode = spec.getBarMode().getValue();
     String collectionType = util.getCollectionType(overlayVariable);
 
-    List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findCollectionSpecsWithStudyDependentVocabs(varMap);
+    List<DynamicDataSpec> dataSpecsWithStudyDependentVocabs = findCollectionSpecsWithStudyDependentVocabs(varMap);
     Map<String, InputStream> studyVocabs = getVocabByRootEntity(dataSpecsWithStudyDependentVocabs);
     dataStreams.putAll(studyVocabs);
 

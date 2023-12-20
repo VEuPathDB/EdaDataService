@@ -84,13 +84,17 @@ public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBo
 
   @Override
   protected List<StreamSpec> getRequestedStreams(FloatingBoxplotSpec pluginSpec) {
+    String outputEntityId = pluginSpec.getOutputEntityId();
+    List<VariableSpec> plotVariableSpecs = new ArrayList<VariableSpec>();
+    plotVariableSpecs.add(pluginSpec.getXAxisVariable());
+    plotVariableSpecs.add(pluginSpec.getYAxisVariable());
+    plotVariableSpecs.add(Optional.ofNullable(pluginSpec.getOverlayConfig()).map(OverlayConfig::getOverlayVariable).orElse(null));
+
     return ListBuilder.asList(
-      new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
-        .addVar(pluginSpec.getXAxisVariable())
-        .addVar(pluginSpec.getYAxisVariable())
-        .addVar(Optional.ofNullable(pluginSpec.getOverlayConfig())
-            .map(OverlayConfig::getOverlayVariable)
-            .orElse(null)));
+      new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, outputEntityId)
+        .addVars(plotVariableSpecs)
+        // TODO can we make this automagical?
+        .addVars(getVariableSpecsWithStudyDependentVocabs(pluginSpec.getOutputEntityId(), plotVariableSpecs)));
   }
 
   @Override
@@ -107,7 +111,7 @@ public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBo
     nonStrataVarColNames.add(util.toColNameOrEmpty(spec.getXAxisVariable()));
     nonStrataVarColNames.add(util.toColNameOrEmpty(spec.getYAxisVariable()));
 
-    List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findVariableSpecsWithStudyDependentVocabs(varMap);
+    List<DynamicDataSpec> dataSpecsWithStudyDependentVocabs = findVariableSpecsWithStudyDependentVocabs(varMap);
     Map<String, InputStream> studyVocabs = getVocabByRootEntity(dataSpecsWithStudyDependentVocabs);
     dataStreams.putAll(studyVocabs);
 

@@ -67,25 +67,29 @@ public class CollectionFloatingBarplotPlugin extends AbstractEmptyComputePlugin<
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(CollectionFloatingBarplotSpec pluginSpec) {    
+  protected List<StreamSpec> getRequestedStreams(CollectionFloatingBarplotSpec pluginSpec) {
+    String outputEntityId = pluginSpec.getOutputEntityId();
+    List<VariableSpec> plotVariableSpecs = new ArrayList<VariableSpec>();
+    plotVariableSpecs.addAll(pluginSpec.getOverlayConfig().getSelectedMembers());
+
     return ListBuilder.asList(
-      new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
-        .addVars(pluginSpec.getOverlayConfig().getSelectedMembers())
-      ); 
+      new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, outputEntityId)
+        .addVars(plotVariableSpecs)
+        // TODO can we make this automagical?
+        // this will probably need revisited when/ if we introduce study-dependent vocabs for collections
+        .addVars(getVariableSpecsWithStudyDependentVocabs(pluginSpec.getOutputEntityId(), plotVariableSpecs)));
   }
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     CollectionFloatingBarplotSpec spec = getPluginSpec();
-    PluginUtil util = getUtil();
     String barMode = spec.getBarMode().getValue();
     String overlayValues = getRBinListAsString(spec.getOverlayConfig().getSelectedValues());
-    List<VariableSpec> inputVarSpecs = new ArrayList<>(spec.getOverlayConfig().getSelectedMembers());
 
     Map<String, CollectionSpec> varMap = new HashMap<>();
     varMap.put("overlay", spec.getOverlayConfig().getCollection());
      
-    List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findCollectionSpecsWithStudyDependentVocabs(varMap);
+    List<DynamicDataSpec> dataSpecsWithStudyDependentVocabs = findCollectionSpecsWithStudyDependentVocabs(varMap);
     Map<String, InputStream> studyVocabs = getVocabByRootEntity(dataSpecsWithStudyDependentVocabs);
     dataStreams.putAll(studyVocabs);
 

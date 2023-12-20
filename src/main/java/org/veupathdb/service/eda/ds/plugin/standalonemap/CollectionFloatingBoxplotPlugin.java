@@ -73,11 +73,16 @@ public class CollectionFloatingBoxplotPlugin extends AbstractEmptyComputePlugin<
 
   @Override
   protected List<StreamSpec> getRequestedStreams(CollectionFloatingBoxplotSpec pluginSpec) {
+    String outputEntityId = pluginSpec.getOutputEntityId();
+    List<VariableSpec> plotVariableSpecs = new ArrayList<VariableSpec>();
+    plotVariableSpecs.add(pluginSpec.getXAxisVariable());
+    plotVariableSpecs.addAll(pluginSpec.getOverlayConfig().getSelectedMembers());
+
     return ListBuilder.asList(
-      new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
-        .addVars(pluginSpec.getOverlayConfig().getSelectedMembers())
-        .addVar(pluginSpec.getXAxisVariable())
-      );
+      new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, outputEntityId)
+        .addVars(plotVariableSpecs)
+        // TODO can we make this automagical?
+        .addVars(getVariableSpecsWithStudyDependentVocabs(pluginSpec.getOutputEntityId(), plotVariableSpecs)));
   }
 
   @Override
@@ -106,7 +111,7 @@ public class CollectionFloatingBoxplotPlugin extends AbstractEmptyComputePlugin<
         conn.voidEval(name + " <- data.table::fread('" + name + "', na.strings=c(''))")
       );
 
-    List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findDataSpecsWithStudyDependentVocabs(varMap);
+    List<DynamicDataSpec> dataSpecsWithStudyDependentVocabs = findDataSpecsWithStudyDependentVocabs(varMap);
     Map<String, InputStream> studyVocabs = getVocabByRootEntity(dataSpecsWithStudyDependentVocabs);
     dataStreams.putAll(studyVocabs);
 

@@ -58,23 +58,26 @@ public class CollectionFloatingContTablePlugin extends AbstractEmptyComputePlugi
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(CollectionFloatingContTableSpec pluginSpec) {    
+  protected List<StreamSpec> getRequestedStreams(CollectionFloatingContTableSpec pluginSpec) {   
+    String outputEntityId = pluginSpec.getOutputEntityId();
+    List<VariableSpec> plotVariableSpecs = new ArrayList<VariableSpec>();
+    plotVariableSpecs.addAll(pluginSpec.getXAxisVariable().getSelectedMembers());
+
     return ListBuilder.asList(
-      new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
-        .addVars(pluginSpec.getXAxisVariable().getSelectedMembers())
-      ); 
+      new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, outputEntityId)
+        .addVars(plotVariableSpecs)
+        // TODO can we make this automagical?
+        .addVars(getVariableSpecsWithStudyDependentVocabs(pluginSpec.getOutputEntityId(), plotVariableSpecs))); 
   }
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    PluginUtil util = getUtil();
     CollectionFloatingContTableSpec spec = getPluginSpec();
     String overlayValues = getRBinListAsString(spec.getXAxisVariable().getSelectedValues());
-    List<VariableSpec> inputVarSpecs = new ArrayList<>(spec.getXAxisVariable().getSelectedMembers());
     Map<String, CollectionSpec> varMap = new HashMap<>();
     varMap.put("xAxis", spec.getXAxisVariable().getCollection());
    
-    List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findCollectionSpecsWithStudyDependentVocabs(varMap);
+    List<DynamicDataSpec> dataSpecsWithStudyDependentVocabs = findCollectionSpecsWithStudyDependentVocabs(varMap);
     Map<String, InputStream> studyVocabs = getVocabByRootEntity(dataSpecsWithStudyDependentVocabs);
     dataStreams.putAll(studyVocabs);
 
