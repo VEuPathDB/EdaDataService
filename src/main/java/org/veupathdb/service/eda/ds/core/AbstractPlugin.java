@@ -17,7 +17,10 @@ import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.*;
 import org.veupathdb.service.eda.common.client.EdaComputeClient.ComputeRequestBody;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
+import org.veupathdb.service.eda.common.model.CollectionDef;
+import org.veupathdb.service.eda.common.model.EntityDef;
 import org.veupathdb.service.eda.common.model.ReferenceMetadata;
+import org.veupathdb.service.eda.common.model.VariableDef;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementSet;
 import org.veupathdb.service.eda.common.plugin.constraint.DataElementValidator;
@@ -336,7 +339,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     return response.getHistogram().stream().collect(Collectors.toMap(HistogramBin::getBinLabel, bin -> Double.valueOf(bin.getValue().toString())));
   }
 
-  protected Map<String, InputStream> getVocabByRootEntity(DynamicDataSpecImpl dataSpec, List<APIFilter> subsetFilters) {
+  protected Map<String, InputStream> getVocabByRootEntity(DynamicDataSpec dataSpec, List<APIFilter> subsetFilters) {
     PluginUtil util = getUtil();
     ResponseFuture response = _subsettingClient.getVocabByRootEntity(_referenceMetadata, dataSpec, subsetFilters);
 
@@ -742,25 +745,21 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     }
   }
 
-  public List<DynamicDataSpecImpl> findDataSpecsWithStudyDependentVocabs(Map<String, DynamicDataSpecImpl> dataSpecs) {
-    List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = new ArrayList<>();
-
-    for (DynamicDataSpecImpl dataSpec : dataSpecs.values()) {
-      if (hasStudyDependentVocabulary(dataSpec)) {
-        dataSpecsWithStudyDependentVocabs.add(dataSpec);
-      } 
-    }
-            
-    return dataSpecsWithStudyDependentVocabs;
+  // these are deprecated. weve decided to always pass all variables w study dependent vocabs, 
+  // rather than only the ones present in the plot. its just going to call the new getDynamicDataSpecsWithStudyDependentVocabs..
+  public List<DynamicDataSpec> findDataSpecsWithStudyDependentVocabs(Map<String, DynamicDataSpecImpl> dataSpecs) {
+    // can use the first, we validate theyre all on the same entity
+    String entityId = getDynamicDataSpecEntityId(dataSpecs.get(0));
+    return getDynamicDataSpecsWithStudyDependentVocabs(entityId);
   }
 
-  public List<DynamicDataSpecImpl> findVariableSpecsWithStudyDependentVocabs(Map<String, VariableSpec> varSpecs) {
+  public List<DynamicDataSpec> findVariableSpecsWithStudyDependentVocabs(Map<String, VariableSpec> varSpecs) {
     Map<String, DynamicDataSpecImpl> dataSpecs = varMapToDynamicDataMap(varSpecs);
 
     return findDataSpecsWithStudyDependentVocabs(dataSpecs);
   }
 
-  public List<DynamicDataSpecImpl> findCollectionSpecsWithStudyDependentVocabs(Map<String, CollectionSpec> collectionSpecs) {
+  public List<DynamicDataSpec> findCollectionSpecsWithStudyDependentVocabs(Map<String, CollectionSpec> collectionSpecs) {
     Map<String, DynamicDataSpecImpl> dataSpecs = collectionMapToDynamicDataMap(collectionSpecs);
 
     return findDataSpecsWithStudyDependentVocabs(dataSpecs);
@@ -839,5 +838,85 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     Map<String, DynamicDataSpecImpl> dataSpecs = varMapToDynamicDataMap(varSpecs);
 
     return(getRInputDataWithImputedZeroesAsString(compressedDataHandle, dataSpecs, variableMetadataListHandle));
+  }
+
+  public List<VariableSpec> getVariableSpecsWithStudyDependentVocabs(String entityId) {
+    List<VariableSpec> varSpecsWithStudyDependentVocabs = new ArrayList<>();
+    EntityDef entity = _referenceMetadata.getEntity(entityId).orElseThrow();
+
+    // get reference metadata and find variables w study specific vocabs
+    for (VariableDef var : entity.getVariables()) {
+      if (var.getHasStudyDependentVocabulary()) {
+        VariableSpecImpl varSpec = new VariableSpecImpl();
+        varSpec.setVariableId(var.getVariableId());
+        varSpec.setEntityId(entityId);
+        varSpecsWithStudyDependentVocabs.add(var);
+      }
+    }
+
+    return varSpecsWithStudyDependentVocabs;
+  }
+
+  public List<VariableSpec> getVariableSpecsWithStudyDependentVocabs(String entityId, List<VariableSpec> varSpecsToIgnore) {
+    List<VariableSpec> varSpecsWithStudyDependentVocabs = getVariableSpecsWithStudyDependentVocabs(entityId);
+    varSpecsWithStudyDependentVocabs.stream().filter(var -> !varSpecsToIgnore.contains(var)).collect(Collectors.toList());
+
+    return varSpecsWithStudyDependentVocabs;
+  }
+
+  public List<CollectionSpec> getCollectionSpecsWithStudyDependentVocabs(String entityId) {
+    List<CollectionSpec> collectionSpecsWithStudyDependentVocabs = new ArrayList<>();
+    EntityDef entity = _referenceMetadata.getEntity(entityId).orElseThrow();
+
+    // get reference metadata and find collections w study specific vocabs
+    for (CollectionDef collection : entity.getCollections()) {
+      if (collection.getHasStudyDependentVocabulary()) {
+        CollectionSpecImpl colSpec = new CollectionSpecImpl();
+        colSpec.setCollectionId(collection.getCollectionId());
+        colSpec.setEntityId(entityId);
+        collectionSpecsWithStudyDependentVocabs.add(collection);
+      }
+    }
+
+    return collectionSpecsWithStudyDependentVocabs;
+  }
+
+  public List<CollectionSpec> getCollectionSpecsWithStudyDependentVocabs(String entityId, List<CollectionSpec> collectionSpecsToIgnore) {
+    List<CollectionSpec> collectionSpecsWithStudyDependentVocabs = getCollectionSpecsWithStudyDependentVocabs(entityId);
+    collectionSpecsWithStudyDependentVocabs.stream().filter(col -> !collectionSpecsToIgnore.contains(col)).collect(Collectors.toList());
+
+    return collectionSpecsWithStudyDependentVocabs;
+  }
+
+  public List<DynamicDataSpec> getDynamicDataSpecsWithStudyDependentVocabs(String entityId, List<DynamicDataSpec> dataSpecsToIgnore) {
+    List<DynamicDataSpec> dynamicDataSpecsWithStudyDependentVocabs = new ArrayList<>();
+
+    List<VariableSpec> varSpecsToIgnore = dataSpecsToIgnore.stream()
+      .filter(dataSpec -> dataSpec.isVariableSpec())
+      .map(dataSpec -> dataSpec.getVariableSpec())
+      .collect(Collectors.toList());
+    List<VariableSpec> varSpecsWithStudyDependentVocabs = getVariableSpecsWithStudyDependentVocabs(entityId, varSpecsToIgnore);
+
+    List<CollectionSpec> collectionSpecsToIgnore = dataSpecsToIgnore.stream()
+      .filter(dataSpec -> dataSpec.isCollectionSpec())
+      .map(dataSpec -> dataSpec.getCollectionSpec())
+      .collect(Collectors.toList());
+    List<CollectionSpec> collectionSpecsWithStudyDependentVocabs = getCollectionSpecsWithStudyDependentVocabs(entityId, collectionSpecsToIgnore);
+
+    for (VariableSpec varSpec : varSpecsWithStudyDependentVocabs) {
+      DynamicDataSpecImpl dataSpec = new DynamicDataSpecImpl(varSpec);
+      dynamicDataSpecsWithStudyDependentVocabs.add(dataSpec);
+    }
+
+    for (CollectionSpec colSpec : collectionSpecsWithStudyDependentVocabs) {
+      DynamicDataSpecImpl dataSpec = new DynamicDataSpecImpl(colSpec);
+      dynamicDataSpecsWithStudyDependentVocabs.add(dataSpec);
+    }
+
+    return dynamicDataSpecsWithStudyDependentVocabs;
+  }
+
+  public List<DynamicDataSpec> getDynamicDataSpecsWithStudyDependentVocabs(String entityId) {
+    return getDynamicDataSpecsWithStudyDependentVocabs(entityId, new ArrayList<>());
   }
 }
