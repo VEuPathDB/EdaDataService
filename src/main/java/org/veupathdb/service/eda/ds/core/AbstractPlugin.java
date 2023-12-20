@@ -609,7 +609,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
         "hasStudyDependentVocabulary=" + hasStudyDependentVocabulary + ")";
   }
 
-  public String getVoidEvalDynamicDataMetadataList(Map<String, DynamicDataSpecImpl> dataSpecs) {
+  public String getVoidEvalDynamicDataMetadataList(Map<String, DynamicDataSpec> dataSpecs) {
     return
         // special case if vars is null or all var values are null
         dataSpecs == null || dataSpecs.values().stream().allMatch(Objects::isNull)
@@ -620,7 +620,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
           dataSpecs.entrySet().stream()
             .map(entry -> {
               String plotReference = entry.getKey();
-              DynamicDataSpecImpl dataSpec = entry.getValue();
+              DynamicDataSpec dataSpec = entry.getValue();
               if (dataSpec.isCollectionSpec()) {
                 return getVariableMetadataRObjectAsString(dataSpec.getCollectionSpec(), plotReference);
               } else if (dataSpec.isVariableSpec()) {
@@ -634,28 +634,28 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
           "))";
   }
 
-  public Map<String, DynamicDataSpecImpl> varMapToDynamicDataMap(Map<String, VariableSpec> varSpecs) {
-    Map<String, DynamicDataSpecImpl> dataSpecs = varSpecs.entrySet().stream()
+  public Map<String, DynamicDataSpec> varMapToDynamicDataMap(Map<String, VariableSpec> varSpecs) {
+    Map<String, DynamicDataSpec> dataSpecs = varSpecs.entrySet().stream()
      .collect(Collectors.toMap(Map.Entry::getKey, e -> new DynamicDataSpecImpl(e.getValue())));
 
      return(dataSpecs);
   }
 
   public String getVoidEvalVariableMetadataList(Map<String, VariableSpec> varSpecs) {
-    Map<String, DynamicDataSpecImpl> dataSpecs = varMapToDynamicDataMap(varSpecs);
+    Map<String, DynamicDataSpec> dataSpecs = varMapToDynamicDataMap(varSpecs);
 
      return getVoidEvalDynamicDataMetadataList(dataSpecs);
   }
 
-  public Map<String, DynamicDataSpecImpl> collectionMapToDynamicDataMap(Map<String, CollectionSpec> collectionSpecs) {
-    Map<String, DynamicDataSpecImpl> dataSpecs = collectionSpecs.entrySet().stream()
+  public Map<String, DynamicDataSpec> collectionMapToDynamicDataMap(Map<String, CollectionSpec> collectionSpecs) {
+    Map<String, DynamicDataSpec> dataSpecs = collectionSpecs.entrySet().stream()
      .collect(Collectors.toMap(Map.Entry::getKey, e -> new DynamicDataSpecImpl(e.getValue())));
 
      return(dataSpecs);
   }
 
   public String getVoidEvalCollectionMetadataList(Map<String, CollectionSpec> collectionSpecs) {
-     Map<String, DynamicDataSpecImpl> dataSpecs = collectionMapToDynamicDataMap(collectionSpecs);
+     Map<String, DynamicDataSpec> dataSpecs = collectionMapToDynamicDataMap(collectionSpecs);
 
      return getVoidEvalDynamicDataMetadataList(dataSpecs);
   }
@@ -681,10 +681,10 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     return rBinList + "))";
   }
 
-  public boolean validateImputeZeroesRequest(Map<String, DynamicDataSpecImpl> dataSpecs) {
+  public boolean validateImputeZeroesRequest(Map<String, DynamicDataSpec> dataSpecs) {
     // TODO keep adding checks as i think of them
 
-    List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findDataSpecsWithStudyDependentVocabs(dataSpecs);
+    List<DynamicDataSpec> dataSpecsWithStudyDependentVocabs = findDataSpecsWithStudyDependentVocabs(dataSpecs);
     List<String> entities = dataSpecsWithStudyDependentVocabs.stream().map(data -> getDynamicDataSpecEntityId(data)).toList();
     if (entities.size() == 0) {
       return false;
@@ -698,7 +698,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     return true;
   }
 
-  public String getRStudyVocabsAsString(DynamicDataSpecImpl dataSpec) {
+  public String getRStudyVocabsAsString(DynamicDataSpec dataSpec) {
     PluginUtil util = getUtil();
     
     // this assuming the first ancestor is the root one is a bit hacky, but i did the same in R so...
@@ -716,7 +716,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     return studyVocabsListAsRString;
   }
 
-  public String getRStudyVocabsAsString(List<DynamicDataSpecImpl> dataSpecs) {
+  public String getRStudyVocabsAsString(List<DynamicDataSpec> dataSpecs) {
     String studyVocabListRString = "veupathUtils::StudySpecificVocabulariesByVariableList(S4Vectors::SimpleList(";
     boolean first = true;
 
@@ -733,7 +733,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     return studyVocabListRString + "))";
   }
 
-  public boolean hasStudyDependentVocabulary(DynamicDataSpecImpl dataSpec) {
+  public boolean hasStudyDependentVocabulary(DynamicDataSpec dataSpec) {
     PluginUtil util = getUtil();
 
     if (dataSpec.isCollectionSpec()) {
@@ -747,25 +747,25 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
 
   // these are deprecated. weve decided to always pass all variables w study dependent vocabs, 
   // rather than only the ones present in the plot. its just going to call the new getDynamicDataSpecsWithStudyDependentVocabs..
-  public List<DynamicDataSpec> findDataSpecsWithStudyDependentVocabs(Map<String, DynamicDataSpecImpl> dataSpecs) {
+  public List<DynamicDataSpec> findDataSpecsWithStudyDependentVocabs(Map<String, DynamicDataSpec> dataSpecs) {
     // can use the first, we validate theyre all on the same entity
     String entityId = getDynamicDataSpecEntityId(dataSpecs.get(0));
     return getDynamicDataSpecsWithStudyDependentVocabs(entityId);
   }
 
   public List<DynamicDataSpec> findVariableSpecsWithStudyDependentVocabs(Map<String, VariableSpec> varSpecs) {
-    Map<String, DynamicDataSpecImpl> dataSpecs = varMapToDynamicDataMap(varSpecs);
+    Map<String, DynamicDataSpec> dataSpecs = varMapToDynamicDataMap(varSpecs);
 
     return findDataSpecsWithStudyDependentVocabs(dataSpecs);
   }
 
   public List<DynamicDataSpec> findCollectionSpecsWithStudyDependentVocabs(Map<String, CollectionSpec> collectionSpecs) {
-    Map<String, DynamicDataSpecImpl> dataSpecs = collectionMapToDynamicDataMap(collectionSpecs);
+    Map<String, DynamicDataSpec> dataSpecs = collectionMapToDynamicDataMap(collectionSpecs);
 
     return findDataSpecsWithStudyDependentVocabs(dataSpecs);
   }
 
-  public String getDynamicDataSpecEntityId(DynamicDataSpecImpl dataSpec) {
+  public String getDynamicDataSpecEntityId(DynamicDataSpec dataSpec) {
     if (dataSpec.isCollectionSpec()) {
       return dataSpec.getCollectionSpec().getEntityId();
     } else if (dataSpec.isVariableSpec()) {
@@ -775,7 +775,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     }
   }
 
-  public String getDynamicDataSpecId(DynamicDataSpecImpl dataSpec) {
+  public String getDynamicDataSpecId(DynamicDataSpec dataSpec) {
     if (dataSpec.isCollectionSpec()) {
       return dataSpec.getCollectionSpec().getCollectionId();
     } else if (dataSpec.isVariableSpec()) {
@@ -785,11 +785,11 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     }
   }
 
-  public String getRMegastudyAsString(String compressedDataHandle, Map<String, DynamicDataSpecImpl> dataSpecs) {
+  public String getRMegastudyAsString(String compressedDataHandle, Map<String, DynamicDataSpec> dataSpecs) {
     PluginUtil util = getUtil();
 
     // find and validate variables w study specific vocabs
-    List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findDataSpecsWithStudyDependentVocabs(dataSpecs);
+    List<DynamicDataSpec> dataSpecsWithStudyDependentVocabs = findDataSpecsWithStudyDependentVocabs(dataSpecs);
     List<String> entities = dataSpecsWithStudyDependentVocabs.stream().map(data -> getDynamicDataSpecEntityId(data)).toList();
     String studyVocabsAsRString = getRStudyVocabsAsString(dataSpecsWithStudyDependentVocabs);
 
@@ -805,11 +805,11 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     return megastudyAsRString;
   }
 
-  public String getRInputDataWithImputedZeroesAsString(String compressedDataHandle, Map<String, DynamicDataSpecImpl> dataSpecs) {
+  public String getRInputDataWithImputedZeroesAsString(String compressedDataHandle, Map<String, DynamicDataSpec> dataSpecs) {
     return getRInputDataWithImputedZeroesAsString(compressedDataHandle, dataSpecs, "variables");
   }
 
-  public String getRInputDataWithImputedZeroesAsString(String compressedDataHandle, Map<String, DynamicDataSpecImpl> dataSpecs, String variableMetadataListHandle) {
+  public String getRInputDataWithImputedZeroesAsString(String compressedDataHandle, Map<String, DynamicDataSpec> dataSpecs, String variableMetadataListHandle) {
     boolean validRequest = validateImputeZeroesRequest(dataSpecs);
 
     if (validRequest) {
@@ -825,7 +825,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
   }
 
   public String getRCollectionInputDataWithImputedZeroesAsString(String compressedDataHandle, Map<String, CollectionSpec> collectionSpecs, String variableMetadataListHandle) {
-    Map<String, DynamicDataSpecImpl> dataSpecs = collectionMapToDynamicDataMap(collectionSpecs);
+    Map<String, DynamicDataSpec> dataSpecs = collectionMapToDynamicDataMap(collectionSpecs);
 
     return(getRInputDataWithImputedZeroesAsString(compressedDataHandle, dataSpecs, variableMetadataListHandle));
   }
@@ -835,7 +835,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
   }
 
   public String getRVariableInputDataWithImputedZeroesAsString(String compressedDataHandle, Map<String, VariableSpec> varSpecs, String variableMetadataListHandle) {
-    Map<String, DynamicDataSpecImpl> dataSpecs = varMapToDynamicDataMap(varSpecs);
+    Map<String, DynamicDataSpec> dataSpecs = varMapToDynamicDataMap(varSpecs);
 
     return(getRInputDataWithImputedZeroesAsString(compressedDataHandle, dataSpecs, variableMetadataListHandle));
   }

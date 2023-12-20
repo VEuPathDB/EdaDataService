@@ -92,7 +92,7 @@ public class CollectionFloatingBoxplotPlugin extends AbstractEmptyComputePlugin<
     List<VariableSpec> inputVarSpecs = new ArrayList<>(spec.getOverlayConfig().getSelectedMembers());
     inputVarSpecs.add(spec.getXAxisVariable());
     CollectionSpec overlayVariable = spec.getOverlayConfig().getCollection();
-    Map<String, DynamicDataSpecImpl> varMap = new HashMap<>();
+    Map<String, DynamicDataSpec> varMap = new HashMap<>();
     varMap.put("xAxis", new DynamicDataSpecImpl(spec.getXAxisVariable()));
     varMap.put("overlay", new DynamicDataSpecImpl(overlayVariable));
     
