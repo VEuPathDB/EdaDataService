@@ -355,20 +355,20 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     return vocab;
   }
 
-  protected Map<String, InputStream> getVocabByRootEntity(DynamicDataSpecImpl dataSpec) {
+  protected Map<String, InputStream> getVocabByRootEntity(DynamicDataSpec dataSpec) {
     return getVocabByRootEntity(dataSpec, _subsetFilters);
   }
 
-  protected Map<String, InputStream> getVocabByRootEntity(List<DynamicDataSpecImpl> dataSpecs, List<APIFilter> subsetFilters) {
+  protected Map<String, InputStream> getVocabByRootEntity(List<DynamicDataSpec> dataSpecs, List<APIFilter> subsetFilters) {
     Map<String, InputStream> studyVocabStreams = new HashMap<String, InputStream>();
-    for (DynamicDataSpecImpl dataSpec : dataSpecs) {
+    for (DynamicDataSpec dataSpec : dataSpecs) {
       studyVocabStreams.putAll(getVocabByRootEntity(dataSpec));
     }
 
     return studyVocabStreams;
   }
 
-  protected Map<String, InputStream> getVocabByRootEntity(List<DynamicDataSpecImpl> dataSpecs) {
+  protected Map<String, InputStream> getVocabByRootEntity(List<DynamicDataSpec> dataSpecs) {
     return getVocabByRootEntity(dataSpecs, _subsetFilters);
   }
 
@@ -886,6 +886,11 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     collectionSpecsWithStudyDependentVocabs.stream().filter(col -> !collectionSpecsToIgnore.contains(col)).collect(Collectors.toList());
 
     return collectionSpecsWithStudyDependentVocabs;
+  }
+
+  // this seems the most common case for collections, so worth a helper
+  public List<CollectionSpec> getCollectionSpecsWithStudyDependentVocabs(String entityId, CollectionSpec collectionSpecToIgnore) {
+    return getCollectionSpecsWithStudyDependentVocabs(entityId, List.of(collectionSpecToIgnore));
   }
 
   public List<DynamicDataSpec> getDynamicDataSpecsWithStudyDependentVocabs(String entityId, List<DynamicDataSpec> dataSpecsToIgnore) {
