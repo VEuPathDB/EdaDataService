@@ -117,7 +117,7 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
       connection.voidEval(DEFAULT_SINGLE_STREAM_NAME + " <- data.table::fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
 
       String inputData = getRVariableInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap, outputEntityId, "variables");
-      connection.voidEval(getVoidEvalVariableMetadataList(varMap));
+      connection.voidEval(getVoidEvalVariableMetadataListWithStudyDependentVocabs(varMap, outputEntityId));
       String cmd =
           "plot.data::bar(data=" + inputData + ", " +
               "variables=variables, " +

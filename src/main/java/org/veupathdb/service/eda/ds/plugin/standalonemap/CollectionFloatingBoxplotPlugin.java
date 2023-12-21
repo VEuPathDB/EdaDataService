@@ -118,7 +118,7 @@ public class CollectionFloatingBoxplotPlugin extends AbstractEmptyComputePlugin<
 
     useRConnectionWithProcessedRemoteFiles(Resources.RSERVE_URL, filesProcessor, connection -> {
       String inputData = getRInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap, outputEntityId, "variables");
-      connection.voidEval(getVoidEvalDynamicDataMetadataList(varMap));
+      connection.voidEval(getVoidEvalDynamicDataMetadataListWithStudyDependentVocabs(varMap, outputEntityId));
       String cmd =
           "plot.data::box(data=" + inputData + ", " +
               "variables=variables, " +
