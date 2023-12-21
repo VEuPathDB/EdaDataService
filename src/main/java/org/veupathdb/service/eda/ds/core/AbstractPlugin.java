@@ -850,7 +850,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
         VariableSpecImpl varSpec = new VariableSpecImpl();
         varSpec.setVariableId(var.getVariableId());
         varSpec.setEntityId(entityId);
-        varSpecsWithStudyDependentVocabs.add(var);
+        varSpecsWithStudyDependentVocabs.add(varSpec);
       }
     }
 
@@ -874,7 +874,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
         CollectionSpecImpl colSpec = new CollectionSpecImpl();
         colSpec.setCollectionId(collection.getCollectionId());
         colSpec.setEntityId(entityId);
-        collectionSpecsWithStudyDependentVocabs.add(collection);
+        collectionSpecsWithStudyDependentVocabs.add(colSpec);
       }
     }
 
