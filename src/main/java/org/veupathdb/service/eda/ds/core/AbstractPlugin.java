@@ -807,24 +807,42 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     return compressedDataHandle;
   }
 
-  public String getRCollectionInputDataWithImputedZeroesAsString(String compressedDataHandle, Map<String, CollectionSpec> collectionSpecs) {
-    return getRCollectionInputDataWithImputedZeroesAsString(compressedDataHandle, collectionSpecs, "variables");
+  public String getRCollectionInputDataWithImputedZeroesAsString(
+    String compressedDataHandle, 
+    Map<String, CollectionSpec> collectionSpecs,
+    String outputEntityId
+  ) {
+    return getRCollectionInputDataWithImputedZeroesAsString(compressedDataHandle, collectionSpecs, outputEntityId, "variables");
   }
 
-  public String getRCollectionInputDataWithImputedZeroesAsString(String compressedDataHandle, Map<String, CollectionSpec> collectionSpecs, String variableMetadataListHandle) {
+  public String getRCollectionInputDataWithImputedZeroesAsString(
+    String compressedDataHandle, 
+    Map<String, CollectionSpec> collectionSpecs, 
+    String outputEntityId,
+    String variableMetadataListHandle
+  ) {
     Map<String, DynamicDataSpec> dataSpecs = collectionMapToDynamicDataMap(collectionSpecs);
 
-    return(getRInputDataWithImputedZeroesAsString(compressedDataHandle, dataSpecs, variableMetadataListHandle));
+    return(getRInputDataWithImputedZeroesAsString(compressedDataHandle, dataSpecs, outputEntityId, variableMetadataListHandle));
   }
 
-  public String getRVariableInputDataWithImputedZeroesAsString(String compressedDataHandle, Map<String, VariableSpec> varSpecs) {
-    return getRVariableInputDataWithImputedZeroesAsString(compressedDataHandle, varSpecs, "variables");
+  public String getRVariableInputDataWithImputedZeroesAsString(
+    String compressedDataHandle, 
+    Map<String, VariableSpec> varSpecs,
+    String outputEntityId
+  ) {
+    return getRVariableInputDataWithImputedZeroesAsString(compressedDataHandle, varSpecs, outputEntityId, "variables");
   }
 
-  public String getRVariableInputDataWithImputedZeroesAsString(String compressedDataHandle, Map<String, VariableSpec> varSpecs, String variableMetadataListHandle) {
+  public String getRVariableInputDataWithImputedZeroesAsString(
+    String compressedDataHandle, 
+    Map<String, VariableSpec> varSpecs, 
+    String outputEntityId,
+    String variableMetadataListHandle
+  ) {
     Map<String, DynamicDataSpec> dataSpecs = varMapToDynamicDataMap(varSpecs);
 
-    return(getRInputDataWithImputedZeroesAsString(compressedDataHandle, dataSpecs, variableMetadataListHandle));
+    return(getRInputDataWithImputedZeroesAsString(compressedDataHandle, dataSpecs, outputEntityId, variableMetadataListHandle));
   }
 
   // TODO consider adding all that follows to util in edacommon
