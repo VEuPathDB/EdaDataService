@@ -748,8 +748,9 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
   // these are deprecated. weve decided to always pass all variables w study dependent vocabs, 
   // rather than only the ones present in the plot. its just going to call the new getDynamicDataSpecsWithStudyDependentVocabs..
   public List<DynamicDataSpec> findDataSpecsWithStudyDependentVocabs(Map<String, DynamicDataSpec> dataSpecs) {
-    // can use the first, we validate theyre all on the same entity
-    String entityId = getDynamicDataSpecEntityId(dataSpecs.get(0));
+    // i dont think this is guaranteed to work properly..... consider actually removing these methods
+    Map.Entry<String, DynamicDataSpec> entry = dataSpecs.entrySet().iterator().next();
+    String entityId = getDynamicDataSpecEntityId(entry.getValue());
     return getDynamicDataSpecsWithStudyDependentVocabs(entityId);
   }
 
@@ -857,9 +858,36 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     return varSpecsWithStudyDependentVocabs;
   }
 
+  public boolean areSameVariableSpec(VariableSpec varSpec1, VariableSpec varSpec2) {
+    return varSpec1.getVariableId().equals(varSpec2.getVariableId()) &&
+           varSpec1.getEntityId().equals(varSpec2.getEntityId());
+  }
+
+  public boolean containsVariableSpec(List<VariableSpec> varSpecs, VariableSpec varSpec) {
+    return varSpecs.stream().anyMatch(var -> areSameVariableSpec(var, varSpec));
+  }
+
+  public boolean areSameDynamicDataSpec(DynamicDataSpec dataSpec1, DynamicDataSpec dataSpec2) {
+    return getDynamicDataSpecId(dataSpec1).equals(getDynamicDataSpecId(dataSpec2)) &&
+           getDynamicDataSpecEntityId(dataSpec1).equals(getDynamicDataSpecEntityId(dataSpec2));
+  }
+
+  public boolean containsDataSpec(List<DynamicDataSpec> dataSpecs, DynamicDataSpec dataSpec) {
+    return dataSpecs.stream().anyMatch(data -> areSameDynamicDataSpec(data, dataSpec));
+  }
+
+  public boolean areSameCollectionSpec(CollectionSpec colSpec1, CollectionSpec colSpec2) {
+    return colSpec1.getCollectionId().equals(colSpec2.getCollectionId()) &&
+           colSpec1.getEntityId().equals(colSpec2.getEntityId());
+  }
+
+  public boolean containsCollectionSpec(List<CollectionSpec> colSpecs, CollectionSpec colSpec) {
+    return colSpecs.stream().anyMatch(col -> areSameCollectionSpec(col, colSpec));
+  }
+
   public List<VariableSpec> getVariableSpecsWithStudyDependentVocabs(String entityId, List<VariableSpec> varSpecsToIgnore) {
     List<VariableSpec> varSpecsWithStudyDependentVocabs = getVariableSpecsWithStudyDependentVocabs(entityId);
-    varSpecsWithStudyDependentVocabs.stream().filter(var -> !varSpecsToIgnore.contains(var)).collect(Collectors.toList());
+    varSpecsWithStudyDependentVocabs = varSpecsWithStudyDependentVocabs.stream().filter(var -> !containsVariableSpec(varSpecsToIgnore, var)).collect(Collectors.toList());
 
     return varSpecsWithStudyDependentVocabs;
   }
@@ -883,7 +911,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
 
   public List<CollectionSpec> getCollectionSpecsWithStudyDependentVocabs(String entityId, List<CollectionSpec> collectionSpecsToIgnore) {
     List<CollectionSpec> collectionSpecsWithStudyDependentVocabs = getCollectionSpecsWithStudyDependentVocabs(entityId);
-    collectionSpecsWithStudyDependentVocabs.stream().filter(col -> !collectionSpecsToIgnore.contains(col)).collect(Collectors.toList());
+    collectionSpecsWithStudyDependentVocabs.stream().filter(col -> !containsCollectionSpec(collectionSpecsToIgnore, col)).collect(Collectors.toList());
 
     return collectionSpecsWithStudyDependentVocabs;
   }
