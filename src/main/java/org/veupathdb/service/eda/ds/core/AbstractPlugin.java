@@ -684,7 +684,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
   public boolean validateImputeZeroesRequest(Map<String, DynamicDataSpec> dataSpecs) {
     // TODO keep adding checks as i think of them
 
-    List<DynamicDataSpec> dataSpecsWithStudyDependentVocabs = findDataSpecsWithStudyDependentVocabs(dataSpecs);
+    List<DynamicDataSpec> dataSpecsWithStudyDependentVocabs = dataSpecs.entrySet().stream().filter(entry -> hasStudyDependentVocabulary(entry.getValue())).map(Map.Entry::getValue).toList();
     List<String> entities = dataSpecsWithStudyDependentVocabs.stream().map(data -> getDynamicDataSpecEntityId(data)).toList();
     if (entities.size() == 0) {
       return false;
@@ -745,27 +745,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     }
   }
 
-  // these are deprecated. weve decided to always pass all variables w study dependent vocabs, 
-  // rather than only the ones present in the plot. its just going to call the new getDynamicDataSpecsWithStudyDependentVocabs..
-  public List<DynamicDataSpec> findDataSpecsWithStudyDependentVocabs(Map<String, DynamicDataSpec> dataSpecs) {
-    // i dont think this is guaranteed to work properly..... consider actually removing these methods
-    Map.Entry<String, DynamicDataSpec> entry = dataSpecs.entrySet().iterator().next();
-    String entityId = getDynamicDataSpecEntityId(entry.getValue());
-    return getDynamicDataSpecsWithStudyDependentVocabs(entityId);
-  }
-
-  public List<DynamicDataSpec> findVariableSpecsWithStudyDependentVocabs(Map<String, VariableSpec> varSpecs) {
-    Map<String, DynamicDataSpec> dataSpecs = varMapToDynamicDataMap(varSpecs);
-
-    return findDataSpecsWithStudyDependentVocabs(dataSpecs);
-  }
-
-  public List<DynamicDataSpec> findCollectionSpecsWithStudyDependentVocabs(Map<String, CollectionSpec> collectionSpecs) {
-    Map<String, DynamicDataSpec> dataSpecs = collectionMapToDynamicDataMap(collectionSpecs);
-
-    return findDataSpecsWithStudyDependentVocabs(dataSpecs);
-  }
-
+  // TODO consider moving these next two to utils in edacommon
   public String getDynamicDataSpecEntityId(DynamicDataSpec dataSpec) {
     if (dataSpec.isCollectionSpec()) {
       return dataSpec.getCollectionSpec().getEntityId();
@@ -786,17 +766,14 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     }
   }
 
-  public String getRMegastudyAsString(String compressedDataHandle, Map<String, DynamicDataSpec> dataSpecs) {
+  public String getRMegastudyAsString(String compressedDataHandle, String outputEntityId) {
     PluginUtil util = getUtil();
 
     // find and validate variables w study specific vocabs
-    List<DynamicDataSpec> dataSpecsWithStudyDependentVocabs = findDataSpecsWithStudyDependentVocabs(dataSpecs);
-    List<String> entities = dataSpecsWithStudyDependentVocabs.stream().map(data -> getDynamicDataSpecEntityId(data)).toList();
+    List<DynamicDataSpec> dataSpecsWithStudyDependentVocabs = getDynamicDataSpecsWithStudyDependentVocabs(outputEntityId);
     String studyVocabsAsRString = getRStudyVocabsAsString(dataSpecsWithStudyDependentVocabs);
 
-    // get ancestor ids, can use first var bc we validate there is at least one and they all have the same entity
-    String entityId = entities.get(0);
-    String ancestorIdsAsRString = util.getEntityAncestorsAsRVectorString(entityId, _referenceMetadata, true);
+    String ancestorIdsAsRString = util.getEntityAncestorsAsRVectorString(outputEntityId, _referenceMetadata, true);
 
     String megastudyAsRString = "veupathUtils::Megastudy(" + 
                                  "data = " + compressedDataHandle + "," +
@@ -806,15 +783,24 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     return megastudyAsRString;
   }
 
-  public String getRInputDataWithImputedZeroesAsString(String compressedDataHandle, Map<String, DynamicDataSpec> dataSpecs) {
-    return getRInputDataWithImputedZeroesAsString(compressedDataHandle, dataSpecs, "variables");
+  public String getRInputDataWithImputedZeroesAsString(
+    String compressedDataHandle, Map<String, 
+    DynamicDataSpec> dataSpecs, 
+    String outputEntityId
+  ) {
+    return getRInputDataWithImputedZeroesAsString(compressedDataHandle, dataSpecs, outputEntityId, "variables");
   }
 
-  public String getRInputDataWithImputedZeroesAsString(String compressedDataHandle, Map<String, DynamicDataSpec> dataSpecs, String variableMetadataListHandle) {
+  public String getRInputDataWithImputedZeroesAsString(
+    String compressedDataHandle, 
+    Map<String, DynamicDataSpec> dataSpecs, 
+    String outputEntityId,
+    String variableMetadataListHandle
+  ) {
     boolean validRequest = validateImputeZeroesRequest(dataSpecs);
 
     if (validRequest) {
-      String megastudyData = getRMegastudyAsString(compressedDataHandle, dataSpecs);
+      String megastudyData = getRMegastudyAsString(compressedDataHandle, outputEntityId);
       return "veupathUtils::getDTWithImputedZeroes(" + megastudyData + ", " + variableMetadataListHandle + ")";
     }
     
@@ -841,6 +827,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     return(getRInputDataWithImputedZeroesAsString(compressedDataHandle, dataSpecs, variableMetadataListHandle));
   }
 
+  // TODO consider adding all that follows to util in edacommon
   public List<VariableSpec> getVariableSpecsWithStudyDependentVocabs(String entityId) {
     List<VariableSpec> varSpecsWithStudyDependentVocabs = new ArrayList<>();
     EntityDef entity = _referenceMetadata.getEntity(entityId).orElseThrow();
