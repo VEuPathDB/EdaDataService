@@ -41,6 +41,7 @@ import java.util.Map.Entry;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static org.veupathdb.service.eda.common.plugin.util.PluginUtil.singleQuote;
@@ -581,11 +582,12 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     if (collection == null) return null;
     PluginUtil util = getUtil();
     String membersList = getVariableSpecListRObjectAsString(util.getCollectionMembers(collection));
+    plotReference = plotReference == null ? "" : "veupathUtils::PlotReference(value=" + singleQuote(plotReference) + "),";
     return
         "veupathUtils::VariableMetadata(" +
         "variableClass=veupathUtils::VariableClass(value='native')," +
         "variableSpec=veupathUtils::VariableSpec(variableId=" + singleQuote(collection.getCollectionId()) + ",entityId=" + singleQuote(collection.getEntityId()) + ")," +
-        "plotReference=veupathUtils::PlotReference(value=" + singleQuote(plotReference) + ")," +
+        plotReference +
         "dataType=" + singleQuote(util.getCollectionType(collection)) + "," +
         "dataShape=" + singleQuote(util.getCollectionDataShape(collection)) + "," +
         "imputeZero=" + util.getCollectionImputeZero(collection).toUpperCase() + "," +
@@ -597,16 +599,28 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     if (var == null) return null;
     PluginUtil util = getUtil();
     String hasStudyDependentVocabulary = util.getHasStudyDependentVocabulary(var) ? "TRUE" : "FALSE";
+    plotReference = plotReference == null ? "" : "plotReference=veupathUtils::PlotReference(value=" + singleQuote(plotReference) + "),";
     return
         "veupathUtils::VariableMetadata(" +
         "variableClass=veupathUtils::VariableClass(value='native')," +
         "variableSpec=veupathUtils::VariableSpec(variableId=" + singleQuote(var.getVariableId()) + ",entityId=" + singleQuote(var.getEntityId()) + ")," +
-        "plotReference=veupathUtils::PlotReference(value=" + singleQuote(plotReference) + ")," +
+        plotReference +
         "dataType=veupathUtils::DataType(value=" + singleQuote(util.getVariableType(var)) + ")," +
         "dataShape=veupathUtils::DataShape(value=" + singleQuote(util.getVariableDataShape(var)) + ")," +
         "imputeZero=" + util.getVariableImputeZero(var).toUpperCase() + "," +
         "weightingVariableSpec=" + getVariableSpecRObjectAsString(util.getVariableSpecToImputeZeroesFor(var), true) + "," +
         "hasStudyDependentVocabulary=" + hasStudyDependentVocabulary + ")";
+  }
+
+  public String getVoidEvalDynamicDataMetadataListWithStudyDependentVocabs(Map<String, DynamicDataSpec> dataSpecs, String outputEntityId) {
+    List<DynamicDataSpec> dataSpecsFromMap = dataSpecs.values().stream().collect(Collectors.toList());
+    List<DynamicDataSpec> dataSpecsWithStudyDependentVocabs = getDynamicDataSpecsWithStudyDependentVocabs(outputEntityId, dataSpecsFromMap);
+    // for each new data spec with study dependent vocabs, add it to the map
+    for (DynamicDataSpec dataSpec : dataSpecsWithStudyDependentVocabs) {
+      dataSpecs.put("none" + getDynamicDataSpecId(dataSpec), dataSpec);
+    }
+    
+    return getVoidEvalDynamicDataMetadataList(dataSpecs);
   }
 
   public String getVoidEvalDynamicDataMetadataList(Map<String, DynamicDataSpec> dataSpecs) {
@@ -620,6 +634,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
           dataSpecs.entrySet().stream()
             .map(entry -> {
               String plotReference = entry.getKey();
+              if (plotReference.contains("none") || plotReference.contains("null")) plotReference = null;
               DynamicDataSpec dataSpec = entry.getValue();
               if (dataSpec.isCollectionSpec()) {
                 return getVariableMetadataRObjectAsString(dataSpec.getCollectionSpec(), plotReference);
@@ -641,6 +656,18 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
      return(dataSpecs);
   }
 
+public String getVoidEvalVariableMetadataListWithStudyDependentVocabs(Map<String, VariableSpec> varSpecs, String outputEntityId) {
+  List<VariableSpec> varSpecsFromMap = varSpecs.values().stream().collect(Collectors.toList());
+  List<VariableSpec> varSpecsWithStudyDependentVocabs = getVariableSpecsWithStudyDependentVocabs(outputEntityId, varSpecsFromMap);
+  // for each new varSpec with studyDependentVocabs, add it to varSpecs
+  for (VariableSpec varSpec : varSpecsWithStudyDependentVocabs) {
+    //ok this is a bit hacky i guess.. 
+    // maybe someday make the varMap like Map<String, List<VariableSpec>>, could help facets too
+    varSpecs.put("none" + varSpec.getVariableId(), varSpec);
+  }
+  return getVoidEvalVariableMetadataList(varSpecs);
+}
+
   public String getVoidEvalVariableMetadataList(Map<String, VariableSpec> varSpecs) {
     Map<String, DynamicDataSpec> dataSpecs = varMapToDynamicDataMap(varSpecs);
 
@@ -652,6 +679,17 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
      .collect(Collectors.toMap(Map.Entry::getKey, e -> new DynamicDataSpecImpl(e.getValue())));
 
      return(dataSpecs);
+  }
+
+  public String getVoidEvalCollectionMetadataListWithStudyDependentVocabs(Map<String, CollectionSpec> collectionSpecs, String outputEntityId) {
+    List<CollectionSpec> collectionSpecsFromMap = collectionSpecs.values().stream().collect(Collectors.toList());
+    List<CollectionSpec> collectionSpecsWithStudyDependentVocabs = getCollectionSpecsWithStudyDependentVocabs(outputEntityId, collectionSpecsFromMap);
+   
+    for (CollectionSpec collectionSpec : collectionSpecsWithStudyDependentVocabs) {
+      collectionSpecs.put("none" + collectionSpec.getCollectionId(), collectionSpec);
+    }
+    
+    return getVoidEvalCollectionMetadataList(collectionSpecs);
   }
 
   public String getVoidEvalCollectionMetadataList(Map<String, CollectionSpec> collectionSpecs) {
