@@ -89,6 +89,7 @@ public class CollectionFloatingBoxplotPlugin extends AbstractEmptyComputePlugin<
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PluginUtil util = getUtil();
     CollectionFloatingBoxplotSpec spec = getPluginSpec();
+    String outputEntityId = spec.getOutputEntityId();
     List<VariableSpec> inputVarSpecs = new ArrayList<>(spec.getOverlayConfig().getSelectedMembers());
     inputVarSpecs.add(spec.getXAxisVariable());
     CollectionSpec overlayVariable = spec.getOverlayConfig().getCollection();
@@ -111,12 +112,12 @@ public class CollectionFloatingBoxplotPlugin extends AbstractEmptyComputePlugin<
         conn.voidEval(name + " <- data.table::fread('" + name + "', na.strings=c(''))")
       );
 
-    List<DynamicDataSpec> dataSpecsWithStudyDependentVocabs = findDataSpecsWithStudyDependentVocabs(varMap);
+    List<DynamicDataSpec> dataSpecsWithStudyDependentVocabs = getDynamicDataSpecsWithStudyDependentVocabs(outputEntityId);
     Map<String, InputStream> studyVocabs = getVocabByRootEntity(dataSpecsWithStudyDependentVocabs);
     dataStreams.putAll(studyVocabs);
 
     useRConnectionWithProcessedRemoteFiles(Resources.RSERVE_URL, filesProcessor, connection -> {
-      String inputData = getRInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap, "variables");
+      String inputData = getRInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap, outputEntityId, "variables");
       connection.voidEval(getVoidEvalDynamicDataMetadataList(varMap));
       String cmd =
           "plot.data::box(data=" + inputData + ", " +

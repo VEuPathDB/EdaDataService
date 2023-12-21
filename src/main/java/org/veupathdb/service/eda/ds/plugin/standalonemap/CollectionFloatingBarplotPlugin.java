@@ -83,19 +83,20 @@ public class CollectionFloatingBarplotPlugin extends AbstractEmptyComputePlugin<
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     CollectionFloatingBarplotSpec spec = getPluginSpec();
+    String outputEntityId = spec.getOutputEntityId();
     String barMode = spec.getBarMode().getValue();
     String overlayValues = getRBinListAsString(spec.getOverlayConfig().getSelectedValues());
 
     Map<String, CollectionSpec> varMap = new HashMap<>();
     varMap.put("overlay", spec.getOverlayConfig().getCollection());
      
-    List<DynamicDataSpec> dataSpecsWithStudyDependentVocabs = findCollectionSpecsWithStudyDependentVocabs(varMap);
+    List<DynamicDataSpec> dataSpecsWithStudyDependentVocabs = getDynamicDataSpecsWithStudyDependentVocabs(outputEntityId);
     Map<String, InputStream> studyVocabs = getVocabByRootEntity(dataSpecsWithStudyDependentVocabs);
     dataStreams.putAll(studyVocabs);
 
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(DEFAULT_SINGLE_STREAM_NAME + " <- data.table::fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
-      String inputData = getRCollectionInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap, "variables");
+      String inputData = getRCollectionInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap, outputEntityId, "variables");
       connection.voidEval(getVoidEvalCollectionMetadataList(varMap));
       String cmd =
           "plot.data::bar(data=" + inputData + ", " +

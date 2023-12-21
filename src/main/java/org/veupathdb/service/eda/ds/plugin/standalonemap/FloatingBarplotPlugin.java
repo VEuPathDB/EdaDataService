@@ -99,6 +99,7 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     FloatingBarplotSpec spec = getPluginSpec();
     PluginUtil util = getUtil();
+    String outputEntityId = spec.getOutputEntityId();
     String barMode = spec.getBarMode().getValue();
     VariableSpec overlayVariable = _overlaySpecification != null ? _overlaySpecification.getOverlayVariable() : null;
     String overlayValues = _overlaySpecification == null ? "NULL" : _overlaySpecification.getRBinListAsString();
@@ -108,14 +109,14 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
     varMap.put("overlay", overlayVariable);
 
     // TODO can we make this automagical? override useRConnectionWithRemoteFiles ? i wasnt clear how..
-    List<DynamicDataSpec> dataSpecsWithStudyDependentVocabs = findVariableSpecsWithStudyDependentVocabs(varMap);
+    List<DynamicDataSpec> dataSpecsWithStudyDependentVocabs = getDynamicDataSpecsWithStudyDependentVocabs(outputEntityId);
     Map<String, InputStream> studyVocabs = getVocabByRootEntity(dataSpecsWithStudyDependentVocabs);
     dataStreams.putAll(studyVocabs);
  
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(DEFAULT_SINGLE_STREAM_NAME + " <- data.table::fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
 
-      String inputData = getRVariableInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap, "variables");
+      String inputData = getRVariableInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap, outputEntityId, "variables");
       connection.voidEval(getVoidEvalVariableMetadataList(varMap));
       String cmd =
           "plot.data::bar(data=" + inputData + ", " +
