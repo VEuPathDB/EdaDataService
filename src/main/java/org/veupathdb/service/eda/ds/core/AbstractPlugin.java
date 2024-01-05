@@ -902,6 +902,8 @@ public String getVoidEvalVariableMetadataListWithStudyDependentVocabs(Map<String
   }
 
   public boolean areSameVariableSpec(VariableSpec varSpec1, VariableSpec varSpec2) {
+    if (varSpec1 == null || varSpec2 == null) return false;
+
     return varSpec1.getVariableId().equals(varSpec2.getVariableId()) &&
            varSpec1.getEntityId().equals(varSpec2.getEntityId());
   }
@@ -911,6 +913,8 @@ public String getVoidEvalVariableMetadataListWithStudyDependentVocabs(Map<String
   }
 
   public boolean areSameDynamicDataSpec(DynamicDataSpec dataSpec1, DynamicDataSpec dataSpec2) {
+    if (dataSpec1 == null || dataSpec2 == null) return false;
+
     return getDynamicDataSpecId(dataSpec1).equals(getDynamicDataSpecId(dataSpec2)) &&
            getDynamicDataSpecEntityId(dataSpec1).equals(getDynamicDataSpecEntityId(dataSpec2));
   }
@@ -920,6 +924,8 @@ public String getVoidEvalVariableMetadataListWithStudyDependentVocabs(Map<String
   }
 
   public boolean areSameCollectionSpec(CollectionSpec colSpec1, CollectionSpec colSpec2) {
+    if (colSpec1 == null || colSpec2 == null) return false;
+    
     return colSpec1.getCollectionId().equals(colSpec2.getCollectionId()) &&
            colSpec1.getEntityId().equals(colSpec2.getEntityId());
   }
