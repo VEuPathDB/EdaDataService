@@ -88,7 +88,9 @@ public class FloatingBoxplotPlugin extends AbstractEmptyComputePlugin<FloatingBo
     List<VariableSpec> plotVariableSpecs = new ArrayList<VariableSpec>();
     plotVariableSpecs.add(pluginSpec.getXAxisVariable());
     plotVariableSpecs.add(pluginSpec.getYAxisVariable());
-    plotVariableSpecs.add(Optional.ofNullable(pluginSpec.getOverlayConfig()).map(OverlayConfig::getOverlayVariable).orElse(null));
+    Optional.ofNullable(pluginSpec.getOverlayConfig())
+        .map(OverlayConfig::getOverlayVariable)
+        .ifPresent(plotVariableSpecs::add);
 
     return ListBuilder.asList(
       new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, outputEntityId)
