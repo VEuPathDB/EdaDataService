@@ -130,8 +130,10 @@ public abstract class AbstractCorrelationBipartiteNetwork<T extends DataPluginRe
     bipartiteNetwork.setData(bipartiteNetworkData);
     bipartiteNetwork.setConfig(bipartiteNetworkConfig);
 
-    BipartiteNetworkPostResponse response = new BipartiteNetworkPostResponseImpl();
+    CorrelationBipartiteNetworkPostResponse response = new CorrelationBipartiteNetworkPostResponseImpl();
     response.setBipartitenetwork(bipartiteNetwork);
+    response.setSignificanceThreshold(pValueThreshold);
+    response.setCorrelationCoefThreshold(correlationCoefThreshold);
 
     JsonUtil.Jackson.writeValue(out, response);
     out.flush();
