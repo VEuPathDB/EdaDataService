@@ -724,9 +724,6 @@ public String getVoidEvalVariableMetadataListWithStudyDependentVocabs(Map<String
 
     List<DynamicDataSpec> dataSpecsWithStudyDependentVocabs = dataSpecs.entrySet().stream().filter(entry -> hasStudyDependentVocabulary(entry.getValue())).map(Map.Entry::getValue).toList();
     List<String> entities = dataSpecsWithStudyDependentVocabs.stream().map(data -> getDynamicDataSpecEntityId(data)).toList();
-    //if (entities.size() == 0) {
-    //  return false;
-    //}
 
     boolean allEqualEntities = entities.isEmpty() || Collections.frequency(entities, entities.get(0)) == entities.size();
     if (!allEqualEntities) { 
