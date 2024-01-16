@@ -348,14 +348,14 @@ public class AppsService implements Apps {
   @Override
   public PostAppsCorrelationassaymetadataVisualizationsBipartitenetworkResponse postAppsCorrelationassaymetadataVisualizationsBipartitenetwork(CorrelationAssayMetadataBipartitenetworkPostRequest entity) {
     return wrapPlugin(() -> PostAppsCorrelationassaymetadataVisualizationsBipartitenetworkResponse.respond200WithApplicationJson(
-        new BipartiteNetworkPostResponseStream(processRequest(new CorrelationAssayMetadataBipartitenetworkPlugin(), entity))));
+        new CorrelationBipartiteNetworkPostResponseStream(processRequest(new CorrelationAssayMetadataBipartitenetworkPlugin(), entity))));
   }
 
   @DisableJackson
   @Override
   public PostAppsCorrelationassayassayVisualizationsBipartitenetworkResponse postAppsCorrelationassayassayVisualizationsBipartitenetwork(CorrelationAssayAssayBipartitenetworkPostRequest entity) {
     return wrapPlugin(() -> PostAppsCorrelationassayassayVisualizationsBipartitenetworkResponse.respond200WithApplicationJson(
-        new BipartiteNetworkPostResponseStream(processRequest(new CorrelationAssayAssayBipartitenetworkPlugin(), entity))));
+        new CorrelationBipartiteNetworkPostResponseStream(processRequest(new CorrelationAssayAssayBipartitenetworkPlugin(), entity))));
   }
 
   @DisableJackson

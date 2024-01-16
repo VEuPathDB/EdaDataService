@@ -866,6 +866,12 @@ types:
       correlationCoefThreshold:
         type: number
         required: false
+  CorrelationBipartiteNetworkPostResponse:
+    type: BipartiteNetworkPostResponse
+    additionalProperties: false
+    properties:
+      significanceThreshold: number
+      correlationCoefThreshold: number
   CorrelationAssayAssayBipartitenetworkPostRequest:
     type: DataPluginRequestBase
     properties:
@@ -920,7 +926,7 @@ types:
     properties:
       source: NodeData
       target: NodeData
-      strokeWidth: string
+      weight: string
       color: string
   NetworkData:
     type: object

@@ -96,7 +96,7 @@ public abstract class AbstractCorrelationBipartiteNetwork<T extends DataPluginRe
       LinkData link = new LinkDataImpl();
       link.setSource(sourceNode);
       link.setTarget(targetNode);
-      link.setStrokeWidth(String.valueOf(Math.abs(Float.parseFloat(correlationRow.getCorrelationCoef()))));
+      link.setWeight(String.valueOf(Math.abs(Float.parseFloat(correlationRow.getCorrelationCoef()))));
       // Link color is the sign of the correlation
       String color = Float.parseFloat(correlationRow.getCorrelationCoef()) < 0 ? "-1" : "1";
       link.setColor(color);
@@ -131,8 +131,10 @@ public abstract class AbstractCorrelationBipartiteNetwork<T extends DataPluginRe
     bipartiteNetwork.setData(bipartiteNetworkData);
     bipartiteNetwork.setConfig(bipartiteNetworkConfig);
 
-    BipartiteNetworkPostResponse response = new BipartiteNetworkPostResponseImpl();
+    CorrelationBipartiteNetworkPostResponse response = new CorrelationBipartiteNetworkPostResponseImpl();
     response.setBipartitenetwork(bipartiteNetwork);
+    response.setSignificanceThreshold(pValueThreshold);
+    response.setCorrelationCoefThreshold(correlationCoefThreshold);
 
     JsonUtil.Jackson.writeValue(out, response);
     out.flush();
