@@ -70,7 +70,7 @@ public abstract class AbstractCorrelationBipartiteNetwork<T extends DataPluginRe
       // Skip rows that have no correlation coefficient, a NaN correlation coef, or a correlation coef that is too small. Filtering here prevents us
       // from showing nodes with no links.
       if (correlationRow.getCorrelationCoef() == null) return;
-      if (correlationRow.getCorrelationCoef() == "NaN") return;
+      if (Float.isNaN(Float.parseFloat(correlationRow.getCorrelationCoef()))) return;
       if (Math.abs(Float.parseFloat(correlationRow.getCorrelationCoef())) < correlationCoefThreshold.floatValue()) return;
       if (correlationRow.getPValue() != null) {
         if (Float.parseFloat(correlationRow.getPValue()) > pValueThreshold.floatValue()) return;
