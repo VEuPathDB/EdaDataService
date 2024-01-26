@@ -752,6 +752,8 @@ public String getVoidEvalVariableMetadataListWithStudyDependentVocabs(Map<String
   }
 
   public String getRStudyVocabsAsString(List<DynamicDataSpec> dataSpecs) {
+    if (dataSpecs.isEmpty()) { return "veupathUtils::StudySpecificVocabulariesByVariableList()"; }
+
     String studyVocabListRString = "veupathUtils::StudySpecificVocabulariesByVariableList(S4Vectors::SimpleList(";
     boolean first = true;
 
