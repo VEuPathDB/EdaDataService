@@ -646,10 +646,18 @@ types:
     type: object
     properties:
       pcoaVariance: number[]
+  FeaturePrefilterThresholds:
+    type: object
+    additionalProperties: false
+    properties:
+      proportionNonZero?: number
+      variance?: number
+      standardDeviation?: number
   CorrelationComputeConfig:
     type: object
     properties:
       correlationMethod: CorrelationMethod
+      prefilterThresholds?: FeaturePrefilterThresholds
   CorrelationMethod:
     type: string
     enum:
@@ -778,6 +786,15 @@ types:
     additionalProperties: false
     properties:
       isCutoff: boolean
+  InternalJob:
+    type: object
+    properties:
+      jobId: JobID
+      status: JobStatus
+      owned: boolean
+      created: datetime
+      grabbed: datetime
+      finished: datetime
   PluginOverview:
     displayName: Plugin Overview
     type: object
@@ -939,16 +956,44 @@ types:
       variables:
         type: VariableMapping[]
         required: false
+  KPartiteNetworkConfig:
+    type: NetworkConfig
+    properties:
+      partitionsMetadata: string[]
+  NodeIdList:
+    type: object
+    additionalProperties: false
+    properties:
+      nodeIds: string[]
+  KPartiteNetworkData:
+    type: NetworkData
+    properties:
+      partitions: NodeIdList[]
+  KPartiteNetwork:
+    type: object
+    additionalProperties: false
+    properties:
+      data: KPartiteNetworkData
+      config: KPartiteNetworkConfig
+  KPartiteNetworkPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      kpartitenetwork: KPartiteNetwork
   BipartiteNetworkConfig:
     type: NetworkConfig
     properties:
-      column1Metadata: string
-      column2Metadata: string
+      partitionsMetadata:
+        type: string[]
+        minItems: 2
+        maxItems: 2
   BipartiteNetworkData:
     type: NetworkData
     properties:
-      column1NodeIDs: string[]
-      column2NodeIDs: string[]
+      partitions:
+        type: NodeIdList[]
+        maxItems: 2
+        minItems: 2
   BipartiteNetwork:
     type: object
     additionalProperties: false
