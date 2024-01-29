@@ -28,6 +28,33 @@ types:
         type: VariableMapping[]
         required: false
 
+  KPartiteNetworkConfig:
+    type: NetworkConfig
+    properties:
+      partitionsMetadata: string[]
+
+  NodeIdList:
+    additionalProperties: false
+    properties:
+      nodeIds: string[]
+
+  KPartiteNetworkData:
+    type: NetworkData
+    properties:
+      partitions: NodeIdList[]
+
+  KPartiteNetwork:
+    additionalProperties: false
+    properties:
+      data: KPartiteNetworkData
+      config: KPartiteNetworkConfig
+
+  KPartiteNetworkPostResponse:
+    additionalProperties: false
+    properties:
+      kpartitenetwork: KPartiteNetwork
+
+  # deprecated
   BipartiteNetworkConfig:
     type: NetworkConfig
     properties:
@@ -39,7 +66,6 @@ types:
     properties:
       column1NodeIDs: string[]
       column2NodeIDs: string[]
-
 
   BipartiteNetwork:
     additionalProperties: false
