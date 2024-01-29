@@ -54,18 +54,22 @@ types:
     properties:
       kpartitenetwork: KPartiteNetwork
 
-  # deprecated
+  # a specific case of a KPartiteNetwork w two partitions
   BipartiteNetworkConfig:
     type: NetworkConfig
     properties:
-      column1Metadata: string
-      column2Metadata: string
+      partitionsMetadata: 
+        type: string[]
+        minItems: 2
+        maxItems: 2      
 
   BipartiteNetworkData:
     type: NetworkData
     properties:
-      column1NodeIDs: string[]
-      column2NodeIDs: string[]
+      partitions:
+        type: NodeIdList[]
+        maxItems: 2
+        minItems: 2
 
   BipartiteNetwork:
     additionalProperties: false
