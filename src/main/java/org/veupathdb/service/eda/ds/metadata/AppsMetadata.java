@@ -48,6 +48,7 @@ public class AppsMetadata {
   public static final String ALLCLINEPI_PROJECT = "AllClinEpiDB";
   public static final String MICROBIOME_PROJECT = "MicrobiomeDB";
   public static final String VECTORBASE_PROJECT = "VectorBase";
+  public static final String PLASMODB_PROJECT = "PlasmoDB";
 
   // NOTE: these names must match the url segments defined in the api.raml
   // Pass vizs are now different based on mbio vs clinepi so we need to adjust the below array?
@@ -85,7 +86,7 @@ public class AppsMetadata {
           viz("histogram", new CollectionFloatingHistogramPlugin())),
       app("pass", "Pass-Through", null,
           "A collection of visualizations designed to support the unbiased exploration of relationships between variables",
-          Arrays.asList(CLINEPI_PROJECT, ALLCLINEPI_PROJECT),
+          Arrays.asList(CLINEPI_PROJECT, ALLCLINEPI_PROJECT, VECTORBASE_PROJECT),
           viz("histogram", new HistogramPlugin()),
           viz("barplot", new BarplotPlugin()),
           viz("scatterplot", new ScatterplotPlugin()),
@@ -117,11 +118,11 @@ public class AppsMetadata {
           viz("volcanoplot", new DifferentialAbundanceVolcanoplotPlugin())),
       app("correlationassaymetadata", "Correlation", "correlationassaymetadata",
           "Discover taxa or genes correlated with metadata.",
-          List.of(MICROBIOME_PROJECT),
+          List.of(MICROBIOME_PROJECT, PLASMODB_PROJECT),
           viz("bipartitenetwork", new CorrelationAssayMetadataBipartitenetworkPlugin())),
       app("correlationassayassay", "Functional Associations", "correlationassayassay",
           "Discover taxa or genes correlated with other taxa or genes.",
-          List.of(MICROBIOME_PROJECT),
+          List.of(MICROBIOME_PROJECT, PLASMODB_PROJECT),
           viz("bipartitenetwork", new CorrelationAssayAssayBipartitenetworkPlugin())),
       app("distributions", "Distributions", null,
           "Plot simple distributions for any continuous variable, including metadata (e.g. age, height, etc.) or microbial assay results.",
