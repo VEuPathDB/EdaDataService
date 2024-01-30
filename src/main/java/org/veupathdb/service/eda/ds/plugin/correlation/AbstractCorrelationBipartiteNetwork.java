@@ -120,13 +120,13 @@ public abstract class AbstractCorrelationBipartiteNetwork<T extends DataPluginRe
     BipartiteNetworkData bipartiteNetworkData = new BipartiteNetworkDataImpl();
     bipartiteNetworkData.setLinks(links);
     bipartiteNetworkData.setNodes(nodes);
-    NodeIdList col1NodeIdList = new NodeIdListImpl();
-    col1NodeIdList.setNodeIds(uniqueColumn1IDs);
-    NodeIdList col2NodeIdList = new NodeIdListImpl();
-    col2NodeIdList.setNodeIds(uniqueColumn2IDs);
+    NodeIdList partition1NodeIdList = new NodeIdListImpl();
+    partition1NodeIdList.setNodeIds(uniqueColumn1IDs);
+    NodeIdList partition2NodeIdList = new NodeIdListImpl();
+    partition2NodeIdList.setNodeIds(uniqueColumn2IDs);
     List<NodeIdList> partitions = new ArrayList<NodeIdList>();
-    partitions.add(col1NodeIdList);
-    partitions.add(col2NodeIdList);
+    partitions.add(partition1NodeIdList);
+    partitions.add(partition2NodeIdList);
     bipartiteNetworkData.setPartitions(partitions);
 
     BipartiteNetworkConfig bipartiteNetworkConfig = new BipartiteNetworkConfigImpl();
