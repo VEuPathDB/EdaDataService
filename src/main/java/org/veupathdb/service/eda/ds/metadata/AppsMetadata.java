@@ -25,6 +25,8 @@ import org.veupathdb.service.eda.ds.plugin.pass.MapMarkersOverlayPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.TestCollectionPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.BubbleMapMarkersLegendPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.BubbleMapMarkersPlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.CollectionFloatingBarplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.CollectionFloatingBoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.CollectionFloatingContTablePlugin;
@@ -57,6 +59,8 @@ public class AppsMetadata {
           "A collection of visualizations designed to support the unbiased exploration of relationships between spatiotemporal variables in a cartographic map.",
           Arrays.asList(VECTORBASE_PROJECT),
           viz("map-markers", new StandaloneMapMarkersPlugin())),
+          viz("map-markers-bubbles", new BubbleMapMarkersPlugin()),
+          viz("map-markers-bubbles-legend", new BubbleMapMarkersLegendPlugin()),
       app("standalone-map-xyrelationships", "X-Y Relationships", null,
           "Build plots to explore the relationship between two variables.",
           Arrays.asList(VECTORBASE_PROJECT),
