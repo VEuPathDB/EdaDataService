@@ -25,6 +25,8 @@ import org.veupathdb.service.eda.ds.plugin.pass.MapMarkersOverlayPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.TestCollectionPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.BubbleMapMarkersLegendPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.BubbleMapMarkersPlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.CollectionFloatingBarplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.CollectionFloatingBoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.CollectionFloatingContTablePlugin;
@@ -56,6 +58,9 @@ public class AppsMetadata {
           "A collection of visualizations designed to support the unbiased exploration of relationships between spatiotemporal variables in a cartographic map.",
           Arrays.asList(VECTORBASE_PROJECT),
           viz("map-markers", new StandaloneMapMarkersPlugin())),
+          viz("map-markers-overlay", new MapMarkersOverlayPlugin()),
+          viz("map-markers-bubbles", new BubbleMapMarkersPlugin()),
+          viz("map-markers-bubbles-legend", new BubbleMapMarkersLegendPlugin()),
       app("standalone-map-xyrelationships", "X-Y Relationships", null,
           "Build plots to explore the relationship between two variables.",
           Arrays.asList(VECTORBASE_PROJECT),
@@ -97,6 +102,8 @@ public class AppsMetadata {
           viz("heatmap", new HeatmapPlugin()),
           viz("map-markers", new MapPlugin()),
           viz("map-markers-overlay", new MapMarkersOverlayPlugin())),
+          viz("map-markers-bubbles", new BubbleMapMarkersPlugin()),
+          viz("map-markers-bubbles-legend", new BubbleMapMarkersLegendPlugin()),
       app("alphadiv", "Alpha Diversity", "alphadiv",
           "Visualize within-sample (alpha) microbial diversity based on field-standard metrics, such as the Shannon Diversity Index, Simpson's Diversity Index, and Pielou's Evenness.",
           List.of(MICROBIOME_PROJECT),
@@ -146,6 +153,8 @@ public class AppsMetadata {
           // also if we did, id like to consider splitting bubbles into their own viz
           viz("map-markers", new MapPlugin()),
           viz("map-markers-overlay", new MapMarkersOverlayPlugin())),
+          viz("map-markers-bubbles", new BubbleMapMarkersPlugin()),
+          viz("map-markers-bubbles-legend", new BubbleMapMarkersLegendPlugin()),
       app("sample", "Sample", null,
           "Wrapper app for sample/test plugins",
           List.of(),
