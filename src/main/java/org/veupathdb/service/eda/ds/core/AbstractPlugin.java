@@ -889,10 +889,10 @@ public String getVoidEvalVariableMetadataListWithStudyDependentVocabs(Map<String
 
     // get reference metadata and find variables w study specific vocabs
     for (VariableDef var : entity.getVariables()) {
-      if (var.getHasStudyDependentVocabulary()) {
+      if (var.getHasStudyDependentVocabulary() && var.getEntityId().equals(entityId)) {
         VariableSpecImpl varSpec = new VariableSpecImpl();
         varSpec.setVariableId(var.getVariableId());
-        varSpec.setEntityId(entityId);
+        varSpec.setEntityId(var.getEntityId());
         varSpecsWithStudyDependentVocabs.add(varSpec);
       }
     }
@@ -946,10 +946,10 @@ public String getVoidEvalVariableMetadataListWithStudyDependentVocabs(Map<String
 
     // get reference metadata and find collections w study specific vocabs
     for (CollectionDef collection : entity.getCollections()) {
-      if (collection.getHasStudyDependentVocabulary()) {
+      if (collection.getHasStudyDependentVocabulary() && collection.getEntityId().equals(entityId)) {
         CollectionSpecImpl colSpec = new CollectionSpecImpl();
         colSpec.setCollectionId(collection.getCollectionId());
-        colSpec.setEntityId(entityId);
+        colSpec.setEntityId(collection.getEntityId());
         collectionSpecsWithStudyDependentVocabs.add(colSpec);
       }
     }
