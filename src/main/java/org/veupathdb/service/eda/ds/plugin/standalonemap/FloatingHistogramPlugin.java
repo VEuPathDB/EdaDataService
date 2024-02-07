@@ -16,6 +16,7 @@ import org.veupathdb.service.eda.generated.model.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,18 +85,25 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
 
   @Override
   protected List<StreamSpec> getRequestedStreams(FloatingHistogramSpec pluginSpec) {
+    String outputEntityId = pluginSpec.getOutputEntityId();
+    List<VariableSpec> plotVariableSpecs = new ArrayList<VariableSpec>();
+    plotVariableSpecs.add(pluginSpec.getXAxisVariable());
+    Optional.ofNullable(pluginSpec.getOverlayConfig())
+        .map(OverlayConfig::getOverlayVariable)
+        .ifPresent(plotVariableSpecs::add);
+
     return ListBuilder.asList(
-      new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
-        .addVar(pluginSpec.getXAxisVariable())
-        .addVar(Optional.ofNullable(pluginSpec.getOverlayConfig())
-            .map(OverlayConfig::getOverlayVariable)
-            .orElse(null)));
+      new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, outputEntityId)
+        .addVars(plotVariableSpecs)
+        // TODO can we make this automagical?
+        .addVars(getVariableSpecsWithStudyDependentVocabs(pluginSpec.getOutputEntityId(), plotVariableSpecs)));
   }
   
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     PluginUtil util = getUtil();
     FloatingHistogramSpec spec = getPluginSpec();
+    String outputEntityId = spec.getOutputEntityId();
     VariableSpec overlayVariable = _overlaySpecification != null ? _overlaySpecification.getOverlayVariable() : null;
     Map<String, VariableSpec> varMap = new HashMap<>();
     varMap.put("xAxis", spec.getXAxisVariable());
@@ -105,14 +113,14 @@ public class FloatingHistogramPlugin extends AbstractEmptyComputePlugin<Floating
     String xVarType = util.getVariableType(spec.getXAxisVariable());
     String overlayValues = _overlaySpecification == null ? "NULL" : _overlaySpecification.getRBinListAsString();
 
-    List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findVariableSpecsWithStudyDependentVocabs(varMap);
+    List<DynamicDataSpec> dataSpecsWithStudyDependentVocabs = getDynamicDataSpecsWithStudyDependentVocabs(outputEntityId);
     Map<String, InputStream> studyVocabs = getVocabByRootEntity(dataSpecsWithStudyDependentVocabs);
     dataStreams.putAll(studyVocabs);
 
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(DEFAULT_SINGLE_STREAM_NAME + " <- data.table::fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
-      String inputData = getRVariableInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap, "variables"); 
-      connection.voidEval(getVoidEvalVariableMetadataList(varMap));
+      String inputData = getRVariableInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap, outputEntityId, "variables"); 
+      connection.voidEval(getVoidEvalVariableMetadataListWithStudyDependentVocabs(varMap, outputEntityId));
      
       String viewportRString = getViewportAsRString(spec.getViewport(), xVarType);
       connection.voidEval(viewportRString);

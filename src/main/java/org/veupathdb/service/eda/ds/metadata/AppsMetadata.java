@@ -7,11 +7,12 @@ import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.ds.core.AbstractPlugin;
 import org.veupathdb.service.eda.ds.plugin.differentialabundance.DifferentialAbundanceVolcanoplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.betadiv.BetaDivScatterplotPlugin;
+import org.veupathdb.service.eda.ds.plugin.correlation.correlationassayassay.CorrelationAssayAssayBipartitenetworkPlugin;
+import org.veupathdb.service.eda.ds.plugin.correlation.correlationassaymetadata.CorrelationAssayMetadataBipartitenetworkPlugin;
 import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivBoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.abundance.AbundanceBoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.abundance.AbundanceScatterplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.correlationassaymetadata.CorrelationAssayMetadataBipartitenetworkPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.BarplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.BoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ContTablePlugin;
@@ -24,6 +25,8 @@ import org.veupathdb.service.eda.ds.plugin.pass.MapMarkersOverlayPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.ScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.pass.TwoByTwoPlugin;
 import org.veupathdb.service.eda.ds.plugin.sample.TestCollectionPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.BubbleMapMarkersLegendPlugin;
+import org.veupathdb.service.eda.ds.plugin.standalonemap.BubbleMapMarkersPlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.CollectionFloatingBarplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.CollectionFloatingBoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.CollectionFloatingContTablePlugin;
@@ -47,6 +50,7 @@ public class AppsMetadata {
   public static final String ALLCLINEPI_PROJECT = "AllClinEpiDB";
   public static final String MICROBIOME_PROJECT = "MicrobiomeDB";
   public static final String VECTORBASE_PROJECT = "VectorBase";
+  public static final String PLASMODB_PROJECT = "PlasmoDB";
 
   // NOTE: these names must match the url segments defined in the api.raml
   // Pass vizs are now different based on mbio vs clinepi so we need to adjust the below array?
@@ -54,7 +58,9 @@ public class AppsMetadata {
       app("standalone-map", "Standalone Map", null,
           "A collection of visualizations designed to support the unbiased exploration of relationships between spatiotemporal variables in a cartographic map.",
           Arrays.asList(VECTORBASE_PROJECT),
-          viz("map-markers", new StandaloneMapMarkersPlugin())),
+          viz("map-markers", new StandaloneMapMarkersPlugin()),
+          viz("map-markers-bubbles", new BubbleMapMarkersPlugin()),
+          viz("map-markers-bubbles-legend", new BubbleMapMarkersLegendPlugin())),
       app("standalone-map-xyrelationships", "X-Y Relationships", null,
           "Build plots to explore the relationship between two variables.",
           Arrays.asList(VECTORBASE_PROJECT),
@@ -84,7 +90,7 @@ public class AppsMetadata {
           viz("histogram", new CollectionFloatingHistogramPlugin())),
       app("pass", "Pass-Through", null,
           "A collection of visualizations designed to support the unbiased exploration of relationships between variables",
-          Arrays.asList(CLINEPI_PROJECT, ALLCLINEPI_PROJECT),
+          Arrays.asList(CLINEPI_PROJECT, ALLCLINEPI_PROJECT, VECTORBASE_PROJECT),
           viz("histogram", new HistogramPlugin()),
           viz("barplot", new BarplotPlugin()),
           viz("scatterplot", new ScatterplotPlugin()),
@@ -116,8 +122,12 @@ public class AppsMetadata {
           viz("volcanoplot", new DifferentialAbundanceVolcanoplotPlugin())),
       app("correlationassaymetadata", "Correlation", "correlationassaymetadata",
           "Discover taxa or genes correlated with metadata.",
-          List.of(MICROBIOME_PROJECT),
+          List.of(MICROBIOME_PROJECT, PLASMODB_PROJECT),
           viz("bipartitenetwork", new CorrelationAssayMetadataBipartitenetworkPlugin())),
+      app("correlationassayassay", "Functional Associations", "correlationassayassay",
+          "Discover taxa or genes correlated with other taxa or genes.",
+          List.of(MICROBIOME_PROJECT, PLASMODB_PROJECT),
+          viz("bipartitenetwork", new CorrelationAssayAssayBipartitenetworkPlugin())),
       app("distributions", "Distributions", null,
           "Plot simple distributions for any continuous variable, including metadata (e.g. age, height, etc.) or microbial assay results.",
           List.of(MICROBIOME_PROJECT),
@@ -134,6 +144,13 @@ public class AppsMetadata {
           List.of(MICROBIOME_PROJECT),
           viz("scatterplot", new ScatterplotPlugin()),
           viz("lineplot", new LineplotPlugin())),
+      app("maps", "Maps", null,
+          "Map visualizations for any geographic data",
+          List.of(MICROBIOME_PROJECT),
+          // i think we could switch to StandaloneMapMarkersPlugin if we wanted to, need mockups frontend though
+          // also if we did, id like to consider splitting bubbles into their own viz
+          viz("map-markers", new MapPlugin()),
+          viz("map-markers-overlay", new MapMarkersOverlayPlugin())),
       app("sample", "Sample", null,
           "Wrapper app for sample/test plugins",
           List.of(),

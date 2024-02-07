@@ -14,6 +14,7 @@ import org.veupathdb.service.eda.generated.model.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,18 +83,25 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
 
   @Override
   protected List<StreamSpec> getRequestedStreams(FloatingBarplotSpec pluginSpec) {
+    String outputEntityId = pluginSpec.getOutputEntityId();
+    List<VariableSpec> plotVariableSpecs = new ArrayList<VariableSpec>();
+    plotVariableSpecs.add(pluginSpec.getXAxisVariable());
+    Optional.ofNullable(pluginSpec.getOverlayConfig())
+        .map(OverlayConfig::getOverlayVariable)
+        .ifPresent(plotVariableSpecs::add);
+
     return ListBuilder.asList(
-      new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
-        .addVar(pluginSpec.getXAxisVariable())
-        .addVar(Optional.ofNullable(pluginSpec.getOverlayConfig())
-            .map(OverlayConfig::getOverlayVariable)
-            .orElse(null)));
+      new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, outputEntityId)
+        .addVars(plotVariableSpecs)
+        // TODO can we make this automagical?
+        .addVars(getVariableSpecsWithStudyDependentVocabs(pluginSpec.getOutputEntityId(), plotVariableSpecs)));
   }
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     FloatingBarplotSpec spec = getPluginSpec();
     PluginUtil util = getUtil();
+    String outputEntityId = spec.getOutputEntityId();
     String barMode = spec.getBarMode().getValue();
     VariableSpec overlayVariable = _overlaySpecification != null ? _overlaySpecification.getOverlayVariable() : null;
     String overlayValues = _overlaySpecification == null ? "NULL" : _overlaySpecification.getRBinListAsString();
@@ -103,15 +111,15 @@ public class FloatingBarplotPlugin extends AbstractEmptyComputePlugin<FloatingBa
     varMap.put("overlay", overlayVariable);
 
     // TODO can we make this automagical? override useRConnectionWithRemoteFiles ? i wasnt clear how..
-    List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findVariableSpecsWithStudyDependentVocabs(varMap);
+    List<DynamicDataSpec> dataSpecsWithStudyDependentVocabs = getDynamicDataSpecsWithStudyDependentVocabs(outputEntityId);
     Map<String, InputStream> studyVocabs = getVocabByRootEntity(dataSpecsWithStudyDependentVocabs);
     dataStreams.putAll(studyVocabs);
  
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(DEFAULT_SINGLE_STREAM_NAME + " <- data.table::fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
 
-      String inputData = getRVariableInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap, "variables");
-      connection.voidEval(getVoidEvalVariableMetadataList(varMap));
+      String inputData = getRVariableInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap, outputEntityId, "variables");
+      connection.voidEval(getVoidEvalVariableMetadataListWithStudyDependentVocabs(varMap, outputEntityId));
       String cmd =
           "plot.data::bar(data=" + inputData + ", " +
               "variables=variables, " +

@@ -58,30 +58,34 @@ public class CollectionFloatingContTablePlugin extends AbstractEmptyComputePlugi
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(CollectionFloatingContTableSpec pluginSpec) {    
+  protected List<StreamSpec> getRequestedStreams(CollectionFloatingContTableSpec pluginSpec) {   
+    String outputEntityId = pluginSpec.getOutputEntityId();
+    List<VariableSpec> plotVariableSpecs = new ArrayList<VariableSpec>();
+    plotVariableSpecs.addAll(pluginSpec.getXAxisVariable().getSelectedMembers());
+
     return ListBuilder.asList(
-      new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, pluginSpec.getOutputEntityId())
-        .addVars(pluginSpec.getXAxisVariable().getSelectedMembers())
-      ); 
+      new StreamSpec(DEFAULT_SINGLE_STREAM_NAME, outputEntityId)
+        .addVars(plotVariableSpecs)
+        // TODO can we make this automagical?
+        .addVars(getVariableSpecsWithStudyDependentVocabs(pluginSpec.getOutputEntityId(), plotVariableSpecs))); 
   }
 
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
-    PluginUtil util = getUtil();
     CollectionFloatingContTableSpec spec = getPluginSpec();
+    String outputEntityId = spec.getOutputEntityId();
     String overlayValues = getRBinListAsString(spec.getXAxisVariable().getSelectedValues());
-    List<VariableSpec> inputVarSpecs = new ArrayList<>(spec.getXAxisVariable().getSelectedMembers());
     Map<String, CollectionSpec> varMap = new HashMap<>();
     varMap.put("xAxis", spec.getXAxisVariable().getCollection());
    
-    List<DynamicDataSpecImpl> dataSpecsWithStudyDependentVocabs = findCollectionSpecsWithStudyDependentVocabs(varMap);
+    List<DynamicDataSpec> dataSpecsWithStudyDependentVocabs = getDynamicDataSpecsWithStudyDependentVocabs(outputEntityId);
     Map<String, InputStream> studyVocabs = getVocabByRootEntity(dataSpecsWithStudyDependentVocabs);
     dataStreams.putAll(studyVocabs);
 
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
       connection.voidEval(DEFAULT_SINGLE_STREAM_NAME + " <- data.table::fread('" + DEFAULT_SINGLE_STREAM_NAME + "', na.strings=c(''))");
-      String inputData = getRCollectionInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap, "variables");
-      connection.voidEval(getVoidEvalCollectionMetadataList(varMap));
+      String inputData = getRCollectionInputDataWithImputedZeroesAsString(DEFAULT_SINGLE_STREAM_NAME, varMap, outputEntityId, "variables");
+      connection.voidEval(getVoidEvalCollectionMetadataListWithStudyDependentVocabs(varMap, outputEntityId));
       String cmd = "plot.data::mosaic(data=" + inputData + ", " + 
                                         "variables=variables, " + 
                                         "statistic='chiSq', " + 

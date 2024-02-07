@@ -527,20 +527,35 @@ securitySchemes:
               application/json:
                 type: lib.DifferentialAbundanceStatsResponse
 
+  /correlationassayassay/visualizations:
+    displayName: Visualizations for discovering correlations between various assay data
+
+    /bipartitenetwork:
+      post:
+        description: Returns data required to create a bipartite network from a correlation matrix.
+        body:
+          application/json:
+            type: lib.CorrelationAssayAssayBipartitenetworkPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.CorrelationBipartiteNetworkPostResponse
+
   /correlationassaymetadata/visualizations:
     displayName: Visualizations for discovering corrleations between assay data and sample metadata
 
     /bipartitenetwork:
       post:
-        description: Returns data required to create a volcanoplot from a differential abundance analysis.
+        description: Returns data required to create a bipartite network from a correlation matrix.
         body:
           application/json:
-            type: lib.CorrelationBipartitenetworkPostRequest
+            type: lib.CorrelationAssayMetadataBipartitenetworkPostRequest
         responses:
           200:
             body:
               application/json:
-                type: lib.BipartiteNetworkPostResponse
+                type: lib.CorrelationBipartiteNetworkPostResponse
 
   /distributions/visualizations:
     displayName: Visualizations for exploring distributions of data.
