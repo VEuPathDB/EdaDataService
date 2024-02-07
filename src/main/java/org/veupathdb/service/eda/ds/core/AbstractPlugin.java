@@ -7,6 +7,7 @@ import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.WebApplicationException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.gusdb.fgputil.AutoCloseableList;
 import org.gusdb.fgputil.Timer;
 import org.gusdb.fgputil.Tuples.ThreeTuple;
 import org.gusdb.fgputil.Tuples.TwoTuple;
@@ -173,35 +174,29 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     _requestProcessed = true;
     logRequestTime("Initial request processing complete");
 
+    // create stream generator
+    Optional<TwoTuple<String, Object>> typedTuple = _computeInfo.map(info -> new TwoTuple<>(info.getFirst(), info.getSecond()));
+    Function<StreamSpec, ResponseFuture> streamGenerator = spec -> _mergingClient
+        .getTabularDataStream(_referenceMetadata, _subsetFilters, _derivedVariableSpecs, typedTuple, spec);
+
+    final AutoCloseableList<InputStream> dataStreams = StreamingDataClient.buildDataStreams(_requiredStreams, streamGenerator);
+
     return out -> {
-      try {
-        if (!_requestProcessed) {
-          throw new RuntimeException("Output cannot be streamed until request has been processed.");
-        }
-
-        // create stream generator
-        Optional<TwoTuple<String, Object>> typedTuple = _computeInfo.map(info -> new TwoTuple<>(info.getFirst(), info.getSecond()));
-        Function<StreamSpec, ResponseFuture> streamGenerator = spec -> _mergingClient
-            .getTabularDataStream(_referenceMetadata, _subsetFilters, _derivedVariableSpecs, typedTuple, spec);
-
-        // create stream processor
-        // TODO: might make disallowing empty results optional in the future; this is the original implementation
-        //ConsumerWithException<Map<String,InputStream>> streamProcessor = map -> writeResults(out, map);
-        ConsumerWithException<Map<String, InputStream>> streamProcessor = map -> writeResults(out,
-            Functions.mapValues(map, entry -> new NonEmptyResultStream(entry.getKey(), entry.getValue())));
-
-        // build and process streams
-        logRequestTime("Making requests for data streams");
-        LOG.info("Building and processing " + _requiredStreams.size() + " required data streams.");
-        StreamingDataClient.buildAndProcessStreams(_requiredStreams, streamGenerator, streamProcessor);
-        logRequestTime("Data streams processed; response written; request complete");
-      } catch (NonEmptyResultStream.EmptyResultException e) {
-        // This error handling has to happen in the stream consumer since it's being invoked as part of generating
-        // the streaming response. Translating to WebApplicationException will ensure the ErrorMapper translates
-        // this properly to a 204. This is a bit deep in the application to have framework-specific logic, but
-        // I'm not sure there's a better way.
-        throw new WebApplicationException(e.getMessage(), 204);
+      if (!_requestProcessed) {
+        throw new RuntimeException("Output cannot be streamed until request has been processed.");
       }
+
+      // create stream processor
+      // TODO: might make disallowing empty results optional in the future; this is the original implementation
+      //ConsumerWithException<Map<String,InputStream>> streamProcessor = map -> writeResults(out, map);
+      ConsumerWithException<Map<String, InputStream>> streamProcessor = map -> writeResults(out,
+          Functions.mapValues(map, entry -> new NonEmptyResultStream(entry.getKey(), entry.getValue())));
+
+      // build and process streams
+      logRequestTime("Making requests for data streams");
+      LOG.info("Building and processing " + _requiredStreams.size() + " required data streams.");
+      StreamingDataClient.processDataStreams(_requiredStreams, dataStreams, streamProcessor);
+      logRequestTime("Data streams processed; response written; request complete");
     };
   }
 

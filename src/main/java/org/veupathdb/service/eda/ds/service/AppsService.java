@@ -164,6 +164,9 @@ public class AppsService implements Apps {
     catch (ValidationException e) {
       throw new BadRequestException(e.getMessage());
     }
+    catch (EmptyResultException e) {
+      throw new WebApplicationException(e.getMessage(), 204);
+    }
     catch (WebApplicationException e) {
       throw e;
     }
