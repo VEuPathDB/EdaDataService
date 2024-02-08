@@ -4,8 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ser.std.StdKeySerializers.Dynamic;
 
 import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.WebApplicationException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.gusdb.fgputil.AutoCloseableList;
 import org.gusdb.fgputil.Timer;
 import org.gusdb.fgputil.Tuples.ThreeTuple;
 import org.gusdb.fgputil.Tuples.TwoTuple;
@@ -172,15 +174,17 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     _requestProcessed = true;
     logRequestTime("Initial request processing complete");
 
+    // create stream generator
+    Optional<TwoTuple<String, Object>> typedTuple = _computeInfo.map(info -> new TwoTuple<>(info.getFirst(), info.getSecond()));
+    Function<StreamSpec, ResponseFuture> streamGenerator = spec -> _mergingClient
+        .getTabularDataStream(_referenceMetadata, _subsetFilters, _derivedVariableSpecs, typedTuple, spec);
+
+    final AutoCloseableList<InputStream> dataStreams = StreamingDataClient.buildDataStreams(_requiredStreams, streamGenerator);
+
     return out -> {
       if (!_requestProcessed) {
         throw new RuntimeException("Output cannot be streamed until request has been processed.");
       }
-
-      // create stream generator
-      Optional<TwoTuple<String, Object>> typedTuple = _computeInfo.map(info -> new TwoTuple<>(info.getFirst(), info.getSecond()));
-      Function<StreamSpec, ResponseFuture> streamGenerator = spec -> _mergingClient
-          .getTabularDataStream(_referenceMetadata, _subsetFilters, _derivedVariableSpecs, typedTuple, spec);
 
       // create stream processor
       // TODO: might make disallowing empty results optional in the future; this is the original implementation
@@ -191,7 +195,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
       // build and process streams
       logRequestTime("Making requests for data streams");
       LOG.info("Building and processing " + _requiredStreams.size() + " required data streams.");
-      StreamingDataClient.buildAndProcessStreams(_requiredStreams, streamGenerator, streamProcessor);
+      StreamingDataClient.processDataStreams(_requiredStreams, dataStreams, streamProcessor);
       logRequestTime("Data streams processed; response written; request complete");
     };
   }
