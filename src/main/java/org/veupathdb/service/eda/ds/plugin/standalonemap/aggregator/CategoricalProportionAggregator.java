@@ -1,5 +1,7 @@
 package org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator;
 
+import com.google.common.collect.Sets;
+
 import java.util.Set;
 
 /**
@@ -7,18 +9,34 @@ import java.util.Set;
  * set of numerator values over number of elements with values in a set of denominator values.
  */
 public class CategoricalProportionAggregator implements MarkerAggregator<Double> {
+  private final boolean negationMode;
+  private final int index;
   private final Set<String> numeratorValues;
-  private final Set<String> denominatorValues;
-  private int numNumeratorMatches = 0;
-  private int numDenominatorMatches = 0;
-  private int index;
+  private final Set<String> distinctDenominatorValues;
 
-  public CategoricalProportionAggregator(Set<String> numeratorValues, Set<String> denominatorValues, int index) {
+  private int numNumeratorMatches = 0;
+  private int distinctDenominatorMatchCount = 0;
+  private int numNonNullMatches = 0;
+
+  public CategoricalProportionAggregator(Set<String> numeratorValues,
+                                         Set<String> denominatorValues,
+                                         Set<String> vocabulary,
+                                         int index) {
     if (!denominatorValues.containsAll(numeratorValues)) {
       throw new IllegalArgumentException("Numerator values must be a subset of denominator values.");
     }
-    this.numeratorValues = numeratorValues;
-    this.denominatorValues = denominatorValues;
+    Set<String> numeratorValuesNegation = Sets.difference(vocabulary, numeratorValues);
+    // Count one of the following depending on which is cheaper:
+    // 1. Total numerator matches.
+    // 2. Everything that doesn't match the numerator.
+    if (numeratorValuesNegation.size() < numeratorValues.size()) {
+      negationMode = true;
+      this.numeratorValues = numeratorValuesNegation;
+    } else {
+      negationMode = false;
+      this.numeratorValues = numeratorValues;
+    }
+    this.distinctDenominatorValues = Sets.difference(denominatorValues, numeratorValues);
     this.index = index;
   }
 
@@ -30,9 +48,10 @@ public class CategoricalProportionAggregator implements MarkerAggregator<Double>
     if (numeratorValues.contains(s[index])) {
       numNumeratorMatches++;
     }
-    if (denominatorValues.contains(s[index])) {
-      numDenominatorMatches++;
+    if (distinctDenominatorValues.contains(s[index])) {
+      distinctDenominatorMatchCount++;
     }
+    numNonNullMatches++;
   }
 
   @Override
@@ -42,9 +61,16 @@ public class CategoricalProportionAggregator implements MarkerAggregator<Double>
 
   @Override
   public Double finish() {
-    if (numDenominatorMatches == 0) {
+    int totalNumeratorMatches;
+    if (negationMode) {
+      totalNumeratorMatches = numNonNullMatches - numNumeratorMatches;
+    } else {
+      totalNumeratorMatches = numNumeratorMatches;
+    }
+    final int totalDenominatorMatches = numNumeratorMatches + distinctDenominatorMatchCount;
+    if (distinctDenominatorMatchCount == 0) {
       return null;
     }
-    return (double) numNumeratorMatches / numDenominatorMatches;
+    return (double) totalNumeratorMatches / totalDenominatorMatches;
   }
 }

@@ -49,7 +49,9 @@ public class QuantitativeAggregateConfiguration {
         @Override
         public MarkerAggregator<Double> create(int index, Function<String, Double> valueQuantifier) {
           return new CategoricalProportionAggregator(new HashSet<>(categoricalConfig.getNumeratorValues()),
-              new HashSet<>(categoricalConfig.getDenominatorValues()), index);
+              new HashSet<>(categoricalConfig.getDenominatorValues()), 
+              new HashSet<>(vocabSupplier.get()),
+              index);
         }
 
         @Override
