@@ -11,7 +11,7 @@ import java.util.Set;
 public class CategoricalProportionAggregator implements MarkerAggregator<Double> {
   private final boolean negationMode;
   private final int index;
-  private final Set<String> numeratorValues;
+  private final Set<String> numeratorMatchSet;
   private final Set<String> distinctDenominatorValues;
 
   private int numNumeratorMatches = 0;
@@ -31,10 +31,10 @@ public class CategoricalProportionAggregator implements MarkerAggregator<Double>
     // 2. Everything that doesn't match the numerator.
     if (numeratorValuesNegation.size() < numeratorValues.size()) {
       negationMode = true;
-      this.numeratorValues = numeratorValuesNegation;
+      this.numeratorMatchSet = numeratorValuesNegation;
     } else {
       negationMode = false;
-      this.numeratorValues = numeratorValues;
+      this.numeratorMatchSet = numeratorValues;
     }
     this.distinctDenominatorValues = Sets.difference(denominatorValues, numeratorValues);
     this.index = index;
@@ -45,7 +45,7 @@ public class CategoricalProportionAggregator implements MarkerAggregator<Double>
     if (s == null) {
       return;
     }
-    if (numeratorValues.contains(s[index])) {
+    if (numeratorMatchSet.contains(s[index])) {
       numNumeratorMatches++;
     }
     if (distinctDenominatorValues.contains(s[index])) {
@@ -67,8 +67,8 @@ public class CategoricalProportionAggregator implements MarkerAggregator<Double>
     } else {
       totalNumeratorMatches = numNumeratorMatches;
     }
-    final int totalDenominatorMatches = numNumeratorMatches + distinctDenominatorMatchCount;
-    if (distinctDenominatorMatchCount == 0) {
+    final int totalDenominatorMatches = totalNumeratorMatches + distinctDenominatorMatchCount;
+    if (totalDenominatorMatches == 0) {
       return null;
     }
     return (double) totalNumeratorMatches / totalDenominatorMatches;
