@@ -1,5 +1,6 @@
 package org.veupathdb.service.eda.ds.plugin.standalonemap.markers;
 
+import com.google.common.collect.Sets;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.AveragesWithConfidence;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.CategoricalProportionAggregator;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.ContinuousAggregators;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -45,23 +47,7 @@ public class QuantitativeAggregateConfiguration {
         throw new IllegalArgumentException("CategoricalQuantitativeOverlay numerator values must be a subset of denominator values.");
       }
       variableValueQuantifier = Double::valueOf;
-      aggregatorSupplier = new ContinuousAggregators.ContinuousAggregatorFactory() {
-        @Override
-        public MarkerAggregator<Double> create(int index, Function<String, Double> valueQuantifier) {
-          return new CategoricalProportionAggregator(new HashSet<>(categoricalConfig.getNumeratorValues()),
-              new HashSet<>(categoricalConfig.getDenominatorValues()), 
-              new HashSet<>(vocabSupplier.get()),
-              index);
-        }
-
-        @Override
-        public MarkerAggregator<AveragesWithConfidence> createWithConfidence(int index, Function<String, Double> valueQuantifier) {
-         return new ProportionWithConfidenceAggregator(index,
-              categoricalConfig.getNumeratorValues(),
-              categoricalConfig.getDenominatorValues(),
-              vocabSupplier.get());
-        }
-      };
+      aggregatorSupplier = new CategoricalProportionAggregatorFactory(categoricalConfig, vocabSupplier);
     } else {
       if (!varShape.equalsIgnoreCase(APIVariableDataShape.CONTINUOUS.getValue())) {
         throw new IllegalArgumentException("Incorrect overlay configuration type for continuous var: " + varShape);
@@ -89,6 +75,51 @@ public class QuantitativeAggregateConfiguration {
       return Instant.ofEpochMilli((long) d).toString();
     } else {
       return Double.toString(d);
+    }
+  }
+
+  public static class CategoricalProportionAggregatorFactory implements ContinuousAggregators.ContinuousAggregatorFactory {
+    private final CategoricalAggregationConfig categoricalConfig;
+    private final Supplier<List<String>> vocabSupplier;
+    private final Set<String> distinctDenominatorValues;
+    private final Set<String> numeratorMatchSet;
+    boolean negationMode;
+
+    public CategoricalProportionAggregatorFactory(CategoricalAggregationConfig categoricalConfig,
+                                                  Supplier<List<String>> vocabSupplier) {
+      Set<String> numeratorValues = new HashSet<>(categoricalConfig.getNumeratorValues());
+      Set<String> vocabulary = new HashSet<>(vocabSupplier.get());
+      Set<String> numeratorValuesNegation = Sets.difference(vocabulary, numeratorValues);
+      // Count one of the following depending on which is cheaper:
+      // 1. Total numerator matches.
+      // 2. Everything that doesn't match the numerator.
+      if (numeratorValuesNegation.size() < numeratorValues.size()) {
+        this.negationMode = true;
+        this.numeratorMatchSet = numeratorValuesNegation;
+      } else {
+        this.negationMode = false;
+        this.numeratorMatchSet = numeratorValues;
+      }
+      Set<String> denominatorValues = new HashSet<>(categoricalConfig.getDenominatorValues());
+      this.distinctDenominatorValues = Sets.difference(denominatorValues, numeratorValues);
+      this.categoricalConfig = categoricalConfig;
+      this.vocabSupplier = vocabSupplier;
+    }
+
+    @Override
+    public MarkerAggregator<Double> create(int index, Function<String, Double> valueQuantifier) {
+      return new CategoricalProportionAggregator(numeratorMatchSet,
+          distinctDenominatorValues,
+          negationMode,
+          index);
+    }
+
+    @Override
+    public MarkerAggregator<AveragesWithConfidence> createWithConfidence(int index, Function<String, Double> valueQuantifier) {
+     return new ProportionWithConfidenceAggregator(index,
+          categoricalConfig.getNumeratorValues(),
+          categoricalConfig.getDenominatorValues(),
+          vocabSupplier.get());
     }
   }
 }

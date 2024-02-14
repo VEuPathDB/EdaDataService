@@ -1,6 +1,8 @@
 package org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator;
 
 import com.google.common.collect.Sets;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Set;
 
@@ -9,6 +11,8 @@ import java.util.Set;
  * set of numerator values over number of elements with values in a set of denominator values.
  */
 public class CategoricalProportionAggregator implements MarkerAggregator<Double> {
+  private static final Logger LOG = LogManager.getLogger(CategoricalProportionAggregator.class);
+
   private final boolean negationMode;
   private final int index;
   private final Set<String> numeratorMatchSet;
@@ -18,25 +22,13 @@ public class CategoricalProportionAggregator implements MarkerAggregator<Double>
   private int distinctDenominatorMatchCount = 0;
   private int numNonNullMatches = 0;
 
-  public CategoricalProportionAggregator(Set<String> numeratorValues,
-                                         Set<String> denominatorValues,
-                                         Set<String> vocabulary,
+  public CategoricalProportionAggregator(Set<String> numeratorMatchSet,
+                                         Set<String> distinctDenominatorValues,
+                                         boolean negationMode,
                                          int index) {
-    if (!denominatorValues.containsAll(numeratorValues)) {
-      throw new IllegalArgumentException("Numerator values must be a subset of denominator values.");
-    }
-    Set<String> numeratorValuesNegation = Sets.difference(vocabulary, numeratorValues);
-    // Count one of the following depending on which is cheaper:
-    // 1. Total numerator matches.
-    // 2. Everything that doesn't match the numerator.
-    if (numeratorValuesNegation.size() < numeratorValues.size()) {
-      negationMode = true;
-      this.numeratorMatchSet = numeratorValuesNegation;
-    } else {
-      negationMode = false;
-      this.numeratorMatchSet = numeratorValues;
-    }
-    this.distinctDenominatorValues = Sets.difference(denominatorValues, numeratorValues);
+   this.numeratorMatchSet = numeratorMatchSet;
+   this.distinctDenominatorValues = distinctDenominatorValues;
+   this.negationMode = negationMode;
     this.index = index;
   }
 
