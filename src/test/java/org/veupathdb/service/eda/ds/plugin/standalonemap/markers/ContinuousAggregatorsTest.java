@@ -3,12 +3,8 @@ package org.veupathdb.service.eda.ds.plugin.standalonemap.markers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.AveragesWithConfidence;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.CategoricalProportionAggregator;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.ContinuousAggregators;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.MarkerAggregator;
-
-import java.util.Set;
 
 public class ContinuousAggregatorsTest {
 
