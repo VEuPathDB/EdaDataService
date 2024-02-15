@@ -3,7 +3,6 @@ package org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.markers.QuantitativeAggregateConfiguration;
 import org.veupathdb.service.eda.generated.model.CategoricalAggregationConfig;
 import org.veupathdb.service.eda.generated.model.CategoricalAggregationConfigImpl;
 
@@ -79,7 +78,7 @@ public class CategoricalProportionAggregatorTest {
     CategoricalAggregationConfig c = new CategoricalAggregationConfigImpl();
     c.setNumeratorValues(numeratorValues.stream().toList());
     c.setDenominatorValues(denominatorValues.stream().toList());
-    return new QuantitativeAggregateConfiguration.CategoricalProportionAggregatorFactory(c, () -> vocabValues.stream().toList())
+    return new CategoricalProportionAggregator.CategoricalProportionAggregatorFactory(c, () -> vocabValues.stream().toList())
         .create(index, Double::valueOf);
   }
 }
