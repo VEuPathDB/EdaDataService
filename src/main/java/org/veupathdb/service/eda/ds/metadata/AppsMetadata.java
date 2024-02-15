@@ -120,7 +120,7 @@ public class AppsMetadata {
           "Find taxa or genes that are differentially abundant between two groups.",
           List.of(MICROBIOME_PROJECT),
           viz("volcanoplot", new DifferentialAbundanceVolcanoplotPlugin())),
-      app("correlationassaymetadata", "Correlation (Taxa v. Metadata)", "correlationassaymetadata",
+      app("correlationassaymetadata", "Correlation (Taxa, Functional Data v. Metadata)", "correlationassaymetadata",
           "Discover relationships between metadata variables and taxonomic abundance.",
           List.of(MICROBIOME_PROJECT, PLASMODB_PROJECT),
           viz("bipartitenetwork", new CorrelationAssayMetadataBipartitenetworkPlugin())),
