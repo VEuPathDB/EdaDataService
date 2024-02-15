@@ -71,5 +71,4 @@ public class ContinuousAggregatorsTest {
     agg.addValue(new String[] { "1" });
     Assertions.assertEquals(3.5, agg.finish());
   }
-
 }

@@ -4,7 +4,6 @@ import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.AveragesWith
 import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.CategoricalProportionAggregator;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.ContinuousAggregators;
 import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.MarkerAggregator;
-import org.veupathdb.service.eda.ds.plugin.standalonemap.aggregator.ProportionWithConfidenceAggregator;
 import org.veupathdb.service.eda.generated.model.APIVariableDataShape;
 import org.veupathdb.service.eda.generated.model.APIVariableType;
 import org.veupathdb.service.eda.generated.model.CategoricalAggregationConfig;
@@ -14,7 +13,6 @@ import org.veupathdb.service.eda.generated.model.QuantitativeAggregationConfig;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.HashSet;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -45,21 +43,7 @@ public class QuantitativeAggregateConfiguration {
         throw new IllegalArgumentException("CategoricalQuantitativeOverlay numerator values must be a subset of denominator values.");
       }
       variableValueQuantifier = Double::valueOf;
-      aggregatorSupplier = new ContinuousAggregators.ContinuousAggregatorFactory() {
-        @Override
-        public MarkerAggregator<Double> create(int index, Function<String, Double> valueQuantifier) {
-          return new CategoricalProportionAggregator(new HashSet<>(categoricalConfig.getNumeratorValues()),
-              new HashSet<>(categoricalConfig.getDenominatorValues()), index);
-        }
-
-        @Override
-        public MarkerAggregator<AveragesWithConfidence> createWithConfidence(int index, Function<String, Double> valueQuantifier) {
-         return new ProportionWithConfidenceAggregator(index,
-              categoricalConfig.getNumeratorValues(),
-              categoricalConfig.getDenominatorValues(),
-              vocabSupplier.get());
-        }
-      };
+      aggregatorSupplier = new CategoricalProportionAggregator.CategoricalProportionAggregatorFactory(categoricalConfig, vocabSupplier);
     } else {
       if (!varShape.equalsIgnoreCase(APIVariableDataShape.CONTINUOUS.getValue())) {
         throw new IllegalArgumentException("Incorrect overlay configuration type for continuous var: " + varShape);
@@ -89,4 +73,5 @@ public class QuantitativeAggregateConfiguration {
       return Double.toString(d);
     }
   }
+
 }
