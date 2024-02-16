@@ -658,6 +658,17 @@ types:
     properties:
       correlationMethod: CorrelationMethod
       prefilterThresholds?: FeaturePrefilterThresholds
+  CorrelationAssaySelfConfig:
+    type: object
+    properties:
+      correlationMethod:
+        type: string
+        enum:
+          - spearman
+          - pearson
+          - sparcc
+      prefilterThresholds?: FeaturePrefilterThresholds
+      collectionVariable: CollectionSpec
   CorrelationMethod:
     type: string
     enum:
@@ -675,7 +686,7 @@ types:
   CorrelationAssaySelfPluginRequest:
     type: ComputeRequestBase
     properties:
-      config: Correlation1Collection
+      config: CorrelationAssaySelfConfig
   CorrelationMetadataSelfPluginRequest:
     type: ComputeRequestBase
     properties:
@@ -938,6 +949,7 @@ types:
     type: object
     properties:
       id: string
+      degree: number
   LinkData:
     type: object
     properties:

@@ -113,6 +113,8 @@ public abstract class AbstractCorrelationBipartiteNetwork<T extends DataPluginRe
     uniqueNodeIDs.forEach((nodeID) -> {
       NodeData node = new NodeDataImpl();
       node.setId(nodeID);
+      int nodeDegree = Collections.frequency(nodeIDs, nodeID);
+      node.setDegree(nodeDegree);
       nodes.add(node);
     });
 
