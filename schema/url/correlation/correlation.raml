@@ -2,7 +2,7 @@
 
 types:
 
-  CorrelationBipartitenetworkSpec:
+  CorrelationNetworkSpec:
     additionalProperties: false
     properties:
       significanceThreshold:
@@ -15,6 +15,13 @@ types:
   CorrelationBipartiteNetworkPostResponse:
     additionalProperties: false
     type: BipartiteNetworkPostResponse
+    properties:
+      significanceThreshold: number
+      correlationCoefThreshold: number
+
+  CorrelationNetworkPostResponse:
+    additionalProperties: false
+    type: NetworkPostResponse
     properties:
       significanceThreshold: number
       correlationCoefThreshold: number
