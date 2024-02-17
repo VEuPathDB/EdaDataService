@@ -10,6 +10,8 @@ import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
 import org.veupathdb.service.eda.ds.core.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.*;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -60,11 +62,14 @@ public class CorrelationAssaySelfNetworkPlugin extends AbstractPlugin<Correlatio
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     CorrelationNetworkSpec spec = getPluginSpec();
-    // TODO get stats result into R
     // TODO add layout arg to schema
+    ByteArrayOutputStream statsBytes = new ByteArrayOutputStream();
+    writeComputeStatsResponseToOutput(out);
+    ByteArrayInputStream statsIn = new ByteArrayInputStream(statsBytes.toByteArray());
+    dataStreams.put("stats-file.tab", statsIn);
 
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      String command = "veupathUtils::writeJSON(plot.data::Network(" + DEFAULT_SINGLE_STREAM_NAME + "))";
+      String command = "veupathUtils::writeJSON(plot.data::Network(data.table::fread(stats-file.tab))))";
       RServeClient.streamResult(connection, command, out);
     }); 
   }
