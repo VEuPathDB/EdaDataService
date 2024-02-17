@@ -62,14 +62,14 @@ public class CorrelationAssaySelfNetworkPlugin extends AbstractPlugin<Correlatio
   @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
     CorrelationNetworkSpec spec = getPluginSpec();
-    // TODO add layout arg to schema
+    String layout = spec.getLayout() != null ? ", layout = '" + spec.getLayout().getValue() + "'" : "";
     ByteArrayOutputStream statsBytes = new ByteArrayOutputStream();
     writeComputeStatsResponseToOutput(out);
     ByteArrayInputStream statsIn = new ByteArrayInputStream(statsBytes.toByteArray());
     dataStreams.put("stats-file.tab", statsIn);
 
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      String command = "veupathUtils::writeJSON(plot.data::Network(data.table::fread(stats-file.tab))))";
+      String command = "veupathUtils::writeJSON(plot.data::Network(data.table::fread(stats-file.tab)" + layout + "))";
       RServeClient.streamResult(connection, command, out);
     }); 
   }

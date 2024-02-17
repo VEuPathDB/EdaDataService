@@ -11,6 +11,9 @@ types:
       correlationCoefThreshold:
         type: number
         required: false
+      layout?:
+        type: string
+        enum: ['none','force','circle','nicely']
 
   CorrelationBipartiteNetworkPostResponse:
     additionalProperties: false
