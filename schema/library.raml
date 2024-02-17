@@ -658,6 +658,17 @@ types:
     properties:
       correlationMethod: CorrelationMethod
       prefilterThresholds?: FeaturePrefilterThresholds
+  CorrelationAssaySelfConfig:
+    type: object
+    properties:
+      correlationMethod:
+        type: string
+        enum:
+          - spearman
+          - pearson
+          - sparcc
+      prefilterThresholds?: FeaturePrefilterThresholds
+      collectionVariable: CollectionSpec
   CorrelationMethod:
     type: string
     enum:
@@ -675,7 +686,7 @@ types:
   CorrelationAssaySelfPluginRequest:
     type: ComputeRequestBase
     properties:
-      config: Correlation1Collection
+      config: CorrelationAssaySelfConfig
   CorrelationMetadataSelfPluginRequest:
     type: ComputeRequestBase
     properties:
@@ -873,7 +884,7 @@ types:
       overlayVariable:
         type: VariableSpec
         required: false
-  CorrelationBipartitenetworkSpec:
+  CorrelationNetworkSpec:
     type: object
     additionalProperties: false
     properties:
@@ -883,8 +894,21 @@ types:
       correlationCoefThreshold:
         type: number
         required: false
+      layout?:
+        type: string
+        enum:
+          - none
+          - force
+          - circle
+          - nicely
   CorrelationBipartiteNetworkPostResponse:
     type: BipartiteNetworkPostResponse
+    additionalProperties: false
+    properties:
+      significanceThreshold: number
+      correlationCoefThreshold: number
+  CorrelationNetworkPostResponse:
+    type: NetworkPostResponse
     additionalProperties: false
     properties:
       significanceThreshold: number
@@ -893,12 +917,17 @@ types:
     type: DataPluginRequestBase
     properties:
       computeConfig: Correlation2Collections
-      config: CorrelationBipartitenetworkSpec
+      config: CorrelationNetworkSpec
   CorrelationAssayMetadataBipartitenetworkPostRequest:
     type: DataPluginRequestBase
     properties:
       computeConfig: Correlation1Collection
-      config: CorrelationBipartitenetworkSpec
+      config: CorrelationNetworkSpec
+  CorrelationAssaySelfNetworkPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      computeConfig: CorrelationAssaySelfConfig
+      config: CorrelationNetworkSpec
   DifferentialAbundanceVolcanoplotPostRequest:
     type: DataPluginRequestBase
     properties:
@@ -1005,6 +1034,17 @@ types:
     additionalProperties: false
     properties:
       bipartitenetwork: BipartiteNetwork
+  Network:
+    type: object
+    additionalProperties: false
+    properties:
+      data: NetworkData
+      config: NetworkConfig
+  NetworkPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      network: Network
   BarplotPostRequest:
     type: DataPluginRequestBase
     properties:
