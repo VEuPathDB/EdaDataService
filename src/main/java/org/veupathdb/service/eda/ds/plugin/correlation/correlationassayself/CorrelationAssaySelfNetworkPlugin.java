@@ -15,13 +15,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class CorrelationAssaySelfNetworkPlugin extends AbstractPlugin<CorrelationAssaySelfPostRequest, CorrelationNetworkSpec, CorrelationAssaySelfConfig> {
+public class CorrelationAssaySelfNetworkPlugin extends AbstractPlugin<CorrelationAssaySelfNetworkPostRequest, CorrelationNetworkSpec, CorrelationAssaySelfConfig> {
   
   @Override
   public String getDisplayName() {
@@ -40,7 +41,7 @@ public class CorrelationAssaySelfNetworkPlugin extends AbstractPlugin<Correlatio
 
   @Override
   protected ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(CorrelationAssaySelfPostRequest.class, CorrelationNetworkSpec.class, CorrelationAssaySelfConfig.class);
+    return new ClassGroup(CorrelationAssaySelfNetworkPostRequest.class, CorrelationNetworkSpec.class, CorrelationAssaySelfConfig.class);
   }
 
   @Override
@@ -49,12 +50,12 @@ public class CorrelationAssaySelfNetworkPlugin extends AbstractPlugin<Correlatio
   }
 
   @Override
-  protected void validateVisualizationSpec(CorrelationBipartitenetworkSpec pluginSpec) throws ValidationException {
+  protected void validateVisualizationSpec(CorrelationNetworkSpec pluginSpec) throws ValidationException {
     // nothing to do here
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(CorrelationBipartitenetworkSpec pluginSpec) {
+  protected List<StreamSpec> getRequestedStreams(CorrelationNetworkSpec pluginSpec) {
     // this plugin only uses the stats result of the compute; no tabular data streams needed
     return Collections.emptyList();
   }

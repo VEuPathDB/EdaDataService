@@ -10,7 +10,7 @@ public class CorrelationAssayMetadataBipartitenetworkPlugin extends AbstractCorr
 
   @Override
   protected ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(CorrelationAssayMetadataBipartitenetworkPostRequest.class, CorrelationBipartitenetworkSpec.class, Correlation1Collection.class);
+    return new ClassGroup(CorrelationAssayMetadataBipartitenetworkPostRequest.class, CorrelationNetworkSpec.class, Correlation1Collection.class);
   }
 
   @Override

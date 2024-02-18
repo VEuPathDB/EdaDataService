@@ -15,7 +15,7 @@ import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.ds.core.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.*;
 
-public abstract class AbstractCorrelationBipartiteNetwork<T extends DataPluginRequestBase, R extends CorrelationComputeConfig> extends AbstractPlugin<T, CorrelationBipartitenetworkSpec, R> {
+public abstract class AbstractCorrelationBipartiteNetwork<T extends DataPluginRequestBase, R extends CorrelationComputeConfig> extends AbstractPlugin<T, CorrelationNetworkSpec, R> {
     
   @Override
   public String getDisplayName() {
@@ -33,12 +33,12 @@ public abstract class AbstractCorrelationBipartiteNetwork<T extends DataPluginRe
   }
 
   @Override
-  protected void validateVisualizationSpec(CorrelationBipartitenetworkSpec pluginSpec) throws ValidationException {
+  protected void validateVisualizationSpec(CorrelationNetworkSpec pluginSpec) throws ValidationException {
     // nothing to do here
   }
 
   @Override
-  protected List<StreamSpec> getRequestedStreams(CorrelationBipartitenetworkSpec pluginSpec) {
+  protected List<StreamSpec> getRequestedStreams(CorrelationNetworkSpec pluginSpec) {
     // this plugin only uses the stats result of the compute; no tabular data streams needed
     return Collections.emptyList();
   }
