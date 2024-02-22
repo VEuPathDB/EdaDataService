@@ -49,7 +49,7 @@ public abstract class AbstractCorrelationBipartiteNetwork<T extends DataPluginRe
     CorrelationStatsResponse stats = getComputeResultStats(CorrelationStatsResponse.class);
     Number correlationCoefThreshold = getPluginSpec().getCorrelationCoefThreshold() != null ? getPluginSpec().getCorrelationCoefThreshold() : 0.2;
     Number pValueThreshold = getPluginSpec().getSignificanceThreshold() != null ? getPluginSpec().getSignificanceThreshold() : 0.05;
-
+    boolean findNodeDegrees = getPluginSpec().getDegree() != null ? getPluginSpec().getDegree() : true;
 
     // TEMPORARY: Reshape data using java instead of calling out to R+plot.data
     // The goal is to transform the response from the correlation app (CorrelationStatsResponse)
@@ -113,8 +113,11 @@ public abstract class AbstractCorrelationBipartiteNetwork<T extends DataPluginRe
     uniqueNodeIDs.forEach((nodeID) -> {
       NodeData node = new NodeDataImpl();
       node.setId(nodeID);
-      int nodeDegree = Collections.frequency(nodeIDs, nodeID);
-      node.setDegree(nodeDegree);
+      if (findNodeDegrees) {
+        // this assumes a de-duplicated edge list
+        int nodeDegree = Collections.frequency(nodeIDs, nodeID);
+        node.setDegree(nodeDegree);
+      }
       nodes.add(node);
     });
 
