@@ -557,6 +557,21 @@ securitySchemes:
               application/json:
                 type: lib.CorrelationBipartiteNetworkPostResponse
 
+  /correlationassayself/visualizations:
+    displayName: Visualizations for discovering correlations between variables within an assay
+
+    /unipartitenetwork:
+      post:
+        description: Returns data required to create a unipartite network from a correlation matrix.
+        body:
+          application/json:
+            type: lib.CorrelationAssaySelfUnipartitenetworkPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.CorrelationNetworkPostResponse
+
   /distributions/visualizations:
     displayName: Visualizations for exploring distributions of data.
 

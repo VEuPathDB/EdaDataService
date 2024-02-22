@@ -10,7 +10,7 @@ public class CorrelationAssayAssayBipartitenetworkPlugin extends AbstractCorrela
 
   @Override
   protected ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(CorrelationAssayAssayBipartitenetworkPostRequest.class, CorrelationBipartitenetworkSpec.class, Correlation2Collections.class);
+    return new ClassGroup(CorrelationAssayAssayBipartitenetworkPostRequest.class, CorrelationNetworkSpec.class, Correlation2Collections.class);
   }
 
   @Override

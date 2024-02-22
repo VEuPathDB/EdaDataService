@@ -84,3 +84,15 @@ types:
       bipartitenetwork:
         type: BipartiteNetwork
       # Eventually could have stats such as number isolated nodes, degree distribution, etc. That all can go here.
+
+  Network:
+    additionalProperties: false
+    properties:
+      data: NetworkData
+      config: NetworkConfig
+
+  NetworkPostResponse:
+    additionalProperties: false
+    properties:
+      network:
+        type: Network

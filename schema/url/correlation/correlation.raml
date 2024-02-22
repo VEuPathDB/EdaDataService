@@ -2,7 +2,7 @@
 
 types:
 
-  CorrelationBipartitenetworkSpec:
+  CorrelationNetworkSpec:
     additionalProperties: false
     properties:
       significanceThreshold:
@@ -11,11 +11,21 @@ types:
       correlationCoefThreshold:
         type: number
         required: false
+      layout?:
+        type: string
+        enum: ['none','force','circle','nicely']
       degree: boolean
 
   CorrelationBipartiteNetworkPostResponse:
     additionalProperties: false
     type: BipartiteNetworkPostResponse
+    properties:
+      significanceThreshold: number
+      correlationCoefThreshold: number
+
+  CorrelationNetworkPostResponse:
+    additionalProperties: false
+    type: NetworkPostResponse
     properties:
       significanceThreshold: number
       correlationCoefThreshold: number

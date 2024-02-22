@@ -884,7 +884,7 @@ types:
       overlayVariable:
         type: VariableSpec
         required: false
-  CorrelationBipartitenetworkSpec:
+  CorrelationNetworkSpec:
     type: object
     additionalProperties: false
     properties:
@@ -894,8 +894,22 @@ types:
       correlationCoefThreshold:
         type: number
         required: false
+      layout?:
+        type: string
+        enum:
+          - none
+          - force
+          - circle
+          - nicely
+      degree: boolean
   CorrelationBipartiteNetworkPostResponse:
     type: BipartiteNetworkPostResponse
+    additionalProperties: false
+    properties:
+      significanceThreshold: number
+      correlationCoefThreshold: number
+  CorrelationNetworkPostResponse:
+    type: NetworkPostResponse
     additionalProperties: false
     properties:
       significanceThreshold: number
@@ -904,12 +918,17 @@ types:
     type: DataPluginRequestBase
     properties:
       computeConfig: Correlation2Collections
-      config: CorrelationBipartitenetworkSpec
+      config: CorrelationNetworkSpec
   CorrelationAssayMetadataBipartitenetworkPostRequest:
     type: DataPluginRequestBase
     properties:
       computeConfig: Correlation1Collection
-      config: CorrelationBipartitenetworkSpec
+      config: CorrelationNetworkSpec
+  CorrelationAssaySelfUnipartitenetworkPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      computeConfig: CorrelationAssaySelfConfig
+      config: CorrelationNetworkSpec
   DifferentialAbundanceVolcanoplotPostRequest:
     type: DataPluginRequestBase
     properties:
@@ -949,7 +968,7 @@ types:
     type: object
     properties:
       id: string
-      degree: number
+      degree?: number
   LinkData:
     type: object
     properties:
@@ -1017,6 +1036,17 @@ types:
     additionalProperties: false
     properties:
       bipartitenetwork: BipartiteNetwork
+  Network:
+    type: object
+    additionalProperties: false
+    properties:
+      data: NetworkData
+      config: NetworkConfig
+  NetworkPostResponse:
+    type: object
+    additionalProperties: false
+    properties:
+      network: Network
   BarplotPostRequest:
     type: DataPluginRequestBase
     properties:
