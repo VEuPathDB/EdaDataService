@@ -22,7 +22,7 @@ import java.util.Map;
 
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class CorrelationAssaySelfNetworkPlugin extends AbstractPlugin<CorrelationAssaySelfNetworkPostRequest, CorrelationNetworkSpec, CorrelationAssaySelfConfig> {
+public class CorrelationAssaySelfUnipartitenetworkPlugin extends AbstractPlugin<CorrelationAssaySelfUnipartitenetworkPostRequest, CorrelationNetworkSpec, CorrelationAssaySelfConfig> {
   
   @Override
   public String getDisplayName() {
@@ -41,7 +41,7 @@ public class CorrelationAssaySelfNetworkPlugin extends AbstractPlugin<Correlatio
 
   @Override
   protected ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(CorrelationAssaySelfNetworkPostRequest.class, CorrelationNetworkSpec.class, CorrelationAssaySelfConfig.class);
+    return new ClassGroup(CorrelationAssaySelfUnipartitenetworkPostRequest.class, CorrelationNetworkSpec.class, CorrelationAssaySelfConfig.class);
   }
 
   @Override

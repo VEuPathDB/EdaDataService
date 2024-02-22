@@ -22,7 +22,7 @@ import org.veupathdb.service.eda.ds.plugin.differentialabundance.DifferentialAbu
 import org.veupathdb.service.eda.ds.plugin.betadiv.BetaDivScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.correlation.correlationassayassay.CorrelationAssayAssayBipartitenetworkPlugin;
 import org.veupathdb.service.eda.ds.plugin.correlation.correlationassaymetadata.CorrelationAssayMetadataBipartitenetworkPlugin;
-import org.veupathdb.service.eda.ds.plugin.correlation.correlationassayself.CorrelationAssaySelfNetworkPlugin;
+import org.veupathdb.service.eda.ds.plugin.correlation.correlationassayself.CorrelationAssaySelfUnipartitenetworkPlugin;
 import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivBoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.abundance.AbundanceBoxplotPlugin;
@@ -361,9 +361,9 @@ public class AppsService implements Apps {
 
   @DisableJackson
   @Override
-  public PostAppsCorrelationassayselfVisualizationsNetworkResponse postAppsCorrelationassayselfVisualizationsNetwork(CorrelationAssaySelfNetworkPostRequest entity) {
-    return wrapPlugin(() -> PostAppsCorrelationassayselfVisualizationsNetworkResponse.respond200WithApplicationJson(
-        new CorrelationNetworkPostResponseStream(processRequest(new CorrelationAssaySelfNetworkPlugin(), entity))));
+  public PostAppsCorrelationassayselfVisualizationsUnipartitenetworkResponse postAppsCorrelationassayselfVisualizationsUnipartitenetwork(CorrelationAssaySelfUnipartitenetworkPostRequest entity) {
+    return wrapPlugin(() -> PostAppsCorrelationassayselfVisualizationsUnipartitenetworkResponse.respond200WithApplicationJson(
+        new CorrelationNetworkPostResponseStream(processRequest(new CorrelationAssaySelfUnipartitenetworkPlugin(), entity))));
   }
 
   @DisableJackson

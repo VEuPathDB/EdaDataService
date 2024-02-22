@@ -9,7 +9,7 @@ import org.veupathdb.service.eda.ds.plugin.differentialabundance.DifferentialAbu
 import org.veupathdb.service.eda.ds.plugin.betadiv.BetaDivScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.correlation.correlationassayassay.CorrelationAssayAssayBipartitenetworkPlugin;
 import org.veupathdb.service.eda.ds.plugin.correlation.correlationassaymetadata.CorrelationAssayMetadataBipartitenetworkPlugin;
-import org.veupathdb.service.eda.ds.plugin.correlation.correlationassayself.CorrelationAssaySelfNetworkPlugin;
+import org.veupathdb.service.eda.ds.plugin.correlation.correlationassayself.CorrelationAssaySelfUnipartitenetworkPlugin;
 import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivBoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.abundance.AbundanceBoxplotPlugin;
@@ -132,7 +132,7 @@ public class AppsMetadata {
       app("correlationassayself", "Correlation (Taxa v. Taxa)", "correlationassayself",
           "Discover relationships between taxonomic data.",
           List.of(MICROBIOME_PROJECT),
-          viz("network", new CorrelationAssaySelfNetworkPlugin())),
+          viz("network", new CorrelationAssaySelfUnipartitenetworkPlugin())),
       app("distributions", "Distributions", null,
           "Plot simple distributions for any continuous variable, including metadata (e.g. age, height, etc.) or microbial assay results.",
           List.of(MICROBIOME_PROJECT, PLASMODB_PROJECT),
