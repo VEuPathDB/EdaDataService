@@ -901,6 +901,7 @@ types:
           - force
           - circle
           - nicely
+      degree: boolean
   CorrelationBipartiteNetworkPostResponse:
     type: BipartiteNetworkPostResponse
     additionalProperties: false
@@ -967,7 +968,7 @@ types:
     type: object
     properties:
       id: string
-      degree: number
+      degree?: number
   LinkData:
     type: object
     properties:

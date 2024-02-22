@@ -65,7 +65,7 @@ public class CorrelationAssaySelfUnipartitenetworkPlugin extends AbstractPlugin<
     CorrelationNetworkSpec spec = getPluginSpec();
     String layout = spec.getLayout() != null ? ", layout = '" + spec.getLayout().getValue() + "'" : "";
     ByteArrayOutputStream statsBytes = new ByteArrayOutputStream();
-    writeComputeStatsResponseToOutput(out);
+    writeComputeStatsResponseToOutput(statsBytes);
     ByteArrayInputStream statsIn = new ByteArrayInputStream(statsBytes.toByteArray());
     dataStreams.put("statsFile.json", statsIn);
 
