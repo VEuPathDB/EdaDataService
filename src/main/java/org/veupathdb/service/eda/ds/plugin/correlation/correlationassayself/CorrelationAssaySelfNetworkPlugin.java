@@ -67,10 +67,13 @@ public class CorrelationAssaySelfNetworkPlugin extends AbstractPlugin<Correlatio
     ByteArrayOutputStream statsBytes = new ByteArrayOutputStream();
     writeComputeStatsResponseToOutput(out);
     ByteArrayInputStream statsIn = new ByteArrayInputStream(statsBytes.toByteArray());
-    dataStreams.put("stats-file.tab", statsIn);
+    dataStreams.put("statsFile.json", statsIn);
 
     useRConnectionWithRemoteFiles(Resources.RSERVE_URL, dataStreams, connection -> {
-      String command = "veupathUtils::writeJSON(plot.data::Network(data.table::fread(stats-file.tab)" + layout + "))";
+      connection.voidEval("corrResult <- jsonlite::read_json('statsFile.json', simplifyVector = TRUE)");
+      connection.voidEval("edgeList <- corrResult$statistics");
+      connection.voidEval("names(edgeList) <- c('source', 'target', 'weight', 'pValue')");
+      String command = "plot.data::writeNetworkJSON(plot.data::Network(edgeList" + layout + "))";
       RServeClient.streamResult(connection, command, out);
     }); 
   }
