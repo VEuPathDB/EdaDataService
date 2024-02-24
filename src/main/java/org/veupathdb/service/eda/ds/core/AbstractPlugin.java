@@ -743,7 +743,7 @@ public String getVoidEvalVariableMetadataListWithStudyDependentVocabs(Map<String
     String studyIdColumnNameAsRString = "rev(" + util.getEntityAncestorsAsRVectorString(getDynamicDataSpecEntityId(dataSpec), _referenceMetadata) + ")[1]";
 
     String studyVocabInR = "{tmp <- data.table::fread('" + util.toColNameOrEmpty(dataSpec) + "', header=FALSE);" +
-                              "names(tmp) <- c('" + studyIdColumnNameAsRString + "', '" + util.toColNameOrEmpty(dataSpec) + "');" +
+                              "names(tmp) <- c(" + studyIdColumnNameAsRString + ", '" + util.toColNameOrEmpty(dataSpec) + "');" +
                               "tmp}";
 
     String varSpecAsRString = "veupathUtils::VariableSpec(" + 
