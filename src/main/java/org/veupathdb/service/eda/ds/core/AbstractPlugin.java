@@ -740,19 +740,22 @@ public String getVoidEvalVariableMetadataListWithStudyDependentVocabs(Map<String
   public String getRStudyVocabsAsString(DynamicDataSpec dataSpec) {
     PluginUtil util = getUtil();
     
-    // this assuming the first ancestor is the root one is a bit hacky, but i did the same in R so...
-    // obviously doing the same awful thing twice makes it ok. but doing any better is higher cost than i have time for right now :(
-    String studyVocabInR = util.toColNameOrEmpty(dataSpec);
-    String studyVocabAsRTibble = "dplyr::reframe(dplyr::group_by(data.table::fread(\"" + studyVocabInR + "\", header=FALSE), V1), " +
-                                         "values=paste0(\"veupathUtils::StudySpecificVocabulary(variableSpec=veupathUtils::VariableSpec(entityId='" + getDynamicDataSpecEntityId(dataSpec)+ "'," + 
-                                                                                              "variableId='" + getDynamicDataSpecId(dataSpec) + "')," + 
-                                                          "vocabulary=c('\",paste(V2, collapse='\\',\\''),\"')," +
-                                                          "study='\",V1,\"'," +
-                                                          "studyIdColumnName=rev(" + util.getEntityAncestorsAsRVectorString(getDynamicDataSpecEntityId(dataSpec), _referenceMetadata) + ")[1])\"))";
-  
-    String studyVocabsListAsRString = "veupathUtils::StudySpecificVocabulariesByVariable(S4Vectors::SimpleList(eval(parse(text=paste0('c(',paste(" + studyVocabAsRTibble + "[[2]], collapse=','), ')')))))";
-    
-    return studyVocabsListAsRString;
+    String studyIdColumnNameAsRString = "rev(" + util.getEntityAncestorsAsRVectorString(getDynamicDataSpecEntityId(dataSpec), _referenceMetadata) + ")[1]";
+
+    String studyVocabInR = "{tmp <- data.table::fread('" + util.toColNameOrEmpty(dataSpec) + "', header=FALSE);" +
+                              "names(tmp) <- c(" + studyIdColumnNameAsRString + ", '" + util.toColNameOrEmpty(dataSpec) + "');" +
+                              "tmp}";
+
+    String varSpecAsRString = "veupathUtils::VariableSpec(" + 
+                                "entityId='" + getDynamicDataSpecEntityId(dataSpec)+ "'," +
+                                "variableId='" + getDynamicDataSpecId(dataSpec) + "')";
+
+    String studyVocabAsRString = "veupathUtils::StudySpecificVocabulariesByVariable(" +
+                                  "variableSpec=" + varSpecAsRString + "," + 
+                                  "studyIdColumnName=" + studyIdColumnNameAsRString + "," +
+                                  "studyVocab=" + studyVocabInR + ")";
+
+    return studyVocabAsRString;
   }
 
   public String getRStudyVocabsAsString(List<DynamicDataSpec> dataSpecs) {
