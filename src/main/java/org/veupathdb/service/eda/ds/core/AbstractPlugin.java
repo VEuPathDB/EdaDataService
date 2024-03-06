@@ -137,6 +137,7 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
     // build clients for required services
     _authHeader = authHeader;
     _subsettingClient = new EdaSubsettingClient(Resources.SUBSETTING_SERVICE_URL, authHeader);
+    LOG.info("AUTH INFO FOR DEBUGGING...REMOVE ME: " + _authHeader.getKey() + ": " + _authHeader.getValue());
     _mergingClient = new EdaMergingClient(Resources.MERGING_SERVICE_URL, authHeader);
     _computeClient = new EdaComputeClient(Resources.COMPUTE_SERVICE_URL, authHeader);
 
