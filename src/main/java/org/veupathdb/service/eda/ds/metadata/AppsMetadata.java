@@ -3,6 +3,7 @@ package org.veupathdb.service.eda.ds.metadata;
 import java.util.Arrays;
 import java.util.List;
 
+import org.gusdb.fgputil.ListBuilder;
 import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.ds.core.AbstractPlugin;
 import org.veupathdb.service.eda.ds.plugin.differentialabundance.DifferentialAbundanceVolcanoplotPlugin;
@@ -51,41 +52,49 @@ public class AppsMetadata {
   public static final String ALLCLINEPI_PROJECT = "AllClinEpiDB";
   public static final String MICROBIOME_PROJECT = "MicrobiomeDB";
   public static final String VECTORBASE_PROJECT = "VectorBase";
-  public static final String PLASMODB_PROJECT = "PlasmoDB";
+  public static final List<String> NON_VB_GENOMICS_PROJECTS = List.of(
+      "AmoebaDB", "CryptoDB", "FungiDB", "GiardiaDB", "HostDB",
+      "MicrosporidiaDB", "PiroplasmaDB", "PlasmoDB", "ToxoDB",
+      "TrichDB", "TriTrypDB", "EuPathDB");
+  public static final List<String> MBIO_PLUS_GENOMICS_PROJECTS = new ListBuilder<String>()
+      .add(MICROBIOME_PROJECT)
+      .add(VECTORBASE_PROJECT)
+      .addAll(NON_VB_GENOMICS_PROJECTS)
+      .toList();
 
   // NOTE: these names must match the url segments defined in the api.raml
   // Pass vizs are now different based on mbio vs clinepi so we need to adjust the below array?
   public static final AppsGetResponse APPS = apps(
       app("standalone-map", "Standalone Map", null,
           "A collection of visualizations designed to support the unbiased exploration of relationships between spatiotemporal variables in a cartographic map.",
-          Arrays.asList(VECTORBASE_PROJECT),
+          List.of(VECTORBASE_PROJECT),
           viz("map-markers", new StandaloneMapMarkersPlugin()),
           viz("map-markers-bubbles", new BubbleMapMarkersPlugin()),
           viz("map-markers-bubbles-legend", new BubbleMapMarkersLegendPlugin())),
       app("standalone-map-xyrelationships", "X-Y Relationships", null,
           "Build plots to explore the relationship between two variables.",
-          Arrays.asList(VECTORBASE_PROJECT),
+          List.of(VECTORBASE_PROJECT),
           viz("lineplot", new FloatingLineplotPlugin()),
           viz("timeseries", new FloatingTimeSeriesPlugin())),
       app("standalone-map-distributions", "Distributions", null,
           "Plot simple distributions for any continuous variable, including metadata (e.g. age, height).",
-          Arrays.asList(VECTORBASE_PROJECT),
+          List.of(VECTORBASE_PROJECT),
           viz("histogram", new FloatingHistogramPlugin()),
           viz("boxplot", new FloatingBoxplotPlugin())),
       app("standalone-map-countsandproportions", "Counts and Proportions", null,
           "Use standard bar plots and contingency tables to examine and compare frequencies in the data.",
-          Arrays.asList(VECTORBASE_PROJECT),
+          List.of(VECTORBASE_PROJECT),
           viz("barplot", new FloatingBarplotPlugin()),
           viz("conttable", new FloatingContTablePlugin())),
       app("standalone-map-categorical-collections", "Plots for categorical grouped variables", null,
           "Use line plots, bar plots and contingency tables to explore data from categorical Grouped Variables.",
-          Arrays.asList(VECTORBASE_PROJECT),
+          List.of(VECTORBASE_PROJECT),
           viz("lineplot", new CollectionFloatingLineplotPlugin()),
           viz("barplot", new CollectionFloatingBarplotPlugin()),
           viz("conttable", new CollectionFloatingContTablePlugin())),
       app("standalone-map-continuous-collections", "Plots for continuous grouped variables", null,
           "Use line plots, box plots and histograms to explore data from continuous Grouped Variables.",
-          Arrays.asList(VECTORBASE_PROJECT),
+          List.of(VECTORBASE_PROJECT),
           viz("lineplot", new CollectionFloatingLineplotPlugin()),
           viz("barplot", new FloatingBarplotPlugin()),
           viz("histogram", new CollectionFloatingHistogramPlugin())),
@@ -123,11 +132,11 @@ public class AppsMetadata {
           viz("volcanoplot", new DifferentialAbundanceVolcanoplotPlugin())),
       app("correlationassaymetadata", "Correlation (Taxa, Functional Data v. Metadata)", "correlationassaymetadata",
           "Discover relationships between metadata variables and taxonomic abundance.",
-          List.of(MICROBIOME_PROJECT, PLASMODB_PROJECT),
+          MBIO_PLUS_GENOMICS_PROJECTS,
           viz("bipartitenetwork", new CorrelationAssayMetadataBipartitenetworkPlugin())),
       app("correlationassayassay", "Correlation (Taxa v. Functional Data)", "correlationassayassay",
           "Uncover connections between taxonomic abundance and functional data such as genes or pathways.",
-          List.of(MICROBIOME_PROJECT, PLASMODB_PROJECT),
+          MBIO_PLUS_GENOMICS_PROJECTS,
           viz("bipartitenetwork", new CorrelationAssayAssayBipartitenetworkPlugin())),
       app("correlationassayself", "Correlation (Taxa v. Taxa)", "correlationassayself",
           "Discover relationships between taxonomic data.",
@@ -135,18 +144,18 @@ public class AppsMetadata {
           viz("network", new CorrelationAssaySelfUnipartitenetworkPlugin())),
       app("distributions", "Distributions", null,
           "Plot simple distributions for any continuous variable, including metadata (e.g. age, height, etc.) or microbial assay results.",
-          List.of(MICROBIOME_PROJECT, PLASMODB_PROJECT),
+          MBIO_PLUS_GENOMICS_PROJECTS,
           viz("histogram", new HistogramPlugin()),
           viz("boxplot", new BoxplotPlugin())),
       app("countsandproportions", "Counts and Proportions", null,
           "Use standard bar plots and 'row by column' (RxC) or 2x2 contingency tables to examine and compare frequencies in the data.",
-          List.of(MICROBIOME_PROJECT, PLASMODB_PROJECT),
+          MBIO_PLUS_GENOMICS_PROJECTS,
           viz("barplot", new BarplotPlugin()),
           viz("twobytwo", new TwoByTwoPlugin()),
           viz("conttable", new ContTablePlugin())),
       app("xyrelationships", "X-Y Relationships", null,
           "Interested in creating your own X-Y visualizations of any study variables?  Look no further!  Click on one of the plot types on the right and get ready to be creative.",
-          List.of(MICROBIOME_PROJECT, PLASMODB_PROJECT),
+          MBIO_PLUS_GENOMICS_PROJECTS,
           viz("scatterplot", new ScatterplotPlugin()),
           viz("lineplot", new LineplotPlugin())),
       app("maps", "Maps", null,
