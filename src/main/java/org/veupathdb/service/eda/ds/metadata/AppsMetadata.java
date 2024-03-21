@@ -7,9 +7,8 @@ import org.veupathdb.service.eda.common.plugin.constraint.ConstraintSpec;
 import org.veupathdb.service.eda.ds.core.AbstractPlugin;
 import org.veupathdb.service.eda.ds.plugin.differentialabundance.DifferentialAbundanceVolcanoplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.betadiv.BetaDivScatterplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.correlation.correlationassayassay.CorrelationAssayAssayBipartitenetworkPlugin;
-import org.veupathdb.service.eda.ds.plugin.correlation.correlationassaymetadata.CorrelationAssayMetadataBipartitenetworkPlugin;
-import org.veupathdb.service.eda.ds.plugin.correlation.correlationassayself.CorrelationAssaySelfUnipartitenetworkPlugin;
+import org.veupathdb.service.eda.ds.plugin.correlation.CorrelationBipartitenetworkPlugin;
+import org.veupathdb.service.eda.ds.plugin.selfcorrelation.SelfCorrelationUnipartitenetworkPlugin;
 import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivBoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.abundance.AbundanceBoxplotPlugin;
@@ -121,18 +120,22 @@ public class AppsMetadata {
           "Find taxa or genes that are differentially abundant between two groups.",
           List.of(MICROBIOME_PROJECT),
           viz("volcanoplot", new DifferentialAbundanceVolcanoplotPlugin())),
-      app("correlationassaymetadata", "Correlation (Taxa, Functional Data v. Metadata)", "correlationassaymetadata",
+      app("correlation", "Correlation (Taxa, Functional Data v. Metadata)", "correlation",
           "Discover relationships between metadata variables and taxonomic abundance.",
-          List.of(MICROBIOME_PROJECT, PLASMODB_PROJECT),
-          viz("bipartitenetwork", new CorrelationAssayMetadataBipartitenetworkPlugin())),
-      app("correlationassayassay", "Correlation (Taxa v. Functional Data)", "correlationassayassay",
+          List.of(MICROBIOME_PROJECT),
+          viz("bipartitenetwork", new CorrelationBipartitenetworkPlugin())),
+      app("correlation", "Correlation (Taxa v. Functional Data)", "correlation",
           "Uncover connections between taxonomic abundance and functional data such as genes or pathways.",
-          List.of(MICROBIOME_PROJECT, PLASMODB_PROJECT),
-          viz("bipartitenetwork", new CorrelationAssayAssayBipartitenetworkPlugin())),
-      app("correlationassayself", "Correlation (Taxa v. Taxa)", "correlationassayself",
+          List.of(MICROBIOME_PROJECT),
+          viz("bipartitenetwork", new CorrelationBipartitenetworkPlugin())),
+      app("correlation", "Correlation (Eigengene v. Eigengene, Metadata)", "correlation",
+          "Discover relationships between eigenengenes and metadata or other eigengenes.",
+          List.of(PLASMODB_PROJECT),
+          viz("bipartitenetwork", new CorrelationBipartitenetworkPlugin())),
+      app("selfcorrelation", "Correlation (Taxa v. Taxa)", "selfcorrelation",
           "Discover relationships between taxonomic data.",
           List.of(MICROBIOME_PROJECT),
-          viz("network", new CorrelationAssaySelfUnipartitenetworkPlugin())),
+          viz("unipartitenetwork", new SelfCorrelationUnipartitenetworkPlugin())),
       app("distributions", "Distributions", null,
           "Plot simple distributions for any continuous variable, including metadata (e.g. age, height, etc.) or microbial assay results.",
           List.of(MICROBIOME_PROJECT, PLASMODB_PROJECT),

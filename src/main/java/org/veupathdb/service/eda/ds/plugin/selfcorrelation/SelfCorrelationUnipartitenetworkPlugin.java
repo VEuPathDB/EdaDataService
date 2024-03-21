@@ -1,4 +1,4 @@
-package org.veupathdb.service.eda.ds.plugin.correlation.correlationassayself;
+package org.veupathdb.service.eda.ds.plugin.selfcorrelation;
 
 import org.gusdb.fgputil.validation.ValidationException;
 import org.veupathdb.service.eda.common.client.spec.StreamSpec;
@@ -22,7 +22,7 @@ import java.util.Map;
 
 import static org.veupathdb.service.eda.common.plugin.util.RServeClient.useRConnectionWithRemoteFiles;
 
-public class CorrelationAssaySelfUnipartitenetworkPlugin extends AbstractPlugin<CorrelationAssaySelfUnipartitenetworkPostRequest, CorrelationNetworkSpec, CorrelationAssaySelfConfig> {
+public class SelfCorrelationUnipartitenetworkPlugin extends AbstractPlugin<SelfCorrelationUnipartitenetworkPostRequest, CorrelationNetworkSpec, SelfCorrelationConfig> {
   
   @Override
   public String getDisplayName() {
@@ -41,7 +41,7 @@ public class CorrelationAssaySelfUnipartitenetworkPlugin extends AbstractPlugin<
 
   @Override
   protected ClassGroup getTypeParameterClasses() {
-    return new ClassGroup(CorrelationAssaySelfUnipartitenetworkPostRequest.class, CorrelationNetworkSpec.class, CorrelationAssaySelfConfig.class);
+    return new ClassGroup(SelfCorrelationUnipartitenetworkPostRequest.class, CorrelationNetworkSpec.class, SelfCorrelationConfig.class);
   }
 
   @Override
