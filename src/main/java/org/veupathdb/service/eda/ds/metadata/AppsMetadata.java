@@ -147,7 +147,7 @@ public class AppsMetadata {
           viz("unipartitenetwork", new SelfCorrelationUnipartitenetworkPlugin())),
       app("selfcorrelation", "Correlation (Eigengene v. Eigengene)", "selfcorrelation",
           "Discover relationships between eigengenes.",
-          NON_VB_GENOMICS_PROJECTS,,
+          NON_VB_GENOMICS_PROJECTS,
           viz("unipartitenetwork", new SelfCorrelationUnipartitenetworkPlugin())),
       app("distributions", "Distributions", null,
           "Plot simple distributions for any continuous variable, including metadata (e.g. age, height, etc.) or microbial assay results.",
