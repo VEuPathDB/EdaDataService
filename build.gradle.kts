@@ -78,10 +78,10 @@ repositories {
 //
 
 // versions
-val coreLib       = "6.19.1"         // Container core lib version
+val coreLib       = "7.0.1"          // Container core lib version
 val edaCompute    = "3.0.0-beta"          // EDA Compute version (used to pull in compute plugin RAML)
 val edaCommon     = "11.7.2"         // EDA Common version
-val fgputil       = "2.12.9-jakarta" // FgpUtil version
+val fgputil       = "2.13.1-jakarta" // FgpUtil version
 
 // use local EDA compute compiled schema if project exists, else use released version;
 //    this mirrors the way we use local EdaCommon code if available

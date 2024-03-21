@@ -40,6 +40,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -365,12 +367,12 @@ public abstract class AbstractPlugin<T extends DataPluginRequestBase, S, R> {
   }
 
   protected Map<String, InputStream> getVocabByRootEntity(List<DynamicDataSpec> dataSpecs, List<APIFilter> subsetFilters) {
-    Map<String, InputStream> studyVocabStreams = new HashMap<String, InputStream>();
-    for (DynamicDataSpec dataSpec : dataSpecs) {
-      studyVocabStreams.putAll(getVocabByRootEntity(dataSpec));
-    }
-
-    return studyVocabStreams;
+    return dataSpecs.parallelStream()
+        .map(this::getVocabByRootEntity)
+        .collect(Collectors.toMap(
+            e -> e.keySet().stream().findFirst().orElseThrow(),
+            e -> e.values().stream().findFirst().orElseThrow())
+        );
   }
 
   protected Map<String, InputStream> getVocabByRootEntity(List<DynamicDataSpec> dataSpecs) {
