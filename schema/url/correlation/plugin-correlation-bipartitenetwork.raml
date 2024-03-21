@@ -21,11 +21,10 @@ types:
     type: BipartiteNetworkPostResponse
     properties:
       significanceThreshold: number
-      correlationCoefThreshold: number
+      correlationCoefThreshold: number 
 
-  CorrelationNetworkPostResponse:
-    additionalProperties: false
-    type: NetworkPostResponse
+  CorrelationBipartitenetworkPostRequest:
+    type: DataPluginRequestBase
     properties:
-      significanceThreshold: number
-      correlationCoefThreshold: number
+      computeConfig: CorrelationConfig
+      config: CorrelationNetworkSpec
