@@ -15,7 +15,7 @@ import org.veupathdb.service.eda.common.client.spec.StreamSpec;
 import org.veupathdb.service.eda.ds.core.AbstractPlugin;
 import org.veupathdb.service.eda.generated.model.*;
 
-public abstract class AbstractCorrelationBipartiteNetwork<T extends DataPluginRequestBase, R extends CorrelationComputeConfig> extends AbstractPlugin<T, CorrelationNetworkSpec, R> {
+public abstract class AbstractCorrelationBipartiteNetwork<T extends DataPluginRequestBase, R extends BaseCorrelationComputeConfig> extends AbstractPlugin<T, CorrelationNetworkSpec, R> {
     
   @Override
   public String getDisplayName() {
@@ -43,7 +43,7 @@ public abstract class AbstractCorrelationBipartiteNetwork<T extends DataPluginRe
     return Collections.emptyList();
   }
 
-   @Override
+  @Override
   protected void writeResults(OutputStream out, Map<String, InputStream> dataStreams) throws IOException {
 
     CorrelationStatsResponse stats = getComputeResultStats(CorrelationStatsResponse.class);
@@ -51,7 +51,6 @@ public abstract class AbstractCorrelationBipartiteNetwork<T extends DataPluginRe
     Number pValueThreshold = getPluginSpec().getSignificanceThreshold() != null ? getPluginSpec().getSignificanceThreshold() : 0.05;
     boolean findNodeDegrees = getPluginSpec().getDegree() != null ? getPluginSpec().getDegree() : true;
 
-    // TEMPORARY: Reshape data using java instead of calling out to R+plot.data
     // The goal is to transform the response from the correlation app (CorrelationStatsResponse)
     // into a BipartiteNetwork that can be sent to the frontend. The BipartiteNetwork is composed
     // of nodes, links, column1NodeIDs, and column2NodeIDs.

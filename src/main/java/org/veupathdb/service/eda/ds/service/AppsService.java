@@ -20,9 +20,8 @@ import org.veupathdb.service.eda.ds.metadata.AppsMetadata;
 import org.veupathdb.service.eda.ds.core.AbstractPlugin;
 import org.veupathdb.service.eda.ds.plugin.differentialabundance.DifferentialAbundanceVolcanoplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.betadiv.BetaDivScatterplotPlugin;
-import org.veupathdb.service.eda.ds.plugin.correlation.correlationassayassay.CorrelationAssayAssayBipartitenetworkPlugin;
-import org.veupathdb.service.eda.ds.plugin.correlation.correlationassaymetadata.CorrelationAssayMetadataBipartitenetworkPlugin;
-import org.veupathdb.service.eda.ds.plugin.correlation.correlationassayself.CorrelationAssaySelfUnipartitenetworkPlugin;
+import org.veupathdb.service.eda.ds.plugin.correlation.CorrelationBipartitenetworkPlugin;
+import org.veupathdb.service.eda.ds.plugin.selfcorrelation.SelfCorrelationUnipartitenetworkPlugin;
 import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivBoxplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.alphadiv.AlphaDivScatterplotPlugin;
 import org.veupathdb.service.eda.ds.plugin.abundance.AbundanceBoxplotPlugin;
@@ -347,23 +346,16 @@ public class AppsService implements Apps {
 
   @DisableJackson
   @Override
-  public PostAppsCorrelationassaymetadataVisualizationsBipartitenetworkResponse postAppsCorrelationassaymetadataVisualizationsBipartitenetwork(CorrelationAssayMetadataBipartitenetworkPostRequest entity) {
-    return wrapPlugin(() -> PostAppsCorrelationassaymetadataVisualizationsBipartitenetworkResponse.respond200WithApplicationJson(
-        new CorrelationBipartiteNetworkPostResponseStream(processRequest(new CorrelationAssayMetadataBipartitenetworkPlugin(), entity))));
+  public PostAppsCorrelationVisualizationsBipartitenetworkResponse postAppsCorrelationVisualizationsBipartitenetwork(CorrelationBipartitenetworkPostRequest entity) {
+    return wrapPlugin(() -> PostAppsCorrelationVisualizationsBipartitenetworkResponse.respond200WithApplicationJson(
+        new CorrelationBipartiteNetworkPostResponseStream(processRequest(new CorrelationBipartitenetworkPlugin(), entity))));
   }
 
   @DisableJackson
   @Override
-  public PostAppsCorrelationassayassayVisualizationsBipartitenetworkResponse postAppsCorrelationassayassayVisualizationsBipartitenetwork(CorrelationAssayAssayBipartitenetworkPostRequest entity) {
-    return wrapPlugin(() -> PostAppsCorrelationassayassayVisualizationsBipartitenetworkResponse.respond200WithApplicationJson(
-        new CorrelationBipartiteNetworkPostResponseStream(processRequest(new CorrelationAssayAssayBipartitenetworkPlugin(), entity))));
-  }
-
-  @DisableJackson
-  @Override
-  public PostAppsCorrelationassayselfVisualizationsUnipartitenetworkResponse postAppsCorrelationassayselfVisualizationsUnipartitenetwork(CorrelationAssaySelfUnipartitenetworkPostRequest entity) {
-    return wrapPlugin(() -> PostAppsCorrelationassayselfVisualizationsUnipartitenetworkResponse.respond200WithApplicationJson(
-        new CorrelationNetworkPostResponseStream(processRequest(new CorrelationAssaySelfUnipartitenetworkPlugin(), entity))));
+  public PostAppsSelfcorrelationVisualizationsUnipartitenetworkResponse postAppsSelfcorrelationVisualizationsUnipartitenetwork(SelfCorrelationUnipartitenetworkPostRequest entity) {
+    return wrapPlugin(() -> PostAppsSelfcorrelationVisualizationsUnipartitenetworkResponse.respond200WithApplicationJson(
+        new CorrelationNetworkPostResponseStream(processRequest(new SelfCorrelationUnipartitenetworkPlugin(), entity))));
   }
 
   @DisableJackson

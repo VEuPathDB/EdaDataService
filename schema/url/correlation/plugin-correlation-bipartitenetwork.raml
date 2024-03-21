@@ -1,0 +1,30 @@
+#%RAML 1.0 Library
+
+types:
+
+  CorrelationNetworkSpec:
+    additionalProperties: false
+    properties:
+      significanceThreshold:
+        type: number
+        required: false
+      correlationCoefThreshold:
+        type: number
+        required: false
+      layout?:
+        type: string
+        enum: ['none','force','circle','nicely']
+      degree: boolean
+
+  CorrelationBipartiteNetworkPostResponse:
+    additionalProperties: false
+    type: BipartiteNetworkPostResponse
+    properties:
+      significanceThreshold: number
+      correlationCoefThreshold: number 
+
+  CorrelationBipartitenetworkPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      computeConfig: CorrelationConfig
+      config: CorrelationNetworkSpec
