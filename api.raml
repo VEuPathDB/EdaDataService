@@ -542,6 +542,36 @@ securitySchemes:
               application/json:
                 type: lib.CorrelationBipartiteNetworkPostResponse
 
+  /correlationassaymetadata/visualizations:
+    displayName: Visualizations for discovering corrleations between assay data and sample metadata
+
+    /bipartitenetwork:
+      post:
+        description: Returns data required to create a bipartite network from a correlation matrix.
+        body:
+          application/json:
+            type: lib.CorrelationAssayMetadataBipartitenetworkPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.CorrelationBipartiteNetworkPostResponse
+
+  /correlationassayassay/visualizations:
+    displayName: Visualizations for discovering corrleations between various assay data
+
+    /bipartitenetwork:
+      post:
+        description: Returns data required to create a bipartite network from a correlation matrix.
+        body:
+          application/json:
+            type: lib.CorrelationAssayAssayBipartitenetworkPostRequest
+        responses:
+          200:
+            body:
+              application/json:
+                type: lib.CorrelationBipartiteNetworkPostResponse
+
   /selfcorrelation/visualizations:
     displayName: Visualizations for discovering correlations between variables within an assay
 
