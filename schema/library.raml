@@ -896,6 +896,25 @@ types:
     properties:
       computeConfig: CorrelationConfig
       config: CorrelationNetworkSpec
+  CorrelationAssayAssayConfig:
+    type: BaseCorrelationComputeConfig
+    properties:
+      collectionVariable: CollectionSpec
+      collectionVariable2: CollectionSpec
+  CorrelationAssayAssayBipartitenetworkPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      computeConfig: CorrelationAssayAssayConfig
+      config: CorrelationNetworkSpec
+  CorrelationAssayMetadataConfig:
+    type: BaseCorrelationComputeConfig
+    properties:
+      collectionVariable: CollectionSpec
+  CorrelationAssayMetadataBipartitenetworkPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      computeConfig: CorrelationAssayMetadataConfig
+      config: CorrelationNetworkSpec
   DifferentialAbundanceVolcanoplotPostRequest:
     type: DataPluginRequestBase
     properties:
