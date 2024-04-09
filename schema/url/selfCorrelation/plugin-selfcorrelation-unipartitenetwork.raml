@@ -1,0 +1,16 @@
+#%RAML 1.0 Library
+
+types:
+
+  SelfCorrelationUnipartitenetworkPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      computeConfig: SelfCorrelationConfig
+      config: CorrelationNetworkSpec
+
+  CorrelationNetworkPostResponse:
+    additionalProperties: false
+    type: NetworkPostResponse
+    properties:
+      significanceThreshold: number
+      correlationCoefThreshold: number

@@ -1,0 +1,56 @@
+#%RAML 1.0 Library
+
+types:
+
+  CorrelationNetworkSpec:
+    additionalProperties: false
+    properties:
+      significanceThreshold:
+        type: number
+        required: false
+      correlationCoefThreshold:
+        type: number
+        required: false
+      layout?:
+        type: string
+        enum: ['none','force','circle','nicely']
+      degree: boolean
+
+  CorrelationBipartiteNetworkPostResponse:
+    additionalProperties: false
+    type: BipartiteNetworkPostResponse
+    properties:
+      significanceThreshold: number
+      correlationCoefThreshold: number 
+
+  CorrelationBipartitenetworkPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      computeConfig: CorrelationConfig
+      config: CorrelationNetworkSpec
+
+  # these are flavors of CorrelationBipartitenetworkPostRequest
+  # they are intended to help the /apps endpoint users distinguish 
+  # different variations of this compute + viz combo
+  CorrelationAssayAssayConfig:
+    type: BaseCorrelationComputeConfig
+    properties: 
+      collectionVariable: CollectionSpec
+      collectionVariable2: CollectionSpec
+
+  CorrelationAssayAssayBipartitenetworkPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      computeConfig: CorrelationAssayAssayConfig
+      config: CorrelationNetworkSpec
+  
+  CorrelationAssayMetadataConfig:
+    type: BaseCorrelationComputeConfig
+    properties: 
+      collectionVariable: CollectionSpec
+
+  CorrelationAssayMetadataBipartitenetworkPostRequest:
+    type: DataPluginRequestBase
+    properties:
+      computeConfig: CorrelationAssayMetadataConfig
+      config: CorrelationNetworkSpec
